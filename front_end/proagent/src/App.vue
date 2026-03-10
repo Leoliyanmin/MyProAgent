@@ -1,47 +1,83 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div class="macos-app-container">
+    <SidebarLeft :current-view="currentView" />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <div class="macos-main-column">
+      <TopBar 
+        :current-view="currentView"
+        @update:currentView="currentView = $event"
+        @toggleAgent="toggleAgent" 
+      />
+
+      <main class="macos-content-area">
+        <KeepAlive>
+          <component :is="viewComponent" />
+        </KeepAlive>
+      </main>
     </div>
-  </header>
 
-  <main>
-    <TheWelcome />
-  </main>
+    <AgentSidebar :is-open="isAgentOpen" />
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
+<script setup>
+import { ref, computed } from 'vue'
+import SidebarLeft from './components/layout/SidebarLeft.vue'
+import TopBar from './components/layout/TopBar.vue'
+import AgentSidebar from './components/layout/AgentSidebar.vue'
+import DashboardView from './views/DashboardView.vue'
+import CalendarView from './views/CalendarView.vue' // 如果你还没创建这个文件，可以先注释掉这行和下面的逻辑
+
+const isAgentOpen = ref(true)
+const currentView = ref('dashboard')
+
+const viewComponent = computed(() => {
+  return currentView.value === 'dashboard' ? DashboardView : CalendarView
+})
+
+const toggleAgent = () => {
+  isAgentOpen.value = !isAgentOpen.value
+}
+</script>
+
+<style>
+/* * 全局样式与外壳布局 
+ * 注意：这里不使用 <style scoped>，以确保样式能作用于整个 App 骨架
+ */
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* 防止出现全局原生滚动条 */
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+/* 核心：三栏式水平布局容器 */
+.macos-app-container {
+  display: flex; /* 激活水平 Flexbox */
+  flex-direction: row;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f5f5f7;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  color: #1d1d1f;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+/* 中部核心区：垂直 Flexbox */
+.macos-main-column {
+  flex: 1; /* 占据除左右侧边栏外的所有剩余空间 */
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* 关键：防止内部 Grid/Flex 子元素撑破容器宽度 */
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+/* 动态内容注入区：自适应高度并允许内部滚动 */
+.macos-content-area {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 16px;
+  overflow-y: auto;
+  overflow-x: hidden; 
+  min-width: 0;
 }
 </style>
