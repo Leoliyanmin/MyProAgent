@@ -1,70 +1,122 @@
 <template>
-  <div class="dashboard-grid">
-    <section class="mac-panel heatmap-section">
-      <div class="panel-header">
-        <h3 class="panel-title">任务完成记录</h3>
-      </div>
-      <div class="panel-body flex-center">
-        <span class="placeholder-text">GitHub Contribution Graph Area</span>
-      </div>
-    </section>
+  <div class="dashboard-engine">
+    <div class="dashboard-toolbar">
+      <h2 class="view-title">工作台概览</h2>
+      <button class="mac-btn-primary" :class="{ 'is-active': isEditing }" @click="toggleEditMode">
+        {{ isEditing ? '保存布局配置' : '自定义布局' }}
+      </button>
+    </div>
 
-    <section class="mac-panel notes-section">
-      <div class="panel-header">
-        <h3 class="panel-title">工作笔记</h3>
-        <button class="mac-btn-primary">Save</button>
-      </div>
-      <div class="panel-body">
-        <textarea class="markdown-input" placeholder="使用 Markdown 格式记录想法..."></textarea>
-      </div>
-    </section>
+    <div class="grid-wrapper">
+      <grid-layout v-model:layout="layoutConfig" :col-num="12" :row-height="50" :is-draggable="isEditing"
+        :is-resizable="isEditing" :vertical-compact="true" :margin="[16, 16]" :use-css-transforms="true">
+        <grid-item v-for="item in layoutConfig" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
+          :i="item.i" :min-w="item.minW" :min-h="item.minH" class="mac-panel grid-item"
+          :class="{ 'editing-mode': isEditing }">
+          <div class="widget-content">
+            <component :is="getComponentByType(item.type)" />
+          </div>
 
-    <section class="mac-panel todo-section">
-      <div class="panel-header border-bottom">
-        <h3 class="panel-title">TODO List</h3>
-      </div>
-      <div class="panel-body todo-list">
-        <div class="todo-item"><input type="checkbox" /> 完善前端路由</div>
-        <div class="todo-item"><input type="checkbox" /> 接入 FullCalendar</div>
-      </div>
-    </section>
-
-    <section class="mac-panel message-section">
-      <div class="message-toolbar">
-        <div class="source-tags">
-          <button class="circle-tag">Email</button>
-          <button class="circle-tag active">BlackBoard</button>
-          <button class="circle-tag">Github</button>
-        </div>
-        <span class="toolbar-title">消息源</span>
-      </div>
-      <div class="message-content flex-center">
-        <span class="placeholder-text">消息列表，渲染当前选中数据源的消息</span>
-      </div>
-    </section>
+          <div v-if="isEditing" class="drag-overlay">
+            <span class="overlay-text">{{ item.type }}</span>
+          </div>
+        </grid-item>
+      </grid-layout>
+    </div>
   </div>
 </template>
 
 <script setup>
-// 当前仅为静态布局，后续可在此处引入 ECharts (热力图) 或 Markdown 解析库
+import { ref } from 'vue'
+import VueGridLayout from 'vue3-grid-layout'
+
+// 显式解构核心组件
+const { GridLayout, GridItem } = VueGridLayout
+
+// 1. 真实导入你刚才创建的四个小组件
+import WidgetHeatmap from '../components/widgets/WidgetHeatmap.vue'
+import WidgetNotes from '../components/widgets/WidgetNotes.vue'
+import WidgetTodo from '../components/widgets/WidgetTodo.vue'
+import WidgetMessages from '../components/widgets/WidgetMessages.vue'
+
+// 2. 更新类型映射字典，指向真实的导入对象
+const componentMap = {
+  'heatmap': WidgetHeatmap,
+  'notes': WidgetNotes,
+  'todo': WidgetTodo,
+  'messages': WidgetMessages
+}
+
+const getComponentByType = (type) => componentMap[type]
+
+// 3. 核心状态：布局数据结构
+// 在 DashboardView.vue 的 <script setup> 中修改 layoutConfig
+const layoutConfig = ref([
+  { x: 0, y: 0, w: 5, h: 4, i: '1', type: 'heatmap', minW: 4, minH: 3 }, // 热力图不能太窄
+  { x: 5, y: 0, w: 7, h: 6, i: '2', type: 'notes', minW: 4, minH: 4 },   // 笔记需要输入空间
+  { x: 0, y: 4, w: 5, h: 5, i: '3', type: 'todo', minW: 3, minH: 4 },    // TODO 允许稍微窄一点
+  { x: 5, y: 6, w: 7, h: 4, i: '4', type: 'messages', minW: 4, minH: 3 } // 消息列表
+])
+// 4. 编辑模式控制
+const isEditing = ref(false)
+const toggleEditMode = () => {
+  isEditing.value = !isEditing.value
+  if (!isEditing.value) {
+    console.log('Saved layout schema:', layoutConfig.value)
+  }
+}
 </script>
 
 <style scoped>
-/* 核心 Grid 布局 */
-.dashboard-grid {
+.dashboard-engine {
   width: 100%;
   height: 100%;
-  display: grid;
-  /* 定义两列：左侧占 4 份，右侧占 6 份 */
-  grid-template-columns: 4fr 6fr;
-  /* 定义两行：上侧固定高度 240px，下侧自适应填满剩余空间 */
-  grid-template-rows: 240px 1fr;
-  gap: 16px;
-  padding: 16px;
-  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
-/* 统一的面板样式 (macOS 风格卡片) */
+.dashboard-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.view-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+.mac-btn-primary {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.mac-btn-primary.is-active {
+  background: #007aff;
+  color: #ffffff;
+  border-color: #007aff;
+}
+
+/* 网格容器需自适应剩余高度并允许内部溢出计算 */
+.grid-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: -16px;
+}
+
+/* 统一面板外观 */
 .mac-panel {
   background: #ffffff;
   border-radius: 12px;
@@ -73,127 +125,78 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-clip: padding-box;
 }
 
-.panel-header {
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.panel-header.border-bottom {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.panel-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1d1d1f;
-  margin: 0;
-}
-
-.panel-body {
-  flex: 1;
-  padding: 16px;
-  overflow-y: auto;
-}
-
-.flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.02);
-}
-
-.placeholder-text {
-  font-size: 12px;
-  color: #86868b;
-}
-
-/* 笔记区特殊样式 */
-.mac-btn-primary {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
-  padding: 4px 16px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.mac-btn-primary:hover {
-  background: #f5f5f7;
-}
-
-.markdown-input {
+.widget-content {
   width: 100%;
   height: 100%;
-  border: none;
-  resize: none;
-  outline: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #1d1d1f;
 }
 
-/* TODO 区样式 */
-.todo-list {
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* 编辑模式视觉增强 */
+.grid-item.editing-mode {
+  border: 1.5px dashed #007aff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: grab;
 }
 
-.todo-item {
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.grid-item.editing-mode:active {
+  cursor: grabbing;
 }
 
-/* 消息区特殊样式 (匹配原型图中的圆形 Tag) */
-.message-toolbar {
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.source-tags {
-  display: flex;
-  gap: 8px;
-}
-
-.circle-tag {
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 16px; /* 胶囊/圆形外观 */
-  padding: 4px 12px;
-  font-size: 12px;
-  cursor: pointer;
-  color: #1d1d1f;
-}
-
-.circle-tag.active {
-  border-color: #1d1d1f;
-  background: #1d1d1f;
-  color: #ffffff;
-}
-
-.toolbar-title {
+.drag-overlay {
   position: absolute;
-  right: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #86868b;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.message-content {
-  flex: 1;
+.overlay-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #007aff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* =========================================
+ * 终极修复：拖拽手柄样式 (使用 !important 强制覆盖底层库)
+ * ========================================= */
+:deep(.vue-resizable-handle) {
+  width: 16px !important;
+  height: 16px !important;
+  /* 强制干掉默认的红色/蓝色背景图 */
+  background: none !important; 
+  border-right: 3px solid rgba(0, 0, 0, 0.15) !important;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.15) !important;
+  border-radius: 2px !important;
+  right: 6px !important;
+  bottom: 6px !important;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 只有在编辑模式下才显示手柄 */
+.grid-item.editing-mode :deep(.vue-resizable-handle) {
+  opacity: 1;
+}
+
+/* 鼠标悬浮或拖动时的极简次级灰反馈 */
+.grid-item.editing-mode :deep(.vue-resizable-handle:hover),
+.grid-item.editing-mode :deep(.vue-resizable-handle:active) {
+  border-right-color: #86868b !important; 
+  border-bottom-color: #86868b !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15)); 
+  transform: scale(1.1); 
+  cursor: se-resize !important;
 }
 </style>
+

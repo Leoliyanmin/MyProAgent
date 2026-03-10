@@ -1,12 +1,8 @@
 <template>
   <aside class="macos-sidebar left-sidebar">
-    <div class="window-controls">
-      <i class="mac-dot close"></i>
-      <i class="mac-dot minimize"></i>
-      <i class="mac-dot maximize"></i>
-    </div>
-
     <div class="sidebar-content">
+      <div class="sidebar-top-spacer"></div>
+
       <div class="nav-group">
         <div class="nav-title">通用功能</div>
         <div class="nav-item active">
@@ -41,9 +37,6 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
-
-// 接收从 App.vue 传来的 currentView 状态
 defineProps({
   currentView: {
     type: String,
@@ -59,29 +52,17 @@ defineProps({
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  /* 背景与毛玻璃滤镜 */
   background: rgba(235, 235, 235, 0.65);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-right: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-/* macOS 红黄绿窗口控制键 */
-.window-controls {
-  padding: 16px 20px;
-  display: flex;
-  gap: 8px;
+.sidebar-top-spacer {
+  height: 12px; /* 替代原本窗口控制块的高度位置 */
 }
 
-.mac-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  cursor: pointer;
-}
-.mac-dot.close { background-color: #ff5f56; }
-.mac-dot.minimize { background-color: #ffbd2e; }
-.mac-dot.maximize { background-color: #27c93f; }
+/* 🛑 已移除：.window-controls 和 .mac-dot 相关 CSS */
 
 /* 菜单内容区排版 */
 .sidebar-content {
