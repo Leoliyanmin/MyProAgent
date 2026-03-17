@@ -198,5 +198,17 @@ const toggleEditMode = () => {
   transform: scale(1.1); 
   cursor: se-resize !important;
 }
+:deep(.vue-grid-item.vue-grid-placeholder) {
+  /* 替换掉默认的刺眼红色，改为 macOS 风格的柔和灰底 */
+  background: rgba(0, 0, 0, 0.04) !important; 
+  /* 增加精致的虚线边框指示 */
+  border: 1.5px dashed rgba(0, 0, 0, 0.2) !important; 
+  /* 保持与你的卡片一样的圆角 */
+  border-radius: 12px !important; 
+  /* 覆盖默认的透明度，让边框更清晰 */
+  opacity: 1 !important; 
+  /* 去掉多余的阴影干扰 */
+  box-shadow: none !important; 
+}
 </style>
 
