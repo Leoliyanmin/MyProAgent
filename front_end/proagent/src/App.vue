@@ -1,22 +1,29 @@
 <template>
   <div class="macos-app-container">
-    <SidebarLeft :current-view="currentView" />
+    <SidebarLeft
+      :current-view="currentView"
+      :is-settings-open="isSettingsOpen"
+      @toggleSettings="toggleSettings"
+    />
 
     <div class="macos-main-column">
-      <TopBar 
+      <TopBar
+        v-if="!isSettingsOpen"
         :current-view="currentView"
+        :is-agent-open="isAgentOpen"
         @update:currentView="currentView = $event"
-        @toggleAgent="toggleAgent" 
+        @toggleAgent="toggleAgent"
       />
 
       <main class="macos-content-area">
-        <KeepAlive>
+        <UserSettingsView v-if="isSettingsOpen" />
+        <KeepAlive v-else>
           <component :is="viewComponent" />
         </KeepAlive>
       </main>
     </div>
 
-    <AgentSidebar :is-open="isAgentOpen" />
+    <AgentSidebar :is-open="isAgentOpen && !isSettingsOpen" />
   </div>
 </template>
 
@@ -26,10 +33,12 @@ import SidebarLeft from './components/layout/SidebarLeft.vue'
 import TopBar from './components/layout/TopBar.vue'
 import AgentSidebar from './components/layout/AgentSidebar.vue'
 import DashboardView from './views/DashboardView.vue'
-import CalendarView from './views/CalendarView.vue' // 如果你还没创建这个文件，可以先注释掉这行和下面的逻辑
+import CalendarView from './views/CalendarView.vue'
+import UserSettingsView from './views/UserSettingsView.vue'
 
 const isAgentOpen = ref(true)
 const currentView = ref('dashboard')
+const isSettingsOpen = ref(false)
 
 const viewComponent = computed(() => {
   return currentView.value === 'dashboard' ? DashboardView : CalendarView
@@ -37,6 +46,10 @@ const viewComponent = computed(() => {
 
 const toggleAgent = () => {
   isAgentOpen.value = !isAgentOpen.value
+}
+
+const toggleSettings = () => {
+  isSettingsOpen.value = !isSettingsOpen.value
 }
 </script>
 

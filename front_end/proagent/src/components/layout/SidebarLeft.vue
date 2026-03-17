@@ -33,6 +33,22 @@
         </template>
       </div>
     </div>
+
+    <div class="sidebar-footer">
+      <button
+        class="user-profile-btn"
+        :class="{ active: isSettingsOpen }"
+        type="button"
+        title="用户设置"
+        @click="emit('toggleSettings')"
+      >
+        <span class="avatar">YM</span>
+        <span class="user-meta">
+          <span class="user-name">Yanmin</span>
+          <span class="user-role">用户设置</span>
+        </span>
+      </button>
+    </div>
   </aside>
 </template>
 
@@ -41,8 +57,14 @@ defineProps({
   currentView: {
     type: String,
     default: 'dashboard'
+  },
+  isSettingsOpen: {
+    type: Boolean,
+    default: false
   }
 })
+
+const emit = defineEmits(['toggleSettings'])
 </script>
 
 <style scoped>
@@ -69,6 +91,67 @@ defineProps({
   padding: 0 12px;
   flex: 1;
   overflow-y: auto;
+}
+
+.sidebar-footer {
+  padding: 10px 12px 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.user-profile-btn {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+}
+
+.user-profile-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.user-profile-btn.active {
+  background: rgba(0, 122, 255, 0.12);
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  background: linear-gradient(135deg, #111827, #4b5563);
+  flex-shrink: 0;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-name {
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.user-role {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 11px;
+  line-height: 1.2;
 }
 
 .nav-group {
