@@ -1,7 +1,7 @@
 <template>
   <div class="theme-editor">
 
-    <!-- ── 底部操作栏 ── -->
+    <!-- ── 顶部部操作栏 ── -->
     <header class="te-header">
       <div>
         <h1 class="te-title">主题设置</h1>

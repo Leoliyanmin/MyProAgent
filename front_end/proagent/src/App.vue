@@ -34,7 +34,7 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue'
-import SidebarLeft from './components/layout/SidebarLeft.vue'
+import SidebarLeft from './components/layout/SidebarLeft2.vue'
 import TopBar from './components/layout/TopBar.vue'
 import AgentSidebar from './components/layout/AgentSidebar.vue'
 import DashboardView from './views/DashboardView.vue'
