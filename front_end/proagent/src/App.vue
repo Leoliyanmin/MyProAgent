@@ -2,13 +2,13 @@
   <div class="macos-app-container">
     <SidebarLeft
       :current-view="currentView"
-      :is-settings-open="isSettingsOpen"
-      @toggleSettings="toggleSettings"
+      :app-mode="appMode"
+      @setAppMode="setAppMode"
     />
 
     <div class="macos-main-column">
       <TopBar
-        v-if="!isSettingsOpen"
+        v-if="appMode !== 'settings'"
         :current-view="currentView"
         :is-agent-open="isAgentOpen"
         @update:currentView="currentView = $event"
@@ -16,29 +16,39 @@
       />
 
       <main class="macos-content-area">
-        <UserSettingsView v-if="isSettingsOpen" />
+        <UserSettingsView v-if="appMode === 'settings'" />
         <KeepAlive v-else>
           <component :is="viewComponent" />
         </KeepAlive>
       </main>
     </div>
 
-    <AgentSidebar :is-open="isAgentOpen && !isSettingsOpen" />
+    <AgentSidebar :is-open="isAgentOpen && appMode !== 'settings'" />
+
+    <ThemeOverlayEditor
+      v-if="appMode === 'theme'"
+      @exit="setAppMode('main')"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import SidebarLeft from './components/layout/SidebarLeft.vue'
 import TopBar from './components/layout/TopBar.vue'
 import AgentSidebar from './components/layout/AgentSidebar.vue'
 import DashboardView from './views/DashboardView.vue'
 import CalendarView from './views/CalendarView.vue'
 import UserSettingsView from './views/UserSettingsView.vue'
+import ThemeOverlayEditor from './components/layout/ThemeOverlayEditor.vue'
+import { useThemeStore } from './stores/theme.js'
+
+const themeStore = useThemeStore()
+onMounted(() => themeStore.applyToRoot())
 
 const isAgentOpen = ref(true)
 const currentView = ref('dashboard')
-const isSettingsOpen = ref(false)
+const appMode = ref('main')
 
 const viewComponent = computed(() => {
   return currentView.value === 'dashboard' ? DashboardView : CalendarView
@@ -48,8 +58,8 @@ const toggleAgent = () => {
   isAgentOpen.value = !isAgentOpen.value
 }
 
-const toggleSettings = () => {
-  isSettingsOpen.value = !isSettingsOpen.value
+const setAppMode = (mode) => {
+  appMode.value = mode
 }
 </script>
 
@@ -71,7 +81,7 @@ html, body, #app {
   flex-direction: row;
   height: 100vh;
   width: 100vw;
-  background-color: #f5f5f7;
+  background-color: var(--clr-bg-app, #f5f5f7);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   color: #1d1d1f;
 }
@@ -87,7 +97,7 @@ html, body, #app {
 /* 动态内容注入区：自适应高度并允许内部滚动 */
 .macos-content-area {
   flex: 1;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--clr-bg-content, #f5f5f7);
   padding: 16px;
   overflow-y: auto;
   overflow-x: hidden; 

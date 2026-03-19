@@ -56,7 +56,7 @@ const emit = defineEmits(['update:currentView', 'toggleAgent'])
 <style scoped>
 .macos-topbar {
   height: 52px;
-  background: rgba(235, 235, 235, 0.65);
+  background: var(--clr-bg-topbar, rgba(235, 235, 235, 0.65));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);

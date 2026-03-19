@@ -9,13 +9,19 @@
 - Daily update: move at least 1 item to `done` or explain blocker
 
 ## Milestone M1: Frontend Theme Editor MVP (You own)
-- [ ] status: todo | owner: FE | Add "主题设置" entry in common features and route/view switch.
-- [ ] status: todo | owner: FE | Implement "主题编辑模式" toggle (normal/edit mode).
-- [ ] status: todo | owner: FE | Add editable area highlight layer (hover + selected state).
-- [ ] status: todo | owner: FE | Build right-side style panel (primary color, text color, card bg color).
-- [ ] status: todo | owner: FE | Add color picker + hex input + opacity slider.
-- [ ] status: todo | owner: FE | Apply live preview using CSS variables.
-- [ ] status: todo | owner: FE | Add reset/undo/redo/save buttons.
+- [x] status: done  | owner: FE | Add "主题设置" entry in common features and route/view switch.
+- [x] status: done  | owner: FE | Implement "主题编辑模式" toggle (normal/edit mode).
+- [x] status: done  | owner: FE | Overlay editor directly on top of live workspace UI (not separate preview page).
+- [x] status: done  | owner: FE | Add clickable region layer (sidebar/topbar/content) with active highlight.
+- [x] status: done  | owner: FE | Build floating right-side style panel (primary color, text color, card bg color).
+- [x] status: done  | owner: FE | Add color picker + hex input + radius slider.
+- [x] status: done  | owner: FE | Apply live preview using CSS variables.
+- [x] status: done  | owner: FE | Add reset/undo/redo/save buttons.
+
+## Milestone M1.5: Overlay UX Refinement
+- [ ] status: todo | owner: FE | Make overlay region boxes auto-fit actual layout bounds (agent sidebar open/closed aware).
+- [ ] status: todo | owner: FE | Add click-through lock option to prevent accidental interactions in underlying page.
+- [ ] status: todo | owner: FE | Add tooltip labels following cursor like screenshot tools.
 
 ## Milestone M2: Module-Level Style Customization
 - [ ] status: todo | owner: FE | Define module map: dashboard widgets, calendar blocks, topbar, sidebar.

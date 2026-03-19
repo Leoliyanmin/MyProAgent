@@ -5,9 +5,13 @@
 
       <div class="nav-group">
         <div class="nav-title">通用功能</div>
-        <div class="nav-item active">
+        <div class="nav-item" :class="{ active: appMode === 'main' }" @click="emit('setAppMode', 'main')">
           <span class="icon">⌘</span>
-          通用接口 A
+          工作区主页
+        </div>
+        <div class="nav-item" :class="{ active: appMode === 'theme' }" @click="emit('setAppMode', 'theme')">
+          <span class="icon">🎨</span>
+          主题设置
         </div>
         <div class="nav-item">
           <span class="icon">⇧</span>
@@ -37,10 +41,10 @@
     <div class="sidebar-footer">
       <button
         class="user-profile-btn"
-        :class="{ active: isSettingsOpen }"
+        :class="{ active: appMode === 'settings' }"
         type="button"
         title="用户设置"
-        @click="emit('toggleSettings')"
+        @click="emit('setAppMode', 'settings')"
       >
         <span class="avatar">YM</span>
         <span class="user-meta">
@@ -58,13 +62,13 @@ defineProps({
     type: String,
     default: 'dashboard'
   },
-  isSettingsOpen: {
-    type: Boolean,
-    default: false
+  appMode: {
+    type: String,
+    default: 'main'
   }
 })
 
-const emit = defineEmits(['toggleSettings'])
+const emit = defineEmits(['setAppMode'])
 </script>
 
 <style scoped>
@@ -74,7 +78,7 @@ const emit = defineEmits(['toggleSettings'])
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  background: rgba(235, 235, 235, 0.65);
+  background: var(--clr-bg-sidebar, rgba(235, 235, 235, 0.65));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-right: 1px solid rgba(0, 0, 0, 0.08);
