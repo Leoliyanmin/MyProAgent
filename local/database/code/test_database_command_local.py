@@ -1,0 +1,693 @@
+from __future__ import annotations
+
+import argparse
+import inspect
+import json
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+import database_command as db
+import database_synchronize_handle as sync_handle
+from database_test_data import get_test_data
+
+
+INSERT_ORDER = [
+    "user",
+    "personal_information",
+    "sync_state",
+    "account",
+    "category",
+    "data",
+    "schedule",
+    "session",
+    "chat",
+]
+
+DELETE_ORDER = [
+    "chat",
+    "session",
+    "data",
+    "category",
+    "schedule",
+    "account",
+    "sync_state",
+    "personal_information",
+    "user",
+]
+
+TABLE_ALIAS = {
+    "user": "user",
+    "users": "user",
+    "personal_information": "personal_information",
+    "sync_state": "sync_state",
+    "account": "account",
+    "category": "category",
+    "data": "data",
+    "schedule": "schedule",
+    "session": "session",
+    "chat": "chat",
+    "all": "all",
+}
+
+
+class LocalCommandTestRunner:
+    def __init__(self) -> None:
+        self.data = get_test_data()
+        self._created: set[str] = set()
+        self._ids: dict[str, int] = {}
+        self.db_dir = Path(__file__).resolve().parents[1] / "test_db"
+        self.db_path = self.db_dir / "test_local.db"
+        self.db_was_created = False
+        self._ensure_db_ready()
+
+    def close(self) -> None:
+        return
+
+    def _ensure_db_ready(self) -> None:
+        self.db_dir.mkdir(parents=True, exist_ok=True)
+        if not self.db_path.exists():
+            self.db_was_created = True
+            print(f"[INFO] test database not found, created at: {self.db_path}")
+            self._init_schema()
+        else:
+            print(f"[INFO] using persistent test database: {self.db_path}")
+
+    def _init_schema(self) -> None:
+        schema_path = Path(__file__).with_name("database_init.sql")
+        schema_sql = schema_path.read_text(encoding="utf-8")
+        with db._connect(self.db_path) as conn:
+            conn.executescript(schema_sql)
+            conn.commit()
+
+    def _expect(self, condition: bool, message: str) -> None:
+        if not condition:
+            raise AssertionError(message)
+
+    def _to_printable(self, value):
+        if value is None:
+            return None
+        if isinstance(value, list):
+            return [self._to_printable(item) for item in value]
+        if isinstance(value, dict):
+            return {key: self._to_printable(item) for key, item in value.items()}
+        if hasattr(value, "keys"):
+            return {key: self._to_printable(value[key]) for key in value.keys()}
+        return value
+
+    def _print_get_result(self, table: str, result) -> None:
+        print(f"[RESULT] get {table}")
+        print(json.dumps(self._to_printable(result), indent=2, sort_keys=True, default=str))
+
+    def _server_test_script(self) -> Path:
+        return Path(__file__).resolve().parents[3] / "server" / "database" / "code" / "test_database_command_server.py"
+
+    def _push_packet_to_server(self, packet: dict[str, object]) -> dict[str, object]:
+        server_script = self._server_test_script()
+        if not server_script.exists():
+            raise AssertionError(f"server bridge script not found: {server_script}")
+
+        packet_path = self.db_dir / "sync_packet_to_server.json"
+        ack_path = self.db_dir / "sync_ack_from_server.json"
+
+        packet_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2), encoding="utf-8")
+        if ack_path.exists():
+            ack_path.unlink()
+
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(server_script),
+                "--action",
+                "sync_receive_push",
+                "--table",
+                "all",
+                "--packet-file",
+                str(packet_path),
+                "--ack-file",
+                str(ack_path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        if completed.stdout.strip():
+            print("[INFO] server bridge output:")
+            print(completed.stdout.rstrip())
+        if completed.stderr.strip():
+            print("[INFO] server bridge error output:")
+            print(completed.stderr.rstrip())
+
+        if completed.returncode != 0:
+            raise AssertionError("server bridge action failed")
+
+        if not ack_path.exists():
+            raise AssertionError("server bridge did not output ack file")
+
+        ack_payload = json.loads(ack_path.read_text(encoding="utf-8"))
+        if not isinstance(ack_payload, dict):
+            raise AssertionError("server ack payload must be a JSON object")
+        return ack_payload
+
+    def _pull_packet_from_server(self, user_id: str, marker: str) -> dict[str, object]:
+        server_script = self._server_test_script()
+        if not server_script.exists():
+            raise AssertionError(f"server bridge script not found: {server_script}")
+
+        packet_path = self.db_dir / "sync_packet_from_server.json"
+        if packet_path.exists():
+            packet_path.unlink()
+
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(server_script),
+                "--action",
+                "sync_build_pull",
+                "--table",
+                "all",
+                "--user-id",
+                user_id,
+                "--packet-file",
+                str(packet_path),
+                "--marker",
+                marker,
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        if completed.stdout.strip():
+            print("[INFO] server bridge output:")
+            print(completed.stdout.rstrip())
+        if completed.stderr.strip():
+            print("[INFO] server bridge error output:")
+            print(completed.stderr.rstrip())
+
+        if completed.returncode != 0:
+            raise AssertionError("server bridge pull action failed")
+
+        if not packet_path.exists():
+            raise AssertionError("server bridge did not output pull packet file")
+
+        pull_packet = json.loads(packet_path.read_text(encoding="utf-8"))
+        if not isinstance(pull_packet, dict):
+            raise AssertionError("server pull packet must be a JSON object")
+
+        return pull_packet
+
+    def _find_session_with_chat(self) -> tuple[int | None, list]:
+        user_id = self.data["user"]["user_id"]
+        sessions = db.list_sessions_by_user(user_id, db_path=self.db_path)
+        for session in sessions:
+            session_id = session["session_id"]
+            rows = db.list_chat_by_session(session_id, db_path=self.db_path)
+            if rows:
+                return session_id, rows
+        return None, []
+
+    def _has_table_data(self, table: str) -> bool:
+        user_id = self.data["user"]["user_id"]
+        if table == "user":
+            return db.get_user(user_id, db_path=self.db_path) is not None
+        if table == "personal_information":
+            return db.get_personal_information(user_id, db_path=self.db_path) is not None
+        if table == "sync_state":
+            return db.get_sync_state(user_id, db_path=self.db_path) is not None
+        if table == "account":
+            return len(db.list_accounts_by_user(user_id, db_path=self.db_path)) > 0
+        if table == "category":
+            return len(db.list_categories_by_user(user_id, db_path=self.db_path)) > 0
+        if table == "data":
+            return len(db.list_data_by_user(user_id, db_path=self.db_path)) > 0
+        if table == "schedule":
+            return len(db.list_schedule_by_user(user_id, db_path=self.db_path)) > 0
+        if table == "session":
+            return len(db.list_sessions_by_user(user_id, db_path=self.db_path)) > 0
+        if table == "chat":
+            _, rows = self._find_session_with_chat()
+            return len(rows) > 0
+        raise ValueError(f"unsupported table: {table}")
+
+    def _require_existing(self, table: str, action: str) -> None:
+        if not self._has_table_data(table):
+            raise AssertionError(
+                f"{action} {table} requires existing data in persistent test DB. "
+                f"Run --action store --table {table} first."
+            )
+
+    def _patch_db_path_for_handle(self) -> dict[str, object]:
+        originals: dict[str, object] = {}
+        for name, obj in vars(db).items():
+            if name.startswith("_") or not callable(obj):
+                continue
+
+            signature = inspect.signature(obj)
+            if "db_path" not in signature.parameters:
+                continue
+
+            originals[name] = obj
+
+            def _wrapper(*args, __orig=obj, **kwargs):
+                kwargs.setdefault("db_path", self.db_path)
+                return __orig(*args, **kwargs)
+
+            setattr(db, name, _wrapper)
+
+        return originals
+
+    def _restore_db_functions(self, originals: dict[str, object]) -> None:
+        for name, obj in originals.items():
+            setattr(db, name, obj)
+
+    def _ensure_inserted(self, table: str) -> None:
+        if table in self._created:
+            return
+
+        if table == "user":
+            user = self.data["user"]
+            db.upsert_user(
+                user_id=user["user_id"],
+                username=user["username"],
+                user_email=user["user_email"],
+                user_is_active=user["user_is_active"],
+                user_created_at=user["user_created_at"],
+                user_last_login=user["user_last_login"],
+                user_source_device_id=user["user_source_device_id"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        if table == "personal_information":
+            self._ensure_inserted("user")
+            row = self.data["personal_information"]
+            db.upsert_personal_information(
+                user_id=row["user_id"],
+                personal_information_json=row["personal_information_json"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        if table == "sync_state":
+            self._ensure_inserted("user")
+            row = self.data["sync_state"]
+            db.upsert_sync_state(
+                user_id=row["user_id"],
+                user_data_updated_at=row["user_data_updated_at"],
+                user_last_synced_at=row["user_last_synced_at"],
+                user_version=row["user_version"],
+                sync_updated_at=row["sync_updated_at"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        if table == "account":
+            self._ensure_inserted("user")
+            existing = db.list_accounts_by_user(self.data["user"]["user_id"], db_path=self.db_path)
+            if existing:
+                self._ids["account_id"] = existing[0]["account_id"]
+                self._created.add(table)
+                return
+            row = self.data["account"]
+            self._ids["account_id"] = db.create_account(
+                user_id=row["user_id"],
+                account_platform_type=row["account_platform_type"],
+                account_platform_username=row["account_platform_username"],
+                account_bind_time=row["account_bind_time"],
+                account_last_sync_time=row["account_last_sync_time"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        if table == "category":
+            self._ensure_inserted("user")
+            existing = db.list_categories_by_user(self.data["user"]["user_id"], db_path=self.db_path)
+            if existing:
+                self._ids["category_id"] = existing[0]["category_id"]
+                self._created.add(table)
+                return
+            row = self.data["category"]
+            self._ids["category_id"] = db.create_category(
+                user_id=row["user_id"],
+                category_kind=row["category_kind"],
+                category_title=row["category_title"],
+                category_content=row["category_content"],
+                category_link=row["category_link"],
+                category_created_at=row["category_created_at"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        if table == "data":
+            self._ensure_inserted("category")
+            existing = db.list_data_by_user(self.data["user"]["user_id"], db_path=self.db_path)
+            if existing:
+                self._ids["data_id"] = existing[0]["data_id"]
+                self._created.add(table)
+                return
+            row = self.data["data"]
+            self._ids["data_id"] = db.create_data(
+                user_id=row["user_id"],
+                data_category_id=self._ids["category_id"],
+                data_content_type=row["data_content_type"],
+                data_title=row["data_title"],
+                data_content_text=row["data_content_text"],
+                data_link_url=row["data_link_url"],
+                data_release_time=row["data_release_time"],
+                data_ddl_time=row["data_ddl_time"],
+                data_is_previewable=row["data_is_previewable"],
+                data_created_at=row["data_created_at"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        if table == "schedule":
+            self._ensure_inserted("user")
+            existing = db.list_schedule_by_user(self.data["user"]["user_id"], db_path=self.db_path)
+            if existing:
+                self._ids["schedule_id"] = existing[0]["schedule_id"]
+                self._created.add(table)
+                return
+            row = self.data["schedule"]
+            self._ids["schedule_id"] = db.create_schedule(
+                user_id=row["user_id"],
+                schedule_event_type=row["schedule_event_type"],
+                schedule_title=row["schedule_title"],
+                schedule_start_time=row["schedule_start_time"],
+                schedule_end_time=row["schedule_end_time"],
+                schedule_location=row["schedule_location"],
+                schedule_description=row["schedule_description"],
+                schedule_related_link=row["schedule_related_link"],
+                schedule_recurrence_rule=row["schedule_recurrence_rule"],
+                schedule_color_tag=row["schedule_color_tag"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        if table == "session":
+            self._ensure_inserted("user")
+            existing = db.list_sessions_by_user(self.data["user"]["user_id"], db_path=self.db_path)
+            if existing:
+                self._ids["session_id"] = existing[0]["session_id"]
+                self._created.add(table)
+                return
+            row = self.data["session"]
+            self._ids["session_id"] = db.create_session(
+                user_id=row["user_id"],
+                session_last_visited_at=row["session_last_visited_at"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        if table == "chat":
+            self._ensure_inserted("session")
+            existing_session_id, existing_rows = self._find_session_with_chat()
+            if existing_rows and existing_session_id is not None:
+                self._ids["session_id"] = existing_session_id
+                self._ids["chat_id"] = existing_rows[0]["chat_id"]
+                self._created.add(table)
+                return
+            row = self.data["chat"]
+            self._ids["chat_id"] = db.create_chat(
+                session_id=self._ids["session_id"],
+                chat_role=row["chat_role"],
+                chat_message_content=row["chat_message_content"],
+                thought_trace=row["thought_trace"],
+                chat_tool_calls=row["chat_tool_calls"],
+                chat_tokens_usage=row["chat_tokens_usage"],
+                chat_created_at=row["chat_created_at"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        raise ValueError(f"unsupported table: {table}")
+
+    def run_store(self, table: str) -> None:
+        self._ensure_inserted(table)
+        print(f"[PASS] store {table}")
+
+    def run_get(self, table: str) -> None:
+        user = self.data["user"]
+        self._require_existing(table, "get")
+        result = None
+
+        if table == "user":
+            row = db.get_user(user["user_id"], db_path=self.db_path)
+            self._expect(row is not None, "get_user should return one row")
+            self._expect(row["username"] == user["username"], "user.username mismatch")
+            rows = db.list_users(db_path=self.db_path)
+            self._expect(len(rows) >= 1, "list_users should contain at least one row")
+            result = {"get_user": row, "list_users": rows}
+        elif table == "personal_information":
+            row = db.get_personal_information(user["user_id"], db_path=self.db_path)
+            self._expect(row is not None, "get_personal_information should return one row")
+            self._expect(
+                row["personal_information_json"] == self.data["personal_information"]["personal_information_json"],
+                "personal_information_json mismatch",
+            )
+            result = row
+        elif table == "sync_state":
+            row = db.get_sync_state(user["user_id"], db_path=self.db_path)
+            self._expect(row is not None, "get_sync_state should return one row")
+            self._expect(row["user_version"] == self.data["sync_state"]["user_version"], "sync_state.user_version mismatch")
+            result = row
+        elif table == "account":
+            rows = db.list_accounts_by_user(user["user_id"], db_path=self.db_path)
+            self._expect(len(rows) >= 1, "list_accounts_by_user should contain at least one row")
+            result = rows
+        elif table == "category":
+            rows = db.list_categories_by_user(user["user_id"], db_path=self.db_path)
+            self._expect(len(rows) >= 1, "list_categories_by_user should contain at least one row")
+            result = rows
+        elif table == "data":
+            rows = db.list_data_by_user(user["user_id"], db_path=self.db_path)
+            self._expect(len(rows) >= 1, "list_data_by_user should contain at least one row")
+            result = rows
+        elif table == "schedule":
+            rows = db.list_schedule_by_user(user["user_id"], db_path=self.db_path)
+            self._expect(len(rows) >= 1, "list_schedule_by_user should contain at least one row")
+            result = rows
+        elif table == "session":
+            rows = db.list_sessions_by_user(user["user_id"], db_path=self.db_path)
+            self._expect(len(rows) >= 1, "list_sessions_by_user should contain at least one row")
+            result = rows
+        elif table == "chat":
+            session_id, rows = self._find_session_with_chat()
+            self._expect(session_id is not None, "chat requires one existing session")
+            self._expect(len(rows) >= 1, "list_chat_by_session should contain at least one row")
+            result = rows
+        else:
+            raise ValueError(f"unsupported table: {table}")
+
+        self._print_get_result(table, result)
+        print(f"[PASS] get {table}")
+
+    def run_delete(self, table: str) -> None:
+        user_id = self.data["user"]["user_id"]
+        self._require_existing(table, "delete")
+
+        if table == "chat":
+            session_id, rows_before = self._find_session_with_chat()
+            self._expect(session_id is not None, "chat requires one existing session")
+            self._expect(len(rows_before) >= 1, "chat should contain at least one row before delete")
+            db.delete_chat(rows_before[0]["chat_id"], db_path=self.db_path)
+            rows_after = db.list_chat_by_session(session_id, db_path=self.db_path)
+            self._expect(len(rows_after) == len(rows_before) - 1, "chat should delete exactly one row")
+        elif table == "session":
+            rows_before = db.list_sessions_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_before) >= 1, "session should contain at least one row before delete")
+            db.delete_session(rows_before[0]["session_id"], db_path=self.db_path)
+            rows_after = db.list_sessions_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_after) == len(rows_before) - 1, "session should delete exactly one row")
+        elif table == "data":
+            rows_before = db.list_data_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_before) >= 1, "data should contain at least one row before delete")
+            db.delete_data(rows_before[0]["data_id"], db_path=self.db_path)
+            rows_after = db.list_data_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_after) == len(rows_before) - 1, "data should delete exactly one row")
+        elif table == "category":
+            rows_before = db.list_categories_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_before) >= 1, "category should contain at least one row before delete")
+            db.delete_category(rows_before[0]["category_id"], db_path=self.db_path)
+            rows_after = db.list_categories_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_after) == len(rows_before) - 1, "category should delete exactly one row")
+        elif table == "schedule":
+            rows_before = db.list_schedule_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_before) >= 1, "schedule should contain at least one row before delete")
+            db.delete_schedule(rows_before[0]["schedule_id"], db_path=self.db_path)
+            rows_after = db.list_schedule_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_after) == len(rows_before) - 1, "schedule should delete exactly one row")
+        elif table == "account":
+            rows_before = db.list_accounts_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_before) >= 1, "account should contain at least one row before delete")
+            db.delete_account(rows_before[0]["account_id"], db_path=self.db_path)
+            rows_after = db.list_accounts_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_after) == len(rows_before) - 1, "account should delete exactly one row")
+        elif table == "sync_state":
+            db.delete_sync_state(user_id, db_path=self.db_path)
+            row = db.get_sync_state(user_id, db_path=self.db_path)
+            self._expect(row is None, "sync_state should be deleted")
+        elif table == "personal_information":
+            db.delete_personal_information(user_id, db_path=self.db_path)
+            row = db.get_personal_information(user_id, db_path=self.db_path)
+            self._expect(row is None, "personal_information should be deleted")
+        elif table == "user":
+            db.delete_user(user_id, db_path=self.db_path)
+            row = db.get_user(user_id, db_path=self.db_path)
+            self._expect(row is None, "user should be deleted")
+        else:
+            raise ValueError(f"unsupported table: {table}")
+
+        print(f"[PASS] delete {table}")
+
+    def run_sync(self) -> None:
+        user_id = self.data["user"]["user_id"]
+        for name in INSERT_ORDER:
+            self._require_existing(name, "sync")
+
+        sync_before = db.get_sync_state(user_id, db_path=self.db_path)
+        before_last_synced = sync_before["user_last_synced_at"] if sync_before is not None else None
+
+        originals = self._patch_db_path_for_handle()
+        try:
+            pull_marker = f"server-login-marker-{int(datetime.now(timezone.utc).timestamp())}"
+            pull_packet = self._pull_packet_from_server(user_id=user_id, marker=pull_marker)
+
+            pull_meta = pull_packet.get("meta")
+            self._expect(isinstance(pull_meta, dict), "pull packet meta should be object")
+            self._expect(pull_meta.get("source") == "server", "pull packet source should be server")
+
+            apply_pull_resp = sync_handle.handle_sync_request(
+                {
+                    "action": "apply_pull",
+                    "payload": pull_packet,
+                }
+            )
+            self._expect(apply_pull_resp.get("ok") is True, "local apply_pull failed")
+
+            local_user = db.get_user(user_id, db_path=self.db_path)
+            self._expect(local_user is not None, "local user should exist after pull")
+            self._expect(
+                local_user.get("user_source_device_id") == pull_marker,
+                "server->local pull marker mismatch on user_source_device_id",
+            )
+
+            push_resp = sync_handle.handle_sync_request(
+                {
+                    "action": "build_push",
+                    "payload": {"user_id": user_id},
+                }
+            )
+            self._expect(push_resp.get("ok") is True, "local build_push failed")
+
+            push_packet = push_resp["payload"]
+            meta = push_packet.get("meta", {})
+            self._expect(isinstance(meta, dict), "push packet meta should be object")
+            self._expect(meta.get("source") == "local", "push packet source should be local")
+
+            ack_payload = self._push_packet_to_server(push_packet)
+            apply_ack_resp = sync_handle.handle_sync_request(
+                {
+                    "action": "apply_server_ack",
+                    "payload": ack_payload,
+                }
+            )
+            self._expect(apply_ack_resp.get("ok") is True, "local apply_server_ack failed")
+        finally:
+            self._restore_db_functions(originals)
+
+        sync_after = db.get_sync_state(user_id, db_path=self.db_path)
+        self._expect(sync_after is not None, "sync_state should still exist after sync")
+        self._expect(
+            sync_after["user_last_synced_at"] != before_last_synced,
+            "sync should update sync_state in persistent test DB",
+        )
+
+        print(f"[INFO] verified server->local pull and local->server push e2e with local test DB: {self.db_path}")
+
+        print("[PASS] sync local_server_bidirectional_e2e")
+
+
+def _normalize_table(table: str) -> str:
+    normalized = TABLE_ALIAS.get(table.strip().lower())
+    if normalized is None:
+        valid = ", ".join(TABLE_ALIAS.keys())
+        raise ValueError(f"invalid table '{table}', valid values: {valid}")
+    return normalized
+
+
+def _run_action(action: str, table: str) -> None:
+    runner = LocalCommandTestRunner()
+    try:
+        if runner.db_was_created and action in {"get", "delete", "sync"}:
+            print(
+                f"[SKIP] action '{action}' cannot run in the same run as initial DB creation. "
+                "Store data first, then rerun this action."
+            )
+            return
+
+        if table == "all":
+            targets = INSERT_ORDER if action in {"store", "get"} else DELETE_ORDER
+        else:
+            targets = [table]
+
+        if action == "store":
+            for name in targets:
+                runner.run_store(name)
+        elif action == "get":
+            for name in targets:
+                runner.run_get(name)
+        elif action == "delete":
+            for name in targets:
+                runner.run_delete(name)
+        elif action == "sync":
+            if table != "all":
+                raise ValueError("sync action only supports --table all")
+            runner.run_sync()
+        else:
+            raise ValueError(f"unsupported action: {action}")
+    finally:
+        runner.close()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Run local database command tests by action and table.",
+    )
+    parser.add_argument(
+        "--action",
+        required=True,
+        choices=["store", "get", "delete", "sync"],
+        help="Action to test: store/get/delete/sync.",
+    )
+    parser.add_argument(
+        "--table",
+        default="all",
+        help="Table to test: all or one table name (user, users, personal_information, sync_state, account, category, data, schedule, session, chat).",
+    )
+
+    args = parser.parse_args()
+
+    try:
+        table = _normalize_table(args.table)
+        _run_action(args.action, table)
+    except Exception as exc:
+        print(f"[FAIL] {exc}")
+        return 1
+
+    print("[DONE] all selected checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
