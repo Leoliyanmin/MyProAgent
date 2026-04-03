@@ -44,7 +44,7 @@
         :class="{ active: appMode === 'settings' }"
         type="button"
         title="用户设置"
-        @click="emit('setAppMode', 'settings')"
+        @click="toggleSettings"
       >
         <span class="avatar">YM</span>
         <span class="user-meta">
@@ -57,7 +57,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   currentView: {
     type: String,
     default: 'dashboard'
@@ -69,6 +69,15 @@ defineProps({
 })
 
 const emit = defineEmits(['setAppMode'])
+
+const toggleSettings = () => {
+  // 如果已在设置页面，点击返回 main；否则进入设置页面
+  if (props.appMode === 'settings') {
+    emit('setAppMode', 'main')
+  } else {
+    emit('setAppMode', 'settings')
+  }
+}
 </script>
 
 <style scoped>

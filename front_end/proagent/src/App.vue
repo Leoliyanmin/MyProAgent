@@ -23,7 +23,10 @@
       </main>
     </div>
 
-    <AgentSidebar :is-open="isAgentOpen && appMode !== 'settings'" />
+    <AgentSidebar 
+      :is-open="isAgentOpen && appMode !== 'settings'"
+      @toggleFromSelf="toggleAgent"
+    />
 
     <ThemeOverlayEditor
       v-if="appMode === 'theme'"
@@ -34,7 +37,7 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue'
-import SidebarLeft from './components/layout/SidebarLeft2.vue'
+import SidebarLeft from './components/layout/SidebarLeft.vue'
 import TopBar from './components/layout/TopBar.vue'
 import AgentSidebar from './components/layout/AgentSidebar.vue'
 import DashboardView from './views/DashboardView.vue'
