@@ -4,6 +4,7 @@
       :current-view="currentView"
       :app-mode="appMode"
       @setAppMode="setAppMode"
+      @update:currentView="currentView = $event"
     />
 
     <div class="macos-main-column">
@@ -42,6 +43,8 @@ import TopBar from './components/layout/TopBar.vue'
 import AgentSidebar from './components/layout/AgentSidebar.vue'
 import DashboardView from './views/DashboardView.vue'
 import CalendarView from './views/CalendarView.vue'
+import FileManagerView from './views/FileManagerView.vue'
+import PartnerMatchView from './views/PartnerMatchView.vue'
 import UserSettingsView from './views/UserSettingsView.vue'
 import ThemeOverlayEditor from './components/layout/ThemeOverlayEditor.vue'
 import { useThemeStore } from './stores/theme.js'
@@ -54,7 +57,11 @@ const currentView = ref('dashboard')
 const appMode = ref('main')
 
 const viewComponent = computed(() => {
-  return currentView.value === 'dashboard' ? DashboardView : CalendarView
+  if (currentView.value === 'dashboard') return DashboardView
+  if (currentView.value === 'calendar') return CalendarView
+  if (currentView.value === 'partnerMatch') return PartnerMatchView
+  if (currentView.value === 'fileManager') return FileManagerView
+  return DashboardView
 })
 
 const toggleAgent = () => {

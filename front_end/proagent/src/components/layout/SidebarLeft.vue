@@ -5,7 +5,7 @@
 
       <div class="nav-group">
         <div class="nav-title">通用功能</div>
-        <div class="nav-item" :class="{ active: appMode === 'main' }" @click="emit('setAppMode', 'main')">
+        <div class="nav-item" :class="{ active: appMode === 'main' && currentView === 'dashboard' }" @click="goHome">
           <span class="icon">⌘</span>
           工作区主页
         </div>
@@ -23,7 +23,7 @@
 
       <div class="nav-group">
         <div class="nav-title">
-          {{ currentView === 'dashboard' ? '主界面特有' : '日程特有' }}功能
+          {{ currentView === 'dashboard' ? '主界面特有' : currentView === 'calendar' ? '日程特有' : currentView === 'fileManager' ? '文件管理特有' : currentView === 'partnerMatch' ? '搭子匹配特有' : '功能' }}
         </div>
 
         <template v-if="currentView === 'dashboard'">
@@ -34,6 +34,16 @@
         <template v-else-if="currentView === 'calendar'">
           <div class="nav-item">日历订阅</div>
           <div class="nav-item">时区设置</div>
+        </template>
+
+        <template v-else-if="currentView === 'fileManager'">
+          <div class="nav-item">本地挂载点</div>
+          <div class="nav-item">云存储同步</div>
+        </template>
+
+        <template v-else-if="currentView === 'partnerMatch'">
+          <div class="nav-item">推荐列表</div>
+          <div class="nav-item">我的搭子</div>
         </template>
       </div>
     </div>
@@ -68,7 +78,12 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['setAppMode'])
+const emit = defineEmits(['setAppMode', 'update:currentView'])
+
+const goHome = () => {
+  emit('setAppMode', 'main')
+  emit('update:currentView', 'dashboard')
+}
 
 const toggleSettings = () => {
   // 如果已在设置页面，点击返回 main；否则进入设置页面
