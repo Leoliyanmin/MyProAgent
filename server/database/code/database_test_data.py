@@ -16,9 +16,18 @@ TEST_DATA = {
         "user_auto_login_token": "token-test-001",
         "user_source_device_id": "device-local-001",
     },
-    "personal_information": {
+    "user_match_profile": {
         "user_id": "user-test-001",
-        "personal_information_json": "{\"name\":\"Alice\",\"city\":\"Shanghai\",\"age\":20}",
+        "answers": "{\"q1\":\"早睡\",\"q2\":\"篮球,阅读\",\"intro\":\"喜欢结伴学习\"}",
+        "is_open": 1,
+        "last_match_time": "2026-03-31T10:07:30+00:00",
+    },
+    "match_result": {
+        "user_id": "user-test-001",
+        "matched_user_id": "user-test-002",
+        "similarity_score": 0.92,
+        "created_at": "2026-03-31T10:07:45+00:00",
+        "is_shared": 0,
     },
     "sync_state": {
         "user_id": "user-test-001",

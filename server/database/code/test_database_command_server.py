@@ -13,7 +13,8 @@ from database_test_data import get_test_data
 
 INSERT_ORDER = [
     "user",
-    "personal_information",
+    "user_match_profile",
+    "match_result",
     "sync_state",
     "account",
     "code",
@@ -32,15 +33,18 @@ DELETE_ORDER = [
     "schedule",
     "code",
     "account",
+    "match_result",
     "sync_state",
-    "personal_information",
+    "user_match_profile",
     "user",
 ]
 
 TABLE_ALIAS = {
     "user": "user",
     "users": "user",
-    "personal_information": "personal_information",
+    "user_match_profile": "user_match_profile",
+    "match_profile": "user_match_profile",
+    "match_result": "match_result",
     "sync_state": "sync_state",
     "account": "account",
     "code": "code",
@@ -115,8 +119,10 @@ class ServerCommandTestRunner:
         user_id = self.data["user"]["user_id"]
         if table == "user":
             return db.get_user(user_id, db_path=self.db_path) is not None
-        if table == "personal_information":
-            return db.get_personal_information(user_id, db_path=self.db_path) is not None
+        if table == "user_match_profile":
+            return db.get_user_match_profile(user_id, db_path=self.db_path) is not None
+        if table == "match_result":
+            return len(db.list_match_results_by_user(user_id, db_path=self.db_path)) > 0
         if table == "sync_state":
             return db.get_sync_state(user_id, db_path=self.db_path) is not None
         if table == "account":
@@ -189,12 +195,33 @@ class ServerCommandTestRunner:
             self._created.add(table)
             return
 
-        if table == "personal_information":
+        if table == "user_match_profile":
             self._ensure_inserted("user")
-            row = self.data["personal_information"]
-            db.upsert_personal_information(
+            row = self.data["user_match_profile"]
+            db.upsert_user_match_profile(
                 user_id=row["user_id"],
-                personal_information_json=row["personal_information_json"],
+                answers=row["answers"],
+                is_open=row["is_open"],
+                last_match_time=row["last_match_time"],
+                db_path=self.db_path,
+            )
+            self._created.add(table)
+            return
+
+        if table == "match_result":
+            self._ensure_inserted("user")
+            existing = db.list_match_results_by_user(self.data["user"]["user_id"], db_path=self.db_path)
+            if existing:
+                self._ids["match_result_id"] = existing[0]["id"]
+                self._created.add(table)
+                return
+            row = self.data["match_result"]
+            self._ids["match_result_id"] = db.create_match_result(
+                user_id=row["user_id"],
+                matched_user_id=row["matched_user_id"],
+                similarity_score=row["similarity_score"],
+                created_at=row["created_at"],
+                is_shared=row["is_shared"],
                 db_path=self.db_path,
             )
             self._created.add(table)
@@ -381,10 +408,14 @@ class ServerCommandTestRunner:
             rows = db.list_users(db_path=self.db_path)
             self._expect(len(rows) >= 1, "list_users should contain at least one row")
             result = {"get_user": row, "list_users": rows}
-        elif table == "personal_information":
-            row = db.get_personal_information(user_id, db_path=self.db_path)
-            self._expect(row is not None, "get_personal_information should return one row")
+        elif table == "user_match_profile":
+            row = db.get_user_match_profile(user_id, db_path=self.db_path)
+            self._expect(row is not None, "get_user_match_profile should return one row")
             result = row
+        elif table == "match_result":
+            rows = db.list_match_results_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows) >= 1, "list_match_results_by_user should contain at least one row")
+            result = rows
         elif table == "sync_state":
             row = db.get_sync_state(user_id, db_path=self.db_path)
             self._expect(row is not None, "get_sync_state should return one row")
@@ -473,14 +504,20 @@ class ServerCommandTestRunner:
             db.delete_account(rows_before[0]["account_id"], db_path=self.db_path)
             rows_after = db.list_accounts_by_user(user_id, db_path=self.db_path)
             self._expect(len(rows_after) == len(rows_before) - 1, "account should delete exactly one row")
+        elif table == "match_result":
+            rows_before = db.list_match_results_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_before) >= 1, "match_result should contain at least one row before delete")
+            db.delete_match_result(rows_before[0]["id"], db_path=self.db_path)
+            rows_after = db.list_match_results_by_user(user_id, db_path=self.db_path)
+            self._expect(len(rows_after) == len(rows_before) - 1, "match_result should delete exactly one row")
         elif table == "sync_state":
             db.delete_sync_state(user_id, db_path=self.db_path)
             row = db.get_sync_state(user_id, db_path=self.db_path)
             self._expect(row is None, "sync_state should be deleted")
-        elif table == "personal_information":
-            db.delete_personal_information(user_id, db_path=self.db_path)
-            row = db.get_personal_information(user_id, db_path=self.db_path)
-            self._expect(row is None, "personal_information should be deleted")
+        elif table == "user_match_profile":
+            db.delete_user_match_profile(user_id, db_path=self.db_path)
+            row = db.get_user_match_profile(user_id, db_path=self.db_path)
+            self._expect(row is None, "user_match_profile should be deleted")
         elif table == "user":
             db.delete_user(user_id, db_path=self.db_path)
             row = db.get_user(user_id, db_path=self.db_path)
@@ -765,7 +802,7 @@ def main() -> int:
     parser.add_argument(
         "--table",
         default="all",
-        help="Table to test: all or one table name (user, users, personal_information, sync_state, account, code, category, data, schedule, session, chat).",
+        help="Table to test: all or one table name (user, users, user_match_profile, match_result, sync_state, account, code, category, data, schedule, session, chat).",
     )
     parser.add_argument(
         "--packet-file",

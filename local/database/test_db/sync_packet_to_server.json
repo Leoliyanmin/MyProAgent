@@ -16,10 +16,22 @@
     "user_last_synced_at": "2026-03-31T15:31:24.749312+00:00",
     "user_data_updated_at": "2026-03-31T15:31:24.449041+00:00"
   },
-  "personal_information": {
+  "user_match_profile": {
     "user_id": "user-test-001",
-    "personal_information_json": "{\"name\":\"Alice\",\"city\":\"Shanghai\",\"age\":20}"
+    "answers": "{\"q1\":\"早睡\",\"q2\":\"篮球,阅读\",\"intro\":\"喜欢结伴学习\"}",
+    "is_open": 1,
+    "last_match_time": "2026-03-31T10:07:30+00:00"
   },
+  "match_result": [
+    {
+      "id": 1,
+      "user_id": "user-test-001",
+      "matched_user_id": "user-test-002",
+      "similarity_score": 0.92,
+      "created_at": "2026-03-31T10:07:45+00:00",
+      "is_shared": 0
+    }
+  ],
   "account": [
     {
       "account_id": 3,

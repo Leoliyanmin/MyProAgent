@@ -20,9 +20,20 @@ USER_FIELDS = (
     "user_last_synced_at",
 )
 
-PERSONAL_INFORMATION_FIELDS = (
+USER_MATCH_PROFILE_FIELDS = (
     "user_id",
-    "personal_information_json",
+    "answers",
+    "is_open",
+    "last_match_time",
+)
+
+MATCH_RESULT_FIELDS = (
+    "id",
+    "user_id",
+    "matched_user_id",
+    "similarity_score",
+    "created_at",
+    "is_shared",
 )
 
 ACCOUNT_FIELDS = (
@@ -144,7 +155,21 @@ def _coerce_int(value: Any) -> int | None:
         return None
 
 
-def _normalize_personal_information_json(value: Any) -> str | None:
+def _coerce_float(value: Any) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _normalize_binary_flag(value: Any) -> int | None:
+    normalized = _coerce_int(value)
+    if normalized in (0, 1):
+        return normalized
+    return None
+
+
+def _normalize_answers_json(value: Any) -> str | None:
     if value is None:
         return None
 
@@ -253,22 +278,65 @@ def validate_sync_packet(payload: dict[str, Any] | str | Path) -> dict[str, Any]
         if synced_at is not None and _parse_iso_datetime(synced_at) is None:
             errors.append("payload.user.user_last_synced_at must be ISO-8601 datetime")
 
-    personal_information = content.get("personal_information")
-    if personal_information is not None:
-        if not isinstance(personal_information, dict):
-            errors.append("payload.personal_information must be object when provided")
+    user_match_profile = content.get("user_match_profile")
+    if "user_match_profile" in content and user_match_profile is not None:
+        if not isinstance(user_match_profile, dict):
+            errors.append("payload.user_match_profile must be object when provided")
         else:
-            personal_user_id = personal_information.get("user_id")
-            if not personal_user_id:
-                errors.append("payload.personal_information.user_id is required")
-            if personal_user_id is not None and expected_user_id is not None and personal_user_id != expected_user_id:
-                errors.append("payload.personal_information.user_id must match payload.user.user_id")
+            profile_user_id = user_match_profile.get("user_id")
+            if not profile_user_id:
+                errors.append("payload.user_match_profile.user_id is required")
+            if profile_user_id is not None and expected_user_id is not None and profile_user_id != expected_user_id:
+                errors.append("payload.user_match_profile.user_id must match payload.user.user_id")
 
-            pi_json = personal_information.get("personal_information_json")
-            if pi_json is None:
-                errors.append("payload.personal_information.personal_information_json is required")
-            elif _normalize_personal_information_json(pi_json) is None:
-                errors.append("payload.personal_information.personal_information_json must be valid JSON")
+            answers = user_match_profile.get("answers")
+            if answers is None:
+                errors.append("payload.user_match_profile.answers is required")
+            elif _normalize_answers_json(answers) is None:
+                errors.append("payload.user_match_profile.answers must be valid JSON")
+
+            is_open = user_match_profile.get("is_open")
+            if is_open is not None and _normalize_binary_flag(is_open) is None:
+                errors.append("payload.user_match_profile.is_open must be 0 or 1")
+
+            last_match_time = user_match_profile.get("last_match_time")
+            if last_match_time is not None and _parse_iso_datetime(last_match_time) is None:
+                errors.append("payload.user_match_profile.last_match_time must be ISO-8601 datetime")
+
+    match_results = content.get("match_result")
+    if "match_result" in content and match_results is not None:
+        if not isinstance(match_results, list):
+            errors.append("payload.match_result must be list when provided")
+        else:
+            for index, row in enumerate(match_results):
+                prefix = f"payload.match_result[{index}]"
+                if not isinstance(row, dict):
+                    errors.append(f"{prefix} must be object")
+                    continue
+
+                row_user_id = row.get("user_id")
+                if not row_user_id:
+                    errors.append(f"{prefix}.user_id is required")
+                elif expected_user_id is not None and row_user_id != expected_user_id:
+                    errors.append(f"{prefix}.user_id must match payload.user.user_id")
+
+                if not row.get("matched_user_id"):
+                    errors.append(f"{prefix}.matched_user_id is required")
+
+                if row.get("similarity_score") is None:
+                    errors.append(f"{prefix}.similarity_score is required")
+                elif _coerce_float(row.get("similarity_score")) is None:
+                    errors.append(f"{prefix}.similarity_score must be numeric")
+
+                created_at = row.get("created_at")
+                if created_at is None:
+                    errors.append(f"{prefix}.created_at is required")
+                elif _parse_iso_datetime(created_at) is None:
+                    errors.append(f"{prefix}.created_at must be ISO-8601 datetime")
+
+                is_shared = row.get("is_shared")
+                if is_shared is not None and _normalize_binary_flag(is_shared) is None:
+                    errors.append(f"{prefix}.is_shared must be 0 or 1")
 
     meta = content.get("meta", {})
     if isinstance(meta, dict):
@@ -356,7 +424,8 @@ class LocalSyncExporter:
         for sid in session_ids:
             chats.extend(db.list_chat_by_session(sid))
 
-        personal_information = db.get_personal_information(target_user_id)
+        user_match_profile = db.get_user_match_profile(target_user_id)
+        match_results = db.list_match_results_by_user(target_user_id)
 
         payload = {
             "meta": {
@@ -365,11 +434,12 @@ class LocalSyncExporter:
                 "generated_at": _now_iso(),
             },
             "user": user_payload,
-            "personal_information": (
-                _pick(personal_information, PERSONAL_INFORMATION_FIELDS)
-                if personal_information is not None
+            "user_match_profile": (
+                _pick(user_match_profile, USER_MATCH_PROFILE_FIELDS)
+                if user_match_profile is not None
                 else None
             ),
+            "match_result": [_pick(row, MATCH_RESULT_FIELDS) for row in match_results],
             "account": [_pick(row, ACCOUNT_FIELDS) for row in db.list_accounts_by_user(target_user_id)],
             "category": [_pick(row, CATEGORY_FIELDS) for row in db.list_categories_by_user(target_user_id)],
             "data": [_pick(row, DATA_FIELDS) for row in db.list_data_by_user(target_user_id)],
@@ -434,18 +504,50 @@ class LocalSyncImporter:
                 user_source_device_id=user.get("user_source_device_id"),
             )
 
-            personal_information = content.get("personal_information")
-            if "personal_information" in content and personal_information is None:
-                db.delete_personal_information(user_id)
-            elif isinstance(personal_information, dict):
-                personal_information_json = _normalize_personal_information_json(
-                    personal_information.get("personal_information_json")
-                )
-                if personal_information_json is not None:
-                    db.upsert_personal_information(
+            user_match_profile = content.get("user_match_profile")
+            if "user_match_profile" in content and user_match_profile is None:
+                db.delete_user_match_profile(user_id)
+            elif isinstance(user_match_profile, dict):
+                answers = _normalize_answers_json(user_match_profile.get("answers"))
+                is_open = _normalize_binary_flag(user_match_profile.get("is_open"))
+                if is_open is None:
+                    is_open = 0
+                last_match_time = user_match_profile.get("last_match_time")
+                if _parse_iso_datetime(last_match_time) is None:
+                    last_match_time = None
+                if answers is not None:
+                    db.upsert_user_match_profile(
                         user_id=user_id,
-                        personal_information_json=personal_information_json,
+                        answers=answers,
+                        is_open=is_open,
+                        last_match_time=last_match_time,
                     )
+
+            if "match_result" in content:
+                db.delete_match_results_by_user(user_id)
+                match_results = content.get("match_result")
+                if isinstance(match_results, list):
+                    for row in match_results:
+                        if not isinstance(row, dict):
+                            continue
+                        if row.get("matched_user_id") is None:
+                            continue
+                        similarity_score = _coerce_float(row.get("similarity_score"))
+                        if similarity_score is None:
+                            continue
+                        created_at = row.get("created_at")
+                        if _parse_iso_datetime(created_at) is None:
+                            continue
+                        is_shared = _normalize_binary_flag(row.get("is_shared"))
+                        if is_shared is None:
+                            is_shared = 0
+                        db.create_match_result(
+                            user_id=user_id,
+                            matched_user_id=str(row.get("matched_user_id")),
+                            similarity_score=similarity_score,
+                            created_at=created_at,
+                            is_shared=is_shared,
+                        )
 
             _clear_user_data(user_id)
 

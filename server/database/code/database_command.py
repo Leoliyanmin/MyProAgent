@@ -125,35 +125,217 @@ def delete_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM users WHERE user_id = ?", (user_id,), db_path)
 
 
-# personal_information
+# user_match_profile
 
-def upsert_personal_information(
+def upsert_user_match_profile(
     user_id: str,
-    personal_information_json: str,
+    answers: str,
+    is_open: int = 0,
+    last_match_time: str | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> None:
     _execute(
         """
-        INSERT INTO personal_information (user_id, personal_information_json)
-        VALUES (?, ?)
+        INSERT INTO user_match_profile (user_id, answers, is_open, last_match_time)
+        VALUES (?, ?, ?, ?)
         ON CONFLICT(user_id) DO UPDATE SET
-            personal_information_json = excluded.personal_information_json
+            answers = excluded.answers,
+            is_open = excluded.is_open,
+            last_match_time = excluded.last_match_time
         """,
-        (user_id, personal_information_json),
+        (user_id, answers, is_open, last_match_time),
         db_path,
     )
 
 
-def get_personal_information(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
-    return _fetch_one("SELECT * FROM personal_information WHERE user_id = ?", (user_id,), db_path)
+def get_user_match_profile(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    return _fetch_one("SELECT * FROM user_match_profile WHERE user_id = ?", (user_id,), db_path)
 
 
-def list_personal_information(db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
-    return _fetch_all("SELECT * FROM personal_information ORDER BY user_id ASC", (), db_path)
+def list_user_match_profiles(db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all("SELECT * FROM user_match_profile ORDER BY user_id ASC", (), db_path)
 
 
-def delete_personal_information(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
-    _execute("DELETE FROM personal_information WHERE user_id = ?", (user_id,), db_path)
+def list_open_user_match_profiles(
+    exclude_user_id: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> list[dict]:
+    if exclude_user_id is None:
+        return _fetch_all(
+            """
+            SELECT * FROM user_match_profile
+            WHERE is_open = 1
+            ORDER BY COALESCE(last_match_time, '') ASC, user_id ASC
+            """,
+            (),
+            db_path,
+        )
+
+    return _fetch_all(
+        """
+        SELECT * FROM user_match_profile
+        WHERE is_open = 1 AND user_id <> ?
+        ORDER BY COALESCE(last_match_time, '') ASC, user_id ASC
+        """,
+        (exclude_user_id,),
+        db_path,
+    )
+
+
+def update_user_match_profile_open(
+    user_id: str,
+    is_open: int,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    _execute(
+        "UPDATE user_match_profile SET is_open = ? WHERE user_id = ?",
+        (is_open, user_id),
+        db_path,
+    )
+
+
+def update_user_match_profile_last_match_time(
+    user_id: str,
+    last_match_time: str | None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    _execute(
+        "UPDATE user_match_profile SET last_match_time = ? WHERE user_id = ?",
+        (last_match_time, user_id),
+        db_path,
+    )
+
+
+def delete_user_match_profile(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM user_match_profile WHERE user_id = ?", (user_id,), db_path)
+
+
+# match_result
+
+def create_match_result(
+    user_id: str,
+    matched_user_id: str,
+    similarity_score: float,
+    created_at: str,
+    is_shared: int,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> int:
+    return _execute(
+        """
+        INSERT INTO match_result (
+            user_id, matched_user_id, similarity_score, created_at, is_shared
+        ) VALUES (?, ?, ?, ?, ?)
+        """,
+        (user_id, matched_user_id, similarity_score, created_at, is_shared),
+        db_path,
+    )
+
+
+def list_match_results_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all(
+        "SELECT * FROM match_result WHERE user_id = ? ORDER BY created_at DESC, id DESC",
+        (user_id,),
+        db_path,
+    )
+
+
+def list_match_results_between_users(
+    user_a_id: str,
+    user_b_id: str,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> list[dict]:
+    return _fetch_all(
+        """
+        SELECT * FROM match_result
+        WHERE (user_id = ? AND matched_user_id = ?)
+           OR (user_id = ? AND matched_user_id = ?)
+        ORDER BY created_at DESC, id DESC
+        """,
+        (user_a_id, user_b_id, user_b_id, user_a_id),
+        db_path,
+    )
+
+
+def list_matched_user_ids(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[str]:
+    rows = _fetch_all(
+        """
+        SELECT DISTINCT
+            CASE
+                WHEN user_id = ? THEN matched_user_id
+                ELSE user_id
+            END AS matched_user_id
+        FROM match_result
+        WHERE user_id = ? OR matched_user_id = ?
+        ORDER BY matched_user_id ASC
+        """,
+        (user_id, user_id, user_id),
+        db_path,
+    )
+    return [str(row["matched_user_id"]) for row in rows if row.get("matched_user_id") is not None]
+
+
+def list_unshared_match_results_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all(
+        "SELECT * FROM match_result WHERE user_id = ? AND is_shared = 0 ORDER BY created_at DESC, id DESC",
+        (user_id,),
+        db_path,
+    )
+
+
+def list_match_results_by_matched_user(matched_user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all(
+        "SELECT * FROM match_result WHERE matched_user_id = ? ORDER BY created_at DESC, id DESC",
+        (matched_user_id,),
+        db_path,
+    )
+
+
+def list_unshared_match_results_by_matched_user(
+    matched_user_id: str,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> list[dict]:
+    return _fetch_all(
+        "SELECT * FROM match_result WHERE matched_user_id = ? AND is_shared = 0 ORDER BY created_at DESC, id DESC",
+        (matched_user_id,),
+        db_path,
+    )
+
+
+def update_match_result_shared(
+    result_id: int,
+    is_shared: int,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    _execute(
+        "UPDATE match_result SET is_shared = ? WHERE id = ?",
+        (is_shared, result_id),
+        db_path,
+    )
+
+
+def update_match_result_shared_by_users(
+    user_id: str,
+    matched_user_id: str,
+    is_shared: int,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    _execute(
+        "UPDATE match_result SET is_shared = ? WHERE user_id = ? AND matched_user_id = ?",
+        (is_shared, user_id, matched_user_id),
+        db_path,
+    )
+
+
+def delete_match_result(result_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM match_result WHERE id = ?", (result_id,), db_path)
+
+
+def delete_match_results_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM match_result WHERE user_id = ?", (user_id,), db_path)
+
+
+def delete_match_results_by_matched_user(matched_user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM match_result WHERE matched_user_id = ?", (matched_user_id,), db_path)
 
 
 # sync_state
