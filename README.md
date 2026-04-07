@@ -1,6 +1,12 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/py413vYq)
 https://kcnshyb9xgl3.feishu.cn/wiki/VOTmwDTd1ipr9JkpZ27cW0BCnrb 就是feishu
 
+## 项目进度
+已完成local backend和server backend的基本框架，实现基本api接口，local与server backend之间的通信。 
+目前未集成数据库，使用的是mock数据库。
+数据集成，agent，寻友匹配，文件管理功能正在开发中，可在本框架下继续集成。
+
+## 项目架构
 
 # SUSTech Student Productivity Agent
 
