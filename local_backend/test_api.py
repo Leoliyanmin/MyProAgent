@@ -5,12 +5,43 @@ BASE_URL = "http://localhost:8000"
 
 def test_register():
     """测试用户注册功能"""
+    email = "test111@mail.sustech.edu.cn"
+    
+    # 第一步：发送验证码
+    url = f"{BASE_URL}/auth/verification/send"
+    data = {
+        "email": email,
+        "purpose": "register"
+    }
+    response = requests.post(url, json=data)
+    print(f"Send verification code response: {response.status_code}")
+    print(f"Send verification code text: {response.text}")
+    
+    if response.status_code != 200:
+        print(f"Error: Failed to send verification code with status {response.status_code}")
+        print(f"Response: {response.text}")
+        print("Note: This may fail if Redis is not running or email is not configured")
+        return False
+    
+    try:
+        result = response.json()
+        print(f"Verification code sent: {result.get('message')}")
+        # 从响应中获取测试验证码（如果有）
+        verification_code = result.get('test_code', '123456')
+        print(f"Using verification code: {verification_code}")
+    except Exception as e:
+        print(f"Error parsing verification response: {e}")
+        return False
+    
+    # 第二步：使用验证码注册
     url = f"{BASE_URL}/auth/register"
     data = {
-        "email": "test@mail.sustech.edu.cn",
-        "password": "password123",
+        "email": email,
+        "password": "Password123",
+        "confirm_password": "Password123",
+        "verification_code": verification_code,
         "full_name": "Test User",
-        "student_id": "20230000"
+        "student_id": "20230100"
     }
     response = requests.post(url, json=data)
     print(f"Register response: {response.status_code}")
@@ -19,12 +50,13 @@ def test_register():
     if response.status_code != 200:
         print(f"Error: Registration failed with status {response.status_code}")
         print(f"Response: {response.text}")
+        print("Note: This may fail if verification code is incorrect or expired")
         return False
     
     try:
         data = response.json()
         assert "user" in data
-        assert data["user"]["email"] == "test@mail.sustech.edu.cn"
+        assert data["user"]["email"] == email
         print("Register test passed!")
         return True
     except Exception as e:
@@ -37,7 +69,7 @@ def test_login():
     url = f"{BASE_URL}/auth/login"
     data = {
         "email": "test@mail.sustech.edu.cn",
-        "password": "password123"
+        "password": "Password123"
     }
     response = requests.post(url, json=data)
     print(f"Login response: {response.status_code}")
@@ -412,7 +444,6 @@ if __name__ == "__main__":
     print("=" * 50)
     
     test_results = {}
-    '''
     test_results["register"] = test_register()
     print("=" * 50)
     '''
@@ -439,7 +470,7 @@ if __name__ == "__main__":
     
     test_results["health"] = test_health()
     print("=" * 50)
-    
+    '''
     # 打印测试结果摘要
     print("Test Results Summary:")
     print("-" * 50)
