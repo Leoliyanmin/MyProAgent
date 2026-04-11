@@ -15,9 +15,21 @@ CREATE TABLE IF NOT EXISTS users (
     user_source_device_id TEXT
 );
 
-CREATE TABLE IF NOT EXISTS personal_information (
+CREATE TABLE IF NOT EXISTS user_match_profile (
     user_id TEXT PRIMARY KEY,
-    personal_information_json TEXT NOT NULL,
+    answers TEXT NOT NULL,
+    is_open INTEGER NOT NULL DEFAULT 0 CHECK (is_open IN (0, 1)),
+    last_match_time TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS match_result (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    matched_user_id TEXT NOT NULL,
+    similarity_score REAL NOT NULL,
+    created_at TEXT NOT NULL,
+    is_shared INTEGER NOT NULL DEFAULT 0 CHECK (is_shared IN (0, 1)),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
