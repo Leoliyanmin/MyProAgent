@@ -27,7 +27,7 @@ local 与 server 两端测试脚本都支持以下动作：
 
 ### Local 端
 
-- 覆盖表：user, personal_information, sync_state, account, category, data, schedule, session, chat
+- 覆盖表：user, user_match_profile, match_result, sync_state, account, category, data, schedule, session, chat
 - 不测试：perm
 - local 端无 code 表
 - sync 动作为双端流程：
@@ -40,7 +40,7 @@ local 与 server 两端测试脚本都支持以下动作：
 
 ### Server 端
 
-- 覆盖表：user, personal_information, sync_state, account, code, category, data, schedule, session, chat
+- 覆盖表：user, user_match_profile, match_result, sync_state, account, code, category, data, schedule, session, chat
 - 不测试：perm
 - 包含 server 独有的 code 表测试
 - user 测试数据包含 server 专有字段：
