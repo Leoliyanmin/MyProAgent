@@ -1,46 +1,52 @@
-from database.repositories import AgentChatRepository
 from business.agent_logic import AgentLogic
+from database.code.database_chat_handle import ChatHandle
 
 
 class AgentService:
     def __init__(self):
         self.agent_logic = AgentLogic()
-        self.chat_repo = AgentChatRepository()
+        self.chat_handle = ChatHandle()
 
-    def process_query(self, user_id: int, message: str, session_id: str):
-        # 处理用户查询
-        result = self.agent_logic.process_query(user_id, message, session_id)
+    def process_query(self, user_id: str, message: str, session_id: str = None):
+        # 如果没有 session_id，创建一个新会话
+        if not session_id:
+            session_result = self.chat_handle.create_session(user_id)
+            if not session_result['ok']:
+                return {'response': '创建会话失败', 'thought_trace': [], 'tool_calls': []}
+            session_id = session_result['data']['session_id']
         
-        # 保存用户消息
-        user_chat_data = {
-            'user_id': user_id,
-            'session_id': session_id,
-            'message': message,
-            'role': 'user'
-        }
-        self.chat_repo.create_chat_message(user_chat_data)
+        # 创建用户消息
+        user_msg_result = self.chat_handle.create_chat_message(session_id, 'user', message)
+        if not user_msg_result['ok']:
+            print(f"Failed to create user message: {user_msg_result['message']}")
         
-        # 保存助手回复
-        assistant_chat_data = {
-            'user_id': user_id,
-            'session_id': session_id,
-            'message': result['response'],
-            'role': 'assistant',
-            'tool_calls': str(result.get('tool_calls', []))
-        }
-        self.chat_repo.create_chat_message(assistant_chat_data)
+        # 处理查询
+        result = self.agent_logic.process_query(user_id, message, str(session_id))
+        
+        # 创建助手消息
+        assistant_msg_result = self.chat_handle.create_chat_message(
+            session_id,
+            'assistant',
+            result['response'],
+            thought_trace=str(result.get('thought_trace', [])),
+            tool_calls=str(result.get('tool_calls', [])),
+        )
+        if not assistant_msg_result['ok']:
+            print(f"Failed to create assistant message: {assistant_msg_result['message']}")
         
         return result
 
-    def get_chat_history(self, session_id: str):
-        chats = self.chat_repo.get_chat_history_by_session(session_id)
-        return [
-            {
-                'id': chat.id,
-                'message': chat.message,
-                'role': chat.role,
-                'tool_calls': chat.tool_calls,
-                'created_at': chat.created_at.isoformat()
-            }
-            for chat in chats
-        ]
+    def get_chat_history(self, user_id: str, session_id: str):
+        try:
+            session_id_int = int(session_id)
+        except ValueError:
+            return {'success': False, 'message': 'Invalid session ID'}
+        
+        result = self.chat_handle.get_chat_history(session_id_int)
+        if not result['ok']:
+            return {'success': False, 'message': result['message']}
+        
+        return {
+            'success': True,
+            'history': result['data']
+        }

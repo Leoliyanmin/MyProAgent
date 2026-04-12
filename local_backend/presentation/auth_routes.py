@@ -37,16 +37,15 @@ async def login(user_data: UserLogin):
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user(user_id: int = Depends(get_current_user_id)):
+async def get_current_user(user_id: str = Depends(get_current_user_id)):
     user = user_service.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    # Convert ORM object to dict
+    # user is already a dict from the database
     return {
-        "id": user.id,
-        "email": user.email,
-        "full_name": user.full_name,
-        "student_id": user.student_id,
-        "is_active": user.is_active,
-        "created_at": user.created_at
+        "id": user.get("user_id", user.get("id")),
+        "email": user.get("user_email", user.get("email")),
+        "full_name": user.get("username", user.get("full_name")),
+        "is_active": user.get("user_is_active", user.get("is_active")),
+        "created_at": user.get("user_created_at", user.get("created_at"))
     }

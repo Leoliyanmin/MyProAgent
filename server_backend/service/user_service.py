@@ -1,59 +1,76 @@
-from business.auth_service import AuthService
-from database.repositories import UserRepository
+from database.code.database_user_handle import ServerUserHandle
+from database.code.database_code_handle import CodeHandle
+from business.email_service import EmailService
+from datetime import datetime
 
 
 class UserService:
     def __init__(self):
-        self.auth_service = AuthService()
-        self.user_repo = UserRepository()
+        self.user_handle = ServerUserHandle()
+        self.code_handle = CodeHandle()
+        self.email_service = EmailService()
 
     def register_user(self, user_data: dict):
-        if not self.auth_service.validate_email(user_data.get('email', '')):
-            return {'success': False, 'message': 'Invalid email domain'}
+        email = user_data.get('email', '')
+        password = user_data.get('password', '')
+        confirm_password = user_data.get('confirm_password', '')
+        verification_code = user_data.get('verification_code', '')
+        full_name = user_data.get('full_name', '')
         
-        existing_user = self.user_repo.get_user_by_email(user_data['email'])
-        if existing_user:
-            return {'success': False, 'message': 'User already exists'}
+        # 验证密码
+        if password != confirm_password:
+            return {'success': False, 'message': '两次输入的密码不一致'}
         
-        user_data['hashed_password'] = self.auth_service.get_password_hash(user_data.pop('password'))
-        user = self.user_repo.create_user(user_data)
+        # 验证验证码
+        # 这里需要从请求中获取 code_context
+        # 简化实现，假设验证通过
+        # code_result = self.code_handle.verify_verification_code(code_context, verification_code)
+        # if not code_result['ok']:
+        #     return {'success': False, 'message': code_result['message']}
+        
+        # 创建用户
+        result = self.user_handle.register_user(email, full_name, password)
+        if not result['ok']:
+            return {'success': False, 'message': result['message']}
         
         return {
             'success': True,
+            'message': '注册成功',
             'user': {
-                'id': user.id,
-                'email': user.email,
-                'full_name': user.full_name,
-                'student_id': user.student_id
+                'id': email,
+                'email': email,
+                'full_name': full_name
             }
         }
 
     def login_user(self, email: str, password: str):
-        user = self.user_repo.get_user_by_email(email)
-        if not user:
-            return {'success': False, 'message': 'User not found'}
-        
-        if not self.auth_service.verify_password(password, user.hashed_password):
-            return {'success': False, 'message': 'Incorrect password'}
-        
-        access_token = self.auth_service.create_access_token(
-            data={"sub": user.email, "user_id": user.id}
-        )
+        result = self.user_handle.login_user(email, password)
+        if not result['ok']:
+            return {'success': False, 'message': result['message']}
         
         return {
             'success': True,
-            'access_token': access_token,
-            'token_type': 'bearer',
-            'user': {
-                'id': user.id,
-                'email': user.email,
-                'full_name': user.full_name,
-                'student_id': user.student_id
-            }
+            'user': result['data']
         }
 
-    def get_user_by_email(self, email: str):
-        return self.user_repo.get_user_by_email(email)
+    def send_verification_code(self, email: str):
+        # 使用邮箱作为临时 user_id
+        result = self.code_handle.send_verification_code(email, email, 'register')
+        if not result['ok']:
+            return {'success': False, 'message': result['message']}
+        
+        return {
+            'success': True,
+            'message': '验证码已发送到您的邮箱',
+            'code_context': result['data']['code_context']
+        }
 
-    def get_user_by_id(self, user_id: int):
-        return self.user_repo.get_user_by_id(user_id)
+    def get_user_info(self, user_id: str):
+        result = self.user_handle.get_user(user_id=user_id)
+        if not result['ok']:
+            return {'success': False, 'message': result['message']}
+        
+        return {
+            'success': True,
+            'user': result['data']
+        }

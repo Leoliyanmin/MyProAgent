@@ -6,6 +6,10 @@ from presentation.schedule_routes import router as schedule_router
 from presentation.task_routes import router as task_router
 from presentation.agent_routes import router as agent_router
 from presentation.sync_routes import router as sync_router
+from logging_config import setup_logging
+
+# 初始化日志系统
+logger = setup_logging("local_backend", log_level=settings.LOG_LEVEL)
 
 app = FastAPI(
     title=settings.APP_NAME,

@@ -1,72 +1,71 @@
-from database.repositories import ScheduleRepository
 from business.schedule_logic import ScheduleLogic
+from database.code.database_schedule_handle import ScheduleHandle
 
 
 class ScheduleService:
     def __init__(self):
-        self.schedule_repo = ScheduleRepository()
         self.schedule_logic = ScheduleLogic()
+        self.schedule_handle = ScheduleHandle()
 
-    def create_schedule(self, user_id: int, schedule_data: dict):
-        validation = self.schedule_logic.validate_schedule(schedule_data)
-        if not validation['success']:
-            return validation
+    def create_schedule(self, user_id: str, schedule_data: dict):
+        title = schedule_data.get('title', '')
+        start_time = schedule_data.get('start_time', '')
+        end_time = schedule_data.get('end_time', '')
         
-        existing_schedules = self.schedule_repo.get_schedules_by_user(user_id)
-        if self.schedule_logic.check_conflicts(existing_schedules, schedule_data):
-            return {'success': False, 'message': 'Schedule conflict detected'}
+        if not title or not start_time or not end_time:
+            return {'success': False, 'message': '标题、开始时间和结束时间不能为空'}
         
-        schedule_data['user_id'] = user_id
-        schedule = self.schedule_repo.create_schedule(schedule_data)
+        result = self.schedule_handle.create_schedule(
+            user_id,
+            title,
+            start_time,
+            end_time,
+            event_type=schedule_data.get('event_type', 'personal'),
+            location=schedule_data.get('location'),
+            description=schedule_data.get('description'),
+            related_link=schedule_data.get('related_link'),
+            recurrence_rule=schedule_data.get('recurrence_rule'),
+            color_tag=schedule_data.get('color_tag'),
+        )
+        if not result['ok']:
+            return {'success': False, 'message': result['message']}
         
         return {
             'success': True,
-            'schedule': {
-                'id': schedule.id,
-                'title': schedule.title,
-                'description': schedule.description,
-                'start_time': schedule.start_time.isoformat(),
-                'end_time': schedule.end_time.isoformat(),
-                'location': schedule.location,
-                'event_type': schedule.event_type,
-                'source': schedule.source
-            }
+            'schedule_id': result['data']['schedule_id']
         }
 
-    def get_user_schedules(self, user_id: int):
-        schedules = self.schedule_repo.get_schedules_by_user(user_id)
-        return [
-            {
-                'id': s.id,
-                'title': s.title,
-                'description': s.description,
-                'start_time': s.start_time.isoformat(),
-                'end_time': s.end_time.isoformat(),
-                'location': s.location,
-                'event_type': s.event_type,
-                'source': s.source
-            }
-            for s in schedules
-        ]
-
-    def update_schedule(self, schedule_id: int, update_data: dict):
-        schedule = self.schedule_repo.get_schedule_by_id(schedule_id)
-        if not schedule:
-            return {'success': False, 'message': 'Schedule not found'}
+    def get_schedules(self, user_id: str):
+        result = self.schedule_handle.get_schedules(user_id)
+        if not result['ok']:
+            return {'success': False, 'message': result['message']}
         
-        if 'start_time' in update_data or 'end_time' in update_data:
-            temp_data = {'start_time': schedule.start_time.isoformat(), 'end_time': schedule.end_time.isoformat()}
-            temp_data.update(update_data)
-            validation = self.schedule_logic.validate_schedule(temp_data)
-            if not validation['success']:
-                return validation
-        
-        schedule = self.schedule_repo.update_schedule(schedule_id, update_data)
-        if schedule:
-            return {'success': True, 'message': 'Schedule updated successfully'}
-        return {'success': False, 'message': 'Schedule not found'}
+        return {
+            'success': True,
+            'schedules': result['data']
+        }
 
-    def delete_schedule(self, schedule_id: int):
-        if self.schedule_repo.delete_schedule(schedule_id):
-            return {'success': True, 'message': 'Schedule deleted successfully'}
-        return {'success': False, 'message': 'Schedule not found'}
+    def update_schedule(self, user_id: str, schedule_id: int, schedule_data: dict):
+        result = self.schedule_handle.update_schedule(
+            user_id,
+            schedule_id,
+            title=schedule_data.get('title'),
+            start_time=schedule_data.get('start_time'),
+            end_time=schedule_data.get('end_time'),
+            location=schedule_data.get('location'),
+            description=schedule_data.get('description'),
+            related_link=schedule_data.get('related_link'),
+            recurrence_rule=schedule_data.get('recurrence_rule'),
+            color_tag=schedule_data.get('color_tag'),
+        )
+        if not result['ok']:
+            return {'success': False, 'message': result['message']}
+        
+        return {'success': True, 'message': '日程更新成功'}
+
+    def delete_schedule(self, user_id: str, schedule_id: int):
+        result = self.schedule_handle.delete_schedule(user_id, schedule_id)
+        if not result['ok']:
+            return {'success': False, 'message': result['message']}
+        
+        return {'success': True, 'message': '日程删除成功'}

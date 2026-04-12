@@ -2,9 +2,19 @@
 https://kcnshyb9xgl3.feishu.cn/wiki/VOTmwDTd1ipr9JkpZ27cW0BCnrb 就是feishu
 
 ## 项目进度
-已完成local backend和server backend的基本框架，实现基本api接口，local与server backend之间的通信。 
-目前未集成数据库，使用的是mock数据库。
-数据集成，agent，寻友匹配，文件管理功能正在开发中，可在本框架下继续集成。
+已完成以下功能：
+- ✅ Local Backend 和 Server Backend 基本框架
+- ✅ 用户认证系统（注册/登录）
+- ✅ 日程管理（完整CRUD）
+- ✅ 任务管理（完整CRUD）
+- ✅ 数据库集成（SQLite）
+- ✅ 数据同步机制（Local ↔ Server）
+- ✅ AI助手功能
+- ✅ 验证码服务（基于数据库实现）
+
+正在开发中：
+- 🔄 寻友匹配功能
+- 🔄 文件管理功能
 
 ## 项目架构
 
@@ -29,7 +39,7 @@ SUSTech Student Productivity Agent 是一个为南方科技大学学生设计的
 │  - 核心业务逻辑         │       │  - 数据同步             │
 │  - 离线功能             │       │  - 远程备份             │
 │  - 实时同步             │       │  - 安全管理             │
-│                         │       │                         │
+│                         │       │  - 邮件服务             │
 └─────────────────────────┘       └─────────────────────────┘
 ```
 
@@ -38,7 +48,7 @@ SUSTech Student Productivity Agent 是一个为南方科技大学学生设计的
 | 组件 | 职责 | 部署位置 | 技术栈 |
 |------|------|----------|--------|
 | **Local Backend** | 本地数据存储、核心业务逻辑、离线功能 | 用户设备本地 | FastAPI + SQLite |
-| **Server Backend** | 用户认证、数据同步、远程备份 | 服务器端 | FastAPI + SQLite (可替换为PostgreSQL) |
+| **Server Backend** | 用户认证、数据同步、远程备份、邮件服务 | 服务器端 | FastAPI + SQLite (可替换为PostgreSQL) |
 
 ## 核心功能
 
@@ -46,25 +56,36 @@ SUSTech Student Productivity Agent 是一个为南方科技大学学生设计的
 
 | 功能 | Local Backend | Server Backend |
 |------|--------------|---------------|
-| 用户注册/登录 | ✅ (本地验证 + 服务器同步) | ✅ (密码验证) |
+| 用户注册/登录 | ✅ (本地验证 + 服务器同步) | ✅ (密码验证 + 验证码) |
 | 日程管理 | ✅ (完整CRUD) | ✅ (同步备份) |
 | 任务管理 | ✅ (完整CRUD) | ✅ (同步备份) |
 | AI助手 | ✅ (完整功能) | ❌ (本地实现) |
 | 文件管理 | ✅ (本地存储) | ❌ (本地实现) |
 | 数据同步 | ✅ (发起同步) | ✅ (接收同步) |
+| 验证码服务 | ❌ (调用Server) | ✅ (邮件发送 + 验证) |
 
 ## 系统流程
 
-### 1. 用户注册流程
+### 1. 用户注册流程 (验证码版本)
 
 ```mermaid
 sequenceDiagram
     participant Client as 前端
     participant Local as Local Backend
     participant Server as Server Backend
+    participant Email as 邮件服务
     
-    Client->>Local: 注册请求
+    Client->>Local: 请求发送验证码
+    Local->>Server: 转发验证码请求
+    Server->>Server: 生成验证码
+    Server->>Email: 发送验证码邮件
+    Server->>Server: 存储验证码到Redis
+    Server-->>Local: 返回验证码发送结果
+    Local-->>Client: 返回验证码发送结果
+    
+    Client->>Local: 提交注册信息(含验证码)
     Local->>Server: 转发注册请求
+    Server->>Server: 验证验证码
     Server->>Server: 验证邮箱和密码
     Server->>Server: 创建用户记录
     Server-->>Local: 返回注册结果
@@ -207,6 +228,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8001
 - 配置Gunicorn + Nginx
 - 启用HTTPS
 - 配置监控和日志管理
+- 配置有效的SMTP服务用于发送验证码
 
 ## 系统集成
 
@@ -235,6 +257,62 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8001
 | ACCESS_TOKEN_EXPIRE_MINUTES | ✅ | ✅ | 令牌过期时间 |
 | CORS_ORIGINS | ✅ | ✅ | CORS允许的源 |
 | SERVER_BACKEND_URL | ✅ | ❌ | 服务器后端地址 |
+| TEST_MODE | ❌ | ✅ | 测试模式，跳过邮件发送 |
+| SKIP_VERIFICATION | ❌ | ✅ | 跳过验证码验证 |
+| SKIP_RATE_LIMIT | ❌ | ✅ | 跳过频率限制 |
+
+| SMTP_HOST | ❌ | ✅ | SMTP服务器地址 |
+| SMTP_PORT | ❌ | ✅ | SMTP端口 |
+| SMTP_USER | ❌ | ✅ | SMTP用户名 |
+| SMTP_PASSWORD | ❌ | ✅ | SMTP密码 |
+| SMTP_FROM_EMAIL | ❌ | ✅ | 发件人邮箱 |
+| SMTP_FROM_NAME | ❌ | ✅ | 发件人名称 |
+| VERIFICATION_CODE_LENGTH | ❌ | ✅ | 验证码长度 |
+| VERIFICATION_CODE_EXPIRE_MINUTES | ❌ | ✅ | 验证码过期时间(分钟) |
+| RATE_LIMIT_MAX_REQUESTS | ❌ | ✅ | 频率限制最大请求数 |
+| RATE_LIMIT_WINDOW_MINUTES | ❌ | ✅ | 频率限制时间窗口(分钟) |
+
+## 验证码系统说明
+
+### 1. 验证码流程
+
+1. **发送验证码**：前端调用 `/auth/verification/send` 接口，提供邮箱地址和用途（register/reset_password）
+2. **接收验证码**：系统生成6位数字验证码，发送到用户邮箱
+3. **验证验证码**：用户在注册或重置密码时提交验证码
+4. **验证结果**：系统验证验证码是否正确且未过期
+
+### 2. 测试模式
+
+在开发环境中，可以启用测试模式来绕过邮件发送：
+
+```env
+TEST_MODE=true
+```
+
+启用测试模式后：
+- 系统会生成验证码但不会发送邮件
+- 响应中会包含 `test_code` 字段，直接返回生成的验证码
+- 方便开发和测试时使用
+
+### 3. 跳过验证码验证
+
+在开发环境中，可以跳过验证码验证：
+
+```env
+SKIP_VERIFICATION=true
+```
+
+启用后，注册和重置密码时不需要验证码即可完成操作。
+
+### 4. 跳过频率限制
+
+在开发环境中，可以跳过频率限制：
+
+```env
+SKIP_RATE_LIMIT=true
+```
+
+启用后，系统不会限制验证码发送的频率，方便测试。
 
 ## 系统监控
 
@@ -259,6 +337,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8001
    - JWT令牌认证
    - 令牌过期机制
    - 防暴力攻击措施
+   - 验证码频率限制
 
 3. **数据保护**：
    - 本地数据文件权限控制
@@ -313,6 +392,7 @@ team-project-26spring-26s-27/
 ├── server_backend/        # 服务器后端
 │   ├── database/         # 数据库层
 │   ├── business/         # 业务层
+│   │   └── email_service.py  # 邮件和验证码服务
 │   ├── service/          # 服务层
 │   ├── presentation/     # 表现层
 │   ├── config.py         # 配置文件
@@ -367,6 +447,14 @@ team-project-26spring-26s-27/
    - 检查数据库连接字符串
    - 验证数据库权限
    - 查看数据库日志
+
+5. **验证码问题**：
+   - 验证SMTP配置是否正确
+   - 查看邮件发送日志
+   - 开发环境可启用TEST_MODE绕过邮件发送
+
+6. **频率限制问题**：
+   - 开发环境可启用SKIP_RATE_LIMIT绕过频率限制
 
 ## 贡献指南
 

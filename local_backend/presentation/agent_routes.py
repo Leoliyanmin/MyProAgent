@@ -20,6 +20,8 @@ async def chat_with_agent(chat_data: AgentChatMessage, user_id: int = Depends(ge
 
 
 @router.get("/history/{session_id}", response_model=List[ChatHistoryItem])
-async def get_chat_history(session_id: str, user_id: int = Depends(get_current_user_id)):
-    history = agent_service.get_chat_history(session_id)
-    return history
+async def get_chat_history(session_id: str, user_id: str = Depends(get_current_user_id)):
+    result = agent_service.get_chat_history(user_id, session_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', 'Failed to get chat history'))
+    return result.get('history', [])

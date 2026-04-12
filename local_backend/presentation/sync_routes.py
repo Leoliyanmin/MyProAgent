@@ -8,7 +8,7 @@ router = APIRouter(prefix="/sync", tags=["Sync"])
 
 
 @router.post("/to-server", response_model=SyncResponse)
-async def sync_to_server(sync_data: SyncRequest, user_id: int = Depends(get_current_user_id)):
+async def sync_to_server(sync_data: SyncRequest, user_id: str = Depends(get_current_user_id)):
     try:
         response = requests.post(
             f"{settings.SERVER_BACKEND_URL}/sync/from-client",
@@ -26,20 +26,21 @@ async def sync_to_server(sync_data: SyncRequest, user_id: int = Depends(get_curr
         raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
 
 
-@router.get("/from-server", response_model=SyncResponse)
-async def sync_from_server(data_type: str, user_id: int = Depends(get_current_user_id)):
+@router.post("/from-server")
+async def sync_from_server(sync_data: SyncRequest, user_id: str = Depends(get_current_user_id)):
     try:
         response = requests.get(
             f"{settings.SERVER_BACKEND_URL}/sync/to-client",
-            params={"data_type": data_type},
-            headers={"X-User-ID": str(user_id)}
+            params={"data_type": sync_data.data_type},
+            headers={"X-User-ID": user_id}
         )
         response.raise_for_status()
         result = response.json()
-        return SyncResponse(
-            success=result['success'],
-            message=result['message'],
-            synced_count=result['synced_count']
-        )
+        return {
+            'success': result['success'],
+            'message': result['message'],
+            'data': result.get('data', []),
+            'synced_count': result['synced_count']
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")

@@ -8,9 +8,8 @@ sync_service = SyncService()
 
 @router.post("/from-client", response_model=SyncResponse)
 async def sync_from_client(sync_data: SyncRequest, x_user_id: str = Header(...)):
-    try:
-        user_id = int(x_user_id)
-    except ValueError:
+    user_id = x_user_id
+    if not user_id:
         raise HTTPException(status_code=400, detail="Invalid user ID")
     
     result = sync_service.sync_from_client(user_id, sync_data.data_type, sync_data.data)
@@ -23,9 +22,8 @@ async def sync_from_client(sync_data: SyncRequest, x_user_id: str = Header(...))
 
 @router.get("/to-client", response_model=SyncToClientResponse)
 async def sync_to_client(data_type: str, x_user_id: str = Header(...)):
-    try:
-        user_id = int(x_user_id)
-    except ValueError:
+    user_id = x_user_id
+    if not user_id:
         raise HTTPException(status_code=400, detail="Invalid user ID")
     
     result = sync_service.sync_to_client(user_id, data_type)
