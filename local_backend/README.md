@@ -83,10 +83,7 @@ python init_db.py
 **默认端口：8000**
 
 ```bash
-# 方式1：使用内置服务器
-python main.py
 
-# 方式2：使用uvicorn
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 

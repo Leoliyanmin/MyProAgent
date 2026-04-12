@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "SUSTech Student Productivity Agent (Local)"
     APP_VERSION: str = "0.1.0"
     DEBUG: bool = True
+    LOG_LEVEL: str = "INFO"  # 日志级别: DEBUG, INFO, WARNING, ERROR
     
     # 数据库配置（Local使用SQLite）
     DATABASE_URL: str = "sqlite:///./local_app.db"
@@ -21,12 +22,6 @@ class Settings(BaseSettings):
     
     # 服务器后端配置
     SERVER_BACKEND_URL: str = "http://localhost:8001"
-    
-    # Redis配置（仅用于本地缓存）
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
-    REDIS_PASSWORD: str = ""
     
     class Config:
         env_file = ".env"

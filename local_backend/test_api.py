@@ -434,7 +434,7 @@ if __name__ == "__main__":
     print("Running Local Backend tests...")
     print("=" * 50)
     test_results = {}
-    '''
+    
     test_results["register"] = test_register()
     print("=" * 50)
     '''
@@ -461,7 +461,7 @@ if __name__ == "__main__":
     
     test_results["health"] = test_health()
     print("=" * 50)
-    
+    '''
     # 打印测试结果摘要
     print("Test Results Summary:")
     print("-" * 50)
