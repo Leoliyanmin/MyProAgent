@@ -59,6 +59,27 @@ def _to_iso_datetime_str(value: Any) -> str | None:
     return None
 
 
+def _normalize_schedule_priority(value: Any) -> int | None:
+    if isinstance(value, int):
+        priority = value
+    elif isinstance(value, str):
+        text = value.strip().lower()
+        if not text:
+            return None
+        if text.startswith("p"):
+            text = text[1:]
+        try:
+            priority = int(text)
+        except ValueError:
+            return None
+    else:
+        return None
+
+    if priority in (0, 1, 2, 3):
+        return priority
+    return None
+
+
 def _is_time_order_valid(start_time: str, end_time: str) -> bool:
     start = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
     end = datetime.fromisoformat(end_time.replace("Z", "+00:00"))
@@ -83,6 +104,11 @@ class ScheduleHandle:
         if not _is_time_order_valid(normalized_start, normalized_end):
             return _error(422, "SCHEDULE_TIME_RANGE_INVALID", "end_time must be later than start_time")
 
+        raw_priority = kwargs.get("priority")
+        normalized_priority = 2 if raw_priority is None else _normalize_schedule_priority(raw_priority)
+        if normalized_priority is None:
+            return _error(422, "SCHEDULE_PRIORITY_INVALID", "priority must be one of p0, p1, p2, p3")
+
         try:
             schedule_id = self.operations.create_schedule(
                 user_id=user_id,
@@ -90,6 +116,7 @@ class ScheduleHandle:
                 start_time=normalized_start,
                 end_time=normalized_end,
                 event_type=kwargs.get("event_type") or "personal",
+                priority_level=normalized_priority,
                 location=kwargs.get("location"),
                 description=kwargs.get("description"),
                 related_link=kwargs.get("related_link"),
@@ -155,16 +182,22 @@ class ScheduleHandle:
         if kwargs.get("event_type") is not None:
             return _error(422, "SCHEDULE_UNSUPPORTED_FIELD", "event_type update is not supported by command layer")
 
-        normalized_start = (
-            _to_iso_datetime_str(kwargs.get("start_time")) if "start_time" in kwargs else None
-        )
-        normalized_end = (
-            _to_iso_datetime_str(kwargs.get("end_time")) if "end_time" in kwargs else None
-        )
-        if "start_time" in kwargs and normalized_start is None:
+        has_start_time = kwargs.get("start_time") is not None
+        has_end_time = kwargs.get("end_time") is not None
+        normalized_start = _to_iso_datetime_str(kwargs.get("start_time")) if has_start_time else None
+        normalized_end = _to_iso_datetime_str(kwargs.get("end_time")) if has_end_time else None
+
+        if has_start_time and normalized_start is None:
             return _error(422, "SCHEDULE_TIME_INVALID", "start_time must be ISO-8601 datetime")
-        if "end_time" in kwargs and normalized_end is None:
+        if has_end_time and normalized_end is None:
             return _error(422, "SCHEDULE_TIME_INVALID", "end_time must be ISO-8601 datetime")
+
+        raw_priority = kwargs.get("priority")
+        normalized_priority = None
+        if raw_priority is not None:
+            normalized_priority = _normalize_schedule_priority(raw_priority)
+            if normalized_priority is None:
+                return _error(422, "SCHEDULE_PRIORITY_INVALID", "priority must be one of p0, p1, p2, p3")
 
         try:
             existing = self.operations.get_schedule_by_id(user_id=user_id, schedule_id=normalized_schedule_id)
@@ -183,6 +216,7 @@ class ScheduleHandle:
                 title=kwargs.get("title"),
                 start_time=normalized_start,
                 end_time=normalized_end,
+                priority_level=normalized_priority,
                 location=kwargs.get("location"),
                 description=kwargs.get("description"),
                 related_link=kwargs.get("related_link"),
@@ -232,6 +266,7 @@ class ScheduleHandle:
                 start_time=payload.get("start_time"),
                 end_time=payload.get("end_time"),
                 event_type=payload.get("event_type"),
+                priority=payload.get("priority"),
                 location=payload.get("location"),
                 description=payload.get("description"),
                 related_link=payload.get("related_link"),
@@ -268,6 +303,7 @@ class ScheduleHandle:
                 related_link=payload.get("related_link"),
                 recurrence_rule=payload.get("recurrence_rule"),
                 color_tag=payload.get("color_tag"),
+                priority=payload.get("priority"),
                 event_type=payload.get("event_type"),
             )
 

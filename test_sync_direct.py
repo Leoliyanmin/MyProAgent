@@ -12,7 +12,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'server_backend'))
 
 from local_backend.database.code.database_command import (
     create_schedule, get_schedule, list_schedule_by_user, delete_schedule,
-    create_data, get_data, list_data_by_user, delete_data, upsert_user, get_user
+    create_data, get_data, list_data_by_user, delete_data, upsert_user, get_user,
+    create_category, list_categories_by_user, delete_category
 )
 from server_backend.database.code.database_command import (
     create_schedule as server_create_schedule,
@@ -35,6 +36,7 @@ TEST_USER_NAME = "Sync Direct Test User"
 TEST_SCHEDULE = {
     "user_id": TEST_USER_ID,
     "schedule_event_type": "meeting",
+    "schedule_priority": 1,
     "schedule_title": "Direct Sync Test Schedule",
     "schedule_start_time": "2026-06-01 09:00:00",
     "schedule_end_time": "2026-06-01 10:00:00",
@@ -85,10 +87,30 @@ def test_direct_sync():
     print("\n[步骤2] 在 Local 创建测试日程")
     local_schedule_id = create_schedule(**TEST_SCHEDULE)
     print("[OK] Local 日程创建成功，ID: %d" % local_schedule_id)
+
+    # 2.5 在 Local 准备 category（任务需要外键）
+    local_category_created = False
+    local_categories = list_categories_by_user(TEST_USER_ID)
+    if local_categories:
+        local_category_id = local_categories[0]["category_id"]
+        print("[OK] Local category 已存在，ID: %d" % local_category_id)
+    else:
+        local_category_id = create_category(
+            user_id=TEST_USER_ID,
+            category_kind="task",
+            category_title="Direct Sync Local Task Category",
+            category_content=None,
+            category_link=None,
+            category_created_at="2026-01-01 00:00:00",
+        )
+        local_category_created = True
+        print("[OK] Local category 创建成功，ID: %d" % local_category_id)
     
     # 3. 在 Local 创建测试任务
     print("\n[步骤3] 在 Local 创建测试任务")
-    local_task_id = create_data(**TEST_TASK)
+    local_task_payload = dict(TEST_TASK)
+    local_task_payload["data_category_id"] = local_category_id
+    local_task_id = create_data(**local_task_payload)
     print("[OK] Local 任务创建成功，ID: %d" % local_task_id)
     
     # 4. 从 Local 获取数据
@@ -120,18 +142,29 @@ def test_direct_sync():
         print("[WARN] Server 用户可能已存在或失败: %s" % e)
     
     # 在 Server 创建 category（任务需要外键）
+    server_category_created = False
     try:
-        server_create_category(
-            user_id=TEST_USER_ID,
-            category_kind="task",
-            category_title="Default Task Category",
-            category_content=None,
-            category_link=None,
-            category_created_at="2026-01-01 00:00:00"
-        )
-        print("[OK] Server category 创建成功")
+        server_categories = server_list_categories_by_user(TEST_USER_ID)
+        if server_categories:
+            server_category_id = server_categories[0]["category_id"]
+            print("[OK] Server category 已存在，ID: %d" % server_category_id)
+        else:
+            server_category_id = server_create_category(
+                user_id=TEST_USER_ID,
+                category_kind="task",
+                category_title="Default Task Category",
+                category_content=None,
+                category_link=None,
+                category_created_at="2026-01-01 00:00:00"
+            )
+            server_category_created = True
+            print("[OK] Server category 创建成功，ID: %d" % server_category_id)
     except Exception as e:
         print("[WARN] Server category 可能已存在或失败: %s" % e)
+        server_categories = server_list_categories_by_user(TEST_USER_ID)
+        if not server_categories:
+            raise
+        server_category_id = server_categories[0]["category_id"]
     
     # 同步日程
     for schedule in local_schedules:
@@ -145,7 +178,8 @@ def test_direct_sync():
             schedule_description=schedule.get('schedule_description'),
             schedule_related_link=schedule.get('schedule_related_link'),
             schedule_recurrence_rule=schedule.get('schedule_recurrence_rule'),
-            schedule_color_tag=schedule.get('schedule_color_tag')
+            schedule_color_tag=schedule.get('schedule_color_tag'),
+            schedule_priority=schedule.get('schedule_priority', 2),
         )
     print("[OK] 日程同步到 Server 成功")
     
@@ -153,7 +187,7 @@ def test_direct_sync():
     for task in local_tasks:
         server_create_data(
             user_id=task['user_id'],
-            data_category_id=task.get('data_category_id', 1),
+            data_category_id=server_category_id,
             data_content_type=task.get('data_content_type', 'task'),
             data_title=task['data_title'],
             data_content_text=task.get('data_content_text'),
@@ -208,7 +242,8 @@ def test_direct_sync():
             schedule_description=schedule.get('schedule_description'),
             schedule_related_link=schedule.get('schedule_related_link'),
             schedule_recurrence_rule=schedule.get('schedule_recurrence_rule'),
-            schedule_color_tag=schedule.get('schedule_color_tag')
+            schedule_color_tag=schedule.get('schedule_color_tag'),
+            schedule_priority=schedule.get('schedule_priority', 2),
         )
     print("[OK] 从 Server 拉取日程成功")
     
@@ -216,7 +251,7 @@ def test_direct_sync():
     for task in server_tasks:
         create_data(
             user_id=task['user_id'],
-            data_category_id=task.get('data_category_id', 1),
+            data_category_id=local_category_id,
             data_content_type=task.get('data_content_type', 'task'),
             data_title=task['data_title'],
             data_content_text=task.get('data_content_text'),
@@ -269,6 +304,10 @@ def test_direct_sync():
         server_delete_schedule(s['schedule_id'])
     for t in server_tasks:
         server_delete_data(t['data_id'])
+    if local_category_created:
+        delete_category(local_category_id)
+    if server_category_created:
+        server_delete_category(server_category_id)
     print("[OK] 测试数据已清理")
     
     print("\n" + "="*60)

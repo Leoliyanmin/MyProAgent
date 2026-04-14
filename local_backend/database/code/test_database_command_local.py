@@ -410,6 +410,7 @@ class LocalCommandTestRunner:
                 schedule_related_link=row["schedule_related_link"],
                 schedule_recurrence_rule=row["schedule_recurrence_rule"],
                 schedule_color_tag=row["schedule_color_tag"],
+                schedule_priority=row.get("schedule_priority", 2),
                 db_path=self.db_path,
             )
             self._created.add(table)
