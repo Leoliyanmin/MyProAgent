@@ -493,7 +493,7 @@ team-project-26spring-26s-27/
 
 1. **依赖兼容性**：
    - Python 3.13需要特定版本的依赖
-   - 已固定pydantic==1.10.12和sqlalchemy==1.4.50
+   - 已固定pydantic==1.10.20和sqlalchemy==1.4.50
 
 2. **同步失败**：
    - 检查网络连接
