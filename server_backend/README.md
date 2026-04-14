@@ -57,14 +57,10 @@ SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-# CORS配置
-CORS_ORIGINS=["http://localhost:3000", "http://localhost:8080"]
-```
-
 ### 3. 初始化数据库
 
 ```bash
-python init_db.py
+python database/code/database_init.py
 ```
 
 ### 4. 启动服务
@@ -72,10 +68,7 @@ python init_db.py
 **默认端口：8001**
 
 ```bash
-# 方式1：使用内置服务器
-python main.py
 
-# 方式2：使用uvicorn
 uvicorn main:app --reload --host 0.0.0.0 --port 8001
 ```
 

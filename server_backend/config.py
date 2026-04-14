@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     TEST_MODE: bool = False
     SKIP_VERIFICATION: bool = False  # 是否跳过验证码验证
-    SKIP_RATE_LIMIT: bool = False  # 新增：是否跳过频率限制
+    SKIP_RATE_LIMIT: bool = False  # 是否跳过频率限制
+    LOG_LEVEL: str = "INFO"  # 日志级别: DEBUG, INFO, WARNING, ERROR
     
     # 数据库配置（Server使用SQLite，实际部署可替换为PostgreSQL）
     DATABASE_URL: str = "sqlite:///./database/db/server.db"
@@ -23,12 +24,6 @@ class Settings(BaseSettings):
     
     # CORS配置
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
-    
-    # Redis配置
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
-    REDIS_PASSWORD: str = ""
     
     # 邮件服务配置
     SMTP_HOST: str = "smtp.gmail.com"
