@@ -1,5 +1,5 @@
 class AgentLogic:
-    def process_query(self, user_id: int, query: str, session_id: str) -> dict:
+    def process_query(self, user_id: str, query: str, session_id: str) -> dict:
         """处理用户查询"""
         # 这里可以集成实际的AI模型
         # 目前返回简单的echo响应

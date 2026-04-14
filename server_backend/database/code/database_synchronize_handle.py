@@ -173,6 +173,7 @@ class ServerSyncHandle:
                 "reason": result.get("reason", "payload applied on server"),
                 **result,
             }
+
             if request_id:
                 response["request_id"] = request_id
             if cache_key:

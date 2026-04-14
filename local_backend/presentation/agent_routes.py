@@ -9,7 +9,7 @@ agent_service = AgentService()
 
 
 @router.post("/chat", response_model=AgentResponse)
-async def chat_with_agent(chat_data: AgentChatMessage, user_id: int = Depends(get_current_user_id)):
+async def chat_with_agent(chat_data: AgentChatMessage, user_id: str = Depends(get_current_user_id)):
     result = agent_service.process_query(user_id, chat_data.message, chat_data.session_id or "default")
     return AgentResponse(
         response=result['response'],
