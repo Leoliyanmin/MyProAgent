@@ -75,7 +75,7 @@ SERVER_BACKEND_URL=http://localhost:8001
 ### 3. 初始化数据库
 
 ```bash
-python init_db.py
+python database/code/database_init.py
 ```
 
 ### 4. 启动服务
