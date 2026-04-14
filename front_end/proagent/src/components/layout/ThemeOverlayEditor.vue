@@ -108,6 +108,33 @@
         />
       </template>
 
+      <template v-if="canUploadImage(activeToken)">
+        <label class="field-label">插入图片</label>
+        <div class="upload-row">
+          <button class="ov-btn upload-btn" type="button" @click="openImagePicker">选择图片</button>
+          <button
+            v-if="store.tokens[getImageKey(activeToken)]"
+            class="ov-btn upload-btn"
+            type="button"
+            @click="clearImage"
+          >
+            清除图片
+          </button>
+        </div>
+        <p class="upload-hint">
+          {{ store.tokens[getImageKey(activeToken)] ? '已插入背景图片，保存后会保留。' : '支持 PNG / JPG / WEBP / GIF。' }}
+        </p>
+      </template>
+
+      <input
+        ref="fileInput"
+        class="image-input"
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        style="display:none"
+        @change="onFileChange"
+      />
+
       <div class="quick-tokens">
         <button
           v-for="key in quickKeys"
@@ -144,6 +171,7 @@ const saveStatusText = ref('当前状态：未保存')
 const saveFeedbackText = ref('主题已保存')
 const lastSavedSnapshot = ref('')
 const lastSavedAtText = ref('')
+const fileInput = ref(null)
 
 const layoutMetrics = ref({
   sidebarWidth: 240,
@@ -202,10 +230,10 @@ watch(
 )
 
 const TOKEN_META = {
-  bgSidebar: { label: '侧边栏背景', desc: '左侧导航区域背景色', type: 'color' },
-  bgTopbar: { label: '顶栏背景', desc: '顶部标签栏背景色', type: 'color' },
-  bgContent: { label: '内容区背景', desc: '主内容区域背景色', type: 'color' },
-  bgAgent: { label: 'Agent 助手背景', desc: '右侧 Agent 侧边栏背景色', type: 'color' },
+  bgSidebar: { label: '侧边栏背景', desc: '左侧导航区域背景色', type: 'color', canUploadImage: true },
+  bgTopbar: { label: '顶栏背景', desc: '顶部标签栏背景色', type: 'color', canUploadImage: true },
+  bgContent: { label: '内容区背景', desc: '主内容区域背景色', type: 'color', canUploadImage: true },
+  bgAgent: { label: 'Agent 助手背景', desc: '右侧 Agent 侧边栏背景色', type: 'color', canUploadImage: true },
   bgCard: { label: '卡片背景', desc: '卡片容器背景色', type: 'color' },
   accent: { label: '主色调', desc: '按钮和高亮颜色', type: 'color' },
   textPrimary: { label: '主文本', desc: '标题与正文主文本色', type: 'color' },
@@ -236,21 +264,24 @@ const zoneSidebarStyle = computed(() => ({
   top: '0px',
   left: '0px',
   width: `${layoutMetrics.value.sidebarWidth}px`,
-  bottom: '0px'
+  bottom: '0px',
+  ...getZonePaintStyle('bgSidebar')
 }))
 
 const zoneTopbarStyle = computed(() => ({
   top: '0px',
   left: `${layoutMetrics.value.sidebarWidth}px`,
   right: `${layoutMetrics.value.agentWidth}px`,
-  height: `${layoutMetrics.value.topbarHeight}px`
+  height: `${layoutMetrics.value.topbarHeight}px`,
+  ...getZonePaintStyle('bgTopbar')
 }))
 
 const zoneContentStyle = computed(() => ({
   top: `${layoutMetrics.value.topbarHeight}px`,
   left: `${layoutMetrics.value.sidebarWidth}px`,
   right: `${layoutMetrics.value.agentWidth}px`,
-  bottom: '0px'
+  bottom: '0px',
+  ...getZonePaintStyle('bgContent')
 }))
 
 const zoneAgentStyle = computed(() => {
@@ -262,12 +293,33 @@ const zoneAgentStyle = computed(() => {
     top: '0px',
     right: '0px',
     width: `${layoutMetrics.value.agentWidth}px`,
-    bottom: '0px'
+    bottom: '0px',
+    ...getZonePaintStyle('bgAgent')
   }
 })
 
 const selectToken = (key) => {
   activeToken.value = key
+}
+
+const getImageKey = (key) => `${key}Image`
+
+const canUploadImage = (key) => Boolean(TOKEN_META[key]?.canUploadImage)
+
+const getZonePaintStyle = (key) => {
+  const imageValue = store.tokens[getImageKey(key)]
+  const style = {
+    backgroundColor: store.tokens[key]
+  }
+
+  if (imageValue) {
+    style.backgroundImage = `url("${imageValue}")`
+    style.backgroundSize = 'cover'
+    style.backgroundPosition = 'center'
+    style.backgroundRepeat = 'no-repeat'
+  }
+
+  return style
 }
 
 const getViewportBounds = () => {
@@ -354,6 +406,58 @@ const onHexChange = (event) => {
 
 const onRadiusInput = (event) => {
   store.setToken(activeToken.value, Number(event.target.value))
+}
+
+const openImagePicker = () => {
+  fileInput.value?.click()
+}
+
+const onFileChange = (event) => {
+  const file = event.target.files?.[0]
+  if (!file || !canUploadImage(activeToken.value)) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      let width = img.width
+      let height = img.height
+      
+      // 限制最大宽高，避免图片体积过大导致 localStorage 爆满 (>5MB)
+      const MAX_SIZE = 1920
+      if (width > MAX_SIZE || height > MAX_SIZE) {
+        if (width > height) {
+          height = Math.round(height * (MAX_SIZE / width))
+          width = MAX_SIZE
+        } else {
+          width = Math.round(width * (MAX_SIZE / height))
+          height = MAX_SIZE
+        }
+      }
+      
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, width, height)
+      
+      // 压缩为 webp 格式（或者 jpeg），质量 0.85
+      const dataUrl = canvas.toDataURL('image/webp', 0.85)
+      
+      store.setToken(getImageKey(activeToken.value), dataUrl)
+    }
+    img.src = e.target.result
+  }
+  reader.readAsDataURL(file)
+  event.target.value = ''
+}
+
+const clearImage = () => {
+  if (!canUploadImage(activeToken.value)) return
+  store.setToken(getImageKey(activeToken.value), '')
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
 }
 
 const getSwatchStyle = (key) => {
@@ -652,6 +756,28 @@ onBeforeUnmount(() => {
 .radius-input {
   width: 100%;
   margin-bottom: 8px;
+}
+
+.upload-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.upload-btn {
+  padding: 4px 8px;
+}
+
+.image-input {
+  display: none;
+}
+
+.upload-hint {
+  margin: 0 0 8px;
+  font-size: 10px;
+  color: #6b7280;
+  line-height: 1.4;
 }
 
 .quick-tokens {

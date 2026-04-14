@@ -31,13 +31,13 @@
       <div class="te-preview-col">
         <p class="col-label">布局预览</p>
 
-        <div class="schematic" :style="{ background: store.tokens.bgApp }">
+        <div class="schematic" :style="{ backgroundColor: store.tokens.bgApp, backgroundImage: store.tokens.bgAppImage ? `url(${store.tokens.bgAppImage})` : 'none', backgroundSize: 'cover' }">
 
           <!-- 侧边栏 zone -->
           <div
             class="sch-sidebar zone"
             :class="zoneClasses('bgSidebar')"
-            :style="{ background: store.tokens.bgSidebar }"
+            :style="{ backgroundColor: store.tokens.bgSidebar, backgroundImage: store.tokens.bgSidebarImage ? `url(${store.tokens.bgSidebarImage})` : 'none', backgroundSize: 'cover' }"
             @click="pickZone('bgSidebar')"
           >
             <div class="sch-logo"></div>
@@ -54,7 +54,7 @@
             <div
               class="sch-topbar zone"
               :class="zoneClasses('bgTopbar')"
-              :style="{ background: store.tokens.bgTopbar }"
+              :style="{ backgroundColor: store.tokens.bgTopbar, backgroundImage: store.tokens.bgTopbarImage ? `url(${store.tokens.bgTopbarImage})` : 'none', backgroundSize: 'cover' }"
               @click="pickZone('bgTopbar')"
             >
               <div class="sch-segment" :style="{ background: store.tokens.accent }"></div>
@@ -65,7 +65,7 @@
             <div
               class="sch-content zone"
               :class="zoneClasses('bgContent')"
-              :style="{ background: store.tokens.bgContent }"
+              :style="{ backgroundColor: store.tokens.bgContent, backgroundImage: store.tokens.bgContentImage ? `url(${store.tokens.bgContentImage})` : 'none', backgroundSize: 'cover' }"
               @click="pickZone('bgContent')"
             >
               <!-- 卡片 zone（两张） -->
@@ -182,16 +182,21 @@
           <!-- 支持上传背景图的区域 -->
           <template v-if="META[activeZone].canUpload">
             <p class="field-label" style="margin-top: 14px;">背景图片（可选）</p>
-            <div class="upload-btn" @click="$refs.fileInput.click()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              上传图片
+            <div style="display:flex; gap:8px;">
+              <div class="upload-btn" @click="$refs.fileInput.click()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                上传图片
+              </div>
+              <div v-if="store.tokens[activeZone + 'Image']" class="upload-btn" style="color:#dc2626; border-color:#dc2626;" @click="clearImage">
+                清除图片
+              </div>
             </div>
-            <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" @change="onFileChange" />
-            <p v-if="uploadedName" class="upload-hint">已选：{{ uploadedName }}</p>
+            <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none" @change="onFileChange" />
+            <p v-if="store.tokens[activeZone + 'Image']" class="upload-hint">已插入背景图片，保存后生效。</p>
           </template>
         </div>
 
@@ -270,8 +275,20 @@ const onHexChange = (value) => {
 const onFileChange = (e) => {
   const file = e.target.files?.[0]
   if (!file) return
-  uploadedName.value = file.name
-  // TODO: POST /assets/upload — integrate real upload endpoint
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    store.setToken(activeZone.value + 'Image', String(reader.result || ''))
+  }
+  reader.readAsDataURL(file)
+  e.target.value = ''
+}
+
+const clearImage = () => {
+  store.setToken(activeZone.value + 'Image', '')
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
 }
 
 const saveTheme = () => {

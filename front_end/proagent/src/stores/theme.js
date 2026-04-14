@@ -4,10 +4,15 @@ import { computed, reactive, ref, watch } from 'vue'
 export const DEFAULTS = {
   accent:      '#007aff',
   bgApp:       '#f5f5f7',
+  bgAppImage:  '',
   bgSidebar:   '#ebebeb',
   bgTopbar:    '#ebebeb',
   bgContent:   '#f5f5f7',
   bgAgent:     '#ebebeb',
+  bgSidebarImage: '',
+  bgTopbarImage: '',
+  bgContentImage: '',
+  bgAgentImage: '',
   bgCard:      '#ffffff',
   textPrimary: '#1d1d1f',
   textMuted:   '#6b7280',
@@ -48,10 +53,15 @@ export const useThemeStore = defineStore('theme', () => {
     const r = document.documentElement
     r.style.setProperty('--clr-accent',       tokens.accent)
     r.style.setProperty('--clr-bg-app',        tokens.bgApp)
+    r.style.setProperty('--clr-bg-app-image',  tokens.bgAppImage ? `url("${tokens.bgAppImage}")` : 'none')
     r.style.setProperty('--clr-bg-sidebar',    tokens.bgSidebar)
+    r.style.setProperty('--clr-bg-sidebar-image', tokens.bgSidebarImage ? `url("${tokens.bgSidebarImage}")` : 'none')
     r.style.setProperty('--clr-bg-topbar',     tokens.bgTopbar)
+    r.style.setProperty('--clr-bg-topbar-image', tokens.bgTopbarImage ? `url("${tokens.bgTopbarImage}")` : 'none')
     r.style.setProperty('--clr-bg-content',    tokens.bgContent)
+    r.style.setProperty('--clr-bg-content-image', tokens.bgContentImage ? `url("${tokens.bgContentImage}")` : 'none')
     r.style.setProperty('--clr-bg-agent',      tokens.bgAgent)
+    r.style.setProperty('--clr-bg-agent-image', tokens.bgAgentImage ? `url("${tokens.bgAgentImage}")` : 'none')
     r.style.setProperty('--clr-bg-card',       tokens.bgCard)
     r.style.setProperty('--clr-text-primary',  tokens.textPrimary)
     r.style.setProperty('--clr-text-muted',    tokens.textMuted)

@@ -35,8 +35,8 @@
 
         <button 
           class="segment" 
-          :class="{ active: currentView === 'partnerMatch' }"
-          @click="emit('update:currentView', 'partnerMatch')"
+          :class="{ active: currentView === 'selfPortrait' }"
+          @click="emit('update:currentView', 'selfPortrait')"
         >
           <svg class="segment-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -44,7 +44,7 @@
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
-          <span>搭子匹配</span>
+          <span>自我画像</span>
         </button>
       </div>
     </div>
@@ -81,7 +81,11 @@ const emit = defineEmits(['update:currentView', 'toggleAgent'])
 <style scoped>
 .macos-topbar {
   height: 52px;
-  background: var(--clr-bg-topbar, rgba(235, 235, 235, 0.65));
+  background-color: var(--clr-bg-topbar, rgba(235, 235, 235, 0.65));
+  background-image: var(--clr-bg-topbar-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);

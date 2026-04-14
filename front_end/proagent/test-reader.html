@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body>
+<input type="file" id="f">
+<script>
+document.getElementById('f').onchange = (e) => {
+  const file = e.target.files[0];
+  const r = new FileReader();
+  r.onload = () => console.log('success! length:', r.result.length);
+  r.readAsDataURL(file);
+  e.target.value = '';
+}
+</script>
+</body>
+</html>

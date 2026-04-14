@@ -1,0 +1,7 @@
+const fs = require('fs');
+let code = fs.readFileSync('src/stores/theme.js', 'utf8');
+code = code.replace(
+  "bgSidebarImage: '',",
+  "bgSidebarImage: 'data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\"><rect width=\"20\" height=\"20\" fill=\"red\"/></svg>',"
+);
+fs.writeFileSync('src/stores/theme.js', code);

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  :root {
+    --bg-image: none;
+  }
+  .box {
+    width: 200px; height: 200px;
+    background-color: red;
+    background-image: var(--bg-image);
+    background-size: cover;
+  }
+</style>
+</head>
+<body>
+  <div class="box"></div>
+  <script>
+    document.documentElement.style.setProperty('--bg-image', 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==")');
+  </script>
+</body>
+</html>

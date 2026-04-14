@@ -122,7 +122,11 @@ const sendMessage = () => {
 .right-sidebar {
   width: 300px;
   flex-shrink: 0;
-  background: var(--clr-bg-agent, rgba(235, 235, 235, 0.65));
+  background-color: var(--clr-bg-agent, rgba(235, 235, 235, 0.65));
+  background-image: var(--clr-bg-agent-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-left: 1px solid rgba(0, 0, 0, 0.08);

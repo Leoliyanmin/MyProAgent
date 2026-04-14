@@ -36,21 +36,45 @@ export const useDashboardStore = defineStore('dashboard', () => {
   // 2. TODO 状态
   // ==============================
   const todos = ref([
-    { id: 1, title: 'Draft ECCV methodology section', completed: false },
-    { id: 2, title: 'CS305 Matrix operations assignment', completed: false }
+    { id: 1, title: 'Draft ECCV methodology section', completed: false, start: '2026-04-10', end: '2026-04-12', color: '#ff3b30' },
+    { id: 2, title: 'CS305 Matrix operations assignment', completed: false, start: '2026-04-15', end: '2026-04-15', color: '#34c759' }
   ])
 
   const pendingTodosCount = computed(() => todos.value.filter(t => !t.completed).length)
 
-  const addTodo = (title) => {
-    todos.value.unshift({ id: Date.now(), title, completed: false })
+  const addTodo = (taskPayload) => {
+    if (typeof taskPayload === 'string') {
+      const today = new Date().toISOString().split('T')[0]
+      todos.value.unshift({ id: Date.now(), title: taskPayload, completed: false, start: today, end: today, color: '#007aff' })
+    } else {
+      const today = new Date().toISOString().split('T')[0]
+      todos.value.unshift({
+        id: taskPayload.id || Date.now(),
+        title: taskPayload.title,
+        completed: taskPayload.completed || false,
+        start: taskPayload.start || today,
+        end: taskPayload.end || taskPayload.start || today,
+        startTime: taskPayload.startTime || '',
+        endTime: taskPayload.endTime || '',
+        color: taskPayload.color || '#007aff'
+      })
+    }
   }
 
-  const toggleTodo = (task) => {
-    task.completed = !task.completed
-    // 如果任务变为完成状态，给今天的热力图加 1 分
-    if (task.completed) {
-      recordActivity(1)
+  const updateTodo = (updatedTask) => {
+    const index = todos.value.findIndex(t => t.id === updatedTask.id)
+    if (index !== -1) {
+      todos.value.splice(index, 1, { ...todos.value[index], ...updatedTask })
+    }
+  }
+
+  const toggleTodo = (id) => {
+    const task = todos.value.find(t => t.id === id)
+    if (task) {
+      task.completed = !task.completed
+      if (task.completed) {
+        recordActivity(1)
+      }
     }
   }
 
@@ -67,6 +91,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     todos,
     pendingTodosCount,
     addTodo,
+    updateTodo,
     toggleTodo,
     removeTodo
   }

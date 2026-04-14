@@ -23,7 +23,7 @@
 
       <div class="nav-group">
         <div class="nav-title">
-          {{ currentView === 'dashboard' ? '主界面特有' : currentView === 'calendar' ? '日程特有' : currentView === 'fileManager' ? '文件管理特有' : currentView === 'partnerMatch' ? '搭子匹配特有' : '功能' }}
+          {{ currentView === 'dashboard' ? '主界面特有' : currentView === 'calendar' ? '日程特有' : currentView === 'fileManager' ? '文件管理特有' : currentView === 'selfPortrait' ? '自我画像特有' : '功能' }}
         </div>
 
         <template v-if="currentView === 'dashboard'">
@@ -41,9 +41,9 @@
           <div class="nav-item">云存储同步</div>
         </template>
 
-        <template v-else-if="currentView === 'partnerMatch'">
-          <div class="nav-item">推荐列表</div>
-          <div class="nav-item">我的搭子</div>
+        <template v-else-if="currentView === 'selfPortrait'">
+          <div class="nav-item">画像维度</div>
+          <div class="nav-item">展示预览</div>
         </template>
       </div>
     </div>
@@ -102,7 +102,11 @@ const toggleSettings = () => {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  background: var(--clr-bg-sidebar, rgba(235, 235, 235, 0.65));
+  background-color: var(--clr-bg-sidebar, rgba(235, 235, 235, 0.65));
+  background-image: var(--clr-bg-sidebar-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-right: 1px solid rgba(0, 0, 0, 0.08);

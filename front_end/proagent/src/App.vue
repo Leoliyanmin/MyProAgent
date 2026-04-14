@@ -44,7 +44,7 @@ import AgentSidebar from './components/layout/AgentSidebar.vue'
 import DashboardView from './views/DashboardView.vue'
 import CalendarView from './views/CalendarView.vue'
 import FileManagerView from './views/FileManagerView.vue'
-import PartnerMatchView from './views/PartnerMatchView.vue'
+import SelfPortraitView from './views/SelfPortraitView.vue'
 import UserSettingsView from './views/UserSettingsView.vue'
 import ThemeOverlayEditor from './components/layout/ThemeOverlayEditor.vue'
 import { useThemeStore } from './stores/theme.js'
@@ -59,7 +59,7 @@ const appMode = ref('main')
 const viewComponent = computed(() => {
   if (currentView.value === 'dashboard') return DashboardView
   if (currentView.value === 'calendar') return CalendarView
-  if (currentView.value === 'partnerMatch') return PartnerMatchView
+  if (currentView.value === 'selfPortrait') return SelfPortraitView
   if (currentView.value === 'fileManager') return FileManagerView
   return DashboardView
 })
@@ -107,7 +107,11 @@ html, body, #app {
 /* 动态内容注入区：自适应高度并允许内部滚动 */
 .macos-content-area {
   flex: 1;
-  background: var(--clr-bg-content, #f5f5f7);
+  background-color: var(--clr-bg-content, #f5f5f7);
+  background-image: var(--clr-bg-content-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   padding: 16px;
   overflow-y: auto;
   overflow-x: hidden; 
