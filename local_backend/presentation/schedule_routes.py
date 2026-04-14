@@ -17,7 +17,7 @@ async def get_schedules(user_id: str = Depends(get_current_user_id)):
 
 
 @router.post("/")
-async def create_schedule(schedule_data: ScheduleCreate, user_id: int = Depends(get_current_user_id)):
+async def create_schedule(schedule_data: ScheduleCreate, user_id: str = Depends(get_current_user_id)):
     result = schedule_service.create_schedule(user_id, schedule_data.dict())
     if not result['success']:
         raise HTTPException(status_code=400, detail=result['message'])
