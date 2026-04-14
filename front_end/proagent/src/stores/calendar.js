@@ -20,9 +20,12 @@ export const useCalendarStore = defineStore('calendar', () => {
         title: t.title,
         start: t.start || today,
         end: t.end || t.start || today,
+        startTime: t.startTime,
+        endTime: t.endTime,
         isTodo: true,
         completed: t.completed,
-        color: t.color || '#34c759'
+        priority: t.priority !== undefined ? t.priority : 2,
+        color: t.color || '#007aff'
       }
     })
     return [...calendarEvents, ...todoEvents]

@@ -158,9 +158,18 @@
           </div>
         </div>
         <div class="color-picker-row">
-          <label>标签颜色</label>
-          <div class="color-options">
-            <span v-for="c in colorOptions" :key="c" class="color-dot" :style="{ backgroundColor: c }" :class="{ active: draftEvent.color === c }" @click="draftEvent.color = c"></span>
+          <label>优先级(分色)</label>
+          <div class="priority-options">
+            <div 
+              v-for="p in priorityOptions" 
+              :key="p.level" 
+              class="priority-chip"
+              :class="{ active: draftEvent.priority === p.level }"
+              :style="{ backgroundColor: p.color + (draftEvent.priority === p.level ? '' : '15'), color: draftEvent.priority === p.level ? '#fff' : p.color, borderColor: p.color }"
+              @click="setPriority(p)"
+            >
+              P{{ p.level }} - {{ p.label }}
+            </div>
           </div>
         </div>
         <label class="checkbox-row" style="margin-top: 10px;">
@@ -190,8 +199,19 @@ const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 
 const showModal = ref(false)
 const isEditing = ref(false)
-const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', isTodo: true, color: '#34c759' })
-const colorOptions = ['#007aff', '#ff3b30', '#ff9500', '#34c759', '#af52de']
+const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', priority: 2, isTodo: true, color: '#007aff' })
+
+const priorityOptions = [
+  { level: 0, color: '#ff3b30', label: '紧急且重要' },
+  { level: 1, color: '#ff9500', label: '重要不紧急' },
+  { level: 2, color: '#007aff', label: '紧急不重要' },
+  { level: 3, color: '#34c759', label: '不重要不紧急' }
+]
+
+const setPriority = (p) => {
+  draftEvent.value.priority = p.level
+  draftEvent.value.color = p.color
+}
 
 const headerTitle = computed(() => {
   const y = currentDate.value.getFullYear()
@@ -344,7 +364,7 @@ const openEventModal = (dateStr, hour = null) => {
     startTime = `${String(hour).padStart(2, '0')}:00`
     endTime = `${String(hour + 1).padStart(2, '0')}:00`
   }
-  draftEvent.value = { id: null, title: '', start: dateStr, end: dateStr, startTime, endTime, isTodo: false, color: '#007aff' }
+  draftEvent.value = { id: null, title: '', start: dateStr, end: dateStr, startTime, endTime, isTodo: false, priority: 2, color: '#007aff' }
   isEditing.value = false
   showModal.value = true
 }
@@ -353,6 +373,7 @@ const editEvent = (event) => {
   draftEvent.value = { 
     ...event, 
     color: event.color || (event.isTodo ? '#34c759' : '#007aff'),
+    priority: event.priority !== undefined ? event.priority : 2,
     startTime: event.startTime || '',
     endTime: event.endTime || ''
   }
@@ -363,7 +384,22 @@ const editEvent = (event) => {
 const closeModal = () => { showModal.value = false }
 
 const saveEvent = () => {
-  if (!draftEvent.value.title) return
+  if (!draftEvent.value.title.trim()) {
+    alert('请输入日程或任务的标题')
+    return
+  }
+
+  if (draftEvent.value.start > draftEvent.value.end) {
+    alert('开始日期不能晚于结束日期')
+    return
+  }
+  if (draftEvent.value.start === draftEvent.value.end && draftEvent.value.startTime && draftEvent.value.endTime) {
+    if (draftEvent.value.startTime > draftEvent.value.endTime) {
+      alert('开始时间不能晚于结束时间')
+      return
+    }
+  }
+
   if (isEditing.value) {
     calendarStore.updateEvent(draftEvent.value)
   } else {
@@ -382,6 +418,20 @@ const deleteEvent = () => {
 </script>
 
 <style scoped>
+.priority-options { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.priority-chip {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.priority-chip:hover { opacity: 0.8; }
+.color-picker-row { margin-bottom: 12px; }
+.color-picker-row label { font-size: 12px; color: #555; }
+
 .calendar-wrapper {
   background: var(--clr-bg-app, #ffffff);
   border-radius: 12px;

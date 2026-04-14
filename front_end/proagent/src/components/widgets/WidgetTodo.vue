@@ -19,17 +19,32 @@
         <div class="date-row">
           <div>
             <label>开始: </label>
-            <input type="date" v-model="newTaskStart" class="mac-input mini" />
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <input type="date" v-model="newTaskStart" class="mac-input mini" />
+              <input type="time" v-model="newTaskStartTime" class="mac-input mini" />
+            </div>
           </div>
           <div>
             <label>结束: </label>
-            <input type="date" v-model="newTaskEnd" class="mac-input mini" />
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <input type="date" v-model="newTaskEnd" class="mac-input mini" />
+              <input type="time" v-model="newTaskEndTime" class="mac-input mini" />
+            </div>
           </div>
         </div>
         <div class="color-picker-row">
-          <label>颜色: </label>
-          <div class="color-options">
-            <span v-for="c in colorOptions" :key="c" class="color-dot" :style="{ backgroundColor: c }" :class="{ active: newTaskColor === c }" @click="newTaskColor = c"></span>
+          <label>优先级(分色): </label>
+          <div class="priority-options">
+            <div 
+              v-for="p in priorityOptions" 
+              :key="p.level" 
+              class="priority-chip"
+              :class="{ active: newTaskPriority === p.level }"
+              :style="{ backgroundColor: p.color + (newTaskPriority === p.level ? '' : '15'), color: newTaskPriority === p.level ? '#fff' : p.color, borderColor: p.color }"
+              @click="setPriority(p)"
+            >
+              P{{ p.level }}
+            </div>
           </div>
         </div>
         <div class="date-actions">
@@ -39,15 +54,15 @@
       </div>
 
       <ul class="todo-list">
-        <li v-for="task in store.todos" :key="task.id" class="todo-item" :class="{ 'is-completed': task.completed }">
+        <li v-for="task in store.sortedTodos" :key="task.id" class="todo-item" :class="{ 'is-completed': task.completed }">
           <input 
             type="checkbox" 
             :checked="task.completed" 
             @change="store.toggleTodo(task.id)" 
             class="mac-checkbox" 
           />
-          <div class="task-color-indicator" :style="{ backgroundColor: task.color || '#007aff' }"></div>
-          <span class="task-text">{{ task.title }}</span>
+          <div class="task-priority-indicator" :style="{ backgroundColor: task.color || '#007aff' }">P{{ task.priority !== undefined ? task.priority : 2 }}</div>
+          <span class="task-text" style="flex: 1">{{ task.title }}</span>
           <button @click="store.removeTodo(task.id)" class="delete-btn">×</button>
         </li>
       </ul>
@@ -66,25 +81,62 @@ const newTaskTitle = ref('')
 const showDatePicker = ref(false)
 const newTaskStart = ref('')
 const newTaskEnd = ref('')
+const newTaskStartTime = ref('')
+const newTaskEndTime = ref('')
+const newTaskPriority = ref(2)
 const newTaskColor = ref('#007aff')
 
-const colorOptions = ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#af52de']
+const priorityOptions = [
+  { level: 0, color: '#ff3b30', label: '紧急且重要' },
+  { level: 1, color: '#ff9500', label: '重要不紧急' },
+  { level: 2, color: '#007aff', label: '紧急不重要' },
+  { level: 3, color: '#34c759', label: '不重要不紧急' }
+]
+
+const setPriority = (p) => {
+  newTaskPriority.value = p.level
+  newTaskColor.value = p.color
+}
 
 const prepareAddTask = () => {
-  if (!newTaskTitle.value.trim()) return
+  if (!newTaskTitle.value.trim()) {
+    alert('请输入新任务的名称')
+    return
+  }
   const today = new Date().toISOString().split('T')[0]
   newTaskStart.value = today
   newTaskEnd.value = today
+  newTaskStartTime.value = ''
+  newTaskEndTime.value = ''
+  newTaskPriority.value = 2
   newTaskColor.value = '#007aff'
   showDatePicker.value = true
 }
 
 const confirmAddTask = () => {
-  if (!newTaskTitle.value.trim()) return
+  if (!newTaskTitle.value.trim()) {
+    alert('请输入新任务的名称')
+    return
+  }
+
+  if (newTaskStart.value > newTaskEnd.value) {
+    alert('开始日期不能晚于结束日期')
+    return
+  }
+  if (newTaskStart.value === newTaskEnd.value && newTaskStartTime.value && newTaskEndTime.value) {
+    if (newTaskStartTime.value > newTaskEndTime.value) {
+      alert('开始时间不能晚于结束时间')
+      return
+    }
+  }
+
   store.addTodo({
     title: newTaskTitle.value.trim(),
     start: newTaskStart.value,
     end: newTaskEnd.value,
+    startTime: newTaskStartTime.value,
+    endTime: newTaskEndTime.value,
+    priority: newTaskPriority.value,
     color: newTaskColor.value
   })
   newTaskTitle.value = ''
@@ -126,11 +178,19 @@ const confirmAddTask = () => {
 .date-row { display: flex; gap: 8px; }
 .date-row div { flex: 1; font-size: 11px; color: #555; }
 .date-row label { font-weight: 500; }
-.color-picker-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #555; }
-.color-picker-row label { font-weight: 500; }
-.color-options { display: flex; gap: 6px; }
-.color-dot { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-.color-dot.active { border-color: #1d1d1f; box-shadow: inset 0 0 0 1px #fff; }
+.color-picker-row { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: #555; }
+.color-picker-row label { font-weight: 500; margin-top: 4px; }
+.priority-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.priority-chip {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.priority-chip:hover { opacity: 0.8; }
 .date-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .mac-btn {
   padding: 4px 10px;
@@ -148,7 +208,15 @@ const confirmAddTask = () => {
 .todo-item { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 0; border-radius: 6px; }
 .todo-item:hover { background: rgba(0,0,0,0.02); }
 .todo-item.is-completed .task-text { text-decoration: line-through; color: #86868b; }
-.task-color-indicator { width: 8px; height: 8px; border-radius: 50%; opacity: 0.8; }
+.task-priority-indicator {
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 14px;
+  text-align: center;
+}
 .task-text { flex: 1; color: #1d1d1f; }
 
 /* 恢复 Checkbox 样式 */

@@ -35,17 +35,34 @@ export const useDashboardStore = defineStore('dashboard', () => {
   // ==============================
   // 2. TODO 状态
   // ==============================
+  // priority: 0 (P0 紧急且重要 - 红色), 1 (P1 重要不紧急 - 橙色)
+  //           2 (P2 紧急不重要 - 蓝色), 3 (P3 不重要不紧急 - 绿色)
   const todos = ref([
-    { id: 1, title: 'Draft ECCV methodology section', completed: false, start: '2026-04-10', end: '2026-04-12', color: '#ff3b30' },
-    { id: 2, title: 'CS305 Matrix operations assignment', completed: false, start: '2026-04-15', end: '2026-04-15', color: '#34c759' }
+    { id: 1, title: 'Draft ECCV methodology section', completed: false, start: '2026-04-10', end: '2026-04-12', priority: 0, color: '#ff3b30' },
+    { id: 2, title: 'CS305 Matrix operations assignment', completed: false, start: '2026-04-15', end: '2026-04-15', priority: 3, color: '#34c759' }
   ])
 
+  // 未完成任务数
   const pendingTodosCount = computed(() => todos.value.filter(t => !t.completed).length)
+
+  // 根据完成状态和优先级排序的 TODO 列表
+  const sortedTodos = computed(() => {
+    return [...todos.value].sort((a, b) => {
+      // 1. 已完成的排在最后
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      // 2. 未完成的按优先级排序 (0 最高, 3 最低)
+      const priorityA = a.priority !== undefined ? a.priority : 3;
+      const priorityB = b.priority !== undefined ? b.priority : 3;
+      if (priorityA !== priorityB) return priorityA - priorityB;
+      // 3. 优先级相同则按时间或 ID
+      return b.id - a.id;
+    })
+  })
 
   const addTodo = (taskPayload) => {
     if (typeof taskPayload === 'string') {
       const today = new Date().toISOString().split('T')[0]
-      todos.value.unshift({ id: Date.now(), title: taskPayload, completed: false, start: today, end: today, color: '#007aff' })
+      todos.value.unshift({ id: Date.now(), title: taskPayload, completed: false, start: today, end: today, priority: 2, color: '#007aff' })
     } else {
       const today = new Date().toISOString().split('T')[0]
       todos.value.unshift({
@@ -56,6 +73,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
         end: taskPayload.end || taskPayload.start || today,
         startTime: taskPayload.startTime || '',
         endTime: taskPayload.endTime || '',
+        priority: taskPayload.priority !== undefined ? taskPayload.priority : 2,
         color: taskPayload.color || '#007aff'
       })
     }
@@ -89,6 +107,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     recordActivity,
     
     todos,
+    sortedTodos,
     pendingTodosCount,
     addTodo,
     updateTodo,
