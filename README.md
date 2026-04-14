@@ -190,7 +190,7 @@ pip install -r requirements.txt
 copy .env.example .env
 
 # 初始化数据库
-python init_db.py
+python database/code/database_init.py
 
 # 启动服务
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
@@ -209,7 +209,7 @@ pip install -r requirements.txt
 copy .env.example .env
 
 # 初始化数据库
-python init_db.py
+python database/code/database_init.py
 
 # 启动服务
 uvicorn main:app --reload --host 0.0.0.0 --port 8001
@@ -251,6 +251,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8001
 | APP_NAME | ✅ | ✅ | 应用名称 |
 | APP_VERSION | ✅ | ✅ | 应用版本 |
 | DEBUG | ✅ | ✅ | 调试模式 |
+| LOG_LEVEL | ✅ | ✅ | 日志级别 (DEBUG/INFO/WARNING/ERROR) |
 | DATABASE_URL | ✅ | ✅ | 数据库连接字符串 |
 | SECRET_KEY | ✅ | ✅ | JWT密钥 |
 | ALGORITHM | ✅ | ✅ | JWT算法 |
@@ -323,8 +324,69 @@ SKIP_RATE_LIMIT=true
 
 ### 日志管理
 
-- **Local Backend**：本地日志文件
-- **Server Backend**：服务器日志系统
+项目采用统一的日志系统，支持以下日志级别：
+
+| 级别 | 说明 | 使用场景 |
+|------|------|----------|
+| **DEBUG** | 调试信息 | 开发阶段详细调试，记录变量值、函数调用等 |
+| **INFO** | 一般信息 | 记录正常运行状态、关键操作完成等 |
+| **WARNING** | 警告信息 | 记录潜在问题、异常情况但不影响系统运行 |
+| **ERROR** | 错误信息 | 记录严重错误、异常堆栈等，需要关注和修复 |
+
+#### 日志配置
+
+在 `.env` 文件中设置日志级别：
+
+```env
+LOG_LEVEL=INFO
+```
+
+#### 日志级别过滤规则
+
+日志级别采用"**包含式**"过滤机制，设置某个级别后，会输出该级别及以上的所有日志类型：
+
+| 设置的级别 | 输出的日志类型 | 适用场景 |
+|------------|----------------|----------|
+| **DEBUG** | DEBUG + INFO + WARNING + ERROR（全部） | 开发调试阶段，需要详细日志 |
+| **INFO** | INFO + WARNING + ERROR | 正常运行环境，记录关键操作 |
+| **WARNING** | WARNING + ERROR | 生产环境，仅关注警告和错误 |
+| **ERROR** | 仅 ERROR | 生产环境，仅记录严重错误 |
+
+**示例**：
+
+```python
+# 设置 LOG_LEVEL=DEBUG 时
+logger.debug("这是调试信息")    # ✅ 会输出
+logger.info("这是一般信息")     # ✅ 会输出
+logger.warning("这是警告")      # ✅ 会输出
+logger.error("这是错误")        # ✅ 会输出
+
+# 设置 LOG_LEVEL=INFO 时
+logger.debug("这是调试信息")    # ❌ 不会输出（被过滤）
+logger.info("这是一般信息")     # ✅ 会输出
+logger.warning("这是警告")      # ✅ 会输出
+logger.error("这是错误")        # ✅ 会输出
+```
+
+#### 日志输出
+
+- **控制台输出**：实时显示到控制台
+- **文件输出**：自动写入 `logs/` 目录，按日期分割
+- **日志文件命名**：`{app_name}_{yyyy-mm-dd}.log`
+- **日志滚动**：单个文件最大10MB，保留最近5个备份
+
+#### 日志格式
+
+```
+2024-01-15 10:30:45,123 - server_backend - INFO - auth_service:45 - 用户登录成功: user_id=test@example.com
+```
+
+格式说明：`{时间戳} - {应用名称} - {日志级别} - {模块:行号} - {日志消息}`
+
+#### 日志文件位置
+
+- **Local Backend**：`local_backend/logs/`
+- **Server Backend**：`server_backend/logs/`
 
 ## 安全考虑
 
@@ -431,7 +493,7 @@ team-project-26spring-26s-27/
 
 1. **依赖兼容性**：
    - Python 3.13需要特定版本的依赖
-   - 已固定pydantic==1.10.12和sqlalchemy==1.4.50
+   - 已固定pydantic==1.10.20和sqlalchemy==1.4.50
 
 2. **同步失败**：
    - 检查网络连接

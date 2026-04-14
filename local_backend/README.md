@@ -75,7 +75,7 @@ SERVER_BACKEND_URL=http://localhost:8001
 ### 3. 初始化数据库
 
 ```bash
-python init_db.py
+python database/code/database_init.py
 ```
 
 ### 4. 启动服务
@@ -206,7 +206,7 @@ python test_api.py
 | fastapi | 0.104.1 | Web框架 |
 | uvicorn | 0.24.0 | ASGI服务器 |
 | sqlalchemy | 1.4.50 | ORM框架 |
-| pydantic | 1.10.12 | 数据验证 |
+| pydantic | 1.10.20 | 数据验证 |
 | python-jose | 3.3.0 | JWT库 |
 | passlib | 1.7.4 | 密码加密 |
 | requests | 2.31.0 | HTTP客户端 |

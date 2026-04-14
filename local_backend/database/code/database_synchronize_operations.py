@@ -76,6 +76,7 @@ SCHEDULE_FIELDS = (
     "schedule_id",
     "user_id",
     "schedule_event_type",
+    "schedule_priority",
     "schedule_title",
     "schedule_start_time",
     "schedule_end_time",
@@ -170,6 +171,13 @@ def _normalize_binary_flag(value: Any) -> int | None:
     if normalized in (0, 1):
         return normalized
     return None
+
+
+def _normalize_schedule_priority(value: Any) -> int:
+    normalized = _coerce_int(value)
+    if normalized in (0, 1, 2, 3):
+        return normalized
+    return 2
 
 
 def _normalize_answers_json(value: Any) -> str | None:
@@ -612,6 +620,7 @@ class LocalSyncImporter:
                     schedule_related_link=row.get("schedule_related_link"),
                     schedule_recurrence_rule=row.get("schedule_recurrence_rule"),
                     schedule_color_tag=row.get("schedule_color_tag"),
+                    schedule_priority=_normalize_schedule_priority(row.get("schedule_priority")),
                 )
 
             session_id_map: dict[int, int] = {}
