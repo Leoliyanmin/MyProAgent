@@ -52,6 +52,7 @@ class ScheduleBase(BaseModel):
     end_time: datetime
     location: Optional[str] = None
     event_type: Optional[str] = "personal"
+    priority: Optional[str] = Field(default="p2", pattern=r"^p[0-3]$")
 
 
 class ScheduleCreate(ScheduleBase):
@@ -65,6 +66,7 @@ class ScheduleUpdate(BaseModel):
     end_time: Optional[datetime] = None
     location: Optional[str] = None
     event_type: Optional[str] = None
+    priority: Optional[str] = Field(default=None, pattern=r"^p[0-3]$")
 
 
 class ScheduleResponse(ScheduleBase):

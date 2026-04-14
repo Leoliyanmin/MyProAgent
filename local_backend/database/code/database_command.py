@@ -567,18 +567,20 @@ def create_schedule(
     schedule_recurrence_rule: str | None,
     schedule_color_tag: str | None,
     db_path: str | Path = DEFAULT_DB_PATH,
+    schedule_priority: int = 2,
 ) -> int:
     return _execute(
         """
         INSERT INTO schedule (
-            user_id, schedule_event_type, schedule_title, schedule_start_time,
+            user_id, schedule_event_type, schedule_priority, schedule_title, schedule_start_time,
             schedule_end_time, schedule_location, schedule_description,
             schedule_related_link, schedule_recurrence_rule, schedule_color_tag
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
             schedule_event_type,
+            schedule_priority,
             schedule_title,
             schedule_start_time,
             schedule_end_time,
@@ -615,6 +617,7 @@ def update_schedule(
     schedule_recurrence_rule: str | None = None,
     schedule_color_tag: str | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
+    schedule_priority: int | None = None,
 ) -> None:
     # 构建动态更新语句
     update_fields = []
@@ -644,6 +647,9 @@ def update_schedule(
     if schedule_color_tag is not None:
         update_fields.append("schedule_color_tag = ?")
         params.append(schedule_color_tag)
+    if schedule_priority is not None:
+        update_fields.append("schedule_priority = ?")
+        params.append(schedule_priority)
     
     if not update_fields:
         return  # 没有更新字段
