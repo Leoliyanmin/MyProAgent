@@ -69,7 +69,7 @@ class ScheduleUpdate(BaseModel):
 
 class ScheduleResponse(ScheduleBase):
     id: int
-    user_id: int
+    user_id: str
     source: str
     
     class Config:
@@ -98,7 +98,7 @@ class TaskUpdate(BaseModel):
 
 class TaskResponse(TaskBase):
     id: int
-    user_id: int
+    user_id: str
     
     class Config:
         from_attributes = True

@@ -8,7 +8,7 @@ auth_service = AuthService()
 user_service = UserService()
 
 
-def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> int:
+def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
     token = credentials.credentials
     payload = auth_service.decode_token(token)
     if not payload:
