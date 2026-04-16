@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { tasksAPI } from '../services/api.js'
 
 export const useDashboardStore = defineStore('dashboard', () => {
   // ==============================
@@ -96,12 +97,98 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
-  const removeTodo = (id) => {
-    todos.value = todos.value.filter(t => t.id !== id)
+  const removeTodo = async (id) => {
+    try {
+      await tasksAPI.deleteTask(id)
+      todos.value = todos.value.filter(t => t.id !== id)
+    } catch (err) {
+      console.error('Failed to delete task:', err)
+    }
+  }
+
+  // Backend sync actions
+  const loading = ref(false)
+  const error = ref(null)
+
+  // Load tasks from backend
+  const loadTasks = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const tasks = await tasksAPI.getTasks()
+      // Map backend task format to frontend format
+      todos.value = tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        completed: task.completed || false,
+        start: task.start_date || task.start || new Date().toISOString().split('T')[0],
+        end: task.end_date || task.end || task.start_date || new Date().toISOString().split('T')[0],
+        startTime: task.start_time || '',
+        endTime: task.end_time || '',
+        priority: task.priority !== undefined ? task.priority : 2,
+        color: task.color || '#007aff',
+        description: task.description || ''
+      }))
+    } catch (err) {
+      error.value = err.message
+      console.error('Failed to load tasks:', err)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Create task on backend
+  const createTaskOnBackend = async (taskData) => {
+    try {
+      const result = await tasksAPI.createTask({
+        title: taskData.title,
+        description: taskData.description || '',
+        start_date: taskData.start,
+        end_date: taskData.end,
+        start_time: taskData.startTime || '',
+        end_time: taskData.endTime || '',
+        priority: taskData.priority,
+        completed: taskData.completed || false
+      })
+      return result
+    } catch (err) {
+      console.error('Failed to create task on backend:', err)
+      throw err
+    }
+  }
+
+  // Update task on backend
+  const updateTaskOnBackend = async (taskId, taskData) => {
+    try {
+      const result = await tasksAPI.updateTask(taskId, {
+        title: taskData.title,
+        description: taskData.description,
+        start_date: taskData.start,
+        end_date: taskData.end,
+        start_time: taskData.startTime,
+        end_time: taskData.endTime,
+        priority: taskData.priority,
+        completed: taskData.completed
+      })
+      return result
+    } catch (err) {
+      console.error('Failed to update task on backend:', err)
+      throw err
+    }
+  }
+
+  // Get AI study plan
+  const getStudyPlan = async () => {
+    try {
+      const result = await tasksAPI.getStudyPlan()
+      return result
+    } catch (err) {
+      console.error('Failed to get study plan:', err)
+      throw err
+    }
   }
 
   return {
-    // 暴露出的状态与方法
     activityLog,
     heatmapData,
     recordActivity,
@@ -112,6 +199,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
     addTodo,
     updateTodo,
     toggleTodo,
-    removeTodo
+    removeTodo,
+    
+    loading,
+    error,
+    loadTasks,
+    createTaskOnBackend,
+    updateTaskOnBackend,
+    getStudyPlan
   }
 })

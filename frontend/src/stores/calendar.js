@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useDashboardStore } from './dashboard.js'
+import { schedulesAPI } from '../services/api.js'
 
 export const useCalendarStore = defineStore('calendar', () => {
   const dashboardStore = useDashboardStore()
   
-  // Only store non-Todo events here
-  const basicEvents = ref([
-    { id: 102, title: 'Meeting with tutor', start: '2026-04-15', end: '2026-04-15', isTodo: false, color: '#ff9500' }
-  ])
+  const basicEvents = ref([])
+  const loading = ref(false)
+  const error = ref(null)
 
   // Combine Calendar-only events and Todo events from Dashboard
   const allEvents = computed(() => {
@@ -75,10 +75,89 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
   }
 
-  const removeEvent = (id) => {
-    basicEvents.value = basicEvents.value.filter(e => e.id !== id)
+  const removeEvent = async (id) => {
+    const event = basicEvents.value.find(e => e.id === id)
+    if (event && !event.isTodo) {
+      try {
+        await schedulesAPI.deleteSchedule(id)
+        basicEvents.value = basicEvents.value.filter(e => e.id !== id)
+      } catch (err) {
+        console.error('Failed to delete schedule:', err)
+      }
+    }
     dashboardStore.removeTodo(id)
   }
 
-  return { allEvents, addEvent, updateEvent, removeEvent }
+  // Backend sync for schedules
+  const loadSchedules = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const schedules = await schedulesAPI.getSchedules()
+      basicEvents.value = schedules.map(schedule => ({
+        id: schedule.id,
+        title: schedule.title,
+        start: schedule.start_date,
+        end: schedule.end_date,
+        startTime: schedule.start_time || '',
+        endTime: schedule.end_time || '',
+        isTodo: false,
+        color: schedule.color || '#ff9500',
+        description: schedule.description || ''
+      }))
+    } catch (err) {
+      error.value = err.message
+      console.error('Failed to load schedules:', err)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const createScheduleOnBackend = async (eventData) => {
+    try {
+      const result = await schedulesAPI.createSchedule({
+        title: eventData.title,
+        description: eventData.description || '',
+        start_date: eventData.start,
+        end_date: eventData.end,
+        start_time: eventData.startTime || '',
+        end_time: eventData.endTime || '',
+        color: eventData.color || '#ff9500'
+      })
+      return result
+    } catch (err) {
+      console.error('Failed to create schedule:', err)
+      throw err
+    }
+  }
+
+  const updateScheduleOnBackend = async (scheduleId, eventData) => {
+    try {
+      const result = await schedulesAPI.updateSchedule(scheduleId, {
+        title: eventData.title,
+        description: eventData.description,
+        start_date: eventData.start,
+        end_date: eventData.end,
+        start_time: eventData.startTime,
+        end_time: eventData.endTime,
+        color: eventData.color
+      })
+      return result
+    } catch (err) {
+      console.error('Failed to update schedule:', err)
+      throw err
+    }
+  }
+
+  return { 
+    allEvents, 
+    addEvent, 
+    updateEvent, 
+    removeEvent,
+    loading,
+    error,
+    loadSchedules,
+    createScheduleOnBackend,
+    updateScheduleOnBackend
+  }
 })
