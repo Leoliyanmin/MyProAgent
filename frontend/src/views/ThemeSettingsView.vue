@@ -40,12 +40,12 @@
             :style="{ backgroundColor: store.tokens.bgSidebar, backgroundImage: store.tokens.bgSidebarImage ? `url(${store.tokens.bgSidebarImage})` : 'none', backgroundSize: 'cover' }"
             @click="pickZone('bgSidebar')"
           >
-            <div class="sch-logo"></div>
-            <div class="sch-navitem" :style="{ background: store.tokens.accent }"></div>
-            <div class="sch-navitem sch-navitem--dim"></div>
-            <div class="sch-navitem sch-navitem--dim"></div>
+            <div class="sch-logo" :style="{ background: store.tokens.textMuted }"></div>
+            <div class="sch-navitem zone" :class="zoneClasses('accent')" :style="{ background: store.tokens.accent }" @click.stop="pickZone('accent')"></div>
+            <div class="sch-navitem sch-navitem--dim" :style="{ background: store.tokens.textMuted + '40' }"></div>
+            <div class="sch-navitem sch-navitem--dim" :style="{ background: store.tokens.textMuted + '40' }"></div>
             <div class="sch-spacer"></div>
-            <div class="sch-avatar" :style="{ background: store.tokens.textMuted }"></div>
+            <div class="sch-avatar zone" :class="zoneClasses('textMuted')" :style="{ background: store.tokens.textMuted }" @click.stop="pickZone('textMuted')"></div>
           </div>
 
           <!-- 右侧主列 -->
@@ -57,8 +57,8 @@
               :style="{ backgroundColor: store.tokens.bgTopbar, backgroundImage: store.tokens.bgTopbarImage ? `url(${store.tokens.bgTopbarImage})` : 'none', backgroundSize: 'cover' }"
               @click="pickZone('bgTopbar')"
             >
-              <div class="sch-segment" :style="{ background: store.tokens.accent }"></div>
-              <div class="sch-segment sch-segment--ghost"></div>
+              <div class="sch-segment zone" :class="zoneClasses('accent')" :style="{ background: store.tokens.accent }" @click.stop="pickZone('accent')"></div>
+              <div class="sch-segment sch-segment--ghost" :style="{ background: store.tokens.textMuted + '30' }"></div>
             </div>
 
             <!-- 内容区 zone -->
@@ -68,99 +68,64 @@
               :style="{ backgroundColor: store.tokens.bgContent, backgroundImage: store.tokens.bgContentImage ? `url(${store.tokens.bgContentImage})` : 'none', backgroundSize: 'cover' }"
               @click="pickZone('bgContent')"
             >
-              <!-- 卡片 zone（两张） -->
+              <!-- 卡片1: 展示文本颜色和边框 -->
               <div
                 class="sch-card zone"
                 :class="zoneClasses('bgCard')"
-                :style="{ background: store.tokens.bgCard, borderColor: store.tokens.borderColor, borderRadius: store.tokens.cardRadius + 'px' }"
+                :style="{
+                  background: store.tokens.bgCard,
+                  border: '2px solid ' + store.tokens.borderColor,
+                  borderRadius: store.tokens.cardRadius + 'px'
+                }"
                 @click.stop="pickZone('bgCard')"
               >
-                <div class="sch-line" :style="{ background: store.tokens.textPrimary }"></div>
-                <div class="sch-line sch-line--sm" :style="{ background: store.tokens.textMuted }"></div>
-                <div class="sch-line sch-line--sm" :style="{ background: store.tokens.textMuted }"></div>
+                <!-- 点击文字区域切换到 textPrimary -->
+                <div class="sch-card-title zone" :class="zoneClasses('textPrimary')" :style="{ color: store.tokens.textPrimary }" @click.stop="pickZone('textPrimary')">
+                  标题文本
+                </div>
+                <!-- 点击描述区域切换到 textMuted -->
+                <div class="sch-card-desc zone" :class="zoneClasses('textMuted')" :style="{ color: store.tokens.textMuted }" @click.stop="pickZone('textMuted')">
+                  描述文本
+                </div>
+                <!-- 点击边框区域切换到 borderColor -->
+                <div
+                  class="border-indicator zone"
+                  :class="zoneClasses('borderColor')"
+                  :style="{ background: store.tokens.borderColor }"
+                  @click.stop="pickZone('borderColor')"
+                  title="点击编辑边框色"
+                ></div>
+                <!-- 点击圆角指示器切换到 cardRadius -->
+                <div
+                  class="radius-indicator zone"
+                  :class="zoneClasses('cardRadius')"
+                  @click.stop="pickZone('cardRadius')"
+                  title="点击编辑圆角"
+                >
+                  {{ store.tokens.cardRadius }}px
+                </div>
               </div>
+
+              <!-- 卡片2: 展示 accent 和综合效果 -->
               <div
                 class="sch-card zone"
                 :class="zoneClasses('bgCard')"
-                :style="{ background: store.tokens.bgCard, borderColor: store.tokens.borderColor, borderRadius: store.tokens.cardRadius + 'px' }"
+                :style="{
+                  background: store.tokens.bgCard,
+                  border: '2px solid ' + store.tokens.borderColor,
+                  borderRadius: store.tokens.cardRadius + 'px'
+                }"
                 @click.stop="pickZone('bgCard')"
               >
-                <div class="sch-accent-bar" :style="{ background: store.tokens.accent }"></div>
-                <div class="sch-line" :style="{ background: store.tokens.textPrimary }"></div>
+                <div class="sch-accent-bar zone" :class="zoneClasses('accent')" :style="{ background: store.tokens.accent }" @click.stop="pickZone('accent')"></div>
+                <div class="sch-card-title" :style="{ color: store.tokens.textPrimary }">主色调预览</div>
+                <div class="action-btn zone" :class="zoneClasses('accent')" :style="{ background: store.tokens.accent }" @click.stop="pickZone('accent')">
+                  按钮
+                </div>
               </div>
             </div>
           </div>
 
-        </div>
-
-        <!-- 样式预览区：展示文本、边框、圆角等效果 -->
-        <p class="col-label" style="margin-top: 12px;">文本与样式预览</p>
-        <div class="style-preview-box">
-          <!-- 文本颜色预览 -->
-          <div class="preview-section">
-            <div class="preview-title">文本颜色</div>
-            <div class="text-preview-row">
-              <div
-                class="text-preview-item zone"
-                :class="zoneClasses('textPrimary')"
-                @click="pickZone('textPrimary')"
-              >
-                <div class="text-sample text-sample-primary" :style="{ color: store.tokens.textPrimary }">
-                  主标题文本
-                </div>
-                <div class="preview-item-label">主文本</div>
-              </div>
-              <div
-                class="text-preview-item zone"
-                :class="zoneClasses('textMuted')"
-                @click="pickZone('textMuted')"
-              >
-                <div class="text-sample text-sample-muted" :style="{ color: store.tokens.textMuted }">
-                  次要描述文本
-                </div>
-                <div class="preview-item-label">次要文本</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 边框与圆角预览 -->
-          <div class="preview-section">
-            <div class="preview-title">边框与圆角</div>
-            <div class="border-preview-row">
-              <div
-                class="border-preview-item zone"
-                :class="zoneClasses('borderColor')"
-                @click="pickZone('borderColor')"
-              >
-                <div
-                  class="border-sample"
-                  :style="{
-                    borderColor: store.tokens.borderColor,
-                    borderRadius: store.tokens.cardRadius + 'px'
-                  }"
-                >
-                  <div class="border-inner" :style="{ background: store.tokens.bgCard }"></div>
-                </div>
-                <div class="preview-item-label">边框色</div>
-              </div>
-              <div
-                class="border-preview-item zone"
-                :class="zoneClasses('cardRadius')"
-                @click="pickZone('cardRadius')"
-              >
-                <div
-                  class="radius-sample"
-                  :style="{
-                    borderRadius: store.tokens.cardRadius + 'px',
-                    background: store.tokens.accent
-                  }"
-                >
-                  <span class="radius-value">{{ store.tokens.cardRadius }}px</span>
-                </div>
-                <div class="preview-item-label">圆角 {{ store.tokens.cardRadius }}px</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- 快速访问色块 -->
@@ -520,6 +485,88 @@ const saveTheme = () => {
   transition: background 0.2s, border-radius 0.2s;
 }
 .sch-accent-bar { height: 3px; border-radius: 2px; width: 38%; transition: background 0.2s; }
+
+/* 卡片内文字样式 */
+.sch-card-title {
+  font-size: 11px;
+  font-weight: 600;
+  transition: color 0.2s;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.sch-card-title:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.sch-card-desc {
+  font-size: 9px;
+  transition: color 0.2s;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.sch-card-desc:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+/* 边框指示器 */
+.border-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: transform 0.15s;
+}
+
+.border-indicator:hover {
+  transform: scale(1.2);
+}
+
+/* 圆角指示器 */
+.radius-indicator {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 8px;
+  padding: 2px 5px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.radius-indicator:hover {
+  transform: scale(1.1);
+}
+
+/* 操作按钮 */
+.action-btn {
+  font-size: 9px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: auto;
+}
+
+.action-btn:hover {
+  opacity: 0.9;
+}
+
+.sch-card {
+  position: relative;
+}
+
 .sch-line { height: 5px; border-radius: 3px; width: 80%; transition: background 0.2s; }
 .sch-line--sm { height: 4px; width: 55%; opacity: 0.6; }
 
@@ -528,115 +575,6 @@ const saveTheme = () => {
 .zone.zone--hoverable           { cursor: pointer; }
 .zone.zone--hoverable:hover     { outline: 2px solid rgba(0,122,255,0.5); outline-offset: 1px; }
 .zone.zone--active              { outline: 2.5px solid #007aff; outline-offset: 1px; }
-
-/* ── Style Preview Box ── */
-.style-preview-box {
-  background: #fafafa;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 10px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.preview-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.preview-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(0,0,0,0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.text-preview-row,
-.border-preview-row {
-  display: flex;
-  gap: 10px;
-}
-
-.text-preview-item,
-.border-preview-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 10px;
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.text-preview-item:hover,
-.border-preview-item:hover {
-  border-color: rgba(0,122,255,0.5);
-  background: rgba(0,122,255,0.04);
-}
-
-.text-preview-item.zone--active,
-.border-preview-item.zone--active {
-  border-color: #007aff;
-  background: rgba(0,122,255,0.08);
-}
-
-.text-sample {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.text-sample-primary {
-  font-weight: 600;
-}
-
-.text-sample-muted {
-  font-size: 12px;
-}
-
-.border-sample {
-  width: 60px;
-  height: 40px;
-  border: 2px solid;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.border-inner {
-  width: 80%;
-  height: 60%;
-  border-radius: 4px;
-}
-
-.radius-sample {
-  width: 60px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.radius-value {
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-
-.preview-item-label {
-  font-size: 10px;
-  color: #6b7280;
-  text-align: center;
-}
 
 /* ── Extra tokens row ── */
 .extra-tokens {
