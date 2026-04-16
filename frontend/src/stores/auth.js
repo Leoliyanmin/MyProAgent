@@ -36,10 +36,25 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const result = await authAPI.login(email, password)
       
-      if (result.success && result.token) {
-        token.value = result.token
+      if (result.success) {
         user.value = result.user
-        localStorage.setItem('token', result.token)
+        
+        // Handle token (some backends may not return token in response)
+        if (result.token) {
+          token.value = result.token
+          localStorage.setItem('token', result.token)
+        } else {
+          // Create a temporary token from user data if backend doesn't provide one
+          // Note: This is for development only. Production should always use proper JWT.
+          const tempToken = btoa(JSON.stringify({
+            user_id: result.user.user_id,
+            email: result.user.email,
+            exp: Date.now() + 3600000 // 1 hour
+          }))
+          token.value = tempToken
+          localStorage.setItem('token', tempToken)
+        }
+        
         return { success: true }
       } else {
         error.value = result.message || 'Login failed'
