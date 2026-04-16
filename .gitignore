@@ -54,7 +54,7 @@ debug.html
 # Temporary assets
 *.jpg
 *.jpeg
-*.png
+# *.png
 *.gif
 *.webp
 *.bmp
