@@ -1,13 +1,18 @@
 import { useAuthStore } from '../stores/auth.js'
 
-export const authGuard = async (to, from, next) => {
+export const authGuard = async (to, from) => {
   const auth = useAuthStore()
   
+  // Check if route requires authentication
   if (to.meta.requiresAuth === true && !auth.isAuthenticated) {
-    next({ name: 'login', query: { redirect: to.fullPath } })
-  } else if ((to.name === 'login' || to.name === 'register') && auth.isAuthenticated) {
-    next({ name: 'dashboard' })
-  } else {
-    next()
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
+  
+  // Redirect authenticated users away from login/register pages
+  if ((to.name === 'login' || to.name === 'register') && auth.isAuthenticated) {
+    return { name: 'dashboard' }
+  }
+  
+  // Allow navigation
+  return true
 }
