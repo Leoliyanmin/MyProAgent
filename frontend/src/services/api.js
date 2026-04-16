@@ -1,7 +1,8 @@
-// API Service Layer for connecting to Local Backend
+// API Service Layer for connecting to Backend
 // Uses Vite proxy in development, direct URL in production
+// Note: Local Backend (8000) or Server Backend (8001)
 
-const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8001'
 
 // Helper to get token from localStorage
 const getToken = () => localStorage.getItem('token')
