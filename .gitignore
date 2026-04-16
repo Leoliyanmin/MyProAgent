@@ -37,3 +37,25 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Test files (not for production)
+test*.html
+test*.js
+test-*.html
+test-*.js
+*_test.js
+*_test.cjs
+test_*.js
+test_*.cjs
+
+# Debug files
+debug.html
+
+# Temporary assets
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.bmp
+!image-*.png  # Keep documentation screenshots
