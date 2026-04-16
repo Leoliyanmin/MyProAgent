@@ -93,8 +93,78 @@
 
         </div>
 
-        <!-- 示意图下方：不在布局中的 token 色块 -->
-        <p class="col-label" style="margin-top: 12px;">其他配色 Token</p>
+        <!-- 样式预览区：展示文本、边框、圆角等效果 -->
+        <p class="col-label" style="margin-top: 12px;">文本与样式预览</p>
+        <div class="style-preview-box">
+          <!-- 文本颜色预览 -->
+          <div class="preview-section">
+            <div class="preview-title">文本颜色</div>
+            <div class="text-preview-row">
+              <div
+                class="text-preview-item zone"
+                :class="zoneClasses('textPrimary')"
+                @click="pickZone('textPrimary')"
+              >
+                <div class="text-sample text-sample-primary" :style="{ color: store.tokens.textPrimary }">
+                  主标题文本
+                </div>
+                <div class="preview-item-label">主文本</div>
+              </div>
+              <div
+                class="text-preview-item zone"
+                :class="zoneClasses('textMuted')"
+                @click="pickZone('textMuted')"
+              >
+                <div class="text-sample text-sample-muted" :style="{ color: store.tokens.textMuted }">
+                  次要描述文本
+                </div>
+                <div class="preview-item-label">次要文本</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 边框与圆角预览 -->
+          <div class="preview-section">
+            <div class="preview-title">边框与圆角</div>
+            <div class="border-preview-row">
+              <div
+                class="border-preview-item zone"
+                :class="zoneClasses('borderColor')"
+                @click="pickZone('borderColor')"
+              >
+                <div
+                  class="border-sample"
+                  :style="{
+                    borderColor: store.tokens.borderColor,
+                    borderRadius: store.tokens.cardRadius + 'px'
+                  }"
+                >
+                  <div class="border-inner" :style="{ background: store.tokens.bgCard }"></div>
+                </div>
+                <div class="preview-item-label">边框色</div>
+              </div>
+              <div
+                class="border-preview-item zone"
+                :class="zoneClasses('cardRadius')"
+                @click="pickZone('cardRadius')"
+              >
+                <div
+                  class="radius-sample"
+                  :style="{
+                    borderRadius: store.tokens.cardRadius + 'px',
+                    background: store.tokens.accent
+                  }"
+                >
+                  <span class="radius-value">{{ store.tokens.cardRadius }}px</span>
+                </div>
+                <div class="preview-item-label">圆角 {{ store.tokens.cardRadius }}px</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快速访问色块 -->
+        <p class="col-label" style="margin-top: 16px;">快速设置</p>
         <div class="extra-tokens">
           <div
             v-for="key in EXTRA_KEYS"
@@ -242,8 +312,8 @@ const META = {
   cardRadius:  { label: '卡片圆角',        desc: '卡片、面板的圆角半径（px）',       type: 'radius', canUpload: false },
 }
 
-// 在示意图里直接可见的 zone key
-const EXTRA_KEYS = ['accent', 'bgApp', 'textPrimary', 'textMuted', 'borderColor', 'cardRadius']
+// 在样式预览区已展示的 token，这里只保留快速访问入口
+const EXTRA_KEYS = ['accent', 'bgApp']
 
 const isEditing  = ref(false)
 const activeZone = ref(null)
@@ -458,6 +528,115 @@ const saveTheme = () => {
 .zone.zone--hoverable           { cursor: pointer; }
 .zone.zone--hoverable:hover     { outline: 2px solid rgba(0,122,255,0.5); outline-offset: 1px; }
 .zone.zone--active              { outline: 2.5px solid #007aff; outline-offset: 1px; }
+
+/* ── Style Preview Box ── */
+.style-preview-box {
+  background: #fafafa;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(0,0,0,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.text-preview-row,
+.border-preview-row {
+  display: flex;
+  gap: 10px;
+}
+
+.text-preview-item,
+.border-preview-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.text-preview-item:hover,
+.border-preview-item:hover {
+  border-color: rgba(0,122,255,0.5);
+  background: rgba(0,122,255,0.04);
+}
+
+.text-preview-item.zone--active,
+.border-preview-item.zone--active {
+  border-color: #007aff;
+  background: rgba(0,122,255,0.08);
+}
+
+.text-sample {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.text-sample-primary {
+  font-weight: 600;
+}
+
+.text-sample-muted {
+  font-size: 12px;
+}
+
+.border-sample {
+  width: 60px;
+  height: 40px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.border-inner {
+  width: 80%;
+  height: 60%;
+  border-radius: 4px;
+}
+
+.radius-sample {
+  width: 60px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.radius-value {
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.preview-item-label {
+  font-size: 10px;
+  color: #6b7280;
+  text-align: center;
+}
 
 /* ── Extra tokens row ── */
 .extra-tokens {
