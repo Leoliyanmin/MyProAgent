@@ -47,11 +47,12 @@ export const authAPI = {
   register: async (email, password, full_name, verification_code) => {
     return fetchWithAuth('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ 
-        email, 
-        password, 
-        full_name, 
-        verification_code 
+      body: JSON.stringify({
+        email,
+        password,
+        confirm_password: password,
+        full_name,
+        verification_code
       })
     })
   },
