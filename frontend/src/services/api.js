@@ -7,6 +7,26 @@ const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8001'
 // Helper to get token from localStorage
 const getToken = () => localStorage.getItem('token')
 
+// Helper to make requests without authentication
+const fetchWithoutAuth = async (url, options = {}) => {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  }
+
+  const response = await fetch(`${API_BASE_URL}${url}`, {
+    ...options,
+    headers
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
+    throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
 // Helper to make authenticated requests
 const fetchWithAuth = async (url, options = {}) => {
   const token = getToken()
@@ -14,21 +34,21 @@ const fetchWithAuth = async (url, options = {}) => {
     'Content-Type': 'application/json',
     ...options.headers
   }
-  
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
-  
+
   const response = await fetch(`${API_BASE_URL}${url}`, {
     ...options,
     headers
   })
-  
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
     throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`)
   }
-  
+
   return response.json()
 }
 
@@ -37,15 +57,15 @@ const fetchWithAuth = async (url, options = {}) => {
 export const authAPI = {
   // Login
   login: async (email, password) => {
-    return fetchWithAuth('/auth/login', {
+    return fetchWithoutAuth('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password })
     })
   },
-  
+
   // Register with verification code
   register: async (email, password, full_name, verification_code) => {
-    return fetchWithAuth('/auth/register', {
+    return fetchWithoutAuth('/auth/register', {
       method: 'POST',
       body: JSON.stringify({
         email,
@@ -56,10 +76,10 @@ export const authAPI = {
       })
     })
   },
-  
+
   // Send verification code
   sendVerificationCode: async (email, purpose = 'register') => {
-    return fetchWithAuth('/auth/verification/send', {
+    return fetchWithoutAuth('/auth/verification/send', {
       method: 'POST',
       body: JSON.stringify({ email, purpose })
     })
