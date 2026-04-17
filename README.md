@@ -1,3 +1,7 @@
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/py413vYq)
+
+飞书文档：https://kcnshyb9xgl3.feishu.cn/wiki/VOTmwDTd1ipr9JkpZ27cW0BCnrb
+
 # ProAgent - 智能协作工作台 (Full Stack)
 
 这是一个完整的全栈应用，整合了前端 Vue3 界面和后端 FastAPI 服务。
@@ -30,52 +34,92 @@
 │   ├── vite.config.js
 │   └── README.md             # 前端详细文档
 │
-├── backend/                   # FastAPI 后端服务
-│   ├── local_backend/         # 本地后端 (FastAPI + SQLite)
-│   │   ├── business/          # 业务逻辑
-│   │   │   ├── agent_logic.py         # AI 助手逻辑
-│   │   │   ├── auth_service.py        # 认证服务
-│   │   │   ├── schedule_logic.py      # 日程逻辑
-│   │   │   └── task_logic.py          # 任务逻辑
-│   │   ├── database/          # 数据库层
-│   │   │   └── code/
-│   │   │       ├── database_init.sql       # 数据库初始化
-│   │   │       ├── database_schedule_*.py   # 日程数据库操作
-│   │   │       ├── database_task_*.py       # 任务数据库操作
-│   │   │       ├── database_user_*.py       # 用户数据库操作
-│   │   │       └── database_synchronize_*.py  # 数据同步操作
-│   │   ├── presentation/      # API 路由
-│   │   │   ├── agent_routes.py        # AI 助手接口
-│   │   │   ├── auth_routes.py         # 认证接口
-│   │   │   ├── schedule_routes.py     # 日程接口
-│   │   │   ├── task_routes.py         # 任务接口
-│   │   │   └── sync_routes.py         # 同步接口
-│   │   ├── service/           # 服务层
-│   │   ├── main.py            # 本地后端入口
-│   │   └── requirements.txt   # 依赖
-│   │
-│   ├── server_backend/        # 服务器后端 (远程同步)
-│   │   ├── business/          # 业务逻辑
-│   │   │   ├── auth_service.py        # 认证服务
-│   │   │   └── email_service.py       # 邮件服务
-│   │   ├── database/          # 数据库层
-│   │   ├── presentation/        # API 路由
-│   │   ├── service/           # 服务层
-│   │   ├── main.py            # 服务器后端入口
-│   │   └── requirements.txt   # 依赖
-│   │
-│   ├── README.md              # 后端架构文档
-│   ├── DATABASE_TESTING.md    # 数据库测试指南
-│   ├── database_invoke_rules.md       # 数据库调用规范
-│   └── database_synchronize_rules.md  # 数据同步规范
+├── local_backend/            # 本地后端 (FastAPI + SQLite)
+│   ├── business/             # 业务逻辑
+│   │   ├── agent_logic.py         # AI 助手逻辑
+│   │   ├── auth_service.py        # 认证服务
+│   │   ├── schedule_logic.py      # 日程逻辑
+│   │   └── task_logic.py          # 任务逻辑
+│   ├── database/             # 数据库层
+│   │   └── code/
+│   │       ├── database_init.sql       # 数据库初始化
+│   │       ├── database_schedule_*.py   # 日程数据库操作
+│   │       ├── database_task_*.py       # 任务数据库操作
+│   │       ├── database_user_*.py       # 用户数据库操作
+│   │       └── database_synchronize_*.py  # 数据同步操作
+│   ├── presentation/         # API 路由
+│   │   ├── agent_routes.py        # AI 助手接口
+│   │   ├── auth_routes.py         # 认证接口
+│   │   ├── schedule_routes.py     # 日程接口
+│   │   ├── task_routes.py         # 任务接口
+│   │   └── sync_routes.py         # 同步接口
+│   ├── service/              # 服务层
+│   ├── main.py               # 本地后端入口
+│   ├── requirements.txt      # 依赖
+│   └── README.md             # 本地后端文档
 │
-├── UI\ design/                # UI 设计资源 (图片)
-├── .gitignore                 # Git 忽略规则
-└── README.md                  # 本文档
-
+├── server_backend/           # 服务器后端 (远程同步)
+│   ├── business/             # 业务逻辑
+│   │   ├── auth_service.py        # 认证服务
+│   │   └── email_service.py       # 邮件服务
+│   ├── database/             # 数据库层
+│   ├── presentation/         # API 路由
+│   ├── service/              # 服务层
+│   ├── main.py               # 服务器后端入口
+│   ├── requirements.txt      # 依赖
+│   └── README.md             # 服务器后端文档
+│
+├── DATABASE_TESTING.md       # 数据库测试指南
+├── database_invoke_rules.md  # 数据库调用规范
+├── database_synchronize_rules.md  # 数据同步规范
+└── README.md                 # 本文档
 ```
 
-## ✨ 功能特性
+## 项目进度
+
+已完成以下功能：
+- ✅ Local Backend 和 Server Backend 基本框架
+- ✅ 用户认证系统（注册/登录）
+- ✅ 日程管理（完整CRUD）
+- ✅ 任务管理（完整CRUD）
+- ✅ 数据库集成（SQLite）
+- ✅ 数据同步机制（Local ↔ Server）
+- ✅ AI助手功能
+- ✅ 验证码服务（基于数据库实现）
+- ✅ 前端认证集成（登录/注册页面）
+- ✅ 退出登录功能
+
+正在开发中：
+- 🔄 寻友匹配功能
+- 🔄 文件管理功能
+
+## 系统架构
+
+### 整体架构
+
+```
+┌─────────────────────────┐       ┌─────────────────────────┐
+│                         │       │                         │
+│  Local Backend          │◄──────►  Server Backend         │
+│  (用户设备本地)         │       │  (服务器端)             │
+│                         │       │                         │
+├─────────────────────────┤       ├─────────────────────────┤
+│  - 本地数据存储         │       │  - 用户认证             │
+│  - 核心业务逻辑         │       │  - 数据同步             │
+│  - 离线功能             │       │  - 远程备份             │
+│  - 实时同步             │       │  - 安全管理             │
+│                         │       │  - 邮件服务             │
+└─────────────────────────┘       └─────────────────────────┘
+```
+
+### 架构分工
+
+| 组件 | 职责 | 部署位置 | 技术栈 |
+|------|------|----------|--------|
+| **Local Backend** | 本地数据存储、核心业务逻辑、离线功能 | 用户设备本地 | FastAPI + SQLite |
+| **Server Backend** | 用户认证、数据同步、远程备份、邮件服务 | 服务器端 | FastAPI + SQLite |
+
+## 核心功能
 
 ### 前端 (Vue3 + Vite)
 - 📊 **工作台概览** - 可拖拽布局，热力图、便签、待办、消息组件
@@ -99,7 +143,7 @@
 ### 1. 启动后端 (Local)
 
 ```bash
-cd backend/local_backend
+cd local_backend
 
 # 创建虚拟环境
 python -m venv venv
@@ -117,7 +161,7 @@ cp .env.example .env
 python database/code/database_init.py
 
 # 启动服务
-python main.py
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 后端服务将在 http://localhost:8000 运行
@@ -130,9 +174,6 @@ cd frontend
 # 安装依赖
 npm install
 
-# 配置 API 地址
-# 编辑 src/stores/ 中的 API URL 配置
-
 # 启动开发服务器
 npm run dev
 ```
@@ -142,7 +183,7 @@ npm run dev
 ### 3. 启动服务器后端 (可选，用于远程同步)
 
 ```bash
-cd backend/server_backend
+cd server_backend
 
 # 创建虚拟环境
 python -m venv venv
@@ -154,53 +195,17 @@ pip install -r requirements.txt
 # 配置环境变量
 cp .env.example .env
 
+# 初始化数据库
+python database/code/database_init.py
+
 # 启动服务
-python main.py
+uvicorn main:app --reload --host 0.0.0.0 --port 8001
 ```
 
-## 🔧 开发指南
+## API文档
 
-### 前后端通信
-
-前端通过 HTTP API 与后端通信：
-
-```javascript
-// 示例: 获取日程列表
-const response = await fetch('http://localhost:8000/api/schedules', {
-  headers: {
-    'Authorization': `Bearer ${token}`
-  }
-})
-```
-
-### 数据库操作
-
-后端提供统一的数据库操作接口：
-
-```python
-from database.code.database_schedule_operations import get_schedules
-from database.code.database_task_operations import get_tasks
-from database.code.database_user_operations import get_user
-```
-
-### 数据同步
-
-Local 和 Server 之间通过 sync API 同步数据：
-
-```python
-# 本地推送数据到服务器
-POST /api/sync/push
-
-# 从服务器拉取数据
-POST /api/sync/pull
-```
-
-## 📝 API 文档
-
-启动后端后，访问自动生成的 API 文档：
-
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- **Local Backend**：http://localhost:8000/docs
+- **Server Backend**：http://localhost:8001/docs
 
 ## 🛠️ 技术栈
 
@@ -216,26 +221,6 @@ POST /api/sync/pull
 | ORM | SQLAlchemy | 2.0+ |
 | 认证 | JWT | - |
 
-## 📚 详细文档
-
-- [前端详细文档](./frontend/README.md) - Vue3 开发指南
-- [后端架构文档](./backend/README.md) - 系统架构设计
-- [数据库测试指南](./backend/DATABASE_TESTING.md) - 数据库测试
-- [数据库调用规范](./backend/database_invoke_rules.md)
-- [数据同步规范](./backend/database_synchronize_rules.md)
-
-## 🤝 贡献指南
-
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
-
-## 📄 许可证
-
-本项目仅供学习和教学使用。
-
----
+## 开发团队
 
 Made with ❤️ by Team 26S-27
