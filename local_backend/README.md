@@ -3,6 +3,8 @@
 ## 概述
 
 Local Backend 是 SUSTech Student Productivity Agent 项目的本地后端服务，主要负责本地数据存储、核心业务逻辑和离线功能。本服务部署在用户设备本地，提供完整的功能集，确保在无网络环境下也能正常工作。
+使用群里的config.json
+
 
 ## 核心功能
 
@@ -80,16 +82,16 @@ python database/code/database_init.py
 
 ### 4. 启动服务
 
-**默认端口：8000**
+**默认端口：8002**
 
 ```bash
 
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8002
 ```
 
 ### 5. 访问API文档
 
-打开浏览器访问：http://localhost:8000/docs
+打开浏览器访问：http://localhost:8002/docs
 
 ## API端点
 

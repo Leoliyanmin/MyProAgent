@@ -165,13 +165,57 @@ sequenceDiagram
 sequenceDiagram
     participant Client as 前端
     participant Local as Local Backend
-    
+    participant Nanobot as Nanobot Agent
+
     Client->>Local: 发送聊天消息
     Local->>Local: 处理Agent逻辑
-    Local->>Local: 生成响应
+    Note over Local: 包含 nanobot 聊天接口<br/>通过 WebSocket 与 nanobot 通信
+    Local->>Nanobot: WebSocket 消息
+    Nanobot-->>Local: Agent 响应
     Local->>Local: 存储聊天历史
     Local-->>Client: 返回Agent响应
 ```
+
+### 6. Nanobot Agent 集成
+
+本项目接入了 [nanobot](https://github.com/HKUDS/nanobot) 作为 AI 助手后端，提供更强大的智能代理功能。
+
+#### 1. 配置 Nanobot
+
+在启动 nanobot gateway 之前，需要先启用 WebSocket channel：
+
+编辑 `C:\Users\<你的用户名>\.nanobot\config.json`（或 `~/.nanobot/config.json`），找到 `channels.websocket` 部分：
+
+```json
+"websocket": {
+  "enabled": true,  // 改为 true
+  "host": "127.0.0.1",
+  "port": 8765,
+  ...
+}
+```
+
+#### 2. 启动 Nanobot Gateway
+
+```bash
+# 进入 nanobot 项目目录
+cd D:\collections2026\project_milestone2\nanobot
+
+# 启动 WebSocket 网关服务
+nanobot gateway
+```
+
+服务启动后应该显示：
+```
+WebSocket server listening on ws://127.0.0.1:8765/
+```
+
+#### Nanobot 功能特点
+
+- 🪶 **超轻量级**：轻量级 AI Agent 实现
+- ⚡️ **流式响应**：支持实时流式输出
+- 🔧 **丰富工具**：内置文件操作、代码执行、Web搜索等多种工具
+- 💬 **多渠道支持**：支持 WebSocket、飞书、Discord 等多种接入方式
 
 ## 部署流程
 
