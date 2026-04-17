@@ -21,13 +21,7 @@ const fetchWithoutAuth = async (url, options = {}) => {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
-    let errorMessage
-    if (Array.isArray(error.detail)) {
-      errorMessage = error.detail.map(e => e.msg).join(', ')
-    } else {
-      errorMessage = error.detail || `HTTP ${response.status}: ${response.statusText}`
-    }
-    throw new Error(errorMessage)
+    throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`)
   }
 
   return response.json()
@@ -52,13 +46,7 @@ const fetchWithAuth = async (url, options = {}) => {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
-    let errorMessage
-    if (Array.isArray(error.detail)) {
-      errorMessage = error.detail.map(e => e.msg).join(', ')
-    } else {
-      errorMessage = error.detail || `HTTP ${response.status}: ${response.statusText}`
-    }
-    throw new Error(errorMessage)
+    throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`)
   }
 
   return response.json()

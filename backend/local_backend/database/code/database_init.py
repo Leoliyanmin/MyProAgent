@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_DB_PATH = BASE_DIR.parent.parent / "local_app.db"
+DEFAULT_DB_PATH = BASE_DIR.parent / "db" / "local.db"
 DEFAULT_SCHEMA_PATH = BASE_DIR / "database_init.sql"
 
 
