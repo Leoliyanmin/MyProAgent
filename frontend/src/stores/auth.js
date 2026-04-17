@@ -40,7 +40,12 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = result.access_token
         localStorage.setItem('token', result.access_token)
 
-        await fetchUser()
+        try {
+          await fetchUser()
+        } catch (userErr) {
+          console.warn('Failed to fetch user info, but login succeeded:', userErr)
+          user.value = { email, id: email }
+        }
 
         return { success: true }
       } else {
