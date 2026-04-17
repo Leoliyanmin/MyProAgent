@@ -197,13 +197,13 @@ const isValid = computed(() => {
 
 const sendCode = async () => {
   if (!isEmailValid.value || countdown.value > 0 || sendingCode.value) return
-  
+
   sendingCode.value = true
   successMsg.value = ''
-  
+
   try {
     const result = await auth.sendVerificationCode(form.email, 'register')
-    
+
     if (result.success) {
       // Start countdown
       countdown.value = 60
@@ -211,6 +211,11 @@ const sendCode = async () => {
         countdown.value--
         if (countdown.value <= 0) clearInterval(timer)
       }, 1000)
+
+      // Show test code if in test mode
+      if (result.test_code) {
+        successMsg.value = `Test code: ${result.test_code}`
+      }
     } else {
        auth.error = result.message || 'Failed to send code'
     }
