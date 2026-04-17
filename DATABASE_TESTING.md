@@ -50,6 +50,8 @@ local 与 server 两端测试脚本都支持以下动作：
 - account 测试数据包含 server 专有凭据字段：
   - account_mail_password
   - account_cookie
+- account 测试数据（双端）新增：
+  - content
 - server 不再提供单端 sync 测试命令。
 - server 提供内部桥接动作：
   - sync_build_pull：生成发给 local 的 pull 包
