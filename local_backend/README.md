@@ -3,7 +3,10 @@
 ## 概述
 
 Local Backend 是 SUSTech Student Productivity Agent 项目的本地后端服务，主要负责本地数据存储、核心业务逻辑和离线功能。本服务部署在用户设备本地，提供完整的功能集，确保在无网络环境下也能正常工作。
-使用群里的config.json
+
+## Agent使用提示
+下载Agent(you know)
+使用群里的config.json文件
 
 
 ## 核心功能
