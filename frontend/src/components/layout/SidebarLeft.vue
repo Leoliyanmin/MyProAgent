@@ -62,11 +62,30 @@
           <span class="user-role">用户设置</span>
         </span>
       </button>
+      <button
+        class="logout-btn"
+        type="button"
+        title="退出登录"
+        @click="handleLogout"
+      >
+        Sign Out
+      </button>
     </div>
   </aside>
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../../stores/auth.js'
+
+const router = useRouter()
+const auth = useAuthStore()
+
+const handleLogout = () => {
+  auth.logout()
+  router.push('/login')
+}
+
 const props = defineProps({
   currentView: {
     type: String,
@@ -128,6 +147,30 @@ const toggleSettings = () => {
 .sidebar-footer {
   padding: 10px 12px 14px;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #ff3b30;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 59, 48, 0.1);
+}
+
+.user-profile-btn {
+  flex: 1;
 }
 
 .user-profile-btn {

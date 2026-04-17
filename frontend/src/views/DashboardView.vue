@@ -83,6 +83,8 @@ const toggleEditMode = () => {
   padding: 0 4px;
 }
 
+
+
 .view-title {
   font-size: 20px;
   font-weight: 600;
