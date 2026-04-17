@@ -128,23 +128,226 @@
 
         </div>
 
-        <!-- 快速访问色块 -->
-        <p class="col-label" style="margin-top: 16px;">快速设置</p>
-        <div class="extra-tokens">
+        <!-- 实时效果预览 -->
+        <p class="col-label" style="margin-top: 16px;">实时效果预览</p>
+        <div class="live-preview-container">
           <div
-            v-for="key in EXTRA_KEYS"
-            :key="key"
-            class="extra-token zone"
-            :class="zoneClasses(key)"
-            @click="pickZone(key)"
+            class="live-preview"
+            :style="{
+              backgroundColor: store.tokens.bgApp,
+              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
+            }"
           >
+            <!-- 模拟顶部栏 -->
             <div
-              class="extra-swatch"
-              :style="META[key].type === 'color'
-                ? { background: store.tokens[key] }
-                : { background: '#e5e7eb' }"
-            ></div>
-            <span class="extra-label">{{ META[key].label }}</span>
+              class="preview-header"
+              :style="{
+                backgroundColor: store.tokens.bgTopbar,
+                borderBottom: '1px solid ' + store.tokens.borderColor
+              }"
+            >
+              <span
+                class="preview-title-text"
+                :style="{ color: store.tokens.textPrimary }"
+              >
+                ProAgent Workspace
+              </span>
+              <div class="preview-header-actions">
+                <div
+                  class="preview-icon-btn"
+                  :style="{ background: store.tokens.accent }"
+                ></div>
+                <div
+                  class="preview-avatar-small"
+                  :style="{ background: store.tokens.textMuted }"
+                ></div>
+              </div>
+            </div>
+
+            <!-- 模拟侧边栏 -->
+            <div
+              class="preview-sidebar"
+              :style="{
+                backgroundColor: store.tokens.bgSidebar,
+                borderRight: '1px solid ' + store.tokens.borderColor
+              }"
+            >
+              <div
+                class="preview-nav-item active"
+                :style="{
+                  backgroundColor: store.tokens.accent + '20',
+                  color: store.tokens.accent,
+                  borderRadius: store.tokens.cardRadius + 'px'
+                }"
+              >
+                <span class="preview-nav-icon" :style="{ background: store.tokens.accent }"></span>
+                <span>工作台</span>
+              </div>
+              <div
+                class="preview-nav-item"
+                :style="{ color: store.tokens.textMuted }"
+              >
+                <span class="preview-nav-icon" :style="{ background: store.tokens.textMuted + '60' }"></span>
+                <span>日历</span>
+              </div>
+              <div
+                class="preview-nav-item"
+                :style="{ color: store.tokens.textMuted }"
+              >
+                <span class="preview-nav-icon" :style="{ background: store.tokens.textMuted + '60' }"></span>
+                <span>文件</span>
+              </div>
+            </div>
+
+            <!-- 模拟内容区 -->
+            <div
+              class="preview-content"
+              :style="{ backgroundColor: store.tokens.bgContent }"
+            >
+              <!-- 卡片1: 待办 -->
+              <div
+                class="preview-card"
+                :style="{
+                  backgroundColor: store.tokens.bgCard,
+                  border: '1px solid ' + store.tokens.borderColor,
+                  borderRadius: store.tokens.cardRadius + 'px',
+                  boxShadow: '0 2px 8px ' + store.tokens.borderColor + '40'
+                }"
+              >
+                <div class="preview-card-header">
+                  <div
+                    class="preview-accent-dot"
+                    :style="{ background: store.tokens.accent }"
+                  ></div>
+                  <span
+                    class="preview-card-title"
+                    :style="{ color: store.tokens.textPrimary }"
+                  >
+                    今日待办
+                  </span>
+                </div>
+                <p
+                  class="preview-card-desc"
+                  :style="{ color: store.tokens.textMuted }"
+                >
+                  3个任务待完成
+                </p>
+                <button
+                  class="preview-btn"
+                  :style="{
+                    background: store.tokens.accent,
+                    color: '#fff',
+                    borderRadius: Math.max(4, store.tokens.cardRadius - 4) + 'px'
+                  }"
+                >
+                  查看全部
+                </button>
+              </div>
+
+              <!-- 卡片2: 日程 -->
+              <div
+                class="preview-card"
+                :style="{
+                  backgroundColor: store.tokens.bgCard,
+                  border: '1px solid ' + store.tokens.borderColor,
+                  borderRadius: store.tokens.cardRadius + 'px',
+                  boxShadow: '0 2px 8px ' + store.tokens.borderColor + '40'
+                }"
+              >
+                <div class="preview-card-header">
+                  <div
+                    class="preview-accent-dot"
+                    :style="{ background: store.tokens.accent }"
+                  ></div>
+                  <span
+                    class="preview-card-title"
+                    :style="{ color: store.tokens.textPrimary }"
+                  >
+                    日程安排
+                  </span>
+                </div>
+                <div class="preview-schedule-item">
+                  <div
+                    class="preview-time"
+                    :style="{ color: store.tokens.accent }"
+                  >
+                    10:00
+                  </div>
+                  <div
+                    class="preview-event"
+                    :style="{ color: store.tokens.textPrimary }"
+                  >
+                    团队会议
+                  </div>
+                </div>
+                <div class="preview-schedule-item">
+                  <div
+                    class="preview-time"
+                    :style="{ color: store.tokens.textMuted }"
+                  >
+                    14:00
+                  </div>
+                  <div
+                    class="preview-event"
+                    :style="{ color: store.tokens.textMuted }"
+                  >
+                    项目评审
+                  </div>
+                </div>
+              </div>
+
+              <!-- 卡片3: 输入框示例 -->
+              <div
+                class="preview-card"
+                :style="{
+                  backgroundColor: store.tokens.bgCard,
+                  border: '1px solid ' + store.tokens.borderColor,
+                  borderRadius: store.tokens.cardRadius + 'px',
+                  boxShadow: '0 2px 8px ' + store.tokens.borderColor + '40'
+                }"
+              >
+                <span
+                  class="preview-card-title"
+                  :style="{ color: store.tokens.textPrimary }"
+                >
+                  新建任务
+                </span>
+                <div
+                  class="preview-input"
+                  :style="{
+                    background: store.tokens.bgApp,
+                    border: '1px solid ' + store.tokens.borderColor,
+                    borderRadius: Math.max(4, store.tokens.cardRadius - 4) + 'px',
+                    color: store.tokens.textMuted
+                  }"
+                >
+                  输入任务名称...
+                </div>
+                <div class="preview-card-actions">
+                  <button
+                    class="preview-btn-secondary"
+                    :style="{
+                      background: 'transparent',
+                      border: '1px solid ' + store.tokens.borderColor,
+                      color: store.tokens.textMuted,
+                      borderRadius: Math.max(4, store.tokens.cardRadius - 4) + 'px'
+                    }"
+                  >
+                    取消
+                  </button>
+                  <button
+                    class="preview-btn"
+                    :style="{
+                      background: store.tokens.accent,
+                      color: '#fff',
+                      borderRadius: Math.max(4, store.tokens.cardRadius - 4) + 'px'
+                    }"
+                  >
+                    创建
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -576,11 +779,174 @@ const saveTheme = () => {
 .zone.zone--hoverable:hover     { outline: 2px solid rgba(0,122,255,0.5); outline-offset: 1px; }
 .zone.zone--active              { outline: 2.5px solid #007aff; outline-offset: 1px; }
 
+/* ── Live Preview ── */
+.live-preview-container {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.live-preview {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  grid-template-rows: 40px 1fr;
+  height: 280px;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 11px;
+}
+
+.preview-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+.preview-title-text {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.preview-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-icon-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.preview-avatar-small {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+.preview-sidebar {
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 6px;
+  gap: 6px;
+}
+
+.preview-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: default;
+}
+
+.preview-nav-item.active {
+  font-weight: 500;
+}
+
+.preview-nav-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.preview-content {
+  grid-row: 2;
+  grid-column: 2;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.preview-card {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.preview-accent-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.preview-card-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.preview-card-desc {
+  font-size: 10px;
+  margin: 0;
+}
+
+.preview-btn {
+  padding: 5px 10px;
+  border: none;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: default;
+  margin-top: auto;
+}
+
+.preview-btn-secondary {
+  padding: 5px 10px;
+  font-size: 10px;
+  cursor: default;
+}
+
+.preview-schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+}
+
+.preview-time {
+  font-weight: 600;
+  font-size: 9px;
+  width: 32px;
+}
+
+.preview-event {
+  flex: 1;
+}
+
+.preview-input {
+  padding: 6px 8px;
+  font-size: 10px;
+}
+
+.preview-card-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
 /* ── Extra tokens row ── */
 .extra-tokens {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: 8px;
 }
 .extra-token {
   display: flex;

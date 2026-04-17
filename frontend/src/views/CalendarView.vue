@@ -36,8 +36,12 @@
             v-for="(day, index) in calendarDays" 
             :key="index" 
             class="day-cell"
-            :class="{ 'is-other-month': !day.isCurrentMonth, 'is-today': day.isToday }"
+            :class="{ 'is-other-month': !day.isCurrentMonth, 'is-today': day.isToday, 'drag-over': dragOverCellIndex === day.date }"
             @click.self="openEventModal(day.date)"
+            @dragover.prevent="onDragOver($event, day)"
+            @dragenter="onDragEnter($event, day)"
+            @dragleave="onDragLeave"
+            @drop="onDrop($event, day)"
           >
             <span class="date-num" :class="{ 'is-today-text': day.isToday }" @click.stop="openEventModal(day.date)">{{ day.dayNum }}</span>
             <div class="events-container" @click.self="openEventModal(day.date)">
@@ -49,6 +53,9 @@
                 :style="{ backgroundColor: event.color ? event.color + '25' : '', color: event.color || '' }"
                 @click.stop="editEvent(event)"
                 :title="event.title"
+                draggable="true"
+                @dragstart="onDragStart($event, event)"
+                @dragend="onDragEnd"
               >
                 {{ event.isStart || day.date === event.start ? event.title : '\u00A0' }}
               </div>
@@ -111,7 +118,7 @@
                 :class="{ 'is-today-col': day.isToday }"
                 @click.self="openEventModal(day.date)"
               >
-                <div class="hour-slot" v-for="h in hours" :key="'ts'+h" @click.self="openEventModal(day.date, h)"></div>
+                <div class="hour-slot" v-for="h in hours" :key="'ts'+h" @click.self="openEventModal(day.date, h)" @dragover.prevent="onTimedDragOver($event, day, h)" @drop="onTimedDrop($event, day, h)"></div>
                 
                 <div
                   v-for="event in day.timedEvents"
@@ -120,9 +127,13 @@
                   :class="{'is-completed': event.completed}"
                   :style="getTimedEventStyle(event)"
                   @click.stop="editEvent(event)"
+                  draggable="true"
+                  @dragstart="onTimedDragStart($event, event)"
+                  @dragend="onTimedDragEnd"
                 >
                   <div class="timed-event-title">{{ event.title }}</div>
                   <div class="timed-event-time">{{ event.startTime }} - {{ event.endTime || '23:59' }}</div>
+                  <div class="resize-handle" @mousedown="onResizeStart($event, event)"></div>
                 </div>
               </div>
             </div>
@@ -200,6 +211,14 @@ const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 const showModal = ref(false)
 const isEditing = ref(false)
 const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', priority: 2, isTodo: true, color: '#007aff' })
+
+// Drag-and-drop state
+const draggingEvent = ref(null)
+const dragOverCellIndex = ref(null)
+const isResizing = ref(false)
+const resizeStartY = ref(0)
+const resizeOriginalEnd = ref('')
+const resizeEvent = ref(null)
 
 const priorityOptions = [
   { level: 0, color: '#ff3b30', label: '紧急且重要' },
@@ -415,6 +434,143 @@ const deleteEvent = () => {
   closeModal()
 }
 
+// Month view drag-and-drop handlers
+const onDragStart = (e, event) => {
+  draggingEvent.value = event
+  e.dataTransfer.effectAllowed = 'move'
+  e.dataTransfer.setData('text/plain', event.id)
+  const ghost = e.target.cloneNode(true)
+  ghost.style.opacity = '0.5'
+  ghost.style.position = 'absolute'
+  ghost.style.top = '-1000px'
+  document.body.appendChild(ghost)
+  e.dataTransfer.setDragImage(ghost, 0, 0)
+  setTimeout(() => document.body.removeChild(ghost), 0)
+}
+
+const onDragOver = (e, day) => {
+  e.preventDefault()
+  dragOverCellIndex.value = day.date
+}
+
+const onDragEnter = (e, day) => {
+  dragOverCellIndex.value = day.date
+}
+
+const onDragLeave = () => {
+  dragOverCellIndex.value = null
+}
+
+const onDrop = (e, day) => {
+  e.preventDefault()
+  dragOverCellIndex.value = null
+  if (!draggingEvent.value) return
+
+  const event = draggingEvent.value
+  const oldStart = new Date(event.start)
+  const newStart = new Date(day.date)
+  const diffDays = Math.round((newStart - oldStart) / (1000 * 60 * 60 * 24))
+
+  if (diffDays !== 0) {
+    const newEnd = new Date(event.end)
+    newEnd.setDate(newEnd.getDate() + diffDays)
+
+    calendarStore.updateEvent({
+      ...event,
+      start: day.date,
+      end: newEnd.toISOString().split('T')[0]
+    })
+  }
+  draggingEvent.value = null
+}
+
+const onDragEnd = () => {
+  dragOverCellIndex.value = null
+  draggingEvent.value = null
+}
+
+// Week/Day view drag-and-drop handlers
+const onTimedDragStart = (e, event) => {
+  draggingEvent.value = event
+  e.dataTransfer.effectAllowed = 'move'
+  e.dataTransfer.setData('text/plain', event.id)
+}
+
+const onTimedDragOver = (e, day, hour) => {
+  e.preventDefault()
+}
+
+const onTimedDrop = (e, day, hour) => {
+  e.preventDefault()
+  if (!draggingEvent.value) return
+
+  const event = draggingEvent.value
+  const [sh, sm] = (event.startTime || '00:00').split(':').map(Number)
+  const [eh, em] = (event.endTime || '23:59').split(':').map(Number)
+  const duration = (eh + em / 60) - (sh + sm / 60)
+
+  const newStartHour = hour
+  const newStartMin = Math.round(e.offsetY / 50 * 60 / 30) * 30 % 60
+  const newStartTime = `${String(newStartHour).padStart(2, '0')}:${String(newStartMin).padStart(2, '0')}`
+
+  const newEndTotal = newStartHour + newStartMin / 60 + duration
+  const newEndHour = Math.floor(newEndTotal) % 24
+  const newEndMin = Math.round((newEndTotal % 1) * 60 / 30) * 30 % 60
+  const newEndTime = `${String(newEndHour).padStart(2, '0')}:${String(newEndMin).padStart(2, '0')}`
+
+  calendarStore.updateEvent({
+    ...event,
+    start: day.date,
+    end: day.date,
+    startTime: newStartTime,
+    endTime: newEndTime
+  })
+
+  draggingEvent.value = null
+}
+
+const onTimedDragEnd = () => {
+  draggingEvent.value = null
+}
+
+// Resize handler for week/day view
+const onResizeStart = (e, event) => {
+  e.preventDefault()
+  e.stopPropagation()
+  isResizing.value = true
+  resizeStartY.value = e.clientY
+  resizeOriginalEnd.value = event.endTime || '23:59'
+  resizeEvent.value = event
+
+  const onMouseMove = (e) => {
+    if (!isResizing.value || !resizeEvent.value) return
+    const deltaY = e.clientY - resizeStartY.value
+    const deltaMinutes = Math.round(deltaY / 50 * 60 / 30) * 30
+
+    const [eh, em] = resizeOriginalEnd.value.split(':').map(Number)
+    const totalMinutes = eh * 60 + em + deltaMinutes
+    const clampedMinutes = Math.max(0, Math.min(23 * 60 + 59, totalMinutes))
+    const newHour = Math.floor(clampedMinutes / 60)
+    const newMin = clampedMinutes % 60
+    const newEndTime = `${String(newHour).padStart(2, '0')}:${String(newMin).padStart(2, '0')}`
+
+    calendarStore.updateEvent({
+      ...resizeEvent.value,
+      endTime: newEndTime
+    })
+  }
+
+  const onMouseUp = () => {
+    isResizing.value = false
+    resizeEvent.value = null
+    document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mouseup', onMouseUp)
+  }
+
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', onMouseUp)
+}
+
 </script>
 
 <style scoped>
@@ -583,4 +739,33 @@ const deleteEvent = () => {
 .timed-event-time { font-size: 9px; opacity: 0.8; }
 .timed-event-card.is-completed { opacity: 0.6; }
 .timed-event-card.is-completed .timed-event-title { text-decoration: line-through; }
+
+/* Drag-over states */
+.day-cell.drag-over {
+  background: rgba(0, 122, 255, 0.08) !important;
+  box-shadow: inset 0 0 0 2px rgba(0, 122, 255, 0.3);
+}
+.day-cell.drag-over .date-num {
+  background: #007aff;
+  color: white;
+}
+
+.week-day-column.drag-over-col {
+  background: rgba(0, 122, 255, 0.04);
+}
+
+/* Resize handle */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+  z-index: 20;
+}
+.resize-handle:hover {
+  background: rgba(0, 122, 255, 0.3);
+  border-radius: 0 0 4px 4px;
+}
 </style>

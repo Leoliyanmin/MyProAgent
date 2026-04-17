@@ -58,12 +58,10 @@ const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
-const isAuthReady = ref(false)
+const isAuthReady = ref(true)
 
-onMounted(async () => {
+onMounted(() => {
   themeStore.applyToRoot()
-  await authStore.initAuth()
-  isAuthReady.value = true
 })
 
 const isAgentOpen = ref(true)
