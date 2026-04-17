@@ -32,30 +32,17 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (email, password) => {
     loading.value = true
     error.value = null
-    
+
     try {
       const result = await authAPI.login(email, password)
-      
-      if (result.success && result.user) {
-        user.value = result.user
-        
-        if (result.token) {
-          token.value = result.token
-          localStorage.setItem('token', result.token)
-        } else {
-          const tempToken = btoa(JSON.stringify({
-            user_id: result.user.user_id,
-            email: result.user.email,
-            exp: Date.now() + 3600000
-          }))
-          token.value = tempToken
-          localStorage.setItem('token', tempToken)
-        }
-        
+
+      if (result.success && result.access_token) {
+        token.value = result.access_token
+        localStorage.setItem('token', result.access_token)
+
+        await fetchUser()
+
         return { success: true }
-      } else if (result.success && !result.user) {
-        error.value = 'Login succeeded but user data is missing'
-        return { success: false, message: error.value }
       } else {
         error.value = result.message || 'Login failed'
         return { success: false, message: error.value }
