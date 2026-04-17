@@ -8,6 +8,12 @@ ProAgent 是一个基于 Vue 3 的智能协作工作台，帮助团队高效管�
 
 ## ✨ 功能特性
 
+### 🔐 用户认证 (Authentication)
+- **登录页面** - 邮箱密码登录，JWT Token 认证
+- **注册页面** - 支持邮箱验证码注册
+- **自动登录** - 刷新页面保持登录状态
+- **退出登录** - 侧边栏 Sign Out 按钮安全退出
+
 ### 📊 工作台概览 (Dashboard)
 - **可拖拽布局** - 使用 vue3-grid-layout 实现自由拖拽和调整大小的组件布局
 - **四种小组件**:
@@ -60,12 +66,12 @@ ProAgent 是一个基于 Vue 3 的智能协作工作台，帮助团队高效管�
 ## 📦 项目结构
 
 ```
-front_end/proagent/
+frontend/
 ├── src/
 │   ├── components/
 │   │   ├── layout/           # 布局组件
 │   │   │   ├── AgentSidebar.vue
-│   │   │   ├── SidebarLeft.vue
+│   │   │   ├── SidebarLeft.vue      # 左侧边栏（含退出登录）
 │   │   │   ├── TopBar.vue
 │   │   │   └── ThemeOverlayEditor.vue
 │   │   ├── widgets/          # 仪表板小部件
@@ -75,6 +81,8 @@ front_end/proagent/
 │   │   │   └── WidgetTodo.vue
 │   │   └── icons/            # 图标组件
 │   ├── views/                # 页面视图
+│   │   ├── LoginView.vue            # 登录页面
+│   │   ├── RegisterView.vue         # 注册页面
 │   │   ├── DashboardView.vue
 │   │   ├── CalendarView.vue
 │   │   ├── SelfPortraitView.vue
@@ -82,9 +90,15 @@ front_end/proagent/
 │   │   ├── FileManagerView.vue
 │   │   └── UserSettingsView.vue
 │   ├── stores/               # Pinia 状态管理
+│   │   ├── auth.js                  # 认证状态（token、用户信息）
 │   │   ├── dashboard.js
 │   │   ├── theme.js
 │   │   └── calendar.js
+│   ├── services/             # API 服务
+│   │   └── api.js                   # 封装后端 API 调用
+│   ├── router/               # Vue Router
+│   │   ├── index.js
+│   │   └── guards.js                # 路由守卫（认证检查）
 │   ├── App.vue
 │   └── main.js
 ├── public/
@@ -103,7 +117,7 @@ front_end/proagent/
 ### 安装依赖
 
 ```bash
-cd front_end/proagent
+cd frontend
 npm install
 ```
 
@@ -114,6 +128,24 @@ npm run dev
 ```
 
 访问 http://localhost:5173 查看应用
+
+### 后端 API 配置
+
+前端通过 Vite 代理连接后端，配置在 `vite.config.js`：
+
+```javascript
+server: {
+  proxy: {
+    '/auth': { target: 'http://localhost:8000' },  // Local Backend
+    '/tasks': { target: 'http://localhost:8000' },
+    '/schedules': { target: 'http://localhost:8000' },
+    '/agent': { target: 'http://localhost:8000' },
+    '/sync': { target: 'http://localhost:8000' }
+  }
+}
+```
+
+确保 Local Backend 在 http://localhost:8000 运行
 
 ### 生产构建
 
@@ -147,6 +179,37 @@ npm run preview
 
 ## 📝 开发指南
 
+### 添加认证保护的路由
+
+在 `router/index.js` 中添加 `requiresAuth: true`：
+
+```javascript
+{
+  path: '/dashboard',
+  name: 'dashboard',
+  component: () => import('../views/DashboardView.vue'),
+  meta: { requiresAuth: true }  // 需要登录
+}
+```
+
+### 在组件中使用认证状态
+
+```javascript
+import { useAuthStore } from '../stores/auth'
+
+const auth = useAuthStore()
+
+// 检查登录状态
+if (auth.isAuthenticated) {
+  console.log('当前用户:', auth.user)
+}
+
+// 调用退出
+const handleLogout = () => {
+  auth.logout()
+}
+```
+
 ### 添加新的小部件
 
 1. 在 `src/components/widgets/` 创建新组件
@@ -159,8 +222,15 @@ npm run preview
 
 ```javascript
 import { useDashboardStore } from '../stores/dashboard'
+import { useAuthStore } from '../stores/auth'
 
-const store = useDashboardStore()
+const dashboardStore = useDashboardStore()
+const authStore = useAuthStore()
+
+// 认证相关
+authStore.login(email, password)    // 登录
+authStore.logout()                  // 退出
+authStore.isAuthenticated           // 是否已登录
 ```
 
 ### 自定义主题
