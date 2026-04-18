@@ -59,14 +59,17 @@
         </div>
 
         <div class="form-group">
-          <label for="password" class="mac-label">Password</label>
+          <div class="label-row">
+            <label for="password" class="mac-label">Password</label>
+            <span class="hint-text-inline">(min. 8 chars)</span>
+          </div>
           <div class="password-input-wrapper">
             <input
               id="password"
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
               class="mac-input"
-              placeholder="Enter password (min. 6 chars)"
+              placeholder="Enter password"
               required
               :class="{ 'is-invalid': errors.password }"
             />
@@ -158,8 +161,8 @@ watch(() => form.email, (newVal) => {
 })
 
 watch(() => form.password, (newVal) => {
-  if (newVal && newVal.length < 6) {
-    errors.password = 'Password must be at least 6 characters'
+  if (newVal && newVal.length < 8) {
+    errors.password = 'Password must be at least 8 characters'
   } else {
     errors.password = ''
   }
@@ -189,7 +192,7 @@ watch(() => form.verificationCode, (newVal) => {
 
 const isValid = computed(() => {
   return validateEmail(form.email) && 
-         form.password.length >= 6 && 
+         form.password.length >= 8 && 
          form.password === form.confirmPassword &&
          /^\d{6}$/.test(form.verificationCode) &&
          form.fullName.trim() !== ''
@@ -355,6 +358,25 @@ const handleRegister = async () => {
   display: block;
   font-size: 12px;
   color: #ff3b30;
+  margin-top: 4px;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hint-text-inline {
+  font-size: 12px;
+  color: var(--clr-text-secondary, #86868b);
+}
+
+.hint-text {
+  display: block;
+  font-size: 12px;
+  color: var(--clr-text-secondary, #86868b);
   margin-top: 4px;
 }
 

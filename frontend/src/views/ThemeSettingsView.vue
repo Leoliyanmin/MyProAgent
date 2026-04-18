@@ -135,7 +135,7 @@
             class="live-preview"
             :style="{
               backgroundColor: store.tokens.bgApp,
-              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
+              fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif'
             }"
           >
             <!-- 模拟顶部栏 -->
