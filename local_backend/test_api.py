@@ -1,8 +1,8 @@
 import requests
 import json
 
-BASE_URL = "http://localhost:8000"
-
+BASE_URL = "http://localhost:8002"
+    
 def test_register():
     """测试用户注册功能"""
     email = "local_test_user@mail.sustech.edu.cn"
