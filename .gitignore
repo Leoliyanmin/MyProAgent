@@ -49,6 +49,10 @@ build/
 *.sqlite
 *.sqlite3
 
+# Database directories (local and server)
+local_backend/database/db/
+server_backend/database/db/
+
 # ----------------------------------------
 # Environment variables (sensitive)
 # ----------------------------------------
@@ -104,6 +108,11 @@ __screenshots__/
 # Vite
 # ----------------------------------------
 *.timestamp-*-*.mjs
+.vite/
+
+# Vite environment files (development)
+.env.development
+.env.development.local
 
 # ----------------------------------------
 # Frontend specific
