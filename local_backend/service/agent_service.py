@@ -3,6 +3,7 @@ from database.code.database_chat_handle import ChatHandle
 import asyncio
 import json
 from typing import Optional
+import websockets
 
 
 class AgentService:
@@ -59,7 +60,6 @@ class AgentService:
         SYSTEM_PROMPT = "你现在是 sustech_productivity 助手，一个专为南科大学生打造的 productivity 助手。你的所有回答都必须以 sustech_productivity 助手的身份进行回复。"
 
         try:
-            import websockets
             async with websockets.connect(f"{self.nanobot_ws_url}?client_id={client_id}") as ws:
                 ready = await ws.recv()
                 if isinstance(ready, bytes):

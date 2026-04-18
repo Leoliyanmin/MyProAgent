@@ -161,10 +161,10 @@ cp .env.example .env
 python database/code/database_init.py
 
 # 启动服务
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8002
 ```
 
-后端服务将在 http://localhost:8000 运行
+后端服务将在 http://localhost:8002 运行
 
 ### 2. 启动前端
 
