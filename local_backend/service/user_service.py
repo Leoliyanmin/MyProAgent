@@ -81,20 +81,20 @@ class UserService:
         logger.info(f"用户登录请求: email={email}")
         
         # 首先尝试本地登录
-        user_result = self.user_handle.get_user(email=email)
-        if user_result['ok']:
-            logger.info(f"本地登录成功: email={email}")
-            # 本地用户存在，验证密码（本地不存储密码，直接成功）
-            access_token = self.auth_service.create_access_token(
-                data={"sub": email, "user_id": email}
-            )
-            return {
-                'success': True,
-                'access_token': access_token,
-                'token_type': 'bearer'
-            }
+        # user_result = self.user_handle.get_user(email=email)
+        # if user_result['ok']:
+        #     logger.info(f"本地登录成功: email={email}")
+        #     # 本地用户存在，验证密码（本地不存储密码，直接成功）
+        #     access_token = self.auth_service.create_access_token(
+        #         data={"sub": email, "user_id": email}
+        #     )
+        #     return {
+        #         'success': True,
+        #         'access_token': access_token,
+        #         'token_type': 'bearer'
+        #     }
         
-        logger.debug(f"本地登录失败，尝试服务器登录: email={email}")
+        # logger.debug(f"本地登录失败，尝试服务器登录: email={email}")
         
         # 本地登录失败，尝试服务器登录
         try:
@@ -105,7 +105,7 @@ class UserService:
             if response.status_code == 200:
                 server_data = response.json()
                 # 同步用户到本地
-                full_name = server_data.get('user', {}).get('full_name', '')
+                full_name = server_data.get('user', {}).get('full_name', '') or email.split('@')[0]
                 self.user_handle.create_user(email, full_name)
                 logger.info(f"服务器登录成功并同步用户到本地: email={email}")
                 
