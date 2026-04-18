@@ -59,14 +59,14 @@
         </div>
 
         <div class="form-group">
-          <label for="password" class="mac-label">Password</label>
+          <label for="password" class="mac-label">Password <span class="label-hint">(min. 8 characters)</span></label>
           <div class="password-input-wrapper">
             <input
               id="password"
               v-model="form.password"
               :type="showPassword ? 'text' : 'password'"
               class="mac-input"
-              placeholder="Enter password (min. 6 chars)"
+              placeholder="Enter your password"
               required
               :class="{ 'is-invalid': errors.password }"
             />
@@ -158,8 +158,8 @@ watch(() => form.email, (newVal) => {
 })
 
 watch(() => form.password, (newVal) => {
-  if (newVal && newVal.length < 6) {
-    errors.password = 'Password must be at least 6 characters'
+  if (newVal && newVal.length < 8) {
+    errors.password = 'Password must be at least 8 characters'
   } else {
     errors.password = ''
   }
@@ -189,7 +189,7 @@ watch(() => form.verificationCode, (newVal) => {
 
 const isValid = computed(() => {
   return validateEmail(form.email) && 
-         form.password.length >= 6 && 
+         form.password.length >= 8 && 
          form.password === form.confirmPassword &&
          /^\d{6}$/.test(form.verificationCode) &&
          form.fullName.trim() !== ''
@@ -356,6 +356,12 @@ const handleRegister = async () => {
   font-size: 12px;
   color: #ff3b30;
   margin-top: 4px;
+}
+
+.label-hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--clr-text-secondary, #86868b);
 }
 
 .api-error {
