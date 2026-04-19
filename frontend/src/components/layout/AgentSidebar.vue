@@ -5,69 +5,77 @@
   >
     <div class="agent-header">
       <span class="font-semibold">Agent 助手</span>
-      
       <button class="icon-btn close-agent-btn" @click="emit('toggleFromSelf')" title="收起 Agent 助手">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
     </div>
 
-    <div class="agent-body">
-      <!-- Thought Trace 区域：展示推理过程 -->
-      <div class="trace-section">
-        <div class="trace-header">
-          <h4 class="trace-title">思维轨迹</h4>
-          <button class="trace-toggle-btn" @click="traceExpanded = !traceExpanded" type="button">
-            {{ traceExpanded ? '▼' : '▶' }}
+    <!-- 聊天记录列表 -->
+    <div class="chat-list-section">
+      <div class="chat-list-header">
+        <span class="chat-list-title">聊天记录</span>
+        <button class="new-chat-btn" @click="createNewChat" type="button" title="新建对话">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          新对话
+        </button>
+      </div>
+      <div class="chat-list">
+        <div 
+          v-for="chat in chatList" 
+          :key="chat.id"
+          class="chat-item"
+          :class="{ active: currentChatId === chat.id }"
+          @click="switchChat(chat.id)"
+        >
+          <div class="chat-icon">💬</div>
+          <div class="chat-info">
+            <div class="chat-title">{{ chat.title }}</div>
+            <div class="chat-time">{{ formatTime(chat.updatedAt) }}</div>
+          </div>
+          <button class="delete-chat-btn" @click.stop="deleteChat(chat.id)" title="删除">
+            ×
           </button>
         </div>
-        
-        <div v-if="traceExpanded" class="trace-content">
-          <div v-for="(event, idx) in traceEvents" :key="idx" class="trace-event">
-            <div class="event-phase" :class="`phase-${event.phase}`">
-              {{ phaseLabel[event.phase] }}
-            </div>
-            <div class="event-summary">{{ event.summary }}</div>
-            <div class="event-meta">{{ event.durationMs }}ms</div>
-          </div>
-          <div v-if="traceEvents.length === 0" class="trace-empty">
-            等待 Agent 执行...
-          </div>
+        <div v-if="chatList.length === 0" class="chat-empty">
+          暂无聊天记录，点击"新对话"开始
+        </div>
+      </div>
+    </div>
+
+    <!-- 对话框区域 -->
+    <div class="dialog-section">
+      <div class="messages-list" ref="messagesContainer">
+        <div v-for="(msg, idx) in messages" :key="idx" class="message" :class="msg.role">
+          <div class="message-content markdown-body" v-html="renderMarkdown(msg.text)"></div>
+        </div>
+        <div v-if="messages.length === 0" class="placeholder-text">
+          在这里与 Agent 对话...
         </div>
       </div>
 
-      <!-- 对话框区域 -->
-      <div class="dialog-section">
-        <div class="messages-list">
-          <div v-for="(msg, idx) in messages" :key="idx" class="message" :class="msg.role">
-            <div class="message-content markdown-body" v-html="renderMarkdown(msg.text)"></div>
-          </div>
-          <div v-if="messages.length === 0" class="placeholder-text">
-            在这里与 Agent 对话...
-          </div>
-        </div>
-
-        <div class="input-area">
-          <textarea
-            v-model="inputText"
-            class="message-input"
-            placeholder="输入你的问题... (Shift+Enter 换行)"
-            @keydown.enter.exact.prevent="sendMessage"
-            rows="3"
-          ></textarea>
-          <button class="send-btn" @click.prevent="sendMessage" type="button" :disabled="isSending">{{ isSending ? '发送中...' : '发送' }}</button>
-        </div>
+      <div class="input-area">
+        <textarea
+          v-model="inputText"
+          class="message-input"
+          placeholder="输入你的问题... (Shift+Enter 换行)"
+          @keydown.enter.exact.prevent="sendMessage"
+          rows="3"
+        ></textarea>
+        <button class="send-btn" @click.prevent="sendMessage" type="button" :disabled="isSending">
+          {{ isSending ? '发送中...' : '发送' }}
+        </button>
       </div>
     </div>
   </aside>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { agentAPI } from '../../services/api.js'
 import { marked } from 'marked'
 
-defineProps({
+const props = defineProps({
   isOpen: {
     type: Boolean,
     default: true
@@ -76,31 +84,20 @@ defineProps({
 
 const emit = defineEmits(['toggleFromSelf'])
 
-// Auth store
 const authStore = useAuthStore()
 
 // 状态
-const traceExpanded = ref(true)
 const messages = ref([])
 const inputText = ref('')
 const wsRef = ref(null)
-const sessionId = ref('default')
-const isConnecting = ref(false)
-const isConnected = ref(false)
-const agentStatus = ref(null)
 const isSending = ref(false)
 const hasInitialized = ref(false)
+const messagesContainer = ref(null)
 
-// Thought Trace 数据
-const phaseLabel = {
-  planning: '📋 规划',
-  tool_call: '🔧 工具调用',
-  observation: '👁️ 观察',
-  result: '✅ 结果',
-  tool: '🔧 工具调用'
-}
-
-const traceEvents = ref([])
+// 聊天记录列表
+const chatList = ref([])
+const currentChatId = ref('')
+const STORAGE_KEY = 'proagent_chat_history'
 
 const renderMarkdown = (text) => {
   if (!text) return ''
@@ -117,103 +114,215 @@ const renderMarkdown = (text) => {
   }
 }
 
-// 欢迎消息
-const welcomeMessage = 'Hello! 我是 ProAgent 智能助手，现在具备文件管理能力。我可以：\n\n' +
-  '📁 读取、编辑项目文件\n' +
-  '🔍 搜索文件和内容\n' +
-  '💡 分析代码、回答问题\n\n' +
-  '试试问我："帮我找出所有 Python 文件中的 TODO"'
+// 生成唯一ID
+const generateId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2)
+}
 
-// 加载历史消息
-const loadHistory = async () => {
+// 格式化时间
+const formatTime = (timestamp) => {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  const now = new Date()
+  const diff = now - date
+  
+  if (diff < 60000) return '刚刚'
+  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前'
+  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前'
+  if (diff < 604800000) return Math.floor(diff / 86400000) + '天前'
+  
+  return date.toLocaleDateString('zh-CN')
+}
+
+// 从 localStorage 加载聊天记录列表
+const loadChatList = () => {
   try {
-    const result = await agentAPI.getLocalSession(sessionId.value)
-    if (result.success && result.messages) {
-      messages.value = result.messages.map(m => ({
-        role: m.role,
-        text: m.content
-      }))
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      chatList.value = JSON.parse(stored)
     }
-    if (messages.value.length === 0) {
-      messages.value.push({ role: 'agent', text: welcomeMessage })
-    }
-  } catch (err) {
-    console.error('[Agent] Failed to load history:', err)
-    messages.value.push({ role: 'agent', text: welcomeMessage })
+  } catch (e) {
+    console.error('Failed to load chat list:', e)
+    chatList.value = []
   }
 }
 
-// 获取 Agent 状态
-const loadAgentStatus = async () => {
+// 保存聊天记录列表到 localStorage
+const saveChatList = () => {
   try {
-    const status = await agentAPI.getStatus()
-    agentStatus.value = status
-    console.log('[Agent] Status:', status)
-  } catch (err) {
-    console.error('[Agent] Failed to get status:', err)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(chatList.value))
+  } catch (e) {
+    console.error('Failed to save chat list:', e)
+  }
+}
+
+// 获取当前聊天记录的存储key
+const getChatStorageKey = (chatId) => {
+  return `${STORAGE_KEY}_messages_${chatId}`
+}
+
+// 保存当前聊天记录
+const saveCurrentChat = () => {
+  if (!currentChatId.value || messages.value.length === 0) return
+  
+  try {
+    localStorage.setItem(
+      getChatStorageKey(currentChatId.value),
+      JSON.stringify(messages.value)
+    )
+    
+    // 更新聊天记录列表中的时间
+    const chat = chatList.value.find(c => c.id === currentChatId.value)
+    if (chat) {
+      chat.updatedAt = Date.now()
+      saveChatList()
+    }
+  } catch (e) {
+    console.error('Failed to save chat:', e)
+  }
+}
+
+// 加载指定聊天记录
+const loadChatMessages = (chatId) => {
+  if (!chatId) return
+  
+  try {
+    const stored = localStorage.getItem(getChatStorageKey(chatId))
+    if (stored) {
+      messages.value = JSON.parse(stored)
+    } else {
+      messages.value = []
+    }
+  } catch (e) {
+    console.error('Failed to load chat messages:', e)
+    messages.value = []
+  }
+}
+
+// 创建新对话
+const createNewChat = () => {
+  // 先保存当前对话
+  if (currentChatId.value) {
+    saveCurrentChat()
+  }
+  
+  const newChat = {
+    id: generateId(),
+    title: '新对话 ' + (chatList.value.length + 1),
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  }
+  
+  chatList.value.unshift(newChat)
+  saveChatList()
+  
+  currentChatId.value = newChat.id
+  messages.value = []
+  
+  // 清空后端会话
+  agentAPI.clearLocalSession('default').catch(console.error)
+}
+
+// 切换对话
+const switchChat = (chatId) => {
+  if (chatId === currentChatId.value) return
+  
+  // 保存当前对话
+  saveCurrentChat()
+  
+  // 切换
+  currentChatId.value = chatId
+  loadChatMessages(chatId)
+  
+  // 滚动到底部
+  nextTick(() => {
+    scrollToBottom()
+  })
+}
+
+// 删除对话
+const deleteChat = (chatId) => {
+  const index = chatList.value.findIndex(c => c.id === chatId)
+  if (index === -1) return
+  
+  // 删除消息存储
+  localStorage.removeItem(getChatStorageKey(chatId))
+  
+  // 从列表移除
+  chatList.value.splice(index, 1)
+  saveChatList()
+  
+  // 如果删除的是当前对话，切换到第一个或创建新对话
+  if (currentChatId.value === chatId) {
+    if (chatList.value.length > 0) {
+      switchChat(chatList.value[0].id)
+    } else {
+      createNewChat()
+    }
+  }
+}
+
+// 自动生成标题（基于第一条用户消息）
+const autoGenerateTitle = () => {
+  if (!currentChatId.value) return
+  
+  const chat = chatList.value.find(c => c.id === currentChatId.value)
+  if (!chat || chat.title !== '新对话 ' + chatList.value.length) return
+  
+  // 找第一条用户消息
+  const firstUserMsg = messages.value.find(m => m.role === 'user')
+  if (firstUserMsg) {
+    // 截取前20个字符作为标题
+    let title = firstUserMsg.text.substring(0, 20)
+    if (firstUserMsg.text.length > 20) title += '...'
+    chat.title = title
+    saveChatList()
+  }
+}
+
+// 滚动到底部
+const scrollToBottom = () => {
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   }
 }
 
 // 连接 WebSocket
 const connectWebSocket = () => {
-  if (!authStore.isAuthenticated) {
-    console.log('[Agent] Not authenticated, skipping WebSocket connection')
-    return
-  }
+  if (!authStore.isAuthenticated) return
 
   disconnectWebSocket()
-
-  isConnecting.value = true
-
   wsRef.value = agentAPI.connectWebSocket(
-    sessionId.value,
-    // onMessage
+    'default',
     (data) => {
       if (data.role === 'assistant') {
-        // 如果最后一条消息是 assistant，追加内容
         const lastMsg = messages.value[messages.value.length - 1]
         if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.done) {
           lastMsg.text += data.content
         } else {
           messages.value.push({ role: 'assistant', text: data.content, done: false })
         }
+        scrollToBottom()
       }
-      // 不再处理 data.role === 'user'：
-      // 用户消息已在 sendMessage() 中本地添加，无需重复添加
     },
-    // onTool
-    (data) => {
-      traceEvents.value.push(data)
-    },
-    // onError
+    () => {},
     (error) => {
-      console.error('[Agent] WebSocket error:', error)
-      isConnected.value = false
-      isConnecting.value = false
       messages.value.push({
         role: 'agent',
         text: `❌ 错误: ${error.message || '连接失败'}`,
         done: true
       })
+      scrollToBottom()
     },
-    // onDone
-    (data) => {
-      console.log('[Agent] Request completed:', data)
-      // 标记最后一条消息完成
+    () => {
       const lastMsg = messages.value[messages.value.length - 1]
       if (lastMsg) {
         lastMsg.done = true
       }
+      saveCurrentChat()
+      autoGenerateTitle()
     }
   )
-
-  if (wsRef.value) {
-    wsRef.value.onopen = () => {
-      console.log('[Agent] WebSocket connected')
-      isConnected.value = true
-      isConnecting.value = false
-    }
-  }
 }
 
 // 断开 WebSocket
@@ -222,10 +331,9 @@ const disconnectWebSocket = () => {
     wsRef.value.close()
     wsRef.value = null
   }
-  isConnected.value = false
-  isConnecting.value = false
 }
 
+// 发送消息
 const sendMessage = () => {
   if (!inputText.value.trim() || isSending.value) return
 
@@ -234,100 +342,84 @@ const sendMessage = () => {
 
   messages.value.push({ role: 'user', text: message, done: true })
   inputText.value = ''
+  
+  scrollToBottom()
+  saveCurrentChat()
+  autoGenerateTitle()
 
   if (wsRef.value && wsRef.value.readyState === WebSocket.OPEN) {
-    wsRef.value.send(JSON.stringify({
-      type: 'chat',
-      message
-    }))
+    wsRef.value.send(JSON.stringify({ type: 'chat', message }))
     isSending.value = false
   } else {
     sendViaREST(message).finally(() => {
       isSending.value = false
+      saveCurrentChat()
+      autoGenerateTitle()
     })
   }
 }
 
-// 通过 REST API 发送消息（降级方案）
+// REST 发送
 const sendViaREST = async (message) => {
   try {
-    const result = await agentAPI.chatLocal(message, sessionId.value)
-
-    // 添加助手消息
+    const result = await agentAPI.chatLocal(message, 'default')
     messages.value.push({
       role: 'agent',
       text: result.response || '没有响应',
       done: true
     })
-
-    // 显示工具调用
-    if (result.tool_calls && result.tool_calls.length > 0) {
-      for (const tool of result.tool_calls) {
-        traceEvents.value.push({
-          phase: 'tool',
-          summary: `调用工具: ${tool}`,
-          durationMs: 0
-        })
-      }
-    }
+    scrollToBottom()
   } catch (err) {
-    console.error('[Agent] Failed to send message:', err)
     messages.value.push({
       role: 'agent',
       text: `❌ 发送失败: ${err.message}`,
       done: true
     })
+    scrollToBottom()
   }
 }
 
-// 清空对话
-const clearChat = () => {
-  messages.value = [{ role: 'agent', text: welcomeMessage }]
-  traceEvents.value = []
-  agentAPI.clearLocalSession(sessionId.value).catch(console.error)
-}
-
 onMounted(() => {
-  loadAgentStatus()
+  loadChatList()
+  
+  // 如果没有聊天记录，创建一个
+  if (chatList.value.length === 0) {
+    createNewChat()
+  } else {
+    // 加载最近的对话
+    currentChatId.value = chatList.value[0].id
+    loadChatMessages(currentChatId.value)
+  }
+  
   if (authStore.isAuthenticated && !hasInitialized.value) {
     hasInitialized.value = true
-    loadHistory()
     connectWebSocket()
   }
 })
 
 onUnmounted(() => {
+  saveCurrentChat()
   disconnectWebSocket()
 })
 
 watch(() => authStore.isAuthenticated, (isAuth) => {
   if (isAuth && !hasInitialized.value) {
     hasInitialized.value = true
-    loadHistory()
     connectWebSocket()
   } else if (!isAuth) {
     disconnectWebSocket()
-    messages.value = [{ role: 'agent', text: '请先登录使用 Agent 助手' }]
   }
 })
 </script>
 
 <style scoped>
-/* 右侧侧边栏核心容器样式 */
 .right-sidebar {
-  width: 300px;
+  width: 320px;
   flex-shrink: 0;
   background-color: var(--clr-bg-agent, rgba(235, 235, 235, 0.65));
-  background-image: var(--clr-bg-agent-image, none);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   border-left: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
   overflow: hidden;
 }
 
@@ -336,9 +428,8 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   border-left: none;
 }
 
-/* 内部结构样式 */
 .agent-header {
-  height: 52px;
+  height: 48px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
@@ -348,121 +439,142 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   font-weight: 600;
   color: #1d1d1f;
   flex-shrink: 0;
-  white-space: nowrap; 
 }
 
 .close-agent-btn {
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  padding: 4px;
-  cursor: pointer;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(0, 0, 0, 0.4);
-  transition: all 0.2s ease;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .close-agent-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #1d1d1f;
+  background: rgba(0, 0, 0, 0.06);
 }
 
-.agent-body {
-  flex: 1;
-  padding: 12px;
-  overflow-y: auto;
+/* 聊天记录列表 */
+.chat-list-section {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  max-height: 200px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
-/* Thought Trace 区域 */
-.trace-section {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 8px;
-  padding: 10px;
-  flex-shrink: 0;
-}
-
-.trace-header {
+.chat-list-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.trace-title {
+.chat-list-title {
   font-size: 12px;
   font-weight: 600;
-  color: #1d1d1f;
-  margin: 0;
+  color: #666;
 }
 
-.trace-toggle-btn {
-  background: transparent;
-  border: none;
-  font-size: 10px;
-  cursor: pointer;
-  color: rgba(0, 0, 0, 0.5);
-  padding: 2px 4px;
-}
-
-.trace-content {
+.new-chat-btn {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.trace-event {
-  font-size: 11px;
-  padding: 6px;
-  background: rgba(255, 255, 255, 0.8);
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #0071e3;
+  color: white;
+  border: none;
   border-radius: 4px;
-  border-left: 3px solid #0071e3;
-}
-
-.event-phase {
-  font-weight: 600;
-  color: #1d1d1f;
-  margin-bottom: 2px;
-}
-
-.event-phase.phase-planning {
-  color: #007aff;
-}
-
-.event-phase.phase-tool_call {
-  color: #ff9500;
-}
-
-.event-phase.phase-observation {
-  color: #34c759;
-}
-
-.event-phase.phase-result {
-  color: #5ac8fa;
-}
-
-.event-summary {
-  color: #555;
-  margin-bottom: 2px;
-}
-
-.event-meta {
-  font-size: 10px;
-  color: #999;
-}
-
-.trace-empty {
   font-size: 11px;
-  color: #999;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.new-chat-btn:hover {
+  background: #0051d5;
+}
+
+.chat-list {
+  overflow-y: auto;
+  padding: 4px;
+  flex: 1;
+}
+
+.chat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.chat-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.chat-item.active {
+  background: rgba(0, 113, 227, 0.1);
+}
+
+.chat-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.chat-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chat-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-time {
+  font-size: 10px;
+  color: #86868b;
+  margin-top: 2px;
+}
+
+.delete-chat-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #86868b;
+  opacity: 0;
+  transition: all 0.15s;
+}
+
+.chat-item:hover .delete-chat-btn {
+  opacity: 1;
+}
+
+.delete-chat-btn:hover {
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+}
+
+.chat-empty {
+  padding: 16px;
   text-align: center;
-  padding: 20px 0;
+  font-size: 12px;
+  color: #86868b;
 }
 
 /* 对话框区域 */
@@ -470,42 +582,47 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  overflow: hidden;
 }
 
 .messages-list {
   flex: 1;
   overflow-y: auto;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 8px 0;
-  min-height: 100px;
+  gap: 10px;
 }
 
 .message {
-  padding: 8px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  line-height: 1.4;
-  word-break: break-word;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 90%;
 }
 
 .message.user {
   background: #0071e3;
   color: white;
   align-self: flex-end;
-  max-width: 85%;
 }
 
 .message.agent {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.06);
   color: #1d1d1f;
   align-self: flex-start;
 }
 
 .message-content {
-  margin: 0;
+  word-break: break-word;
+}
+
+.placeholder-text {
+  color: #86868b;
+  font-size: 12px;
+  text-align: center;
+  padding: 40px 20px;
 }
 
 /* Markdown 样式 */
@@ -513,135 +630,76 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   line-height: 1.5;
 }
 
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3,
-.markdown-body h4 {
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
   margin: 8px 0 4px 0;
   font-weight: 600;
-  line-height: 1.3;
 }
 
 .markdown-body h1 { font-size: 14px; }
 .markdown-body h2 { font-size: 13px; }
 .markdown-body h3 { font-size: 12px; }
-.markdown-body h4 { font-size: 11px; }
 
-.markdown-body p {
-  margin: 4px 0;
-}
+.markdown-body p { margin: 4px 0; }
 
-.markdown-body ul,
-.markdown-body ol {
+.markdown-body ul, .markdown-body ol {
   margin: 4px 0;
   padding-left: 16px;
 }
 
-.markdown-body li {
-  margin: 2px 0;
-}
+.markdown-body li { margin: 2px 0; }
 
 .markdown-body code {
-  background: rgba(0, 0, 0, 0.05);
-  padding: 1px 4px;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 2px 4px;
   border-radius: 3px;
-  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-family: ui-monospace, monospace;
   font-size: 11px;
-}
-
-.markdown-body pre {
-  background: rgba(0, 0, 0, 0.05);
-  padding: 8px;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin: 4px 0;
-}
-
-.markdown-body pre code {
-  background: none;
-  padding: 0;
-}
-
-.markdown-body blockquote {
-  border-left: 3px solid rgba(0, 0, 0, 0.2);
-  margin: 4px 0;
-  padding-left: 8px;
-  color: #666;
-}
-
-.markdown-body strong {
-  font-weight: 600;
-}
-
-.markdown-body em {
-  font-style: italic;
-}
-
-.markdown-body a {
-  color: #0071e3;
-  text-decoration: none;
-}
-
-.markdown-body a:hover {
-  text-decoration: underline;
 }
 
 .message.user .markdown-body code {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.placeholder-text {
-  color: #86868b;
-  font-size: 12px;
-  text-align: center;
-  padding: 40px 10px;
-}
-
 /* 输入区域 */
 .input-area {
+  padding: 10px 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  flex-shrink: 0;
-  padding-top: 8px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 8px;
 }
 
 .message-input {
   width: 100%;
-  padding: 6px 8px;
+  padding: 10px 12px;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 8px;
+  font-size: 13px;
   font-family: inherit;
-  resize: vertical;
-  max-height: 80px;
+  resize: none;
+  max-height: 100px;
+  background: white;
 }
 
 .message-input:focus {
   outline: none;
   border-color: #0071e3;
-  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.1);
 }
 
 .send-btn {
-  padding: 6px 12px;
+  padding: 8px 16px;
   background: #0071e3;
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s;
 }
 
 .send-btn:hover {
   background: #0051d5;
-}
-
-.send-btn:active {
-  background: #003da6;
 }
 
 .send-btn:disabled {
