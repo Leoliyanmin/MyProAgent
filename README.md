@@ -140,7 +140,47 @@
 
 ## 🚀 快速开始
 
-### 1. 启动后端 (Local)
+### 方式一：Web 开发模式（推荐日常开发）
+
+一键启动前端 + Local Backend + Server Backend：
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+访问 http://localhost:5173
+
+### 方式二：Tauri 桌面应用
+
+构建独立桌面应用（包含所有后端）：
+
+```bash
+# 1. 安装依赖
+cd frontend
+npm install
+
+# 2. 构建 Python sidecar（打包后端为可执行文件）
+cd ../scripts
+pip install pyinstaller
+python build_sidecar.py
+
+# 3. 开发模式（带桌面窗口）
+cd ../frontend
+npm run tauri:dev
+
+# 4. 生产构建（生成 .app / .exe）
+npm run tauri:build
+```
+
+输出文件：
+- macOS: `src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
+- Windows: `src-tauri/target/release/bundle/nsis/ProAgent_*.exe`
+
+### 方式三：手动启动各服务
+
+#### 1. 启动后端 (Local)
 
 ```bash
 cd local_backend

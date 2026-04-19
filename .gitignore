@@ -151,3 +151,40 @@ debug.html
 *.tmp
 *.temp
 /personal
+
+# ----------------------------------------
+# Tauri / Rust
+# ----------------------------------------
+# Rust build output
+frontend/src-tauri/target/
+frontend/src-tauri/Cargo.lock
+
+# Tauri generated files
+frontend/src-tauri/gen/
+
+# Sidecar binaries (platform-specific, auto-generated)
+# Keep the directory but ignore binaries
+frontend/src-tauri/binaries/*
+!frontend/src-tauri/binaries/.gitkeep
+
+# macOS specific
+frontend/src-tauri/*.app
+frontend/src-tauri/*.dmg
+*.dmg
+
+# Windows specific
+frontend/src-tauri/*.exe
+*.exe
+*.msi
+*.msm
+*.msp
+
+# Linux specific
+frontend/src-tauri/*.AppImage
+*.AppImage
+*.deb
+*.rpm
+
+# Bundle artifacts
+frontend/src-tauri/target/release/bundle/
+frontend/src-tauri/target/debug/bundle/
