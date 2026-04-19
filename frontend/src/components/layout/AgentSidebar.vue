@@ -39,7 +39,7 @@
       <div class="dialog-section">
         <div class="messages-list">
           <div v-for="(msg, idx) in messages" :key="idx" class="message" :class="msg.role">
-            <div class="message-content">{{ msg.text }}</div>
+            <div class="message-content markdown-body" v-html="renderMarkdown(msg.text)"></div>
           </div>
           <div v-if="messages.length === 0" class="placeholder-text">
             在这里与 Agent 对话...
@@ -50,11 +50,11 @@
           <textarea
             v-model="inputText"
             class="message-input"
-            placeholder="输入你的问题..."
-            @keydown.enter.meta="sendMessage"
+            placeholder="输入你的问题... (Shift+Enter 换行)"
+            @keydown.enter.exact.prevent="sendMessage"
             rows="3"
           ></textarea>
-          <button class="send-btn" @click="sendMessage" type="button">发送</button>
+          <button class="send-btn" @click.prevent="sendMessage" type="button" :disabled="isSending">{{ isSending ? '发送中...' : '发送' }}</button>
         </div>
       </div>
     </div>
@@ -65,6 +65,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 import { agentAPI } from '../../services/api.js'
+import { marked } from 'marked'
 
 defineProps({
   isOpen: {
@@ -87,6 +88,8 @@ const sessionId = ref('default')
 const isConnecting = ref(false)
 const isConnected = ref(false)
 const agentStatus = ref(null)
+const isSending = ref(false)
+const hasInitialized = ref(false)
 
 // Thought Trace 数据
 const phaseLabel = {
@@ -98,6 +101,21 @@ const phaseLabel = {
 }
 
 const traceEvents = ref([])
+
+const renderMarkdown = (text) => {
+  if (!text) return ''
+  try {
+    marked.setOptions({
+      breaks: true,
+      gfm: true,
+      headerIds: false,
+      mangle: false
+    })
+    return marked.parse(text)
+  } catch (e) {
+    return text
+  }
+}
 
 // 欢迎消息
 const welcomeMessage = 'Hello! 我是 ProAgent 智能助手，现在具备文件管理能力。我可以：\n\n' +
@@ -159,9 +177,9 @@ const connectWebSocket = () => {
         } else {
           messages.value.push({ role: 'assistant', text: data.content, done: false })
         }
-      } else if (data.role === 'user') {
-        messages.value.push({ role: 'user', text: data.content })
       }
+      // 不再处理 data.role === 'user'：
+      // 用户消息已在 sendMessage() 中本地添加，无需重复添加
     },
     // onTool
     (data) => {
@@ -208,25 +226,25 @@ const disconnectWebSocket = () => {
   isConnecting.value = false
 }
 
-// 发送消息
 const sendMessage = () => {
-  if (!inputText.value.trim()) return
+  if (!inputText.value.trim() || isSending.value) return
 
+  isSending.value = true
   const message = inputText.value.trim()
 
-  // 添加用户消息
   messages.value.push({ role: 'user', text: message, done: true })
   inputText.value = ''
 
-  // 如果 WebSocket 连接正常，使用 WebSocket
   if (wsRef.value && wsRef.value.readyState === WebSocket.OPEN) {
     wsRef.value.send(JSON.stringify({
       type: 'chat',
       message
     }))
+    isSending.value = false
   } else {
-    // 否则使用 REST API（降级方案）
-    sendViaREST(message)
+    sendViaREST(message).finally(() => {
+      isSending.value = false
+    })
   }
 }
 
@@ -269,10 +287,10 @@ const clearChat = () => {
   agentAPI.clearLocalSession(sessionId.value).catch(console.error)
 }
 
-// 生命周期
 onMounted(() => {
   loadAgentStatus()
-  if (authStore.isAuthenticated) {
+  if (authStore.isAuthenticated && !hasInitialized.value) {
+    hasInitialized.value = true
     loadHistory()
     connectWebSocket()
   }
@@ -282,12 +300,12 @@ onUnmounted(() => {
   disconnectWebSocket()
 })
 
-// 监听认证状态变化
 watch(() => authStore.isAuthenticated, (isAuth) => {
-  if (isAuth) {
+  if (isAuth && !hasInitialized.value) {
+    hasInitialized.value = true
     loadHistory()
     connectWebSocket()
-  } else {
+  } else if (!isAuth) {
     disconnectWebSocket()
     messages.value = [{ role: 'agent', text: '请先登录使用 Agent 助手' }]
   }
@@ -490,6 +508,88 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   margin: 0;
 }
 
+/* Markdown 样式 */
+.markdown-body {
+  line-height: 1.5;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  margin: 8px 0 4px 0;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.markdown-body h1 { font-size: 14px; }
+.markdown-body h2 { font-size: 13px; }
+.markdown-body h3 { font-size: 12px; }
+.markdown-body h4 { font-size: 11px; }
+
+.markdown-body p {
+  margin: 4px 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 4px 0;
+  padding-left: 16px;
+}
+
+.markdown-body li {
+  margin: 2px 0;
+}
+
+.markdown-body code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+}
+
+.markdown-body pre {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 4px 0;
+}
+
+.markdown-body pre code {
+  background: none;
+  padding: 0;
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid rgba(0, 0, 0, 0.2);
+  margin: 4px 0;
+  padding-left: 8px;
+  color: #666;
+}
+
+.markdown-body strong {
+  font-weight: 600;
+}
+
+.markdown-body em {
+  font-style: italic;
+}
+
+.markdown-body a {
+  color: #0071e3;
+  text-decoration: none;
+}
+
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+
+.message.user .markdown-body code {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .placeholder-text {
   color: #86868b;
   font-size: 12px;
@@ -542,5 +642,10 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
 
 .send-btn:active {
   background: #003da6;
+}
+
+.send-btn:disabled {
+  background: #999;
+  cursor: not-allowed;
 }
 </style>

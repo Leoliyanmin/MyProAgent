@@ -171,46 +171,39 @@ export const agentAPI = {
     })
   },
 
-  // Chat with LocalAgent (文件管理功能)
   chatLocal: async (message, session_id = null) => {
-    return fetchWithAuth('/agent/local/chat', {
+    return fetchWithAuth('/agent/chat', {
       method: 'POST',
       body: JSON.stringify({ message, session_id })
     })
   },
 
-  // Get chat history (original)
-  getHistory: async () => {
-    return fetchWithAuth('/agent/history')
+  getHistory: async (session_id) => {
+    return fetchWithAuth(`/agent/history/${session_id}`)
   },
 
-  // Get LocalAgent session
   getLocalSession: async (sessionId) => {
-    return fetchWithAuth(`/agent/local/session/${sessionId}`)
+    return fetchWithAuth(`/agent/session/${sessionId}`)
   },
 
-  // Clear LocalAgent session
   clearLocalSession: async (sessionId) => {
-    return fetchWithAuth(`/agent/local/session/${sessionId}/clear`, {
+    return fetchWithAuth(`/agent/session/${sessionId}/clear`, {
       method: 'POST'
     })
   },
 
-  // Get LocalAgent memory
   getMemory: async () => {
-    return fetchWithAuth('/agent/local/memory')
+    return fetchWithAuth('/agent/memory')
   },
 
-  // Consolidate LocalAgent memory
   consolidateMemory: async () => {
-    return fetchWithAuth('/agent/local/memory/consolidate', {
+    return fetchWithAuth('/agent/memory/consolidate', {
       method: 'POST'
     })
   },
 
-  // Get LocalAgent status
   getStatus: async () => {
-    return fetchWithAuth('/agent/local/status')
+    return fetchWithAuth('/agent/status')
   },
 
   // WebSocket connection for real-time chat
@@ -221,9 +214,9 @@ export const agentAPI = {
       return null
     }
 
-    const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss' : 'ws'
-    const wsBaseUrl = API_BASE_URL.replace(/^https?:\/\//, '')
-    const wsUrl = `${wsProtocol}://${wsBaseUrl}/agent/ws/${sessionId}?token=${token}`
+    const wsUrl = import.meta.env.DEV
+      ? `ws://localhost:8002/agent/ws/${sessionId}?token=${token}`
+      : `wss://your-production-server.com/agent/ws/${sessionId}?token=${token}`
 
     const ws = new WebSocket(wsUrl)
 
