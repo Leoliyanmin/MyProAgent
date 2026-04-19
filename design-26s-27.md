@@ -90,7 +90,7 @@ graph TB
 
 | 层级 | 技术 | 职责 |
 |------|------|------|
-| **前端** | Vue3 + Vite | 用户界面、路由、状态管理 |
+| **前端** | Vue3 + Vite + Tauri | 用户界面、路由、状态管理 |
 | **Local Backend** | FastAPI + SQLite | 本地数据存储、核心业务逻辑、离线功能 |
 | **Server Backend** | FastAPI + SQLite | 用户认证、数据同步、邮件服务 |
 
