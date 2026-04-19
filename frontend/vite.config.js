@@ -4,38 +4,52 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  
+  return {
+    plugins: [
+      vue(),
+      vueDevTools(),
+    ],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url))
+      },
     },
-  },
-  server: {
-    proxy: {
-      '/auth': {
-        target: 'http://localhost:8002',
-        changeOrigin: true
-      },
-      '/tasks': {
-        target: 'http://localhost:8002',
-        changeOrigin: true
-      },
-      '/schedules': {
-        target: 'http://localhost:8002',
-        changeOrigin: true
-      },
-      '/agent': {
-        target: 'http://localhost:8002',
-        changeOrigin: true
-      },
-      '/sync': {
-        target: 'http://localhost:8002',
-        changeOrigin: true
+    clearScreen: false,
+    server: {
+      port: 5173,
+      strictPort: true,
+      proxy: {
+        '/auth': {
+          target: 'http://localhost:8002',
+          changeOrigin: true
+        },
+        '/tasks': {
+          target: 'http://localhost:8002',
+          changeOrigin: true
+        },
+        '/schedules': {
+          target: 'http://localhost:8002',
+          changeOrigin: true
+        },
+        '/agent': {
+          target: 'http://localhost:8002',
+          changeOrigin: true,
+          ws: true
+        },
+        '/sync': {
+          target: 'http://localhost:8002',
+          changeOrigin: true
+        }
       }
+    },
+    envPrefix: ['VITE_', 'TAURI_'],
+    build: {
+      target: process.env.TAURI_ENV_PLATFORM === 'windows' ? 'chrome105' : 'safari13',
+      outDir: 'dist',
+      sourcemap: !!process.env.TAURI_ENV_DEBUG,
     }
   }
 })
