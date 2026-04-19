@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ProAgent",
+  "version": "0.1.0",
+  "identifier": "com.team26s27.proagent",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "ProAgent - 智能协作工作台",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 1200,
+        "minHeight": 800,
+        "center": true,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false,
+        "focus": true
+      }
+    ],
+    "security": {
+      "csp": null,
+      "dangerousDisableAssetCspModification": false,
+      "capabilities": ["default"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg", "appimage", "nsis"],
+    "category": "Productivity",
+    "copyright": "© 2026 Team 26S-27",
+    "shortDescription": "智能协作工作台",
+    "longDescription": "ProAgent 是一个智能协作工作台，帮助团队高效管理任务、日程、文件和个人画像。",
+    "icon": [],
+    "externalBin": ["binaries/python-backend", "binaries/server-backend"],
+    "resources": [],
+    "windows": {
+      "wix": {
+        "language": "zh-CN"
+      },
+      "nsis": {
+        "languages": ["SimpChinese"],
+        "displayLanguageSelector": false
+      }
+    },
+    "macOS": {
+      "frameworks": [],
+      "minimumSystemVersion": "10.13",
+      "entitlements": null
+    }
+  }
+}
