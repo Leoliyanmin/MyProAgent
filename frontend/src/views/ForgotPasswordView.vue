@@ -2,23 +2,11 @@
   <div class="auth-container">
     <div class="auth-card">
       <div class="auth-header">
-        <h1 class="mac-title">Create an Account</h1>
-        <p class="mac-subtitle">Sign up for AgentWorkspace</p>
+        <h1 class="mac-title">Reset Password</h1>
+        <p class="mac-subtitle">Set a new password for your account</p>
       </div>
 
-      <form @submit.prevent="handleRegister" class="auth-form">
-        <div class="form-group">
-          <label for="fullName" class="mac-label">Full Name</label>
-          <input
-            id="fullName"
-            v-model="form.fullName"
-            type="text"
-            class="mac-input"
-            placeholder="Enter your full name"
-            required
-          />
-        </div>
-
+      <form @submit.prevent="handleResetPassword" class="auth-form">
         <div class="form-group">
           <label for="email" class="mac-label">Email</label>
           <div class="email-input-wrapper">
@@ -59,54 +47,76 @@
         </div>
 
         <div class="form-group">
-          <label for="password" class="mac-label">Password <span class="label-hint">(min. 8 characters)</span></label>
+          <label for="oldPassword" class="mac-label">Old Password</label>
           <div class="password-input-wrapper">
             <input
-              id="password"
-              v-model="form.password"
-              :type="showPassword ? 'text' : 'password'"
+              id="oldPassword"
+              v-model="form.oldPassword"
+              :type="showOldPassword ? 'text' : 'password'"
               class="mac-input"
-              placeholder="Enter your password"
+              placeholder="Enter your old password"
               required
-              :class="{ 'is-invalid': errors.password }"
+              :class="{ 'is-invalid': errors.oldPassword }"
             />
-            <button type="button" class="eye-btn" @click="showPassword = !showPassword">
-               {{ showPassword ? 'Hide' : 'Show' }}
+            <button type="button" class="eye-btn" @click="showOldPassword = !showOldPassword">
+              {{ showOldPassword ? 'Hide' : 'Show' }}
             </button>
           </div>
-          <span class="error-text" v-if="errors.password">{{ errors.password }}</span>
+          <span class="error-text" v-if="errors.oldPassword">{{ errors.oldPassword }}</span>
         </div>
 
         <div class="form-group">
-          <label for="confirmPassword" class="mac-label">Confirm Password</label>
+          <label for="newPassword" class="mac-label">New Password <span class="label-hint">(min. 8 characters)</span></label>
+          <div class="password-input-wrapper">
+            <input
+              id="newPassword"
+              v-model="form.newPassword"
+              :type="showNewPassword ? 'text' : 'password'"
+              class="mac-input"
+              placeholder="Enter your new password"
+              required
+              :class="{ 'is-invalid': errors.newPassword }"
+            />
+            <button type="button" class="eye-btn" @click="showNewPassword = !showNewPassword">
+              {{ showNewPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          <span class="error-text" v-if="errors.newPassword">{{ errors.newPassword }}</span>
+          <p class="password-strength" :class="strengthClass" v-if="form.newPassword">
+            Password strength: {{ passwordStrengthLabel }}
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword" class="mac-label">Confirm New Password</label>
           <input
             id="confirmPassword"
             v-model="form.confirmPassword"
             type="password"
             class="mac-input"
-            placeholder="Confirm your password"
+            placeholder="Confirm your new password"
             required
             :class="{ 'is-invalid': errors.confirmPassword }"
           />
           <span class="error-text" v-if="errors.confirmPassword">{{ errors.confirmPassword }}</span>
         </div>
         
-        <div v-if="auth.error" class="api-error">
-          {{ auth.error }}
+        <div v-if="errorMsg" class="api-error">
+          {{ errorMsg }}
         </div>
         <div v-if="successMsg" class="api-success">
           {{ successMsg }}
         </div>
 
-        <button type="submit" class="mac-btn w-full" :disabled="auth.loading || !isValid">
-          <span v-if="auth.loading" class="spinner"></span>
-          <span v-else>Register</span>
+        <button type="submit" class="mac-btn w-full" :disabled="loading || !isValid">
+          <span v-if="loading" class="spinner"></span>
+          <span v-else>Reset Password</span>
         </button>
       </form>
 
       <div class="auth-footer">
         <p class="mac-text">
-          Already have an account? 
+          Remember your password? 
           <router-link to="/login" class="mac-link">Sign in</router-link>
         </p>
       </div>
@@ -123,23 +133,27 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const form = reactive({
-  fullName: '',
   email: '',
   verificationCode: '',
-  password: '',
+  oldPassword: '',
+  newPassword: '',
   confirmPassword: ''
 })
 
 const errors = reactive({
   email: '',
   verificationCode: '',
-  password: '',
+  oldPassword: '',
+  newPassword: '',
   confirmPassword: ''
 })
 
-const showPassword = ref(false)
+const showOldPassword = ref(false)
+const showNewPassword = ref(false)
 const countdown = ref(0)
 const sendingCode = ref(false)
+const loading = ref(false)
+const errorMsg = ref('')
 const successMsg = ref('')
 
 const validateEmail = (email) => {
@@ -157,11 +171,11 @@ watch(() => form.email, (newVal) => {
   }
 })
 
-watch(() => form.password, (newVal) => {
+watch(() => form.newPassword, (newVal) => {
   if (newVal && newVal.length < 8) {
-    errors.password = 'Password must be at least 8 characters'
+    errors.newPassword = 'Password must be at least 8 characters'
   } else {
-    errors.password = ''
+    errors.newPassword = ''
   }
   
   if (form.confirmPassword && newVal !== form.confirmPassword) {
@@ -172,7 +186,7 @@ watch(() => form.password, (newVal) => {
 })
 
 watch(() => form.confirmPassword, (newVal) => {
-  if (newVal && newVal !== form.password) {
+  if (newVal && newVal !== form.newPassword) {
     errors.confirmPassword = 'Passwords do not match'
   } else {
     errors.confirmPassword = ''
@@ -187,55 +201,95 @@ watch(() => form.verificationCode, (newVal) => {
   }
 })
 
+const passwordStrengthLabel = computed(() => {
+  const pwd = form.newPassword
+  if (!pwd) return ''
+  
+  let score = 0
+  if (pwd.length >= 8) score += 1
+  if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score += 1
+  if (/\d/.test(pwd)) score += 1
+  if (/[^A-Za-z0-9]/.test(pwd)) score += 1
+  
+  if (score <= 1) return 'Weak'
+  if (score <= 3) return 'Medium'
+  return 'Strong'
+})
+
+const strengthClass = computed(() => {
+  if (passwordStrengthLabel.value === 'Strong') return 'strength-strong'
+  if (passwordStrengthLabel.value === 'Medium') return 'strength-medium'
+  if (passwordStrengthLabel.value === 'Weak') return 'strength-weak'
+  return ''
+})
+
 const isValid = computed(() => {
   return validateEmail(form.email) && 
-         form.password.length >= 8 && 
-         form.password === form.confirmPassword &&
+         form.newPassword.length >= 8 && 
+         form.newPassword === form.confirmPassword &&
          /^\d{6}$/.test(form.verificationCode) &&
-         form.fullName.trim() !== ''
+         form.oldPassword.length > 0 &&
+         form.verificationCode.length === 6
 })
 
 const sendCode = async () => {
   if (!isEmailValid.value || countdown.value > 0 || sendingCode.value) return
 
   sendingCode.value = true
+  errorMsg.value = ''
   successMsg.value = ''
 
   try {
-    const result = await auth.sendVerificationCode(form.email, 'register')
+    // TODO: Replace with actual API call to send verification code
+    // const result = await auth.sendVerificationCode(form.email, 'reset_password')
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // Start countdown
+    countdown.value = 60
+    const timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) clearInterval(timer)
+    }, 1000)
 
-    if (result.success) {
-      // Start countdown
-      countdown.value = 60
-      const timer = setInterval(() => {
-        countdown.value--
-        if (countdown.value <= 0) clearInterval(timer)
-      }, 1000)
-    } else {
-       auth.error = result.message || 'Failed to send code'
-    }
+    // Show test code for development
+    const testCode = String(100000 + Math.floor(Math.random() * 900000))
+    successMsg.value = `Verification code sent. Test code: ${testCode}`
+  } catch (error) {
+    errorMsg.value = error.message || 'Failed to send code'
   } finally {
     sendingCode.value = false
   }
 }
 
-const handleRegister = async () => {
+const handleResetPassword = async () => {
   if (!isValid.value) return
   
+  loading.value = true
+  errorMsg.value = ''
   successMsg.value = ''
   
-  const result = await auth.register(
-    form.email, 
-    form.password, 
-    form.fullName, 
-    form.verificationCode
-  )
-  
-  if (result.success) {
-    successMsg.value = 'Registration successful! Redirecting to login...'
+  try {
+    // TODO: Replace with actual API call
+    // const result = await auth.resetPassword({
+    //   email: form.email,
+    //   oldPassword: form.oldPassword,
+    //   newPassword: form.newPassword,
+    //   verificationCode: form.verificationCode
+    // })
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    successMsg.value = 'Password reset successfully! Redirecting to login...'
     setTimeout(() => {
       router.push('/login')
-    }, 1500)
+    }, 2000)
+  } catch (error) {
+    errorMsg.value = error.message || 'Failed to reset password'
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -357,6 +411,23 @@ const handleRegister = async () => {
   font-size: 12px;
   font-weight: 400;
   color: var(--clr-text-secondary, #86868b);
+}
+
+.password-strength {
+  font-size: 12px;
+  margin: 6px 0 0;
+}
+
+.strength-weak {
+  color: #ff3b30;
+}
+
+.strength-medium {
+  color: #ff9500;
+}
+
+.strength-strong {
+  color: #34c759;
 }
 
 .api-error {

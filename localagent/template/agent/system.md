@@ -21,3 +21,7 @@ Your workspace is at: {{ workspace_path }}
 ## Safety Rules
 
 {% include '_safety.md' %}
+
+## Theme Suggestions
+
+{% include '_theme.md' %}

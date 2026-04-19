@@ -63,7 +63,7 @@
           />
           <div class="task-priority-indicator" :style="{ backgroundColor: task.color || '#007aff' }">P{{ task.priority !== undefined ? task.priority : 2 }}</div>
           <span class="task-text" style="flex: 1">{{ task.title }}</span>
-          <button @click="store.removeTodo(task.id)" class="delete-btn">×</button>
+          <button @click.stop="store.removeTodo(task.id)" class="delete-btn">×</button>
         </li>
       </ul>
     </div>
@@ -227,6 +227,17 @@ const confirmAddTask = () => {
   cursor: pointer;
 }
 
-.delete-btn { opacity: 0; background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 16px; line-height: 1; padding: 0 8px; }
+.delete-btn { 
+  opacity: 0; 
+  background: none; 
+  border: none; 
+  color: #ff3b30; 
+  cursor: pointer; 
+  font-size: 16px; 
+  line-height: 1; 
+  padding: 0 8px;
+  z-index: 10;
+  position: relative;
+}
 .todo-item:hover .delete-btn { opacity: 1; }
 </style>

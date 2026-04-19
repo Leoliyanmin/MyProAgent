@@ -48,7 +48,12 @@
     >
       <div class="panel-header">
         <div class="drag-handle" @mousedown="startDrag($event)">
-          <h3 class="panel-main-title">🎨 主题编辑</h3>
+          <h3 class="panel-main-title">
+            <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+            主题编辑
+          </h3>
           <span class="drag-hint">可拖动</span>
         </div>
         <div class="panel-actions">
@@ -93,19 +98,6 @@
             spellcheck="false"
           />
         </div>
-      </template>
-
-      <template v-else>
-        <label class="field-label">圆角 {{ store.tokens[activeToken] }}px</label>
-        <input
-          class="radius-input"
-          type="range"
-          min="0"
-          max="24"
-          step="1"
-          :value="store.tokens[activeToken]"
-          @input="onRadiusInput"
-        />
       </template>
 
       <template v-if="canUploadImage(activeToken)">
@@ -233,26 +225,14 @@ const TOKEN_META = {
   bgSidebar: { label: '侧边栏背景', desc: '左侧导航区域背景色', type: 'color', canUploadImage: true },
   bgTopbar: { label: '顶栏背景', desc: '顶部标签栏背景色', type: 'color', canUploadImage: true },
   bgContent: { label: '内容区背景', desc: '主内容区域背景色', type: 'color', canUploadImage: true },
-  bgAgent: { label: 'Agent 助手背景', desc: '右侧 Agent 侧边栏背景色', type: 'color', canUploadImage: true },
-  bgCard: { label: '卡片背景', desc: '卡片容器背景色', type: 'color' },
-  accent: { label: '主色调', desc: '按钮和高亮颜色', type: 'color' },
-  textPrimary: { label: '主文本', desc: '标题与正文主文本色', type: 'color' },
-  textMuted: { label: '次文本', desc: '说明和辅助文案颜色', type: 'color' },
-  borderColor: { label: '边框色', desc: '边框和分隔线颜色', type: 'color' },
-  cardRadius: { label: '卡片圆角', desc: '卡片圆角半径', type: 'radius' }
+  bgAgent: { label: 'Agent 助手背景', desc: '右侧 Agent 侧边栏背景色', type: 'color', canUploadImage: true }
 }
 
 const quickKeys = [
   'bgSidebar',
   'bgTopbar',
   'bgContent',
-  'bgAgent',
-  'bgCard',
-  'accent',
-  'textPrimary',
-  'textMuted',
-  'borderColor',
-  'cardRadius'
+  'bgAgent'
 ]
 
 const panelStyle = computed(() => ({
@@ -668,6 +648,16 @@ onBeforeUnmount(() => {
   font-size: 13px;
   font-weight: 700;
   color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.title-icon {
+  width: 16px;
+  height: 16px;
+  color: #6b7280;
+  flex-shrink: 0;
 }
 
 .panel-actions {

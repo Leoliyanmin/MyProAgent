@@ -1,12 +1,38 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { tasksAPI } from '../services/api.js'
+import { ref, computed, onMounted } from 'vue'
+
+const STORAGE_KEY = 'proagent_todos'
+
+// 本地存储 helpers
+const loadTodosFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch (err) {
+    console.error('Failed to load todos from localStorage:', err)
+  }
+  // 默认示例数据
+  return [
+    { id: 1, title: 'Draft ECCV methodology section', completed: false, start: '2026-04-10', end: '2026-04-12', priority: 0, color: '#ff3b30' },
+    { id: 2, title: 'CS305 Matrix operations assignment', completed: false, start: '2026-04-15', end: '2026-04-15', priority: 3, color: '#34c759' }
+  ]
+}
+
+const saveTodosToStorage = (todos) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+  } catch (err) {
+    console.error('Failed to save todos to localStorage:', err)
+  }
+}
 
 export const useDashboardStore = defineStore('dashboard', () => {
   // ==============================
   // 1. 活动热力图状态 (Heatmap)
   // ==============================
-  // 记录每天的“贡献值”，格式: { '2026-03-10': 5, '2026-03-11': 2 }
+  // 记录每天的"贡献值"，格式：{ '2026-03-10': 5, '2026-03-11': 2 }
   const activityLog = ref({
     '2026-03-08': 3,
     '2026-03-09': 8 // 伪造的历史数据
@@ -18,7 +44,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
 
-  // 核心 Action：记录一次有效操作（如勾选Todo、保存笔记）
+  // 核心 Action：记录一次有效操作（如勾选 Todo、保存笔记）
   const recordActivity = (points = 1) => {
     const today = getTodayString()
     if (activityLog.value[today]) {
@@ -28,20 +54,17 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
-  // 转换为 ECharts 需要的数据格式: [['2026-03-10', 5], ...]
+  // 转换为 ECharts 需要的数据格式：[['2026-03-10', 5], ...]
   const heatmapData = computed(() => {
     return Object.entries(activityLog.value).map(([date, count]) => [date, count])
   })
 
   // ==============================
-  // 2. TODO 状态
+  // 2. TODO 状态 (本地存储)
   // ==============================
   // priority: 0 (P0 紧急且重要 - 红色), 1 (P1 重要不紧急 - 橙色)
   //           2 (P2 紧急不重要 - 蓝色), 3 (P3 不重要不紧急 - 绿色)
-  const todos = ref([
-    { id: 1, title: 'Draft ECCV methodology section', completed: false, start: '2026-04-10', end: '2026-04-12', priority: 0, color: '#ff3b30' },
-    { id: 2, title: 'CS305 Matrix operations assignment', completed: false, start: '2026-04-15', end: '2026-04-15', priority: 3, color: '#34c759' }
-  ])
+  const todos = ref(loadTodosFromStorage())
 
   // 未完成任务数
   const pendingTodosCount = computed(() => todos.value.filter(t => !t.completed).length)
@@ -78,12 +101,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
         color: taskPayload.color || '#007aff'
       })
     }
+    saveTodosToStorage(todos.value)
   }
 
   const updateTodo = (updatedTask) => {
     const index = todos.value.findIndex(t => t.id === updatedTask.id)
     if (index !== -1) {
       todos.value.splice(index, 1, { ...todos.value[index], ...updatedTask })
+      saveTodosToStorage(todos.value)
     }
   }
 
@@ -94,98 +119,17 @@ export const useDashboardStore = defineStore('dashboard', () => {
       if (task.completed) {
         recordActivity(1)
       }
+      saveTodosToStorage(todos.value)
     }
   }
 
-  const removeTodo = async (id) => {
-    try {
-      await tasksAPI.deleteTask(id)
-      todos.value = todos.value.filter(t => t.id !== id)
-    } catch (err) {
-      console.error('Failed to delete task:', err)
-    }
-  }
-
-  // Backend sync actions
-  const loading = ref(false)
-  const error = ref(null)
-
-  // Load tasks from backend
-  const loadTasks = async () => {
-    loading.value = true
-    error.value = null
-    try {
-      const tasks = await tasksAPI.getTasks()
-      // Map backend task format to frontend format
-      todos.value = tasks.map(task => ({
-        id: task.id,
-        title: task.title,
-        completed: task.completed || false,
-        start: task.start_date || task.start || new Date().toISOString().split('T')[0],
-        end: task.end_date || task.end || task.start_date || new Date().toISOString().split('T')[0],
-        startTime: task.start_time || '',
-        endTime: task.end_time || '',
-        priority: task.priority !== undefined ? task.priority : 2,
-        color: task.color || '#007aff',
-        description: task.description || ''
-      }))
-    } catch (err) {
-      error.value = err.message
-      console.error('Failed to load tasks:', err)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // Create task on backend
-  const createTaskOnBackend = async (taskData) => {
-    try {
-      const result = await tasksAPI.createTask({
-        title: taskData.title,
-        description: taskData.description || '',
-        start_date: taskData.start,
-        end_date: taskData.end,
-        start_time: taskData.startTime || '',
-        end_time: taskData.endTime || '',
-        priority: taskData.priority,
-        completed: taskData.completed || false
-      })
-      return result
-    } catch (err) {
-      console.error('Failed to create task on backend:', err)
-      throw err
-    }
-  }
-
-  // Update task on backend
-  const updateTaskOnBackend = async (taskId, taskData) => {
-    try {
-      const result = await tasksAPI.updateTask(taskId, {
-        title: taskData.title,
-        description: taskData.description,
-        start_date: taskData.start,
-        end_date: taskData.end,
-        start_time: taskData.startTime,
-        end_time: taskData.endTime,
-        priority: taskData.priority,
-        completed: taskData.completed
-      })
-      return result
-    } catch (err) {
-      console.error('Failed to update task on backend:', err)
-      throw err
-    }
-  }
-
-  // Get AI study plan
-  const getStudyPlan = async () => {
-    try {
-      const result = await tasksAPI.getStudyPlan()
-      return result
-    } catch (err) {
-      console.error('Failed to get study plan:', err)
-      throw err
-    }
+  const removeTodo = (id) => {
+    console.log('[DashboardStore] Removing todo with id:', id)
+    console.log('[DashboardStore] Todos before:', todos.value)
+    todos.value = todos.value.filter(t => t.id !== id)
+    console.log('[DashboardStore] Todos after:', todos.value)
+    saveTodosToStorage(todos.value)
+    console.log('[DashboardStore] Saved to localStorage')
   }
 
   return {
@@ -199,13 +143,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
     addTodo,
     updateTodo,
     toggleTodo,
-    removeTodo,
-    
-    loading,
-    error,
-    loadTasks,
-    createTaskOnBackend,
-    updateTaskOnBackend,
-    getStudyPlan
+    removeTodo
   }
 })

@@ -164,7 +164,7 @@ const toggleSkill = (skill) => {
 }
 
 .card-shell {
-  background: #ffffff;
+  background: var(--clr-bg-card, #ffffff);
   border-radius: 12px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   box-shadow: 0 6px 20px rgba(17, 24, 39, 0.05);

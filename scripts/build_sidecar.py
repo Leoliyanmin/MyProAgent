@@ -34,24 +34,27 @@ def get_target_triple():
             return "x86_64-unknown-linux-gnu"
 
 
-def build_sidecar():
-    """使用 PyInstaller 构建 sidecar"""
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
-    
-    backend_script = script_dir / "python_backend.py"
-    binaries_dir = project_root / "frontend" / "src-tauri" / "binaries"
-    
-    # 确保 binaries 目录存在
-    binaries_dir.mkdir(parents=True, exist_ok=True)
-    
-    target_triple = get_target_triple()
-    output_name = f"python-backend-{target_triple}"
-    
-    print(f"Building sidecar for {target_triple}...")
+BACKENDS = [
+    {
+        "script": "python_backend.py",
+        "name": "python-backend",
+    },
+    {
+        "script": "server_backend.py",
+        "name": "server-backend",
+    },
+]
+
+
+def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, script_dir: Path):
+    output_name = f"{name}-{target_triple}"
+    if sys.platform == "win32":
+        output_name += ".exe"
+
+    print(f"\nBuilding {name} for {target_triple}...")
+    print(f"Script: {script}")
     print(f"Output: {binaries_dir / output_name}")
-    
-    # PyInstaller 命令
+
     cmd = [
         sys.executable, "-m", "PyInstaller",
         "--onefile",
@@ -61,33 +64,47 @@ def build_sidecar():
         "--distpath", str(binaries_dir),
         "--workpath", str(script_dir / "build"),
         "--specpath", str(script_dir),
-        str(backend_script)
+        str(script)
     ]
-    
+
     print(f"Running: {' '.join(cmd)}")
-    
+
     try:
-        result = subprocess.run(cmd, check=True, capture_output=False, text=True)
-        print("Build successful!")
-        
-        # 检查输出文件
+        subprocess.run(cmd, check=True, capture_output=False, text=True)
+        print(f"Build {name} successful!")
+
         output_file = binaries_dir / output_name
-        if sys.platform == "win32":
-            output_file = output_file.with_suffix(".exe")
-        
         if output_file.exists():
             print(f"Output file: {output_file}")
             print(f"File size: {output_file.stat().st_size / 1024 / 1024:.2f} MB")
         else:
-            print("Warning: Output file not found!")
-            
+            print(f"Warning: Output file not found at {output_file}")
+
     except subprocess.CalledProcessError as e:
-        print(f"Build failed: {e}")
+        print(f"Build {name} failed: {e}")
         sys.exit(1)
     except FileNotFoundError:
         print("Error: PyInstaller not found. Please install it:")
         print("  pip install pyinstaller")
         sys.exit(1)
+
+
+def build_sidecar():
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent
+    binaries_dir = project_root / "frontend" / "src-tauri" / "binaries"
+    binaries_dir.mkdir(parents=True, exist_ok=True)
+
+    target_triple = get_target_triple()
+
+    for backend in BACKENDS:
+        script = script_dir / backend["script"]
+        if not script.exists():
+            print(f"Error: Script not found: {script}")
+            sys.exit(1)
+        build_one(backend["name"], script, binaries_dir, target_triple, script_dir)
+
+    print("\nAll sidecars built successfully!")
 
 
 if __name__ == "__main__":

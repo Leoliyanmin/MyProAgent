@@ -40,15 +40,15 @@
             :style="{ backgroundColor: store.tokens.bgSidebar, backgroundImage: store.tokens.bgSidebarImage ? `url(${store.tokens.bgSidebarImage})` : 'none', backgroundSize: 'cover' }"
             @click="pickZone('bgSidebar')"
           >
-            <div class="sch-logo" :style="{ background: store.tokens.textMuted }"></div>
-            <div class="sch-navitem zone" :class="zoneClasses('accent')" :style="{ background: store.tokens.accent }" @click.stop="pickZone('accent')"></div>
-            <div class="sch-navitem sch-navitem--dim" :style="{ background: store.tokens.textMuted + '40' }"></div>
-            <div class="sch-navitem sch-navitem--dim" :style="{ background: store.tokens.textMuted + '40' }"></div>
+            <div class="sch-logo"></div>
+            <div class="sch-navitem"></div>
+            <div class="sch-navitem sch-navitem--dim"></div>
+            <div class="sch-navitem sch-navitem--dim"></div>
             <div class="sch-spacer"></div>
-            <div class="sch-avatar zone" :class="zoneClasses('textMuted')" :style="{ background: store.tokens.textMuted }" @click.stop="pickZone('textMuted')"></div>
+            <div class="sch-avatar"></div>
           </div>
 
-          <!-- 右侧主列 -->
+          <!-- 中间主列 -->
           <div class="sch-main">
             <!-- 顶栏 zone -->
             <div
@@ -57,8 +57,8 @@
               :style="{ backgroundColor: store.tokens.bgTopbar, backgroundImage: store.tokens.bgTopbarImage ? `url(${store.tokens.bgTopbarImage})` : 'none', backgroundSize: 'cover' }"
               @click="pickZone('bgTopbar')"
             >
-              <div class="sch-segment zone" :class="zoneClasses('accent')" :style="{ background: store.tokens.accent }" @click.stop="pickZone('accent')"></div>
-              <div class="sch-segment sch-segment--ghost" :style="{ background: store.tokens.textMuted + '30' }"></div>
+              <div class="sch-segment"></div>
+              <div class="sch-segment sch-segment--ghost"></div>
             </div>
 
             <!-- 内容区 zone -->
@@ -68,61 +68,23 @@
               :style="{ backgroundColor: store.tokens.bgContent, backgroundImage: store.tokens.bgContentImage ? `url(${store.tokens.bgContentImage})` : 'none', backgroundSize: 'cover' }"
               @click="pickZone('bgContent')"
             >
-              <!-- 卡片1: 展示文本颜色和边框 -->
-              <div
-                class="sch-card zone"
-                :class="zoneClasses('bgCard')"
-                :style="{
-                  background: store.tokens.bgCard,
-                  border: '2px solid ' + store.tokens.borderColor,
-                  borderRadius: store.tokens.cardRadius + 'px'
-                }"
-                @click.stop="pickZone('bgCard')"
-              >
-                <!-- 点击文字区域切换到 textPrimary -->
-                <div class="sch-card-title zone" :class="zoneClasses('textPrimary')" :style="{ color: store.tokens.textPrimary }" @click.stop="pickZone('textPrimary')">
-                  标题文本
-                </div>
-                <!-- 点击描述区域切换到 textMuted -->
-                <div class="sch-card-desc zone" :class="zoneClasses('textMuted')" :style="{ color: store.tokens.textMuted }" @click.stop="pickZone('textMuted')">
-                  描述文本
-                </div>
-                <!-- 点击边框区域切换到 borderColor -->
-                <div
-                  class="border-indicator zone"
-                  :class="zoneClasses('borderColor')"
-                  :style="{ background: store.tokens.borderColor }"
-                  @click.stop="pickZone('borderColor')"
-                  title="点击编辑边框色"
-                ></div>
-                <!-- 点击圆角指示器切换到 cardRadius -->
-                <div
-                  class="radius-indicator zone"
-                  :class="zoneClasses('cardRadius')"
-                  @click.stop="pickZone('cardRadius')"
-                  title="点击编辑圆角"
-                >
-                  {{ store.tokens.cardRadius }}px
-                </div>
-              </div>
+              <!-- 简化的内容占位 -->
+              <div class="sch-content-placeholder"></div>
+              <div class="sch-content-placeholder"></div>
+            </div>
+          </div>
 
-              <!-- 卡片2: 展示 accent 和综合效果 -->
-              <div
-                class="sch-card zone"
-                :class="zoneClasses('bgCard')"
-                :style="{
-                  background: store.tokens.bgCard,
-                  border: '2px solid ' + store.tokens.borderColor,
-                  borderRadius: store.tokens.cardRadius + 'px'
-                }"
-                @click.stop="pickZone('bgCard')"
-              >
-                <div class="sch-accent-bar zone" :class="zoneClasses('accent')" :style="{ background: store.tokens.accent }" @click.stop="pickZone('accent')"></div>
-                <div class="sch-card-title" :style="{ color: store.tokens.textPrimary }">主色调预览</div>
-                <div class="action-btn zone" :class="zoneClasses('accent')" :style="{ background: store.tokens.accent }" @click.stop="pickZone('accent')">
-                  按钮
-                </div>
-              </div>
+          <!-- Agent 侧边栏 zone -->
+          <div
+            class="sch-agent zone"
+            :class="zoneClasses('bgAgent')"
+            :style="{ backgroundColor: store.tokens.bgAgent, backgroundImage: store.tokens.bgAgentImage ? `url(${store.tokens.bgAgentImage})` : 'none', backgroundSize: 'cover' }"
+            @click="pickZone('bgAgent')"
+          >
+            <div class="sch-agent-header"></div>
+            <div class="sch-agent-body">
+              <div class="sch-agent-line"></div>
+              <div class="sch-agent-line sch-agent-line--short"></div>
             </div>
           </div>
 
@@ -142,212 +104,31 @@
             <div
               class="preview-header"
               :style="{
-                backgroundColor: store.tokens.bgTopbar,
-                borderBottom: '1px solid ' + store.tokens.borderColor
+                backgroundColor: store.tokens.bgTopbar
               }"
-            >
-              <span
-                class="preview-title-text"
-                :style="{ color: store.tokens.textPrimary }"
-              >
-                ProAgent Workspace
-              </span>
-              <div class="preview-header-actions">
-                <div
-                  class="preview-icon-btn"
-                  :style="{ background: store.tokens.accent }"
-                ></div>
-                <div
-                  class="preview-avatar-small"
-                  :style="{ background: store.tokens.textMuted }"
-                ></div>
-              </div>
-            </div>
+            ></div>
 
             <!-- 模拟侧边栏 -->
             <div
               class="preview-sidebar"
               :style="{
-                backgroundColor: store.tokens.bgSidebar,
-                borderRight: '1px solid ' + store.tokens.borderColor
+                backgroundColor: store.tokens.bgSidebar
               }"
-            >
-              <div
-                class="preview-nav-item active"
-                :style="{
-                  backgroundColor: store.tokens.accent + '20',
-                  color: store.tokens.accent,
-                  borderRadius: store.tokens.cardRadius + 'px'
-                }"
-              >
-                <span class="preview-nav-icon" :style="{ background: store.tokens.accent }"></span>
-                <span>工作台</span>
-              </div>
-              <div
-                class="preview-nav-item"
-                :style="{ color: store.tokens.textMuted }"
-              >
-                <span class="preview-nav-icon" :style="{ background: store.tokens.textMuted + '60' }"></span>
-                <span>日历</span>
-              </div>
-              <div
-                class="preview-nav-item"
-                :style="{ color: store.tokens.textMuted }"
-              >
-                <span class="preview-nav-icon" :style="{ background: store.tokens.textMuted + '60' }"></span>
-                <span>文件</span>
-              </div>
-            </div>
+            ></div>
 
             <!-- 模拟内容区 -->
             <div
               class="preview-content"
               :style="{ backgroundColor: store.tokens.bgContent }"
-            >
-              <!-- 卡片1: 待办 -->
-              <div
-                class="preview-card"
-                :style="{
-                  backgroundColor: store.tokens.bgCard,
-                  border: '1px solid ' + store.tokens.borderColor,
-                  borderRadius: store.tokens.cardRadius + 'px',
-                  boxShadow: '0 2px 8px ' + store.tokens.borderColor + '40'
-                }"
-              >
-                <div class="preview-card-header">
-                  <div
-                    class="preview-accent-dot"
-                    :style="{ background: store.tokens.accent }"
-                  ></div>
-                  <span
-                    class="preview-card-title"
-                    :style="{ color: store.tokens.textPrimary }"
-                  >
-                    今日待办
-                  </span>
-                </div>
-                <p
-                  class="preview-card-desc"
-                  :style="{ color: store.tokens.textMuted }"
-                >
-                  3个任务待完成
-                </p>
-                <button
-                  class="preview-btn"
-                  :style="{
-                    background: store.tokens.accent,
-                    color: '#fff',
-                    borderRadius: Math.max(4, store.tokens.cardRadius - 4) + 'px'
-                  }"
-                >
-                  查看全部
-                </button>
-              </div>
+            ></div>
 
-              <!-- 卡片2: 日程 -->
-              <div
-                class="preview-card"
-                :style="{
-                  backgroundColor: store.tokens.bgCard,
-                  border: '1px solid ' + store.tokens.borderColor,
-                  borderRadius: store.tokens.cardRadius + 'px',
-                  boxShadow: '0 2px 8px ' + store.tokens.borderColor + '40'
-                }"
-              >
-                <div class="preview-card-header">
-                  <div
-                    class="preview-accent-dot"
-                    :style="{ background: store.tokens.accent }"
-                  ></div>
-                  <span
-                    class="preview-card-title"
-                    :style="{ color: store.tokens.textPrimary }"
-                  >
-                    日程安排
-                  </span>
-                </div>
-                <div class="preview-schedule-item">
-                  <div
-                    class="preview-time"
-                    :style="{ color: store.tokens.accent }"
-                  >
-                    10:00
-                  </div>
-                  <div
-                    class="preview-event"
-                    :style="{ color: store.tokens.textPrimary }"
-                  >
-                    团队会议
-                  </div>
-                </div>
-                <div class="preview-schedule-item">
-                  <div
-                    class="preview-time"
-                    :style="{ color: store.tokens.textMuted }"
-                  >
-                    14:00
-                  </div>
-                  <div
-                    class="preview-event"
-                    :style="{ color: store.tokens.textMuted }"
-                  >
-                    项目评审
-                  </div>
-                </div>
-              </div>
-
-              <!-- 卡片3: 输入框示例 -->
-              <div
-                class="preview-card"
-                :style="{
-                  backgroundColor: store.tokens.bgCard,
-                  border: '1px solid ' + store.tokens.borderColor,
-                  borderRadius: store.tokens.cardRadius + 'px',
-                  boxShadow: '0 2px 8px ' + store.tokens.borderColor + '40'
-                }"
-              >
-                <span
-                  class="preview-card-title"
-                  :style="{ color: store.tokens.textPrimary }"
-                >
-                  新建任务
-                </span>
-                <div
-                  class="preview-input"
-                  :style="{
-                    background: store.tokens.bgApp,
-                    border: '1px solid ' + store.tokens.borderColor,
-                    borderRadius: Math.max(4, store.tokens.cardRadius - 4) + 'px',
-                    color: store.tokens.textMuted
-                  }"
-                >
-                  输入任务名称...
-                </div>
-                <div class="preview-card-actions">
-                  <button
-                    class="preview-btn-secondary"
-                    :style="{
-                      background: 'transparent',
-                      border: '1px solid ' + store.tokens.borderColor,
-                      color: store.tokens.textMuted,
-                      borderRadius: Math.max(4, store.tokens.cardRadius - 4) + 'px'
-                    }"
-                  >
-                    取消
-                  </button>
-                  <button
-                    class="preview-btn"
-                    :style="{
-                      background: store.tokens.accent,
-                      color: '#fff',
-                      borderRadius: Math.max(4, store.tokens.cardRadius - 4) + 'px'
-                    }"
-                  >
-                    创建
-                  </button>
-                </div>
-              </div>
-            </div>
+            <!-- 模拟 Agent 侧边栏 -->
+            <div
+              class="preview-agent"
+              :style="{
+                backgroundColor: store.tokens.bgAgent
+              }"
+            ></div>
           </div>
         </div>
 
@@ -468,20 +249,11 @@ import { useThemeStore } from '../stores/theme.js'
 const store = useThemeStore()
 
 const META = {
-  accent:      { label: '主色调 / Accent', desc: '按钮、高亮、选中态等关键元素颜色', type: 'color',  canUpload: false },
-  bgApp:       { label: '应用外层背景',    desc: '整个应用最底层的背景色',           type: 'color',  canUpload: true  },
   bgSidebar:   { label: '侧边栏背景',      desc: '左侧导航栏背景色',                 type: 'color',  canUpload: false },
   bgTopbar:    { label: '顶栏背景',        desc: '顶部页签栏背景色',                 type: 'color',  canUpload: false },
   bgContent:   { label: '内容区背景',      desc: '中间主体内容区域背景色',           type: 'color',  canUpload: true  },
-  bgCard:      { label: '卡片背景',        desc: '各类卡片、面板的背景色',           type: 'color',  canUpload: false },
-  textPrimary: { label: '主文本色',        desc: '标题、正文等主要文字颜色',         type: 'color',  canUpload: false },
-  textMuted:   { label: '次要文本色',      desc: '描述、说明等较淡文字颜色',         type: 'color',  canUpload: false },
-  borderColor: { label: '边框色',          desc: '线框、分割线、输入框边框颜色',     type: 'color',  canUpload: false },
-  cardRadius:  { label: '卡片圆角',        desc: '卡片、面板的圆角半径（px）',       type: 'radius', canUpload: false },
+  bgAgent:     { label: 'Agent背景',       desc: 'AI助手侧边栏背景色',               type: 'color',  canUpload: false },
 }
-
-// 在样式预览区已展示的 token，这里只保留快速访问入口
-const EXTRA_KEYS = ['accent', 'bgApp']
 
 const isEditing  = ref(false)
 const activeZone = ref(null)
@@ -543,7 +315,7 @@ const saveTheme = () => {
 .theme-editor {
   width: 100%;
   height: 100%;
-  background: #fff;
+  background: var(--clr-bg-card, #ffffff);
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.08);
   display: flex;
@@ -560,7 +332,7 @@ const saveTheme = () => {
   padding: 14px 18px;
   border-bottom: 1px solid rgba(0,0,0,0.08);
   flex-shrink: 0;
-  background: #fafafa;
+  background: var(--clr-bg-topbar, #fafafa);
   flex-wrap: wrap;
   gap: 10px;
 }
@@ -653,6 +425,21 @@ const saveTheme = () => {
 .sch-navitem--dim { background: rgba(0,0,0,0.1) !important; }
 .sch-spacer { flex: 1; }
 .sch-avatar { width: 18px; height: 18px; border-radius: 50%; align-self: center; flex-shrink: 0; transition: background 0.2s; }
+
+.sch-agent {
+  width: 48px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 6px;
+  gap: 6px;
+  transition: background 0.2s;
+  border-left: 1px solid rgba(0,0,0,0.07);
+}
+.sch-agent-header { height: 8px; border-radius: 4px; width: 100%; transition: background 0.2s; }
+.sch-agent-body { flex: 1; display: flex; flex-direction: column; gap: 4px; padding-top: 4px; }
+.sch-agent-line { height: 4px; border-radius: 2px; width: 100%; transition: background 0.2s; }
+.sch-agent-line--short { width: 60%; }
 
 .sch-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
@@ -779,6 +566,13 @@ const saveTheme = () => {
 .zone.zone--hoverable:hover     { outline: 2px solid rgba(0,122,255,0.5); outline-offset: 1px; }
 .zone.zone--active              { outline: 2.5px solid #007aff; outline-offset: 1px; }
 
+/* 内容区占位 */
+.sch-content-placeholder {
+  background: rgba(0,0,0,0.05);
+  border-radius: 4px;
+  min-height: 40px;
+}
+
 /* ── Live Preview ── */
 .live-preview-container {
   background: #fff;
@@ -790,7 +584,7 @@ const saveTheme = () => {
 
 .live-preview {
   display: grid;
-  grid-template-columns: 70px 1fr;
+  grid-template-columns: 70px 1fr 50px;
   grid-template-rows: 40px 1fr;
   height: 280px;
   border-radius: 8px;
@@ -800,169 +594,23 @@ const saveTheme = () => {
 
 .preview-header {
   grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-}
-
-.preview-title-text {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.preview-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.preview-icon-btn {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-}
-
-.preview-avatar-small {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
+  grid-row: 1;
 }
 
 .preview-sidebar {
   grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  padding: 10px 6px;
-  gap: 6px;
-}
-
-.preview-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  cursor: default;
-}
-
-.preview-nav-item.active {
-  font-weight: 500;
-}
-
-.preview-nav-icon {
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  flex-shrink: 0;
+  grid-column: 1;
 }
 
 .preview-content {
   grid-row: 2;
   grid-column: 2;
-  padding: 12px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  overflow-y: auto;
 }
 
-.preview-card {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.preview-agent {
+  grid-row: 2;
+  grid-column: 3;
 }
-
-.preview-card-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.preview-accent-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.preview-card-title {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.preview-card-desc {
-  font-size: 10px;
-  margin: 0;
-}
-
-.preview-btn {
-  padding: 5px 10px;
-  border: none;
-  font-size: 10px;
-  font-weight: 500;
-  cursor: default;
-  margin-top: auto;
-}
-
-.preview-btn-secondary {
-  padding: 5px 10px;
-  font-size: 10px;
-  cursor: default;
-}
-
-.preview-schedule-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-}
-
-.preview-time {
-  font-weight: 600;
-  font-size: 9px;
-  width: 32px;
-}
-
-.preview-event {
-  flex: 1;
-}
-
-.preview-input {
-  padding: 6px 8px;
-  font-size: 10px;
-}
-
-.preview-card-actions {
-  display: flex;
-  gap: 6px;
-  justify-content: flex-end;
-  margin-top: auto;
-}
-
-/* ── Extra tokens row ── */
-.extra-tokens {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-.extra-token {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 10px;
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 8px;
-  min-width: 60px;
-  transition: border-color 0.15s, background 0.15s;
-}
-.extra-token.zone--hoverable:hover { border-color: rgba(0,122,255,0.5); background: rgba(0,122,255,0.04); }
-.extra-token.zone--active          { border-color: #007aff; background: rgba(0,122,255,0.06); }
-.extra-swatch { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); }
-.extra-label  { font-size: 10px; color: #4b5563; text-align: center; line-height: 1.3; }
 
 /* ── Panel states ── */
 .panel-empty {

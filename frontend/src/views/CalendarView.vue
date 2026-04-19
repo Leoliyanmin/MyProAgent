@@ -621,7 +621,7 @@ const onResizeStart = (e, event) => {
   padding: 4px 12px; font-size: 13px; font-weight: 500; cursor: pointer; color: #1d1d1f;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
-.mac-btn:hover { background: #f5f5f7; }
+.mac-btn:hover { background: var(--clr-bg-content, #f5f5f7); }
 .mac-btn.primary { background: #007aff; color: white; border-color: #007aff; }
 .mac-btn.primary:hover { background: #0062cc; }
 
@@ -637,7 +637,7 @@ const onResizeStart = (e, event) => {
   background: transparent; border: none; padding: 4px 12px; font-size: 13px;
   font-weight: 500; border-radius: 6px; cursor: pointer; color: #1d1d1f;
 }
-.segment.active { background: #ffffff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+.segment.active { background: var(--clr-bg-card, #ffffff); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
 
 .calendar-grid-container { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .mock-calendar-body { flex: 1; display: flex; flex-direction: column; }
@@ -652,7 +652,7 @@ const onResizeStart = (e, event) => {
 .day-cell {
   border-right: 1px solid rgba(0, 0, 0, 0.04); border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   padding: 4px; text-align: right; display: flex; flex-direction: column; cursor: pointer;
-  background: #ffffff; 
+  background: var(--clr-bg-card, #ffffff); 
 }
 .day-cell.is-other-month { background: #fafafa; opacity: 0.6; }
 .day-cell.is-today { background: rgba(0, 122, 255, 0.03); }
@@ -693,7 +693,7 @@ const onResizeStart = (e, event) => {
 .delete-btn-modal:hover { background: rgba(255,59,48,0.1); border-color: rgba(255,59,48,0.2); }
 
 /* Week and Day Timeline View */
-.week-timeline-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #ffffff;}
+.week-timeline-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--clr-bg-card, #ffffff);}
 .week-timeline-header { display: flex; border-bottom: 1px solid rgba(0,0,0,0.08); background: #fafafa; padding-top: 8px; }
 .time-axis-placeholder { width: 50px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-right: 1px solid rgba(0,0,0,0.08); }
 .week-timeline-day-header { flex: 1; text-align: center; padding: 4px 0 8px; border-right: 1px solid rgba(0,0,0,0.04); cursor: pointer; }
@@ -703,18 +703,18 @@ const onResizeStart = (e, event) => {
 .is-today-text .day-name { color: #007aff; }
 .day-num.is-today-bg { background: #007aff; color: white; font-weight: 500; }
 
-.week-all-day-row { display: flex; border-bottom: 1px solid rgba(0,0,0,0.08); min-height: 40px; background: #ffffff; }
+.week-all-day-row { display: flex; border-bottom: 1px solid rgba(0,0,0,0.08); min-height: 40px; background: var(--clr-bg-card, #ffffff); }
 .all-day-label { font-size: 11px; color: #86868b; font-weight: 500; }
 .week-all-day-cell { flex: 1; border-right: 1px solid rgba(0,0,0,0.04); padding: 4px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
 .week-all-day-cell:last-child { border-right: none; }
 
 .week-timeline-scroll { flex: 1; overflow-y: auto; position: relative; }
 .week-timeline-grid { display: flex; min-height: 1200px; }
-.time-axis { width: 50px; flex-shrink: 0; border-right: 1px solid rgba(0,0,0,0.08); background: #ffffff; position: relative;}
+.time-axis { width: 50px; flex-shrink: 0; border-right: 1px solid rgba(0,0,0,0.08); background: var(--clr-bg-card, #ffffff); position: relative;}
 .time-slot { height: 50px; position: relative; }
 .time-slot span { position: absolute; top: -7px; right: 8px; font-size: 10px; color: #86868b; background: #fff; padding-left: 4px;}
 .time-separator { position: absolute; right: 0; top: 0; width: 4px; height: 1px; background: rgba(0,0,0,0.08); }
-.week-day-columns { flex: 1; display: flex; background: #ffffff;}
+.week-day-columns { flex: 1; display: flex; background: var(--clr-bg-card, #ffffff);}
 .week-day-column { flex: 1; display: flex; flex-direction: column; border-right: 1px solid rgba(0,0,0,0.04); position: relative; }
 .week-day-column:last-child { border-right: none; }
 .is-today-col { background: rgba(0, 122, 255, 0.02); }

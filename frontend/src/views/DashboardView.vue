@@ -33,16 +33,12 @@ import VueGridLayout from 'vue3-grid-layout'
 // 显式解构核心组件
 const { GridLayout, GridItem } = VueGridLayout
 
-// 1. 真实导入你刚才创建的四个小组件
-import WidgetHeatmap from '../components/widgets/WidgetHeatmap.vue'
-import WidgetNotes from '../components/widgets/WidgetNotes.vue'
+// 1. 真实导入你刚才创建的小组件
 import WidgetTodo from '../components/widgets/WidgetTodo.vue'
 import WidgetMessages from '../components/widgets/WidgetMessages.vue'
 
 // 2. 更新类型映射字典，指向真实的导入对象
 const componentMap = {
-  'heatmap': WidgetHeatmap,
-  'notes': WidgetNotes,
   'todo': WidgetTodo,
   'messages': WidgetMessages
 }
@@ -52,10 +48,8 @@ const getComponentByType = (type) => componentMap[type]
 // 3. 核心状态：布局数据结构
 // 在 DashboardView.vue 的 <script setup> 中修改 layoutConfig
 const layoutConfig = ref([
-  { x: 0, y: 0, w: 5, h: 4, i: '1', type: 'heatmap', minW: 4, minH: 3 }, // 热力图不能太窄
-  { x: 5, y: 0, w: 7, h: 6, i: '2', type: 'notes', minW: 4, minH: 4 },   // 笔记需要输入空间
-  { x: 0, y: 4, w: 5, h: 5, i: '3', type: 'todo', minW: 3, minH: 4 },    // TODO 允许稍微窄一点
-  { x: 5, y: 6, w: 7, h: 4, i: '4', type: 'messages', minW: 4, minH: 3 } // 消息列表
+  { x: 0, y: 0, w: 6, h: 5, i: '3', type: 'todo', minW: 3, minH: 4 },    // TODO 允许稍微窄一点
+  { x: 6, y: 0, w: 6, h: 5, i: '4', type: 'messages', minW: 4, minH: 3 } // 消息列表
 ])
 // 4. 编辑模式控制
 const isEditing = ref(false)

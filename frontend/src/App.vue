@@ -5,7 +5,7 @@
   <div v-else-if="route.meta.requiresAuth === false" class="macos-app-container">
     <router-view />
   </div>
-  <div v-else class="macos-app-container">
+  <div v-else class="macos-app-container" :class="{ 'theme-editing-mode': appMode === 'theme' }">
     <SidebarLeft
       :current-view="currentView"
       :app-mode="appMode"
@@ -172,5 +172,18 @@ html, body, #app {
   overflow-y: auto;
   overflow-x: hidden; 
   min-width: 0;
+}
+
+/* ── Theme Editing Mode ── */
+/* Hide all content inside layout zones, keeping only their backgrounds visible */
+.theme-editing-mode .left-sidebar > *,
+.theme-editing-mode .macos-topbar > *,
+.theme-editing-mode .right-sidebar > * {
+  visibility: hidden;
+}
+
+/* Content area: hide routed content children */
+.theme-editing-mode .macos-content-area > * {
+  visibility: hidden;
 }
 </style>

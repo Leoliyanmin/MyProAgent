@@ -6,15 +6,21 @@
       <div class="nav-group">
         <div class="nav-title">通用功能</div>
         <div class="nav-item" :class="{ active: appMode === 'main' && currentView === 'dashboard' }" @click="goHome">
-          <span class="icon">⌘</span>
+          <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
           工作区主页
         </div>
         <div class="nav-item" :class="{ active: appMode === 'theme' }" @click="emit('setAppMode', 'theme')">
-          <span class="icon">🎨</span>
+          <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+          </svg>
           主题设置
         </div>
         <div class="nav-item">
-          <span class="icon">⇧</span>
+          <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+          </svg>
           通用接口 B
         </div>
       </div>
@@ -266,9 +272,19 @@ const toggleSettings = () => {
   font-weight: 600;
 }
 
-.icon {
-  font-size: 14px;
+.icon-svg {
+  width: 18px;
+  height: 18px;
   color: rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.nav-item.active .icon-svg {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.nav-item:hover .icon-svg {
+  color: rgba(0, 0, 0, 0.7);
 }
 
 /* 虚线分割线 */

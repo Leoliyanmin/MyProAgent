@@ -66,7 +66,7 @@
 
 .file-explorer-skeleton {
   flex: 1;
-  background: #ffffff;
+  background: var(--clr-bg-content, #f5f5f7);
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;

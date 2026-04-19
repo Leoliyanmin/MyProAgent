@@ -19,7 +19,8 @@
               placeholder="请输入姓名"
             />
             <button class="action-btn" type="button" @click="saveName">保存姓名</button>
-            <button class="action-btn ghost" type="button" @click="openPasswordModal">修改密码</button>
+            <!-- 修改密码功能暂未实现后端接口，暂时隐藏 -->
+            <!-- <button class="action-btn ghost" type="button" @click="openPasswordModal">修改密码</button> -->
           </div>
           <p v-if="nameNotice" class="status-text" :class="`status-${nameNoticeType}`">{{ nameNotice }}</p>
           <p class="binding-meta">
@@ -418,7 +419,7 @@ const toggleProvider = (key) => {
   min-height: 100%;
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  background: #ffffff;
+  background: var(--clr-bg-card, #ffffff);
   padding: 20px;
   box-sizing: border-box;
 }
@@ -450,7 +451,7 @@ const toggleProvider = (key) => {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 10px;
   padding: 14px;
-  background: linear-gradient(180deg, #ffffff, #fafafa);
+  background: var(--clr-bg-card, #ffffff);
 }
 
 .panel-title {
@@ -491,7 +492,7 @@ const toggleProvider = (key) => {
   padding: 8px 10px;
   font-size: 13px;
   color: #111827;
-  background: #ffffff;
+  background: var(--clr-bg-card, #ffffff);
 }
 
 .text-input:focus {
@@ -513,7 +514,7 @@ const toggleProvider = (key) => {
 
 .action-btn.ghost {
   border-color: rgba(0, 0, 0, 0.2);
-  background: #ffffff;
+  background: var(--clr-bg-card, #ffffff);
   color: #111827;
 }
 
@@ -536,7 +537,7 @@ const toggleProvider = (key) => {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: #ffffff;
+  background: var(--clr-bg-card, #ffffff);
 }
 
 .binding-main {
@@ -581,7 +582,7 @@ const toggleProvider = (key) => {
   width: min(460px, calc(100vw - 32px));
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.12);
-  background: #ffffff;
+  background: var(--clr-bg-card, #ffffff);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
   padding: 16px;
 }

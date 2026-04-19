@@ -47,6 +47,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-print(f"TEST_MODE: {settings.TEST_MODE}")
-print(f"SKIP_VERIFICATION: {settings.SKIP_VERIFICATION}")
-print(f"SKIP_RATE_LIMIT: {settings.SKIP_RATE_LIMIT}")

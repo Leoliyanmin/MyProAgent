@@ -65,6 +65,10 @@ fn spawn_backend(
 
 #[tauri::command]
 fn restart_backends(app: tauri::AppHandle) -> Result<String, String> {
+    if cfg!(debug_assertions) {
+        return Ok("Dev mode: backends managed by dev.js, restart manually".to_string());
+    }
+    
     let state = app.state::<BackendState>();
     
     if let Ok(mut process) = state.local_process.lock() {
@@ -99,34 +103,39 @@ fn main() {
             server_process: Arc::new(Mutex::new(None)),
         })
         .setup(|app| {
-            let state = app.state::<BackendState>();
             let app_handle = app.handle().clone();
             
-            tauri::async_runtime::spawn(async move {
-                let state = app_handle.state::<BackendState>();
-                
-                match spawn_backend(&app_handle, "python-backend", state.local_process.clone()) {
-                    Ok(_) => {
-                        if let Err(e) = wait_for_backend("http://localhost:8002/health", 10).await {
-                            eprintln!("Local backend failed to start: {}", e);
+            // In dev mode, backends are started by scripts/dev.js (beforeDevCommand)
+            // Only spawn sidecars in production (release) builds
+            if cfg!(debug_assertions) {
+                println!("[ProAgent] Dev mode: backends started by dev.js, skipping sidecar spawn");
+            } else {
+                tauri::async_runtime::spawn(async move {
+                    let state = app_handle.state::<BackendState>();
+                    
+                    match spawn_backend(&app_handle, "python-backend", state.local_process.clone()) {
+                        Ok(_) => {
+                            if let Err(e) = wait_for_backend("http://localhost:8002/health", 10).await {
+                                eprintln!("Local backend failed to start: {}", e);
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Local backend error: {}", e);
                         }
                     }
-                    Err(e) => {
-                        eprintln!("Local backend error: {}", e);
-                    }
-                }
-                
-                match spawn_backend(&app_handle, "server-backend", state.server_process.clone()) {
-                    Ok(_) => {
-                        if let Err(e) = wait_for_backend("http://localhost:8001/health", 10).await {
-                            eprintln!("Server backend failed to start: {}", e);
+                    
+                    match spawn_backend(&app_handle, "server-backend", state.server_process.clone()) {
+                        Ok(_) => {
+                            if let Err(e) = wait_for_backend("http://localhost:8001/health", 10).await {
+                                eprintln!("Server backend failed to start: {}", e);
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Server backend error: {}", e);
                         }
                     }
-                    Err(e) => {
-                        eprintln!("Server backend error: {}", e);
-                    }
-                }
-            });
+                });
+            }
             
             Ok(())
         })

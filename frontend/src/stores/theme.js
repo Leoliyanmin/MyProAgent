@@ -69,7 +69,10 @@ export const useThemeStore = defineStore('theme', () => {
     r.style.setProperty('--clr-card-radius',   tokens.cardRadius + 'px')
   }
 
-  watch(tokens, applyToRoot, { deep: true })
+  watch(tokens, () => {
+    applyToRoot()
+    saveToStorage()
+  }, { deep: true })
 
   const snapshot = () => ({ ...tokens })
 
@@ -97,9 +100,19 @@ export const useThemeStore = defineStore('theme', () => {
     Object.assign(tokens, DEFAULTS)
   }
 
+  const applySuggestion = (suggestedTokens) => {
+    history.value.push(snapshot())
+    redoStack.value = []
+    for (const [key, value] of Object.entries(suggestedTokens)) {
+      if (key in DEFAULTS) {
+        tokens[key] = value
+      }
+    }
+  }
+
   // 初始化时加载
   loadFromStorage()
   applyToRoot()
 
-  return { tokens, canUndo, canRedo, setToken, undo, redo, reset, applyToRoot, saveToStorage, loadFromStorage }
+  return { tokens, canUndo, canRedo, setToken, undo, redo, reset, applyToRoot, saveToStorage, loadFromStorage, applySuggestion }
 })

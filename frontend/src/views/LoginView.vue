@@ -38,6 +38,8 @@
             </button>
           </div>
           <span class="error-text" v-if="errors.password">{{ errors.password }}</span>
+          <!-- 修改密码功能暂未实现后端接口，暂时隐藏 -->
+          <!-- <router-link to="/forgot-password" class="forgot-password-link">Forgot password?</router-link> -->
         </div>
         
         <div v-if="auth.error" class="api-error">
@@ -219,6 +221,18 @@ const handleLogin = async () => {
   font-size: 12px;
   color: #ff3b30;
   margin-top: 4px;
+}
+
+.forgot-password-link {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--clr-primary, #007aff);
+  text-decoration: none;
+  margin-top: 6px;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
 }
 
 .api-error {
