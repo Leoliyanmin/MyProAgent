@@ -18,19 +18,14 @@ from localagent.memory import MemoryStore
 
 class AgentService:
     _instance = None
-    _initialized = False
     
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+            cls._instance._init(*args, **kwargs)
         return cls._instance
     
-    def __init__(self, nanobot_ws_url: str = "ws://127.0.0.1:8765/"):
-        if AgentService._initialized:
-            return
-            
-        AgentService._initialized = True
-        
+    def _init(self, nanobot_ws_url: str = "ws://127.0.0.1:8765/"):
         self.agent_logic = AgentLogic()
         self.chat_handle = ChatHandle()
         self.nanobot_ws_url = nanobot_ws_url
@@ -38,7 +33,12 @@ class AgentService:
         self.workspace = Path(__file__).parent.parent.parent
         self.session_manager = SessionManager(self.workspace)
         self.memory_store = MemoryStore(self.workspace)
+        
+        print("[AgentService] Initializing LocalAgent...")
+        import time
+        start = time.time()
         self.agent = LocalAgent(workspace=self.workspace)
+        print(f"[AgentService] LocalAgent initialized in {time.time() - start:.2f}s")
 
     def process_query(self, user_id: str, message: str, session_id: str = None):
         # 如果没有 session_id，创建一个新会话
