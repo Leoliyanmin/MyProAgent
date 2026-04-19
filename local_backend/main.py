@@ -12,6 +12,9 @@ from logging_config import setup_logging
 # 初始化日志系统
 logger = setup_logging("local_backend", log_level=settings.LOG_LEVEL)
 
+from service.agent_service import AgentService
+_agent_service = AgentService()
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
