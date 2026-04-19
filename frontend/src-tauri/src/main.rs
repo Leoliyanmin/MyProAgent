@@ -1,12 +1,33 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use tauri::Manager;
 use tauri_plugin_shell::process::CommandChild;
+use tauri_plugin_shell::ShellExt;
 
 struct BackendState {
     local_process: Arc<Mutex<Option<CommandChild>>>,
     server_process: Arc<Mutex<Option<CommandChild>>>,
+}
+
+async fn wait_for_backend(url: &str, timeout_secs: u64) -> Result<(), String> {
+    let start = std::time::Instant::now();
+    let client = reqwest::Client::new();
+    
+    while start.elapsed().as_secs() < timeout_secs {
+        match client.get(url).timeout(Duration::from_secs(2)).send().await {
+            Ok(resp) if resp.status().is_success() => {
+                println!("Backend ready at {}", url);
+                return Ok(());
+            }
+            _ => {
+                tokio::time::sleep(Duration::from_millis(100)).await;
+            }
+        }
+    }
+    
+    Err(format!("Backend at {} failed to start within {} seconds", url, timeout_secs))
 }
 
 fn spawn_backend(
@@ -14,8 +35,6 @@ fn spawn_backend(
     name: &str,
     process_state: Arc<Mutex<Option<CommandChild>>>,
 ) -> Result<(), String> {
-    use tauri_plugin_shell::ShellExt;
-    
     let sidecar_name = format!("binaries/{}", name);
     let sidecar = app.shell()
         .sidecar(&sidecar_name)
@@ -60,7 +79,7 @@ fn restart_backends(app: tauri::AppHandle) -> Result<String, String> {
         }
     }
     
-    std::thread::sleep(std::time::Duration::from_secs(1));
+    std::thread::sleep(Duration::from_millis(500));
     
     let local_state = state.local_process.clone();
     spawn_backend(&app, "python-backend", local_state)?;
@@ -81,26 +100,33 @@ fn main() {
         })
         .setup(|app| {
             let state = app.state::<BackendState>();
+            let app_handle = app.handle().clone();
             
-            match spawn_backend(&app.handle(), "python-backend", state.local_process.clone()) {
-                Ok(_) => println!("Local backend started"),
-                Err(e) => {
-                    eprintln!("Local backend error: {}", e);
-                    eprintln!("Run manually: cd local_backend && uvicorn main:app --host 0.0.0.0 --port 8002");
+            tauri::async_runtime::spawn(async move {
+                let state = app_handle.state::<BackendState>();
+                
+                match spawn_backend(&app_handle, "python-backend", state.local_process.clone()) {
+                    Ok(_) => {
+                        if let Err(e) = wait_for_backend("http://localhost:8002/health", 10).await {
+                            eprintln!("Local backend failed to start: {}", e);
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("Local backend error: {}", e);
+                    }
                 }
-            }
-            
-            std::thread::sleep(std::time::Duration::from_secs(1));
-            
-            match spawn_backend(&app.handle(), "server-backend", state.server_process.clone()) {
-                Ok(_) => println!("Server backend started"),
-                Err(e) => {
-                    eprintln!("Server backend error: {}", e);
-                    eprintln!("Run manually: cd server_backend && uvicorn main:app --host 0.0.0.0 --port 8001");
+                
+                match spawn_backend(&app_handle, "server-backend", state.server_process.clone()) {
+                    Ok(_) => {
+                        if let Err(e) = wait_for_backend("http://localhost:8001/health", 10).await {
+                            eprintln!("Server backend failed to start: {}", e);
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("Server backend error: {}", e);
+                    }
                 }
-            }
-            
-            std::thread::sleep(std::time::Duration::from_secs(2));
+            });
             
             Ok(())
         })

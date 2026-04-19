@@ -7,7 +7,6 @@ import websockets
 from pathlib import Path
 import sys
 
-# 添加 localagent 到路径
 localagent_path = Path(__file__).parent.parent.parent / "localagent"
 if str(localagent_path) not in sys.path:
     sys.path.insert(0, str(localagent_path))
@@ -18,14 +17,25 @@ from localagent.memory import MemoryStore
 
 
 class AgentService:
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
     def __init__(self, nanobot_ws_url: str = "ws://127.0.0.1:8765/"):
-        # 保留原有逻辑作为备用
+        if AgentService._initialized:
+            return
+            
+        AgentService._initialized = True
+        
         self.agent_logic = AgentLogic()
         self.chat_handle = ChatHandle()
         self.nanobot_ws_url = nanobot_ws_url
 
-        # 初始化 LocalAgent
-        self.workspace = Path(__file__).parent.parent.parent  # 项目根目录
+        self.workspace = Path(__file__).parent.parent.parent
         self.session_manager = SessionManager(self.workspace)
         self.memory_store = MemoryStore(self.workspace)
         self.agent = LocalAgent(workspace=self.workspace)

@@ -4,8 +4,14 @@ from dataclasses import dataclass, field
 from typing import Any
 import httpx
 import json
+from functools import lru_cache
 
 from .config import LocalAgentConfig, load_config
+
+
+@lru_cache(maxsize=1)
+def get_cached_config():
+    return load_config()
 
 
 @dataclass
@@ -38,28 +44,14 @@ class OpenAICompatProvider:
         self.temperature = temperature
         self._client = None
 
-        # Load from config file if not explicitly provided
         if config is None and api_key is None:
-            config = load_config()
+            config = get_cached_config()
 
         if config is not None:
-            # Debug info
-            print(f"[DEBUG] Provider init - Model requested: {model}")
-            print(f"[DEBUG] Config agent.provider: {config.agent.provider}")
-            print(f"[DEBUG] Config agent.model: {config.agent.model}")
             provider_name = config.get_provider_name(model)
-            print(f"[DEBUG] Matched provider name: {provider_name}")
-
-            # Apply API key from explicit arg, then config, then env
             self.api_key = api_key or config.get_api_key(model)
-            print(f"[DEBUG] API key type: {type(self.api_key)}")
-            print(f"[DEBUG] API key (masked): {self.api_key[:10] if self.api_key else 'None'}...")
-
-            # Apply api_base from explicit arg, then config
             config_api_base = config.get_api_base(model)
-            print(f"[DEBUG] Config API base: {config_api_base}")
             self.api_base = api_base or config_api_base or "https://api.openai.com/v1"
-
             self.model = model or config.agent.model
         else:
             self.api_key = api_key
@@ -68,10 +60,6 @@ class OpenAICompatProvider:
 
         if self.api_base:
             self.api_base = self.api_base.rstrip("/")
-
-        print(f"[DEBUG] Final API key type: {type(self.api_key)}, value: {self.api_key}")
-        print(f"[DEBUG] Final API base: {self.api_base}")
-        print(f"[DEBUG] Final model: {self.model}")
 
     def _get_client(self):
         if self._client is None:
@@ -92,9 +80,8 @@ class OpenAICompatProvider:
         return self._client
 
     def _get_extra_headers(self) -> dict[str, str]:
-        """Get extra headers from config if available."""
         try:
-            config = load_config()
+            config = get_cached_config()
             provider_name = config.get_provider_name(self.model)
             if provider_name:
                 provider_config = getattr(config.providers, provider_name, None)
