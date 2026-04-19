@@ -144,6 +144,15 @@
 
 一键启动前端 + Local Backend + Server Backend：
 
+初始化数据库
+```bash
+cd local_backend
+python database/code/database_init.py
+cd ..
+cd server_backend
+python database/code/database_init.py
+```
+
 ```bash
 cd frontend
 npm install
