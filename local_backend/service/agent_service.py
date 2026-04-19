@@ -4,13 +4,31 @@ import asyncio
 import json
 from typing import Optional
 import websockets
+from pathlib import Path
+import sys
+
+# 添加 localagent 到路径
+localagent_path = Path(__file__).parent.parent.parent / "localagent"
+if str(localagent_path) not in sys.path:
+    sys.path.insert(0, str(localagent_path))
+
+from localagent.agent import LocalAgent
+from localagent.session import SessionManager
+from localagent.memory import MemoryStore
 
 
 class AgentService:
     def __init__(self, nanobot_ws_url: str = "ws://127.0.0.1:8765/"):
+        # 保留原有逻辑作为备用
         self.agent_logic = AgentLogic()
         self.chat_handle = ChatHandle()
         self.nanobot_ws_url = nanobot_ws_url
+
+        # 初始化 LocalAgent
+        self.workspace = Path(__file__).parent.parent.parent  # 项目根目录
+        self.session_manager = SessionManager(self.workspace)
+        self.memory_store = MemoryStore(self.workspace)
+        self.agent = LocalAgent(workspace=self.workspace)
 
     def process_query(self, user_id: str, message: str, session_id: str = None):
         # 如果没有 session_id，创建一个新会话
@@ -105,3 +123,70 @@ class AgentService:
                 'response': f'连接nanobot失败: {str(e)}',
                 'error': str(e)
             }
+
+    # ==================== LocalAgent 集成方法 ====================
+
+    async def process_with_local_agent(self, user_id: str, message: str, session_id: str = "default"):
+        """使用 LocalAgent 处理查询（支持文件管理功能）- 异步版本"""
+        # 获取或创建会话
+        session = self.session_manager.get_or_create(session_id)
+
+        # 运行 agent
+        result = await self.agent.run(message)
+
+        # 保存到会话和记忆
+        session.add_message("user", message)
+        if result.content:
+            session.add_message("assistant", result.content)
+        self.session_manager.save(session)
+        self.memory_store.add_entry(message)
+
+        return {
+            'response': result.content,
+            'thought_trace': [],  # LocalAgent 可扩展此功能
+            'tool_calls': result.tools_used,
+            'iterations': result.iterations,
+            'requires_confirmation': False
+        }
+
+    def get_local_agent_session(self, session_id: str = "default"):
+        """获取 LocalAgent 会话消息"""
+        session = self.session_manager.get_or_create(session_id)
+        history = session.get_history()
+        return {
+            'success': True,
+            'session_id': session_id,
+            'messages': [
+                {'role': msg['role'], 'content': msg.get('content', '')}
+                for msg in history
+            ]
+        }
+
+    def clear_local_agent_session(self, session_id: str = "default"):
+        """清除 LocalAgent 会话"""
+        session = self.session_manager.get_or_create(session_id)
+        session.clear()
+        self.session_manager.save(session)
+        return {'success': True, 'message': f'Session {session_id} cleared'}
+
+    def get_memory_content(self):
+        """获取当前记忆内容"""
+        return {
+            'success': True,
+            'content': self.memory_store.get_memory()
+        }
+
+    async def consolidate_memory(self):
+        """运行记忆整合"""
+        from localagent.memory import Dream
+        dream = Dream(
+            store=self.memory_store,
+            provider=self.agent.provider,
+            tool_registry=self.agent.tools,
+        )
+        result = await dream.run()
+        return {
+            'success': result.success,
+            'entries_processed': result.entries_processed,
+            'summary': result.summary
+        }

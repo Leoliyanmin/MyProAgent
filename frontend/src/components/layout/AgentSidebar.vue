@@ -62,7 +62,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useAuthStore } from '../../stores/auth.js'
+import { agentAPI } from '../../services/api.js'
 
 defineProps({
   isOpen: {
@@ -73,48 +75,223 @@ defineProps({
 
 const emit = defineEmits(['toggleFromSelf'])
 
-// Thought Trace 数据
+// Auth store
+const authStore = useAuthStore()
+
+// 状态
 const traceExpanded = ref(true)
+const messages = ref([])
+const inputText = ref('')
+const wsRef = ref(null)
+const sessionId = ref('default')
+const isConnecting = ref(false)
+const isConnected = ref(false)
+const agentStatus = ref(null)
+
+// Thought Trace 数据
 const phaseLabel = {
   planning: '📋 规划',
   tool_call: '🔧 工具调用',
   observation: '👁️ 观察',
-  result: '✅ 结果'
+  result: '✅ 结果',
+  tool: '🔧 工具调用'
 }
 
-// Mock trace 事件（后期从 Pinia 或 WebSocket 接收真实数据）
-const traceEvents = ref([
-  { phase: 'planning', summary: '分析用户问题，制定执行计划', durationMs: 120 },
-  { phase: 'tool_call', summary: '调用 search_workspace 工具', durationMs: 250 },
-  { phase: 'observation', summary: '获取查询结果 3 条', durationMs: 80 }
-])
+const traceEvents = ref([])
 
-// 对话消息
-const messages = ref([
-  { role: 'agent', text: 'Hello! 我是 ProAgent 助手，可以帮你分析代码和回答问题。' }
-])
+// 欢迎消息
+const welcomeMessage = 'Hello! 我是 ProAgent 智能助手，现在具备文件管理能力。我可以：\n\n' +
+  '📁 读取、编辑项目文件\n' +
+  '🔍 搜索文件和内容\n' +
+  '💡 分析代码、回答问题\n\n' +
+  '试试问我："帮我找出所有 Python 文件中的 TODO"'
 
-const inputText = ref('')
+// 加载历史消息
+const loadHistory = async () => {
+  try {
+    const result = await agentAPI.getLocalSession(sessionId.value)
+    if (result.success && result.messages) {
+      messages.value = result.messages.map(m => ({
+        role: m.role,
+        text: m.content
+      }))
+    }
+    if (messages.value.length === 0) {
+      messages.value.push({ role: 'agent', text: welcomeMessage })
+    }
+  } catch (err) {
+    console.error('[Agent] Failed to load history:', err)
+    messages.value.push({ role: 'agent', text: welcomeMessage })
+  }
+}
 
+// 获取 Agent 状态
+const loadAgentStatus = async () => {
+  try {
+    const status = await agentAPI.getStatus()
+    agentStatus.value = status
+    console.log('[Agent] Status:', status)
+  } catch (err) {
+    console.error('[Agent] Failed to get status:', err)
+  }
+}
+
+// 连接 WebSocket
+const connectWebSocket = () => {
+  if (!authStore.isAuthenticated) {
+    console.log('[Agent] Not authenticated, skipping WebSocket connection')
+    return
+  }
+
+  disconnectWebSocket()
+
+  isConnecting.value = true
+
+  wsRef.value = agentAPI.connectWebSocket(
+    sessionId.value,
+    // onMessage
+    (data) => {
+      if (data.role === 'assistant') {
+        // 如果最后一条消息是 assistant，追加内容
+        const lastMsg = messages.value[messages.value.length - 1]
+        if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.done) {
+          lastMsg.text += data.content
+        } else {
+          messages.value.push({ role: 'assistant', text: data.content, done: false })
+        }
+      } else if (data.role === 'user') {
+        messages.value.push({ role: 'user', text: data.content })
+      }
+    },
+    // onTool
+    (data) => {
+      traceEvents.value.push(data)
+    },
+    // onError
+    (error) => {
+      console.error('[Agent] WebSocket error:', error)
+      isConnected.value = false
+      isConnecting.value = false
+      messages.value.push({
+        role: 'agent',
+        text: `❌ 错误: ${error.message || '连接失败'}`,
+        done: true
+      })
+    },
+    // onDone
+    (data) => {
+      console.log('[Agent] Request completed:', data)
+      // 标记最后一条消息完成
+      const lastMsg = messages.value[messages.value.length - 1]
+      if (lastMsg) {
+        lastMsg.done = true
+      }
+    }
+  )
+
+  if (wsRef.value) {
+    wsRef.value.onopen = () => {
+      console.log('[Agent] WebSocket connected')
+      isConnected.value = true
+      isConnecting.value = false
+    }
+  }
+}
+
+// 断开 WebSocket
+const disconnectWebSocket = () => {
+  if (wsRef.value) {
+    wsRef.value.close()
+    wsRef.value = null
+  }
+  isConnected.value = false
+  isConnecting.value = false
+}
+
+// 发送消息
 const sendMessage = () => {
   if (!inputText.value.trim()) return
-  
-  // 用户消息
-  messages.value.push({
-    role: 'user',
-    text: inputText.value
-  })
-  
-  // 模拟 Agent 响应
-  setTimeout(() => {
+
+  const message = inputText.value.trim()
+
+  // 添加用户消息
+  messages.value.push({ role: 'user', text: message, done: true })
+  inputText.value = ''
+
+  // 如果 WebSocket 连接正常，使用 WebSocket
+  if (wsRef.value && wsRef.value.readyState === WebSocket.OPEN) {
+    wsRef.value.send(JSON.stringify({
+      type: 'chat',
+      message
+    }))
+  } else {
+    // 否则使用 REST API（降级方案）
+    sendViaREST(message)
+  }
+}
+
+// 通过 REST API 发送消息（降级方案）
+const sendViaREST = async (message) => {
+  try {
+    const result = await agentAPI.chatLocal(message, sessionId.value)
+
+    // 添加助手消息
     messages.value.push({
       role: 'agent',
-      text: `已收到: "${inputText.value}" (这是演示回复)`
+      text: result.response || '没有响应',
+      done: true
     })
-  }, 500)
-  
-  inputText.value = ''
+
+    // 显示工具调用
+    if (result.tool_calls && result.tool_calls.length > 0) {
+      for (const tool of result.tool_calls) {
+        traceEvents.value.push({
+          phase: 'tool',
+          summary: `调用工具: ${tool}`,
+          durationMs: 0
+        })
+      }
+    }
+  } catch (err) {
+    console.error('[Agent] Failed to send message:', err)
+    messages.value.push({
+      role: 'agent',
+      text: `❌ 发送失败: ${err.message}`,
+      done: true
+    })
+  }
 }
+
+// 清空对话
+const clearChat = () => {
+  messages.value = [{ role: 'agent', text: welcomeMessage }]
+  traceEvents.value = []
+  agentAPI.clearLocalSession(sessionId.value).catch(console.error)
+}
+
+// 生命周期
+onMounted(() => {
+  loadAgentStatus()
+  if (authStore.isAuthenticated) {
+    loadHistory()
+    connectWebSocket()
+  }
+})
+
+onUnmounted(() => {
+  disconnectWebSocket()
+})
+
+// 监听认证状态变化
+watch(() => authStore.isAuthenticated, (isAuth) => {
+  if (isAuth) {
+    loadHistory()
+    connectWebSocket()
+  } else {
+    disconnectWebSocket()
+    messages.value = [{ role: 'agent', text: '请先登录使用 Agent 助手' }]
+  }
+})
 </script>
 
 <style scoped>

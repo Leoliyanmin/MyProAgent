@@ -163,17 +163,115 @@ export const schedulesAPI = {
 // ==================== AI Agent API ====================
 
 export const agentAPI = {
-  // Chat with AI agent
+  // Chat with AI agent (original)
   chat: async (message, session_id = null) => {
     return fetchWithAuth('/agent/chat', {
       method: 'POST',
       body: JSON.stringify({ message, session_id })
     })
   },
-  
-  // Get chat history
+
+  // Chat with LocalAgent (文件管理功能)
+  chatLocal: async (message, session_id = null) => {
+    return fetchWithAuth('/agent/local/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, session_id })
+    })
+  },
+
+  // Get chat history (original)
   getHistory: async () => {
     return fetchWithAuth('/agent/history')
+  },
+
+  // Get LocalAgent session
+  getLocalSession: async (sessionId) => {
+    return fetchWithAuth(`/agent/local/session/${sessionId}`)
+  },
+
+  // Clear LocalAgent session
+  clearLocalSession: async (sessionId) => {
+    return fetchWithAuth(`/agent/local/session/${sessionId}/clear`, {
+      method: 'POST'
+    })
+  },
+
+  // Get LocalAgent memory
+  getMemory: async () => {
+    return fetchWithAuth('/agent/local/memory')
+  },
+
+  // Consolidate LocalAgent memory
+  consolidateMemory: async () => {
+    return fetchWithAuth('/agent/local/memory/consolidate', {
+      method: 'POST'
+    })
+  },
+
+  // Get LocalAgent status
+  getStatus: async () => {
+    return fetchWithAuth('/agent/local/status')
+  },
+
+  // WebSocket connection for real-time chat
+  connectWebSocket: (sessionId, onMessage, onTool, onError, onDone) => {
+    const token = getToken()
+    if (!token) {
+      onError?.({ message: '未登录' })
+      return null
+    }
+
+    const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss' : 'ws'
+    const wsBaseUrl = API_BASE_URL.replace(/^https?:\/\//, '')
+    const wsUrl = `${wsProtocol}://${wsBaseUrl}/agent/ws/${sessionId}?token=${token}`
+
+    const ws = new WebSocket(wsUrl)
+
+    ws.onopen = () => {
+      console.log('[Agent] WebSocket connected')
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+
+        switch (data.type) {
+          case 'message':
+            onMessage?.(data)
+            break
+          case 'tool':
+            onTool?.({ phase: 'tool_call', summary: `调用工具: ${data.tool}`, durationMs: 0 })
+            break
+          case 'error':
+            onError?.(data)
+            break
+          case 'done':
+            onDone?.(data)
+            break
+          case 'pong':
+            // 心跳响应
+            break
+          default:
+            console.log('[Agent] Unknown message type:', data.type)
+        }
+      } catch (err) {
+        console.error('[Agent] Failed to parse message:', err, event.data)
+      }
+    }
+
+    ws.onerror = (error) => {
+      console.error('[Agent] WebSocket error:', error)
+      onError?.({ message: '连接错误，请检查网络' })
+    }
+
+    ws.onclose = (event) => {
+      console.log('[Agent] WebSocket closed:', event.code, event.reason)
+      if (event.code !== 1000) {
+        onError?.({ message: '连接断开' })
+      }
+    }
+
+    return ws
   }
 }
 

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from config import settings
 from presentation.auth_routes import router as auth_router
 from presentation.schedule_routes import router as schedule_router
@@ -17,6 +18,10 @@ app = FastAPI(
     debug=settings.DEBUG
 )
 
+# 添加 GZip 压缩
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# CORS 配置
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
