@@ -6,7 +6,9 @@
     <div class="agent-header">
       <span class="font-semibold">Agent 助手</span>
       <button class="icon-btn close-agent-btn" @click="emit('toggleFromSelf')" title="收起 Agent 助手">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
       </button>
     </div>
 
@@ -27,13 +29,18 @@
           :class="{ active: currentChatId === chat.id }"
           @click="switchChat(chat.id)"
         >
-          <div class="chat-icon">💬</div>
+          <svg class="chat-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
           <div class="chat-info">
             <div class="chat-title">{{ chat.title }}</div>
             <div class="chat-time">{{ formatTime(chat.updatedAt) }}</div>
           </div>
           <button class="delete-chat-btn" @click.stop="deleteChat(chat.id)" title="删除">
-            ×
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </button>
         </div>
         <div v-if="chatList.length === 0" class="chat-empty">
@@ -46,7 +53,14 @@
     <div class="dialog-section">
       <div class="messages-list" ref="messagesContainer">
         <div v-for="(msg, idx) in messages" :key="idx" class="message" :class="msg.role">
-          <div class="message-content markdown-body" v-html="renderMarkdown(msg.text)"></div>
+          <template v-for="(segment, si) in parseMessage(msg.text)" :key="si">
+            <div v-if="segment.type === 'text'" class="message-content markdown-body" v-html="renderMarkdown(segment.content)"></div>
+            <ThemeSuggestionWidget
+              v-else-if="segment.type === 'theme-suggestion'"
+              :tokens="segment.tokens"
+              @accept="applyThemeSuggestion(segment.tokens)"
+            />
+          </template>
         </div>
         <div v-if="messages.length === 0" class="placeholder-text">
           在这里与 Agent 对话...
@@ -72,8 +86,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
+import { useThemeStore } from '../../stores/theme.js'
+import { useMessageParser } from '../../composables/useMessageParser.js'
 import { agentAPI } from '../../services/api.js'
 import { marked } from 'marked'
+import ThemeSuggestionWidget from '../agent/ThemeSuggestionWidget.vue'
 
 const props = defineProps({
   isOpen: {
@@ -85,6 +102,8 @@ const props = defineProps({
 const emit = defineEmits(['toggleFromSelf'])
 
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
+const { parse: parseMessage } = useMessageParser()
 
 // 状态
 const messages = ref([])
@@ -379,7 +398,12 @@ const sendViaREST = async (message) => {
   }
 }
 
-onMounted(() => {
+// Apply theme suggestion from agent
+  const applyThemeSuggestion = (tokens) => {
+    themeStore.applySuggestion(tokens)
+  }
+
+  onMounted(() => {
   loadChatList()
   
   // 如果没有聊天记录，创建一个
@@ -429,12 +453,12 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
 }
 
 .agent-header {
-  height: 48px;
+  height: 52px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px 0 16px;
+  padding: 0 16px;
   font-size: 14px;
   font-weight: 600;
   color: #1d1d1f;
@@ -448,19 +472,23 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   align-items: center;
   justify-content: center;
   border-radius: 6px;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  color: rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
 }
 
 .close-agent-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.05);
+  color: #1d1d1f;
 }
 
 /* 聊天记录列表 */
 .chat-list-section {
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
-  max-height: 200px;
+  max-height: 180px;
   display: flex;
   flex-direction: column;
 }
@@ -469,14 +497,15 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 8px 16px;
 }
 
 .chat-list-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: #666;
+  color: rgba(0, 0, 0, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .new-chat-btn {
@@ -484,22 +513,27 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background: #0071e3;
-  color: white;
+  background: transparent;
   border: none;
-  border-radius: 4px;
-  font-size: 11px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 .new-chat-btn:hover {
-  background: #0051d5;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.new-chat-btn svg {
+  stroke-width: 2;
 }
 
 .chat-list {
   overflow-y: auto;
-  padding: 4px;
+  padding: 0 8px 8px;
   flex: 1;
 }
 
@@ -507,24 +541,31 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 6px 10px;
+  margin-bottom: 2px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
   position: relative;
 }
 
 .chat-item:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .chat-item.active {
-  background: rgba(0, 113, 227, 0.1);
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.chat-item.active .chat-title {
+  font-weight: 600;
 }
 
 .chat-icon {
-  font-size: 14px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .chat-info {
@@ -534,7 +575,7 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
 }
 
 .chat-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: #1d1d1f;
   white-space: nowrap;
@@ -543,22 +584,24 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
 }
 
 .chat-time {
-  font-size: 10px;
-  color: #86868b;
-  margin-top: 2px;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 1px;
 }
 
 .delete-chat-btn {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  font-size: 16px;
-  color: #86868b;
+  border-radius: 5px;
+  background: transparent;
+  border: none;
+  color: rgba(0, 0, 0, 0.3);
   opacity: 0;
-  transition: all 0.15s;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .chat-item:hover .delete-chat-btn {
@@ -574,7 +617,7 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   padding: 16px;
   text-align: center;
   font-size: 12px;
-  color: #86868b;
+  color: rgba(0, 0, 0, 0.4);
 }
 
 /* 对话框区域 */
@@ -603,15 +646,17 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
 }
 
 .message.user {
-  background: #0071e3;
-  color: white;
+  background: white;
+  color: #1d1d1f;
   align-self: flex-end;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .message.agent {
-  background: rgba(0, 0, 0, 0.06);
+  background: white;
   color: #1d1d1f;
   align-self: flex-start;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .message-content {
@@ -649,20 +694,16 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
 .markdown-body li { margin: 2px 0; }
 
 .markdown-body code {
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.06);
   padding: 2px 4px;
   border-radius: 3px;
   font-family: ui-monospace, monospace;
   font-size: 11px;
 }
 
-.message.user .markdown-body code {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 /* 输入区域 */
 .input-area {
-  padding: 10px 12px;
+  padding: 12px 16px;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
@@ -671,39 +712,48 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
 
 .message-input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   font-size: 13px;
   font-family: inherit;
   resize: none;
-  max-height: 100px;
-  background: white;
+  max-height: 80px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #1d1d1f;
 }
 
 .message-input:focus {
   outline: none;
-  border-color: #0071e3;
+  border-color: #007aff;
+  background: white;
+}
+
+.message-input::placeholder {
+  color: rgba(0, 0, 0, 0.4);
 }
 
 .send-btn {
-  padding: 8px 16px;
-  background: #0071e3;
-  color: white;
-  border: none;
+  padding: 6px 14px;
+  background: white;
+  color: #1d1d1f;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  align-self: flex-end;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .send-btn:hover {
-  background: #0051d5;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .send-btn:disabled {
-  background: #999;
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.3);
   cursor: not-allowed;
 }
 </style>
