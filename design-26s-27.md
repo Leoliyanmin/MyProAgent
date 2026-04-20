@@ -48,11 +48,11 @@ graph TB
     Router --> Stores
     Stores --> API
     
-    API -->|HTTP/WS| AuthRoutes
-    API -->|HTTP| TaskRoutes
-    API -->|HTTP| ScheduleRoutes
-    API -->|HTTP| AgentRoutes
-    API -->|HTTP| SyncRoutes
+    API -->|HTTPS| AuthRoutes
+    API -->|HTTPS| TaskRoutes
+    API -->|HTTPS| ScheduleRoutes
+    API -->|HTTPS| AgentRoutes
+    API -->|HTTPS| SyncRoutes
     
     AuthRoutes --> AuthService
     TaskRoutes --> TaskLogic
@@ -67,7 +67,7 @@ graph TB
     
     AgentLogic -->|WebSocket| SPAgent
     
-    SyncRoutes -->|HTTP| ServerAuth
+    SyncRoutes -->|HTTPS| ServerAuth
     ServerAuth --> EmailService
     EmailService --> SMTP
     ServerAuth --> ServerDB
@@ -90,7 +90,7 @@ graph TB
 
 | 层级 | 技术 | 职责 |
 |------|------|------|
-| **前端** | Vue3 + Vite | 用户界面、路由、状态管理 |
+| **前端** | Vue3 + Vite + Tauri | 用户界面、路由、状态管理 |
 | **Local Backend** | FastAPI + SQLite | 本地数据存储、核心业务逻辑、离线功能 |
 | **Server Backend** | FastAPI + SQLite | 用户认证、数据同步、邮件服务 |
 
@@ -120,7 +120,7 @@ graph TB
 #### 图中未体现的隐含假设
 
 1. **网络假设**：同步功能依赖网络连接，Local Backend 与 Server Backend 之间的数据同步需要稳定的网络环境
-2. **安全假设**：JWT Token 用于认证，假设客户端安全存储 Token，HTTPS 用于传输加密
+2. **安全假设**：JWT Token 用于认证，假设客户端安全存储 Token，HTTPSS 用于传输加密
 3. **数据一致性**：双向同步机制假设冲突解决策略为"最后写入优先"，未处理复杂的冲突合并场景
 4. **AI 服务可用性**：SPAgent 作为外部服务，假设其始终可用，未实现降级策略（如 AI 不可用时回退到本地规则引擎）
 5. **单设备假设**：当前架构假设用户主要在单一设备上使用，多设备同步场景下的数据冲突处理尚未完善
@@ -134,4 +134,20 @@ graph TB
 
 # 2，UI设计
 
-# 3, AI使用报告
+## 整体布局结构
+
+![整体布局结构](docs/main.png)
+
+
+## calendar
+
+![日程管理界面](docs/calendar.png)
+
+
+## self
+
+![个人画像界面](docs/self1.png)
+
+## function
+
+![功能界面](docs/function.png)
