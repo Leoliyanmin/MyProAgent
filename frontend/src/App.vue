@@ -15,24 +15,26 @@
 
     <div class="macos-main-column">
       <TopBar
-        v-if="appMode !== 'settings'"
+        v-if="appMode !== 'settings' && appMode !== 'agent-settings'"
         :current-view="currentView"
         :is-agent-open="isAgentOpen"
         @update:currentView="currentView = $event"
         @toggleAgent="toggleAgent"
       />
 
-      <main class="macos-content-area">
+      <main v-if="appMode !== 'agent-settings'" class="macos-content-area">
         <router-view v-slot="{ Component }">
           <KeepAlive>
             <component :is="Component" />
           </KeepAlive>
         </router-view>
       </main>
+
+      <AgentSettingsView v-if="appMode === 'agent-settings'" class="agent-settings-container" />
     </div>
 
-    <AgentSidebar 
-      :is-open="isAgentOpen && appMode !== 'settings'"
+    <AgentSidebar
+      :is-open="isAgentOpen && appMode !== 'settings' && appMode !== 'agent-settings'"
       @toggleFromSelf="toggleAgent"
     />
 
@@ -53,6 +55,7 @@ import SidebarLeft from './components/layout/SidebarLeft.vue'
 import TopBar from './components/layout/TopBar.vue'
 import AgentSidebar from './components/layout/AgentSidebar.vue'
 import ThemeOverlayEditor from './components/layout/ThemeOverlayEditor.vue'
+import AgentSettingsView from './views/AgentSettingsView.vue'
 import { useThemeStore } from './stores/theme.js'
 
 const themeStore = useThemeStore()
@@ -107,6 +110,8 @@ watch(() => route.name, (newName) => {
       appMode.value = 'main'
       currentView.value = newName === 'self-portrait' ? 'selfPortrait' : newName === 'files' ? 'fileManager' : newName
     }
+  } else if (newName === 'agent-settings') {
+    appMode.value = 'agent-settings'
   }
 })
 
@@ -130,6 +135,12 @@ watch(appMode, (newMode) => {
     }
   } else if (newMode === 'main' && route.name === 'user-settings') {
      router.push({ name: 'dashboard' })
+  } else if (newMode === 'agent-settings') {
+    if (route.name !== 'agent-settings') {
+      router.push({ name: 'agent-settings' })
+    }
+  } else if (newMode === 'main' && route.name === 'agent-settings') {
+    router.push({ name: 'dashboard' })
   }
 })
 
@@ -215,5 +226,12 @@ html, body, #app {
 /* Content area: hide routed content children */
 .theme-editing-mode .macos-content-area > * {
   visibility: hidden;
+}
+
+/* ── Agent Settings Mode ── */
+.agent-settings-container {
+  flex: 1;
+  padding: 16px;
+  overflow: hidden;
 }
 </style>

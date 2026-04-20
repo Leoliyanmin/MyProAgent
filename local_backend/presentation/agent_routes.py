@@ -17,6 +17,9 @@ from presentation.schemas import (
     AgentFileManagerFileReadResponse,
     AgentResponse,
     ChatHistoryItem,
+    AgentConfigUpdateRequest,
+    AgentConfigUpdateResponse,
+    AgentTestConnectionResponse,
 )
 from presentation.dependencies import get_current_user_id, get_current_user_id_websocket
 from service.agent_service import AgentService
@@ -245,9 +248,39 @@ async def get_agent_status(_: str = Depends(get_current_user_id)):
         "model": agent_service.agent.model,
         "provider": agent_service.agent.provider_name,
         "api_base": agent_service.agent.api_base,
-        "workspace": str(agent_service.agent.workspace),
-        "has_api_key": bool(agent_service.agent.provider.api_key)
+        "api_key": f"{agent_service.agent.provider.api_key[:10]}..." if agent_service.agent.provider.api_key else "None",
     }
+
+@router.post("/config/update", response_model=AgentConfigUpdateResponse)
+async def update_agent_config(
+    request: AgentConfigUpdateRequest,
+    _: str = Depends(get_current_user_id)
+):
+    """更新 Agent 配置"""
+    try:
+        result = agent_service.update_agent_config(
+            provider=request.provider,
+            model=request.model,
+            api_key=request.api_key,
+            api_base=request.api_base,
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/test", response_model=AgentTestConnectionResponse)
+async def test_agent_connection(_: str = Depends(get_current_user_id)):
+    """测试 Agent API 连接"""
+    try:
+        result = await agent_service.test_connection()
+        return result
+    except Exception as e:
+        return AgentTestConnectionResponse(
+            success=False,
+            message=f"测试失败: {str(e)}",
+            error=str(e),
+            type=type(e).__name__,
+        )
 
 
 # ==================== Nanobot 端点（可选）====================

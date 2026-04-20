@@ -207,9 +207,35 @@ class ChatHistoryItem(BaseModel):
     role: str
     tool_calls: Optional[str] = None
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
+
+
+class AgentConfigUpdateRequest(BaseModel):
+    """Agent 配置更新请求"""
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    api_key: Optional[str] = None
+    api_base: Optional[str] = None
+
+
+class AgentConfigUpdateResponse(BaseModel):
+    """Agent 配置更新响应"""
+    success: bool
+    message: str
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    api_base: Optional[str] = None
+
+
+class AgentTestConnectionResponse(BaseModel):
+    """Agent 测试连接响应"""
+    success: bool
+    status: Optional[int] = None
+    message: str
+    error: Optional[str] = None
+    type: Optional[str] = None
 
 
 class SyncRequest(BaseModel):

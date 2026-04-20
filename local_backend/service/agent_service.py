@@ -520,3 +520,78 @@ class AgentService:
             'entries_processed': result.entries_processed,
             'summary': result.summary
         }
+
+    def update_agent_config(self, provider: str = None, model: str = None, api_key: str = None, api_base: str = None):
+        """更新 Agent 配置"""
+        try:
+            from localagent.config import save_config
+
+            # 获取当前配置对象并直接修改
+            config = self.agent.config
+
+            if provider:
+                config.agent.provider = provider
+
+            if model:
+                config.agent.model = model
+
+            if api_key and provider:
+                provider_config = getattr(config.providers, provider, None)
+                if provider_config:
+                    provider_config.api_key = api_key
+
+            if api_base and provider:
+                provider_config = getattr(config.providers, provider, None)
+                if provider_config:
+                    provider_config.api_base = api_base
+
+            # 重新创建 LocalAgent 应用新配置（不触发保存）
+            if provider or model or api_key or api_base:
+                self.agent = LocalAgent(workspace=self.workspace, config=config)
+
+            # 保存配置
+            save_config(config)
+
+            return {
+                'success': True,
+                'message': 'Configuration updated successfully',
+                'provider': self.agent.provider_name,
+                'model': self.agent.model,
+                'api_base': self.agent.api_base,
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'Failed to update configuration: {str(e)}',
+            }
+
+    async def test_connection(self):
+        """测试 Agent API 连接"""
+        import httpx
+        try:
+            async with httpx.AsyncClient(
+                base_url=self.agent.api_base,
+                headers={
+                    "Authorization": f"Bearer {self.agent.provider.api_key}",
+                    "Content-Type": "application/json",
+                },
+                timeout=10.0,
+            ) as client:
+                payload = {
+                    "model": self.agent.model,
+                    "messages": [{"role": "user", "content": "test"}],
+                    "max_tokens": 10,
+                }
+                resp = await client.post("/chat/completions", json=payload)
+                resp.raise_for_status()
+                return {
+                    'success': True,
+                    'status': resp.status_code,
+                    'message': 'Connection successful',
+                }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e),
+                'type': type(e).__name__,
+            }

@@ -44,6 +44,13 @@ class ConsolidationResponse(BaseModel):
     summary: str | None
 
 
+class UpdateConfigRequest(BaseModel):
+    provider: str | None = None
+    model: str | None = None
+    api_key: str | None = None
+    api_base: str | None = None
+
+
 class AgentServer:
     """Agent server with session and memory management."""
 
@@ -210,6 +217,40 @@ async def get_status() -> dict[str, Any]:
         "api_base": server.agent.api_base,
         "api_key": f"{server.agent.provider.api_key[:10]}..." if server.agent.provider.api_key else "None",
     }
+
+
+@app.post("/api/config/update")
+async def update_config(request: UpdateConfigRequest) -> dict[str, Any]:
+    """Update agent configuration."""
+    server = get_server()
+    agent = server.agent
+
+    try:
+        if request.provider:
+            agent.switch_provider(request.provider)
+
+        if request.model:
+            agent.update_model(request.model)
+
+        if request.api_key:
+            agent.update_api_key(request.api_key)
+
+        if request.api_base:
+            agent.update_api_base(request.api_base)
+
+        return {
+            "success": True,
+            "message": "Configuration updated successfully",
+            "provider": server.agent.provider_name,
+            "model": server.agent.model,
+            "api_base": server.agent.api_base,
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "type": type(e).__name__,
+        }
 
 
 @app.get("/api/test")
