@@ -323,24 +323,199 @@ export const handlers = [
       responseMessage = 'Hello! I\'m your AI assistant. I can help you manage tasks, schedules, and provide study plans. What would you like to work on today?'
     }
 
-    const newMessage = {
-      id: ++messageIdCounter,
-      session_id: body.session_id || `session-${Date.now()}`,
-      role: 'assistant',
-      message: responseMessage,
-      created_at: new Date().toISOString()
-    }
+    const sessionId = body.session_id || `session-${Date.now()}`
 
     mockAgentHistory.push({
       id: ++messageIdCounter,
-      session_id: newMessage.session_id,
+      session_id: sessionId,
       role: 'user',
       message: userMessage,
       created_at: new Date(Date.now() - 1000).toISOString()
     })
-    mockAgentHistory.push(newMessage)
+    mockAgentHistory.push({
+      id: ++messageIdCounter,
+      session_id: sessionId,
+      role: 'assistant',
+      message: responseMessage,
+      created_at: new Date().toISOString()
+    })
 
-    return HttpResponse.json(newMessage)
+    return HttpResponse.json({
+      response: responseMessage,
+      thought_trace: [],
+      tool_calls: [],
+      requires_confirmation: false
+    })
+  }),
+
+  // POST /agent/chat/file-manager
+  http.post('/agent/chat/file-manager', async ({ request }) => {
+    await delay(1000)
+    const token = checkAuth(request)
+
+    if (!token) {
+      return HttpResponse.json(
+        { detail: 'Not authenticated' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    const userMessage = body.message || ''
+    const workingDirectory = body.working_directory || ''
+
+    if (!workingDirectory) {
+      return HttpResponse.json(
+        { detail: 'working_directory is required' },
+        { status: 400 }
+      )
+    }
+
+    return HttpResponse.json({
+      response: `已在目录 ${workingDirectory} 接收指令: ${userMessage}`,
+      thought_trace: [],
+      tool_calls: ['list_dir'],
+      requires_confirmation: false
+    })
+  }),
+
+  // POST /agent/file-manager/list
+  http.post('/agent/file-manager/list', async ({ request }) => {
+    await delay(400)
+    const token = checkAuth(request)
+
+    if (!token) {
+      return HttpResponse.json(
+        { detail: 'Not authenticated' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    const workingDirectory = body.working_directory || ''
+    const relativePath = body.relative_path || ''
+
+    if (!workingDirectory) {
+      return HttpResponse.json(
+        { detail: 'working_directory is required' },
+        { status: 400 }
+      )
+    }
+
+    return HttpResponse.json({
+      working_directory: workingDirectory,
+      current_directory: relativePath ? `${workingDirectory}/${relativePath}` : workingDirectory,
+      relative_path: relativePath,
+      parent_relative_path: relativePath.includes('/')
+        ? relativePath.split('/').slice(0, -1).join('/')
+        : (relativePath ? '' : null),
+      entries: [
+        {
+          name: 'Documents',
+          relative_path: relativePath ? `${relativePath}/Documents` : 'Documents',
+          is_directory: true,
+          size: null,
+          modified_at: new Date().toISOString()
+        },
+        {
+          name: 'todo.md',
+          relative_path: relativePath ? `${relativePath}/todo.md` : 'todo.md',
+          is_directory: false,
+          size: 128,
+          modified_at: new Date().toISOString()
+        }
+      ]
+    })
+  }),
+
+  // POST /agent/file-manager/file/create
+  http.post('/agent/file-manager/file/create', async ({ request }) => {
+    await delay(250)
+    const token = checkAuth(request)
+
+    if (!token) {
+      return HttpResponse.json(
+        { detail: 'Not authenticated' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    if (!body.working_directory || !body.filename) {
+      return HttpResponse.json(
+        { detail: 'working_directory and filename are required' },
+        { status: 400 }
+      )
+    }
+
+    return HttpResponse.json({
+      success: true,
+      message: `创建成功: ${body.filename}`,
+      working_directory: body.working_directory,
+      relative_path: body.relative_path || '',
+      filename: body.filename,
+      new_filename: null
+    })
+  }),
+
+  // POST /agent/file-manager/file/rename
+  http.post('/agent/file-manager/file/rename', async ({ request }) => {
+    await delay(250)
+    const token = checkAuth(request)
+
+    if (!token) {
+      return HttpResponse.json(
+        { detail: 'Not authenticated' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    if (!body.working_directory || !body.old_filename || !body.new_filename) {
+      return HttpResponse.json(
+        { detail: 'working_directory, old_filename and new_filename are required' },
+        { status: 400 }
+      )
+    }
+
+    return HttpResponse.json({
+      success: true,
+      message: `重命名成功: ${body.old_filename} -> ${body.new_filename}`,
+      working_directory: body.working_directory,
+      relative_path: body.relative_path || '',
+      filename: body.old_filename,
+      new_filename: body.new_filename
+    })
+  }),
+
+  // POST /agent/file-manager/file/delete
+  http.post('/agent/file-manager/file/delete', async ({ request }) => {
+    await delay(250)
+    const token = checkAuth(request)
+
+    if (!token) {
+      return HttpResponse.json(
+        { detail: 'Not authenticated' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    if (!body.working_directory || !body.filename) {
+      return HttpResponse.json(
+        { detail: 'working_directory and filename are required' },
+        { status: 400 }
+      )
+    }
+
+    return HttpResponse.json({
+      success: true,
+      message: `删除成功: ${body.filename}`,
+      working_directory: body.working_directory,
+      relative_path: body.relative_path || '',
+      filename: body.filename,
+      new_filename: null
+    })
   }),
 
   // GET /agent/history

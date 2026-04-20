@@ -43,29 +43,29 @@ class ToolRegistry:
 
     def __init__(self):
         self._tools: dict[str, BaseTool] = {}
+        self._schemas_cache: list[dict[str, Any]] | None = None
 
     def register(self, tool: BaseTool) -> None:
-        """Register a tool."""
         self._tools[tool.name] = tool
+        self._schemas_cache = None
 
     def unregister(self, name: str) -> None:
-        """Unregister a tool by name."""
         self._tools.pop(name, None)
+        self._schemas_cache = None
 
     def get(self, name: str) -> BaseTool | None:
-        """Get a tool by name."""
         return self._tools.get(name)
 
     def get_schemas(self) -> list[dict[str, Any]]:
-        """Get all tool schemas."""
-        return [tool.to_schema() for tool in self._tools.values()]
+        if self._schemas_cache is None:
+            self._schemas_cache = [tool.to_schema() for tool in self._tools.values()]
+        return self._schemas_cache
 
     @property
     def tool_names(self) -> list[str]:
-        """Get list of registered tool names."""
         return list(self._tools.keys())
 
-    def __len__(self) -> int:
+    def __len__(self):
         return len(self._tools)
 
     def __contains__(self, name: str) -> bool:

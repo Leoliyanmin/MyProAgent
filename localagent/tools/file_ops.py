@@ -1,6 +1,7 @@
 """File operation tools (move, copy, delete)."""
 
 from pathlib import Path
+import json
 
 from .base import BaseTool
 
@@ -53,11 +54,16 @@ class MoveFileTool(BaseTool):
             return f"Error moving file: {e}"
 
 
+_DELETE_CONFIRMATION_PREFIX = "[DELETE_CONFIRMATION]"
+
+
 class DeleteFileTool(BaseTool):
-    """Delete a file or directory."""
+    """Request deletion of a file or directory. Does NOT delete immediately.
+    Returns a confirmation request that must be approved by the user before
+    actual deletion occurs."""
 
     name = "delete_file"
-    description = "Delete a file or directory. Be careful as this operation cannot be undone."
+    description = "Request deletion of a file or directory. IMPORTANT: This tool does NOT delete immediately. It returns a confirmation request that the user must approve. Use this tool when you believe a file should be deleted."
     parameters = {
         "type": "object",
         "properties": {
@@ -85,16 +91,41 @@ class DeleteFileTool(BaseTool):
             if not target_path.exists():
                 return f"Error: Path not found: {target_path}"
 
-            if target_path.is_dir():
-                for item in target_path.iterdir():
-                    item.unlink()
-                target_path.rmdir()
-            else:
-                target_path.unlink()
+            file_type = "directory" if target_path.is_dir() else "file"
+            size_info = ""
+            if target_path.is_file():
+                size = target_path.stat().st_size
+                size_info = f" ({size} bytes)"
 
-            return f"Successfully deleted: {target_path}"
+            detail = json.dumps({
+                "path": path,
+                "resolved": str(target_path),
+                "type": file_type,
+                "size_info": size_info,
+            }, ensure_ascii=False)
+
+            return f"{_DELETE_CONFIRMATION_PREFIX}{detail}\nDeletion of {file_type} '{path}' is pending user confirmation. Report this to the user and wait for their approval."
         except Exception as e:
-            return f"Error deleting file: {e}"
+            return f"Error checking file for deletion: {e}"
+
+
+class DeleteExecutor:
+    """Actually executes confirmed deletions. NOT a tool - called by the frontend API."""
+
+    @staticmethod
+    def execute(path: str) -> str:
+        p = Path(path)
+        if not p.exists():
+            return f"Error: Path not found: {p}"
+        try:
+            if p.is_dir():
+                import shutil
+                shutil.rmtree(p)
+            else:
+                p.unlink()
+            return f"Successfully deleted: {p}"
+        except Exception as e:
+            return f"Error deleting: {e}"
 
 
 class CopyFileTool(BaseTool):

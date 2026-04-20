@@ -6,6 +6,12 @@ from .dir_tools import ListDirTool, CreateDirTool
 from .search_tools import SearchFilesTool, GrepTool
 from .file_ops import MoveFileTool, DeleteFileTool, CopyFileTool
 from .shell_tool import ExecTool
+from .calendar_tools import (
+    CreateScheduleEventTool,
+    UpdateScheduleEventTool,
+    UpdateScheduleEventTimeTool,
+    DeleteScheduleEventTool,
+)
 
 __all__ = [
     "BaseTool",
@@ -21,4 +27,8 @@ __all__ = [
     "DeleteFileTool",
     "CopyFileTool",
     "ExecTool",
+    "CreateScheduleEventTool",
+    "UpdateScheduleEventTool",
+    "UpdateScheduleEventTimeTool",
+    "DeleteScheduleEventTool",
 ]

@@ -46,10 +46,34 @@ const fetchWithAuth = async (url, options = {}) => {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
+    if (response.status === 401) {
+      // Clear stale/invalid token to force a clean re-login flow.
+      localStorage.removeItem('token')
+      throw new Error('登录状态已失效，请重新登录')
+    }
     throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`)
   }
 
   return response.json()
+}
+
+// Helper to tolerate transient backend reloads in development.
+const fetchWithAuthRetry = async (url, options = {}, retryCount = 1, retryDelayMs = 350) => {
+  let lastError = null
+
+  for (let attempt = 0; attempt <= retryCount; attempt += 1) {
+    try {
+      return await fetchWithAuth(url, options)
+    } catch (error) {
+      lastError = error
+      const isLastAttempt = attempt === retryCount
+      if (isLastAttempt) break
+
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
+    }
+  }
+
+  throw lastError || new Error('Request failed')
 }
 
 // ==================== Authentication API ====================
@@ -117,6 +141,19 @@ export const tasksAPI = {
   
   // Delete task
   deleteTask: async (taskId) => {
+    const token = getToken()
+    const numericId = Number(taskId)
+    const isLocalGeneratedId = Number.isFinite(numericId) && numericId > 1000000000000
+
+    // 本地临时任务（Date.now()）或未登录场景不触发后端删除，避免 401 噪音
+    if (!token || isLocalGeneratedId) {
+      return {
+        success: true,
+        message: 'Skip remote delete for local task',
+        skipped: true,
+      }
+    }
+
     return fetchWithAuth(`/tasks/${taskId}`, {
       method: 'DELETE'
     })
@@ -178,6 +215,55 @@ export const agentAPI = {
     })
   },
 
+  chatWithWorkingDirectory: async (message, working_directory, session_id = 'file_manager') => {
+    return fetchWithAuth('/agent/chat/file-manager', {
+      method: 'POST',
+      body: JSON.stringify({ message, working_directory, session_id })
+    })
+  },
+
+  listWorkingDirectory: async (working_directory, relative_path = '') => {
+    return fetchWithAuthRetry('/agent/file-manager/list', {
+      method: 'POST',
+      body: JSON.stringify({ working_directory, relative_path })
+    }, 2)
+  },
+
+  createFileByName: async (working_directory, filename, relative_path = '') => {
+    return fetchWithAuthRetry('/agent/file-manager/file/create', {
+      method: 'POST',
+      body: JSON.stringify({ working_directory, relative_path, filename })
+    }, 2)
+  },
+
+  renameFileByName: async (working_directory, old_filename, new_filename, relative_path = '') => {
+    return fetchWithAuthRetry('/agent/file-manager/file/rename', {
+      method: 'POST',
+      body: JSON.stringify({ working_directory, relative_path, old_filename, new_filename })
+    }, 2)
+  },
+
+  deleteFileByName: async (working_directory, filename, relative_path = '') => {
+    return fetchWithAuthRetry('/agent/file-manager/file/delete', {
+      method: 'POST',
+      body: JSON.stringify({ working_directory, relative_path, filename })
+    }, 2)
+  },
+
+  readFileByName: async (working_directory, filename, relative_path = '') => {
+    return fetchWithAuthRetry('/agent/file-manager/file/read', {
+      method: 'POST',
+      body: JSON.stringify({ working_directory, relative_path, filename })
+    }, 2)
+  },
+
+  updateFileByName: async (working_directory, filename, content, relative_path = '') => {
+    return fetchWithAuthRetry('/agent/file-manager/file/update', {
+      method: 'POST',
+      body: JSON.stringify({ working_directory, relative_path, filename, content })
+    }, 2)
+  },
+
   getHistory: async (session_id) => {
     return fetchWithAuth(`/agent/history/${session_id}`)
   },
@@ -232,8 +318,14 @@ export const agentAPI = {
           case 'message':
             onMessage?.(data)
             break
+          case 'stream':
+            onMessage?.({ role: data.role || 'assistant', content: data.content, isStream: true })
+            break
           case 'tool':
-            onTool?.({ phase: 'tool_call', summary: `调用工具: ${data.tool}`, durationMs: 0 })
+            onTool?.({ phase: 'tool_call', summary: `调用工具: ${data.tool}`, durationMs: 0, tool: data.tool })
+            break
+          case 'tool_start':
+            onTool?.({ phase: 'tool_call', summary: `正在调用: ${data.tool}`, durationMs: 0, tool: data.tool, args: data.args })
             break
           case 'error':
             onError?.(data)
@@ -242,7 +334,6 @@ export const agentAPI = {
             onDone?.(data)
             break
           case 'pong':
-            // 心跳响应
             break
           default:
             console.log('[Agent] Unknown message type:', data.type)

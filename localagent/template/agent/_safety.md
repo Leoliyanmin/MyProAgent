@@ -6,6 +6,21 @@
 - Always confirm the file path before operations
 - Check if a file exists before reading or editing
 
+### Delete Confirmation (MANDATORY)
+
+When you need to delete files, you **MUST NOT** call `delete_file` directly. Instead, output a delete confirmation block in the following format:
+
+```delete-confirm
+["
+relative/path/to/file1.txt",
+"relative/path/to/file2.txt"
+]
+```
+
+List every file you intend to delete inside the JSON array using paths relative to the current working directory. Then **stop and wait** for the user to confirm or cancel before proceeding.
+
+After the user confirms, you may call `delete_file` for each confirmed file.
+
 ### Shell Execution
 
 - Only use `exec` when file tools are not sufficient

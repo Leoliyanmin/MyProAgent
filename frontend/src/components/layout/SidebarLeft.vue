@@ -181,9 +181,9 @@ const toggleSettings = () => {
 
 .user-profile-btn {
   width: 100%;
-  border: none;
+  border: 1px solid #000000;
   border-radius: 10px;
-  background: transparent;
+  background: #ffffff;
   padding: 8px;
   display: flex;
   align-items: center;
@@ -194,11 +194,11 @@ const toggleSettings = () => {
 }
 
 .user-profile-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: #f5f5f5;
 }
 
 .user-profile-btn.active {
-  background: rgba(0, 122, 255, 0.12);
+  background: #f3f4f6;
 }
 
 .avatar {
@@ -223,14 +223,14 @@ const toggleSettings = () => {
 }
 
 .user-name {
-  color: #1d1d1f;
+  color: #000000;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
 }
 
 .user-role {
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.65);
   font-size: 11px;
   line-height: 1.2;
 }
