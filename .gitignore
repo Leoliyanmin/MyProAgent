@@ -152,6 +152,10 @@ debug.html
 *.temp
 /personal
 
+# Agent session data (local only)
+.memory/
+.sessions/
+
 # ----------------------------------------
 # Tauri / Rust
 # ----------------------------------------
