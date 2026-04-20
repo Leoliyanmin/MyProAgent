@@ -47,6 +47,8 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
+import { useCalendarStore } from './stores/calendar.js'
+import { useDashboardStore } from './stores/dashboard.js'
 import SidebarLeft from './components/layout/SidebarLeft.vue'
 import TopBar from './components/layout/TopBar.vue'
 import AgentSidebar from './components/layout/AgentSidebar.vue'
@@ -55,13 +57,41 @@ import { useThemeStore } from './stores/theme.js'
 
 const themeStore = useThemeStore()
 const authStore = useAuthStore()
+const calendarStore = useCalendarStore()
+const dashboardStore = useDashboardStore()
 const route = useRoute()
 const router = useRouter()
 
 const isAuthReady = ref(true)
 
+const loadInitialData = async () => {
+  if (!authStore.isAuthenticated) return
+  try {
+    await Promise.all([
+      calendarStore.loadSchedules(),
+      dashboardStore.loadTodosFromBackend()
+    ])
+  } catch (err) {
+    console.error('Failed to load initial data:', err)
+  }
+}
+
 onMounted(() => {
   themeStore.applyToRoot()
+  if (authStore.isAuthenticated) {
+    loadInitialData()
+  }
+
+  window.addEventListener('auth:required', () => {
+    authStore.token = null
+    router.push('/login')
+  })
+})
+
+watch(() => authStore.isAuthenticated, (newVal) => {
+  if (newVal) {
+    loadInitialData()
+  }
 })
 
 const isAgentOpen = ref(true)

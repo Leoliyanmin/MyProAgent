@@ -162,7 +162,12 @@ class AgentFileManagerFileReadRequest(BaseModel):
 class AgentFileManagerFileDeleteRequest(BaseModel):
     working_directory: str = Field(..., min_length=1, description="用户输入的文件工作目录")
     relative_path: Optional[str] = Field(default="", description="相对于工作目录的子目录")
-    filename: str = Field(..., min_length=1, description="待删除文件名")
+    filename: str = Field(..., min_length=1, description="仅文件名，不含路径")
+
+
+class AgentFileManagerPathDeleteRequest(BaseModel):
+    path: str = Field(..., min_length=1, description="要删除的文件的绝对路径或相对于工作目录的路径")
+    working_directory: Optional[str] = Field(default=None, description="工作目录（path 为相对路径时必须提供）")
 
 
 class AgentFileManagerOperationResponse(BaseModel):

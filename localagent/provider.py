@@ -137,7 +137,7 @@ class OpenAICompatProvider:
         try:
             print(f"[DEBUG] API Request: {self.api_base}/chat/completions")
             print(f"[DEBUG] Model: {self.model}")
-            resp = await client.post("/chat/completions", json=payload)
+            resp = await client.post("/chat/completions", json=payload, timeout=120.0)
             resp.raise_for_status()
             data = resp.json()
         except httpx.HTTPStatusError as e:
@@ -148,6 +148,9 @@ class OpenAICompatProvider:
             print(f"[ERROR] Check network connection and proxy settings")
             print(f"[ERROR] Verify API key is valid: {self.api_key[:10]}...{self.api_key[-4:] if self.api_key else 'None'}")
             raise
+        except httpx.ReadTimeout as e:
+            print(f"[ERROR] Request timeout after 120s: {e}")
+            raise RuntimeError("AI 服务响应超时，请稍后重试") from e
         except Exception as e:
             print(f"[ERROR] Request failed: {type(e).__name__}: {e}")
             raise

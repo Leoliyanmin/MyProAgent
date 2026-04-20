@@ -49,6 +49,7 @@ const fetchWithAuth = async (url, options = {}) => {
     if (response.status === 401) {
       // Clear stale/invalid token to force a clean re-login flow.
       localStorage.removeItem('token')
+      window.dispatchEvent(new CustomEvent('auth:required'))
       throw new Error('登录状态已失效，请重新登录')
     }
     throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`)
@@ -208,17 +209,19 @@ export const agentAPI = {
     })
   },
 
-  chatLocal: async (message, session_id = null) => {
+  chatLocal: async (message, session_id = null, options = {}) => {
     return fetchWithAuth('/agent/chat', {
       method: 'POST',
-      body: JSON.stringify({ message, session_id })
+      body: JSON.stringify({ message, session_id }),
+      signal: options.signal,
     })
   },
 
-  chatWithWorkingDirectory: async (message, working_directory, session_id = 'file_manager') => {
+  chatWithWorkingDirectory: async (message, working_directory, session_id = 'file_manager', options = {}) => {
     return fetchWithAuth('/agent/chat/file-manager', {
       method: 'POST',
-      body: JSON.stringify({ message, working_directory, session_id })
+      body: JSON.stringify({ message, working_directory, session_id }),
+      signal: options.signal,
     })
   },
 
@@ -247,6 +250,13 @@ export const agentAPI = {
     return fetchWithAuthRetry('/agent/file-manager/file/delete', {
       method: 'POST',
       body: JSON.stringify({ working_directory, relative_path, filename })
+    }, 2)
+  },
+
+  deleteFileByPath: async (path, working_directory = null) => {
+    return fetchWithAuthRetry('/agent/file-manager/file/delete-path', {
+      method: 'POST',
+      body: JSON.stringify({ path, working_directory })
     }, 2)
   },
 

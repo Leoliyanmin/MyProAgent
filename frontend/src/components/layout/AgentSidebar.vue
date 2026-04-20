@@ -63,7 +63,7 @@
     <!-- 对话框区域 -->
     <div class="dialog-section">
       <div class="messages-list" ref="messagesContainer">
-        <div v-for="(msg, idx) in messages" :key="idx" class="message" :class="[msg.role, msg.collapsed ? 'message--collapsed' : '']">
+        <div v-for="(msg, idx) in messages" :key="idx" class="message" :class="[msg.role]">
           <div v-for="(segment, si) in parseMessage(msg.text)" :key="si">
             <div v-if="segment.type === 'text'" class="message-content markdown-body" v-html="renderMarkdown(segment.content)"></div>
             <ThemeSuggestionWidget
@@ -76,13 +76,11 @@
             <DeleteConfirmWidget
               v-else-if="segment.type === 'delete-confirm'"
               :files="segment.files"
+              :working-directory="fmStore.workingDirectory"
               @confirm="onDeleteConfirmed(idx, segment.files)"
               @dismiss="onDeleteDismissed(idx)"
             />
           </div>
-          <button v-if="canCollapse(msg)" class="collapse-btn" @click="toggleCollapse(idx)">
-            {{ msg.collapsed ? '展开' : '收起' }}
-          </button>
         </div>
         <div v-if="messages.length === 0 && !isThinking" class="placeholder-text">
           在这里与 Agent 对话...
@@ -105,8 +103,12 @@
           @keydown.enter.exact.prevent="sendMessage"
           rows="3"
         ></textarea>
-        <button class="send-btn" @click.prevent="sendMessage" type="button" :disabled="isSending || isThinking">
-          {{ isSending || isThinking ? '思考中...' : '发送' }}
+        <button v-if="!isSending && !isThinking" class="send-btn" @click.prevent="sendMessage" type="button">
+          发送
+        </button>
+        <button v-else class="stop-btn" @click.prevent="stopGenerating" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+          停止
         </button>
       </div>
     </div>
@@ -156,6 +158,15 @@ const CALENDAR_TOOL_NAMES = new Set([
   'delete_schedule_event'
 ])
 
+const FILE_TOOL_NAMES = new Set([
+  'write_file',
+  'edit_file',
+  'move_file',
+  'copy_file',
+  'delete_file',
+  'create_dir'
+])
+
 // 状态
 const messages = ref([])
 const inputText = ref('')
@@ -165,6 +176,8 @@ const isThinking = ref(false)
 const hasInitialized = ref(false)
 const messagesContainer = ref(null)
 const chatListCollapsed = ref(false)
+const abortControllerRef = ref(null)
+const isStopping = ref(false)
 
 // 跟踪当前正在接收回复的对话 ID，防止切换对话后回复被放到错误的对话中
 const sentChatId = ref('')
@@ -469,15 +482,27 @@ const refreshPanelsIfNeeded = async (toolNames = []) => {
   if (!Array.isArray(toolNames) || toolNames.length === 0) return
 
   const hasCalendarMutation = toolNames.some((name) => CALENDAR_TOOL_NAMES.has(name))
-  if (!hasCalendarMutation) return
+  const hasFileMutation = toolNames.some((name) => FILE_TOOL_NAMES.has(name))
 
-  try {
-    await Promise.all([
+  const promises = []
+
+  if (hasCalendarMutation) {
+    promises.push(
       calendarStore.loadSchedules(),
       dashboardStore.loadTodosFromBackend()
-    ])
+    )
+  }
+
+  if (hasFileMutation && fmStore.isDirectorySet) {
+    promises.push(fmStore.listFiles())
+  }
+
+  if (promises.length === 0) return
+
+  try {
+    await Promise.all(promises)
   } catch (err) {
-    console.error('Failed to refresh calendar/todo after agent action:', err)
+    console.error('Failed to refresh panels after agent action:', err)
   }
 }
 
@@ -510,6 +535,11 @@ const connectWebSocket = () => {
     (error) => {
       const targetChatId = sentChatId.value || currentChatId.value
       isThinking.value = false
+
+      if (isStopping.value) {
+        isStopping.value = false
+        return
+      }
 
       appendMessageToChat(targetChatId, {
         role: 'agent',
@@ -629,14 +659,18 @@ const sendMessage = () => {
 // REST 发送
 const sendViaREST = async (message, chatId) => {
   isThinking.value = true
+  const controller = new AbortController()
+  abortControllerRef.value = controller
   try {
     const sessionId = fmStore.isDirectorySet
       ? `file-manager:${fmStore.workingDirectory.replace(/\//g, '_')}`
       : 'default'
 
     const result = fmStore.isDirectorySet
-      ? await agentAPI.chatWithWorkingDirectory(message, fmStore.workingDirectory, sessionId)
-      : await agentAPI.chatLocal(message, sessionId)
+      ? await agentAPI.chatWithWorkingDirectory(message, fmStore.workingDirectory, sessionId, { signal: controller.signal })
+      : await agentAPI.chatLocal(message, sessionId, { signal: controller.signal })
+
+    if (controller.signal.aborted) return
 
     const pendingDeletions = result?.pending_deletions || []
 
@@ -657,6 +691,7 @@ const sendViaREST = async (message, chatId) => {
     if (chatId === currentChatId.value) scrollToBottom()
     await refreshPanelsIfNeeded(result?.tool_calls || [])
   } catch (err) {
+    if (controller.signal.aborted) return
     appendMessageToChat(chatId, {
       role: 'agent',
       text: `❌ 发送失败: ${err.message}`,
@@ -664,6 +699,7 @@ const sendViaREST = async (message, chatId) => {
     })
     if (chatId === currentChatId.value) scrollToBottom()
   } finally {
+    abortControllerRef.value = null
     isThinking.value = false
   }
 }
@@ -690,17 +726,32 @@ const onDeleteDismissed = (msgIdx) => {
   saveCurrentChat()
 }
 
-// Message collapse/expand
-const COLLAPSE_THRESHOLD = 200 // characters
-const canCollapse = (msg) => {
-  return msg.text && msg.text.length > COLLAPSE_THRESHOLD
-}
-const toggleCollapse = (msgIdx) => {
-  if (messages.value[msgIdx]) {
-    messages.value[msgIdx].collapsed = !messages.value[msgIdx].collapsed
-    saveCurrentChat()
+const stopGenerating = () => {
+  isStopping.value = true
+
+  if (abortControllerRef.value) {
+    abortControllerRef.value.abort()
+    abortControllerRef.value = null
   }
+
+  if (wsRef.value && wsRef.value.readyState === WebSocket.OPEN) {
+    wsRef.value.close()
+    wsRef.value = null
+  }
+
+  isSending.value = false
+  isThinking.value = false
+
+  const lastMsg = messages.value[messages.value.length - 1]
+  if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.done) {
+    lastMsg.done = true
+    lastMsg.text += '\n\n· 已中断'
+  }
+
+  saveCurrentChat()
 }
+
+
 
   onMounted(() => {
   loadChatList()
@@ -1088,6 +1139,27 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   color: rgba(0, 0, 0, 0.4);
 }
 
+.stop-btn {
+  padding: 7px 14px;
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #ff3b30;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.stop-btn:hover {
+  background: rgba(255, 59, 48, 0.18);
+  border-color: rgba(255, 59, 48, 0.5);
+}
+
 .send-btn {
   padding: 6px 14px;
   background: #ffffff;
@@ -1113,41 +1185,7 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   cursor: not-allowed;
 }
 
-/* Message collapse */
-.message--collapsed .message-text--collapsed {
-  max-height: 80px;
-  overflow: hidden;
-  position: relative;
-}
 
-.message--collapsed .message-text--collapsed::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 30px;
-  background: linear-gradient(transparent, white);
-  pointer-events: none;
-}
-
-.collapse-btn {
-  display: inline-block;
-  margin-top: 4px;
-  padding: 2px 8px;
-  border: none;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.05);
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.collapse-btn:hover {
-  background: rgba(0, 0, 0, 0.08);
-  color: rgba(0, 0, 0, 0.7);
-}
 
 /* Thinking indicator */
 .thinking-indicator {

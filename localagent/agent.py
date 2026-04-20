@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -36,6 +37,23 @@ from .template import TemplateLoader
 DEFAULT_MAX_HISTORY_MESSAGES = 40
 
 
+# Patterns to detect file creation claims in agent responses
+FILE_CREATION_CLAIM_PATTERNS = [
+    # Chinese patterns
+    re.compile(r'[我己已已将]?\s*(?:成功|已经|已)?\s*(?:创建|写入|生成|保存).*?(?:文件|故事|文档)',
+               re.IGNORECASE | re.UNICODE),
+    re.compile(r'(?:已经|已)?\s*(?:在.*)?\s*(?:创建|写入|生成|保存).*?(?:故事|文件)',
+               re.IGNORECASE | re.UNICODE),
+    re.compile(r'(?:文件|故事|文档)\s*(?:已经|已)?\s*(?:创建|写入|生成|保存)',
+               re.IGNORECASE | re.UNICODE),
+    # English patterns
+    re.compile(r'(?:have\s+)?(?:successfully\s+)?(?:created|written|saved|generated)\s+(?:the\s+)?(?:file|story|stories|document)',
+               re.IGNORECASE),
+    re.compile(r'(?:file|story|stories|document)\s+(?:has\s+been\s+)?(?:created|written|saved|generated)',
+               re.IGNORECASE),
+]
+
+
 @dataclass
 class AgentResult:
     """Result of an agent run."""
@@ -43,6 +61,21 @@ class AgentResult:
     messages: list[dict[str, Any]]
     tools_used: list[str]
     iterations: int
+    hallucination_detected: bool = False
+
+
+def _detect_file_creation_claims(content: str) -> bool:
+    """Detect if the agent claims to have created files without actually calling tools.
+
+    Args:
+        content: The agent's response content
+
+    Returns:
+        True if file creation is claimed, False otherwise
+    """
+    if not content:
+        return False
+    return any(pattern.search(content) for pattern in FILE_CREATION_CLAIM_PATTERNS)
 
 
 class LocalAgent:
@@ -228,12 +261,21 @@ class LocalAgent:
         user_input: str,
         on_stream: Callable[[str], Awaitable[None]] | None = None,
         on_tool: Callable[[str, dict], Awaitable[None]] | None = None,
+        enforce_tool_calls: bool = True,
     ) -> AgentResult:
-        """Run the agent with user input. Uses streaming when on_stream is provided."""
+        """Run the agent with user input. Uses streaming when on_stream is provided.
+
+        Args:
+            user_input: The user's input message
+            on_stream: Optional callback for streaming responses
+            on_tool: Optional callback when tools are called
+            enforce_tool_calls: If True, verifies that file creation claims match actual tool calls
+        """
         messages = self._build_messages(user_input)
         tools_used: list[str] = []
         iterations = 0
         final_content = ""
+        hallucination_detected = False
 
         use_streaming = on_stream is not None
 
@@ -261,6 +303,26 @@ class LocalAgent:
 
             if not response.tool_calls:
                 final_content = response.content or ""
+
+                # Check for hallucination: agent claims to create files but didn't call write_file
+                if enforce_tool_calls and _detect_file_creation_claims(final_content):
+                    write_file_called = "write_file" in tools_used
+                    if not write_file_called:
+                        hallucination_detected = True
+                        # Add a corrective system message to force actual tool usage
+                        correction_msg = {
+                            "role": "system",
+                            "content": (
+                                "检测到您声称创建了文件，但没有调用 write_file 工具。"
+                                "根据系统规则，您必须实际调用 write_file 工具才能创建文件。"
+                                "请不要只在回复中说已创建文件，必须使用工具调用。"
+                                "请现在调用 write_file 工具来完成文件创建任务。"
+                            )
+                        }
+                        messages.append(correction_msg)
+                        # Continue to next iteration to force tool call
+                        continue
+
                 self.messages.append({"role": "user", "content": user_input})
                 self.messages.append({"role": "assistant", "content": final_content})
                 break
@@ -303,6 +365,7 @@ class LocalAgent:
             messages=messages,
             tools_used=tools_used,
             iterations=iterations,
+            hallucination_detected=hallucination_detected,
         )
 
     def clear_history(self):

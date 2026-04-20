@@ -126,6 +126,7 @@ export const useFileManagerStore = defineStore('fileManager', () => {
     if (previewFile.value && previewFile.value.name === filename.trim()) {
       previewContent.value = content
     }
+    await listFiles()
     return res
   }
 

@@ -36,10 +36,12 @@
 
 <script setup>
 import { ref } from 'vue'
+import { agentAPI } from '../../services/api.js'
 import { useFileManagerStore } from '../../stores/fileManager.js'
 
 const props = defineProps({
   files: { type: Array, required: true },
+  workingDirectory: { type: String, default: '' },
   initiallyDismissed: { type: Boolean, default: false }
 })
 
@@ -53,10 +55,13 @@ const onConfirm = async () => {
   confirmed.value = true
   for (const file of props.files) {
     try {
-      await fmStore.deleteFile(file)
+      await agentAPI.deleteFileByPath(file, props.workingDirectory || null)
     } catch (err) {
       console.error(`Failed to delete ${file}:`, err)
     }
+  }
+  if (fmStore.isDirectorySet) {
+    await fmStore.listFiles()
   }
   emit('confirm', props.files)
 }

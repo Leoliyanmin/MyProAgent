@@ -216,7 +216,19 @@ class AgentService:
 
         self.agent.set_runtime_context(user_id=user_id)
 
-        result = await self.agent.run(agent_message, on_stream=on_stream)
+        try:
+            result = await self.agent.run(agent_message, on_stream=on_stream)
+        except RuntimeError as e:
+            if "AI 服务响应超时" in str(e):
+                return {
+                    'response': '⏱ AI 服务响应超时，请稍后重试',
+                    'thought_trace': [],
+                    'tool_calls': [],
+                    'iterations': 0,
+                    'requires_confirmation': False,
+                    'pending_deletions': [],
+                }
+            raise
 
         session.add_message("user", message)
         if result.content:
@@ -443,6 +455,28 @@ class AgentService:
             "working_directory": str(root),
             "relative_path": relative,
             "filename": name,
+        }
+
+    def delete_by_path(self, path: str, working_directory: str = None):
+        """Delete a file by absolute path or path relative to working_directory."""
+        if Path(path).is_absolute():
+            target = Path(path).resolve()
+        else:
+            if not working_directory:
+                raise ValueError("相对路径需要提供工作目录")
+            root = self._resolve_working_directory(working_directory)
+            target = (root / path).resolve()
+
+        if not target.exists():
+            raise ValueError(f"文件不存在: {path}")
+        if not target.is_file():
+            raise ValueError(f"不是文件: {path}")
+
+        target.unlink()
+        return {
+            "success": True,
+            "message": f"删除成功: {target.name}",
+            "path": str(target),
         }
 
     def get_local_agent_session(self, session_id: str = "default"):

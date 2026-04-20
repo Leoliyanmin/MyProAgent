@@ -18,19 +18,35 @@
       <div v-if="showDatePicker" class="todo-date-picker">
         <div class="date-row">
           <div>
-            <label>开始: </label>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <input type="date" v-model="newTaskStart" class="mac-input mini" />
-              <input type="time" v-model="newTaskStartTime" class="mac-input mini" />
-            </div>
+          <label>开始时间: </label>
+          <input type="date" v-model="newTaskStart" class="mac-input mini" />
+          <div class="time-picker-row">
+            <select v-model="newTaskStartHour" class="mac-input mini time-select">
+              <option value="">--</option>
+              <option v-for="h in hours24" :key="h" :value="h">{{ h }}</option>
+            </select>
+            <span class="time-sep">:</span>
+            <select v-model="newTaskStartMinute" class="mac-input mini time-select">
+              <option value="">--</option>
+              <option v-for="m in minutes60" :key="m" :value="m">{{ m }}</option>
+            </select>
           </div>
-          <div>
-            <label>结束: </label>
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <input type="date" v-model="newTaskEnd" class="mac-input mini" />
-              <input type="time" v-model="newTaskEndTime" class="mac-input mini" />
-            </div>
+        </div>
+        <div>
+          <label>结束时间: </label>
+          <input type="date" v-model="newTaskEnd" class="mac-input mini" />
+          <div class="time-picker-row">
+            <select v-model="newTaskEndHour" class="mac-input mini time-select">
+              <option value="">--</option>
+              <option v-for="h in hours24" :key="h" :value="h">{{ h }}</option>
+            </select>
+            <span class="time-sep">:</span>
+            <select v-model="newTaskEndMinute" class="mac-input mini time-select">
+              <option value="">--</option>
+              <option v-for="m in minutes60" :key="m" :value="m">{{ m }}</option>
+            </select>
           </div>
+        </div>
         </div>
         <div class="color-picker-row">
           <label>优先级(分色): </label>
@@ -68,6 +84,10 @@
           </div>
           <div v-if="expandedId === task.id" class="task-detail" @click.stop>
             <div class="detail-row">
+              <span class="detail-label">优先级</span>
+              <span class="detail-value" :style="{ color: task.color || '#007aff' }">{{ priorityLabel(task.priority) }}</span>
+            </div>
+            <div class="detail-row">
               <span class="detail-label">开始</span>
               <span class="detail-value">{{ formatDate(task.start) }}{{ task.startTime ? ' ' + task.startTime : '' }}</span>
             </div>
@@ -87,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useDashboardStore } from '../../stores/dashboard'
 import { useCalendarStore } from '../../stores/calendar'
 
@@ -105,6 +125,11 @@ const formatDate = (dateStr) => {
   return dateStr
 }
 
+const priorityLabel = (p) => {
+  const labels = { 0: 'P0 紧急且重要', 1: 'P1 重要不紧急', 2: 'P2 紧急不重要', 3: 'P3 不重要不紧急' }
+  return labels[p ?? 2] || 'P2 紧急不重要'
+}
+
 const showDatePicker = ref(false)
 const newTaskStart = ref('')
 const newTaskEnd = ref('')
@@ -112,6 +137,26 @@ const newTaskStartTime = ref('')
 const newTaskEndTime = ref('')
 const newTaskPriority = ref(2)
 const newTaskColor = ref('#007aff')
+
+const hours24 = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+const minutes60 = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
+
+const newTaskStartHour = computed({
+  get: () => (newTaskStartTime.value || '').split(':')[0] || '',
+  set: (v) => { const m = (newTaskStartTime.value || '').split(':')[1] || '00'; newTaskStartTime.value = v ? `${v}:${m}` : '' }
+})
+const newTaskStartMinute = computed({
+  get: () => { const p = (newTaskStartTime.value || '').split(':'); return p[1] || '' },
+  set: (v) => { const h = (newTaskStartTime.value || '').split(':')[0] || '00'; newTaskStartTime.value = v !== '' ? `${h}:${v}` : '' }
+})
+const newTaskEndHour = computed({
+  get: () => (newTaskEndTime.value || '').split(':')[0] || '',
+  set: (v) => { const m = (newTaskEndTime.value || '').split(':')[1] || '00'; newTaskEndTime.value = v ? `${v}:${m}` : '' }
+})
+const newTaskEndMinute = computed({
+  get: () => { const p = (newTaskEndTime.value || '').split(':'); return p[1] || '' },
+  set: (v) => { const h = (newTaskEndTime.value || '').split(':')[0] || '00'; newTaskEndTime.value = v !== '' ? `${h}:${v}` : '' }
+})
 
 const deleteTodo = (task) => {
   const linkedId = Number(task.linkedScheduleId)
@@ -121,6 +166,8 @@ const deleteTodo = (task) => {
     store.removeTodo(task.id)
   }
 }
+
+
 
 const priorityOptions = [
   { level: 0, color: '#ff3b30', label: '紧急且重要' },
@@ -199,6 +246,9 @@ const confirmAddTask = () => {
 }
 .mac-input:focus { border-color: #007aff; box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2); }
 .mac-input.mini { padding: 4px 8px; font-size: 11px; margin-top: 4px; }
+.time-picker-row { display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+.time-select { flex: 1; }
+.time-sep { font-weight: 600; color: #1d1d1f; }
 
 .todo-date-picker {
   background: #fdfdfd;

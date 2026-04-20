@@ -6,6 +6,14 @@
 - Always confirm the file path before operations
 - Check if a file exists before reading or editing
 
+### Create/Write Files (MANDATORY)
+
+When asked to create or write a file:
+- **YOU MUST** call `write_file` tool with the actual content
+- **YOU MUST NOT** say "I have created the file" without actually calling the tool
+- Wait for the tool response and report the actual result to the user
+- If the tool returns an error, report the error and do not claim success
+
 ### Delete Confirmation (MANDATORY)
 
 When you need to delete files, you **MUST NOT** call `delete_file` directly. Instead, output a delete confirmation block in the following format:

@@ -109,7 +109,7 @@
           <div class="week-timeline-grid" :class="{'day-layout': calendarStore.viewType === 'day'}">
             <div class="time-axis">
               <div class="time-slot" v-for="h in hours" :key="'t'+h">
-                <span>{{ h === 0 ? '12 AM' : (h < 12 ? h + ' AM' : (h === 12 ? '12 PM' : (h - 12) + ' PM')) }}</span>
+                <span>{{ String(h).padStart(2, '0') }}:00</span>
                 <div class="time-separator"></div>
               </div>
             </div>
@@ -170,8 +170,18 @@
             <input type="date" v-model="draftEvent.start" class="mac-input" />
           </div>
           <div>
-            <label>时间 (可选)</label>
-            <input type="time" v-model="draftEvent.startTime" class="mac-input" />
+            <label>开始时间</label>
+            <div class="time-picker-row">
+              <select v-model="startTimeHour" class="mac-input time-select">
+                <option value="">--</option>
+                <option v-for="h in hours24" :key="h" :value="h">{{ h }}</option>
+              </select>
+              <span class="time-sep">:</span>
+              <select v-model="startTimeMinute" class="mac-input time-select">
+                <option value="">--</option>
+                <option v-for="m in minutes60" :key="m" :value="m">{{ m }}</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="date-row">
@@ -180,8 +190,18 @@
             <input type="date" v-model="draftEvent.end" class="mac-input" />
           </div>
           <div>
-            <label>时间 (可选)</label>
-            <input type="time" v-model="draftEvent.endTime" class="mac-input" />
+            <label>结束时间</label>
+            <div class="time-picker-row">
+              <select v-model="endTimeHour" class="mac-input time-select">
+                <option value="">--</option>
+                <option v-for="h in hours24" :key="h" :value="h">{{ h }}</option>
+              </select>
+              <span class="time-sep">:</span>
+              <select v-model="endTimeMinute" class="mac-input time-select">
+                <option value="">--</option>
+                <option v-for="m in minutes60" :key="m" :value="m">{{ m }}</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="color-picker-row">
@@ -212,7 +232,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useCalendarStore } from '../stores/calendar.js'
 import { useDashboardStore } from '../stores/dashboard.js'
 
@@ -263,6 +283,38 @@ const priorityOptions = [
   { level: 2, color: '#007aff', label: '紧急不重要' },
   { level: 3, color: '#34c759', label: '不重要不紧急' }
 ]
+
+const hours24 = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+const minutes60 = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
+
+const startTimeHour = computed({
+  get: () => (draftEvent.value.startTime || '').split(':')[0] || '',
+  set: (v) => {
+    const m = (draftEvent.value.startTime || '').split(':')[1] || '00'
+    draftEvent.value.startTime = v ? `${v}:${m}` : ''
+  }
+})
+const startTimeMinute = computed({
+  get: () => { const p = (draftEvent.value.startTime || '').split(':'); return p[1] || '' },
+  set: (v) => {
+    const h = (draftEvent.value.startTime || '').split(':')[0] || '00'
+    draftEvent.value.startTime = v !== '' ? `${h}:${v}` : ''
+  }
+})
+const endTimeHour = computed({
+  get: () => (draftEvent.value.endTime || '').split(':')[0] || '',
+  set: (v) => {
+    const m = (draftEvent.value.endTime || '').split(':')[1] || '00'
+    draftEvent.value.endTime = v ? `${v}:${m}` : ''
+  }
+})
+const endTimeMinute = computed({
+  get: () => { const p = (draftEvent.value.endTime || '').split(':'); return p[1] || '' },
+  set: (v) => {
+    const h = (draftEvent.value.endTime || '').split(':')[0] || '00'
+    draftEvent.value.endTime = v !== '' ? `${h}:${v}` : ''
+  }
+})
 
 const setPriority = (p) => {
   draftEvent.value.priority = p.level
@@ -881,7 +933,10 @@ const onResizeStart = (e, event) => {
 .mac-modal { background: #fff; width: 320px; border-radius: 12px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
 .mac-modal h3 { margin-top: 0; margin-bottom: 16px; font-size: 16px; color: #1d1d1f; }
 .mac-modal label { display: block; font-size: 12px; color: #555; margin-bottom: 4px; }
-.mac-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 12px; font-size: 13px;}
+.mac-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 12px; font-size: 13px; height: 35px; }
+.time-picker-row { display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
+.time-select { flex: 1; margin-bottom: 0; }
+.time-sep { font-weight: 600; color: #1d1d1f; }
 .date-row { display: flex; gap: 12px; }
 .date-row > div { flex: 1; }
 .checkbox-row { display: flex; align-items: center; gap: 6px; cursor: pointer; color: #1d1d1f; font-size: 12px; }
@@ -907,7 +962,7 @@ const onResizeStart = (e, event) => {
 
 .week-timeline-scroll { flex: 1; overflow-y: auto; position: relative; }
 .week-timeline-grid { display: flex; min-height: 1200px; }
-.time-axis { width: 50px; flex-shrink: 0; border-right: 1px solid rgba(0,0,0,0.08); background: var(--clr-bg-card, #ffffff); position: relative;}
+.time-axis { width: 50px; flex-shrink: 0; border-right: 1px solid rgba(0,0,0,0.08); background: var(--clr-bg-card, #ffffff); position: relative; padding-top: 16px;}
 .time-slot { height: 50px; position: relative; }
 .time-slot span { position: absolute; top: -7px; right: 8px; font-size: 10px; color: #86868b; background: #fff; padding-left: 4px;}
 .time-separator { position: absolute; right: 0; top: 0; width: 4px; height: 1px; background: rgba(0,0,0,0.08); }

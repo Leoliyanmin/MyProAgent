@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
+from pathlib import Path
 from typing import List
 from presentation.schemas import (
     AgentChatMessage,
@@ -8,6 +9,7 @@ from presentation.schemas import (
     AgentFileManagerFileReadRequest,
     AgentFileManagerFileRenameRequest,
     AgentFileManagerFileUpdateRequest,
+    AgentFileManagerPathDeleteRequest,
     AgentFileManagerListRequest,
     AgentFileManagerListResponse,
     AgentFileManagerMessage,
@@ -154,6 +156,29 @@ async def update_file_by_name(
         raise HTTPException(status_code=400, detail=str(exc))
 
     return AgentFileManagerOperationResponse(**result)
+
+
+@router.post("/file-manager/file/delete-path", response_model=AgentFileManagerOperationResponse)
+async def delete_file_by_path(
+    request: AgentFileManagerPathDeleteRequest,
+    _: str = Depends(get_current_user_id),
+):
+    """按路径删除文件（支持绝对路径或相对路径）。"""
+    try:
+        result = agent_service.delete_by_path(
+            path=request.path,
+            working_directory=request.working_directory,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return AgentFileManagerOperationResponse(
+        success=result["success"],
+        message=result["message"],
+        working_directory=request.working_directory or "",
+        relative_path="",
+        filename=Path(request.path).name,
+    )
 
 
 @router.post("/file-manager/file/delete", response_model=AgentFileManagerOperationResponse)
