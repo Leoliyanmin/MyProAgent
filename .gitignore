@@ -192,3 +192,6 @@ frontend/src-tauri/*.AppImage
 # Bundle artifacts
 frontend/src-tauri/target/release/bundle/
 frontend/src-tauri/target/debug/bundle/
+
+# Config files with sensitive data
+config.json
