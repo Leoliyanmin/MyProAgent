@@ -54,16 +54,32 @@
       </div>
 
       <ul class="todo-list">
-        <li v-for="task in store.sortedTodos" :key="task.id" class="todo-item" :class="{ 'is-completed': task.completed }">
-          <input 
-            type="checkbox" 
-            :checked="task.completed" 
-            @change="store.toggleTodo(task.id)" 
-            class="mac-checkbox" 
-          />
-          <div class="task-priority-indicator" :style="{ backgroundColor: task.color || '#007aff' }">P{{ task.priority !== undefined ? task.priority : 2 }}</div>
-          <span class="task-text" style="flex: 1">{{ task.title }}</span>
-          <button @click.stop="store.removeTodo(task.id)" class="delete-btn">×</button>
+        <li v-for="task in store.sortedTodos" :key="task.id" class="todo-item" :class="{ 'is-completed': task.completed, 'is-expanded': expandedId === task.id }">
+          <div class="todo-row">
+            <input 
+              type="checkbox" 
+              :checked="task.completed" 
+              @change="store.toggleTodo(task.id)" 
+              class="mac-checkbox" 
+            />
+            <div class="task-priority-indicator" :style="{ backgroundColor: task.color || '#007aff' }">P{{ task.priority !== undefined ? task.priority : 2 }}</div>
+            <span class="task-text" style="flex: 1" @click="toggleExpand(task.id)">{{ task.title }}</span>
+            <button @click.stop="deleteTodo(task)" class="delete-btn">×</button>
+          </div>
+          <div v-if="expandedId === task.id" class="task-detail" @click.stop>
+            <div class="detail-row">
+              <span class="detail-label">开始</span>
+              <span class="detail-value">{{ formatDate(task.start) }}{{ task.startTime ? ' ' + task.startTime : '' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">结束</span>
+              <span class="detail-value">{{ formatDate(task.end || task.start) }}{{ task.endTime ? ' ' + task.endTime : '' }}</span>
+            </div>
+            <div class="detail-row" v-if="task.description">
+              <span class="detail-label">备注</span>
+              <span class="detail-value">{{ task.description }}</span>
+            </div>
+          </div>
         </li>
       </ul>
     </div>
@@ -73,10 +89,21 @@
 <script setup>
 import { ref } from 'vue'
 import { useDashboardStore } from '../../stores/dashboard'
+import { useCalendarStore } from '../../stores/calendar'
 
-// 初始化 Store
 const store = useDashboardStore()
+const calendarStore = useCalendarStore()
 const newTaskTitle = ref('')
+const expandedId = ref(null)
+
+const toggleExpand = (id) => {
+  expandedId.value = expandedId.value === id ? null : id
+}
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '—'
+  return dateStr
+}
 
 const showDatePicker = ref(false)
 const newTaskStart = ref('')
@@ -85,6 +112,15 @@ const newTaskStartTime = ref('')
 const newTaskEndTime = ref('')
 const newTaskPriority = ref(2)
 const newTaskColor = ref('#007aff')
+
+const deleteTodo = (task) => {
+  const linkedId = Number(task.linkedScheduleId)
+  if (Number.isFinite(linkedId) && linkedId > 0) {
+    calendarStore.removeEvent(linkedId)
+  } else {
+    store.removeTodo(task.id)
+  }
+}
 
 const priorityOptions = [
   { level: 0, color: '#ff3b30', label: '紧急且重要' },
@@ -151,7 +187,6 @@ const confirmAddTask = () => {
 .task-count { font-size: 11px; color: #86868b; }
 .panel-body { flex: 1; padding: 12px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 
-/* 恢复输入框的 macOS 样式 */
 .mac-input { 
   width: 100%; 
   padding: 8px 12px; 
@@ -204,10 +239,14 @@ const confirmAddTask = () => {
 .mac-btn.primary { background: #007aff; color: #fff; border-color: #007aff; }
 .mac-btn.primary:hover { background: #0062cc; }
 
-.todo-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.todo-item { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 0; border-radius: 6px; }
+.todo-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.todo-item { font-size: 13px; padding: 4px 6px; border-radius: 6px; }
 .todo-item:hover { background: rgba(0,0,0,0.02); }
+.todo-item.is-expanded { background: rgba(0,0,0,0.03); }
 .todo-item.is-completed .task-text { text-decoration: line-through; color: #86868b; }
+
+.todo-row { display: flex; align-items: center; gap: 8px; }
+
 .task-priority-indicator {
   padding: 2px 4px;
   border-radius: 4px;
@@ -216,15 +255,29 @@ const confirmAddTask = () => {
   font-weight: 700;
   min-width: 14px;
   text-align: center;
+  flex-shrink: 0;
 }
-.task-text { flex: 1; color: #1d1d1f; }
+.task-text { flex: 1; color: #1d1d1f; cursor: pointer; }
+.task-text:hover { color: #007aff; }
 
-/* 恢复 Checkbox 样式 */
+.task-detail {
+  padding: 6px 8px 6px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: #86868b;
+}
+.detail-row { display: flex; gap: 6px; }
+.detail-label { min-width: 28px; font-weight: 500; }
+.detail-value { color: #555; word-break: break-word; }
+
 .mac-checkbox {
   width: 16px;
   height: 16px;
   accent-color: #007aff;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .delete-btn { 
@@ -236,8 +289,7 @@ const confirmAddTask = () => {
   font-size: 16px; 
   line-height: 1; 
   padding: 0 8px;
-  z-index: 10;
-  position: relative;
+  flex-shrink: 0;
 }
 .todo-item:hover .delete-btn { opacity: 1; }
 </style>

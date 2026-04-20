@@ -20,6 +20,7 @@ class TaskService:
         title = task_data.get('title', '')
         description = task_data.get('description', '')
         due_date = task_data.get('due_date')
+        linked_schedule_id = task_data.get('linked_schedule_id')
         
         logger.info(f"创建任务: user_id={user_id}, title={title}")
         
@@ -27,7 +28,7 @@ class TaskService:
             logger.warning(f"创建任务失败: 任务标题不能为空, user_id={user_id}")
             return {'success': False, 'message': '任务标题不能为空'}
         
-        result = self.task_handle.create_task(user_id, title, description, due_date)
+        result = self.task_handle.create_task(user_id, title, description, due_date, linked_schedule_id=linked_schedule_id)
         if not result['ok']:
             logger.error(f"创建任务失败: {result['message']}, user_id={user_id}")
             return {'success': False, 'message': result['message']}
@@ -56,10 +57,11 @@ class TaskService:
         title = task_data.get('title')
         description = task_data.get('description')
         due_date = task_data.get('due_date')
+        linked_schedule_id = task_data.get('linked_schedule_id')
         
         logger.info(f"更新任务: user_id={user_id}, task_id={task_id}")
         
-        result = self.task_handle.update_task(user_id, task_id, title, description, due_date)
+        result = self.task_handle.update_task(user_id, task_id, title=title, description=description, due_date=due_date, linked_schedule_id=linked_schedule_id)
         if not result['ok']:
             logger.error(f"更新任务失败: {result['message']}, user_id={user_id}, task_id={task_id}")
             return {'success': False, 'message': result['message']}
@@ -74,6 +76,10 @@ class TaskService:
         if not result['ok']:
             logger.error(f"删除任务失败: {result['message']}, user_id={user_id}, task_id={task_id}")
             return {'success': False, 'message': result['message']}
+        
+        if result.get('already_deleted'):
+            logger.warning(f"删除任务目标不存在，按幂等删除处理: user_id={user_id}, task_id={task_id}")
+            return {'success': True, 'message': result['message']}
         
         logger.info(f"任务删除成功: user_id={user_id}, task_id={task_id}")
         return {'success': True, 'message': '任务删除成功'}

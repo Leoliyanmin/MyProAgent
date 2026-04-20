@@ -1,7 +1,8 @@
-"""Minimal LLM provider abstraction."""
+"""Minimal LLM provider abstraction with streaming support."""
 
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Callable, Awaitable
 import httpx
 import json
 from functools import lru_cache
@@ -31,7 +32,7 @@ class LLMResponse:
 
 
 class OpenAICompatProvider:
-    """Minimal OpenAI-compatible provider."""
+    """Minimal OpenAI-compatible provider with streaming support."""
 
     def __init__(
         self,
@@ -75,7 +76,7 @@ class OpenAICompatProvider:
             self._client = httpx.AsyncClient(
                 base_url=self.api_base,
                 headers=headers,
-                timeout=120.0,
+                timeout=httpx.Timeout(connect=10.0, read=120.0, write=30.0, pool=10.0),
             )
         return self._client
 
@@ -91,14 +92,13 @@ class OpenAICompatProvider:
             pass
         return {}
 
-    async def chat(
+    def _build_payload(
         self,
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]] | None = None,
-    ) -> LLMResponse:
-        """Send chat completion request."""
-        client = self._get_client()
-
+        stream: bool = False,
+    ) -> dict[str, Any]:
+        """Build the request payload."""
         payload: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
@@ -106,11 +106,38 @@ class OpenAICompatProvider:
         }
         if tools:
             payload["tools"] = tools
+        if stream:
+            payload["stream"] = True
+        return payload
+
+    @staticmethod
+    def _parse_tool_calls(raw_tool_calls: list[dict]) -> list[ToolCall]:
+        """Parse tool calls from API response."""
+        tool_calls = []
+        for tc in raw_tool_calls:
+            args = tc["function"]["arguments"]
+            if isinstance(args, str):
+                args = json.loads(args)
+            tool_calls.append(ToolCall(
+                id=tc["id"],
+                name=tc["function"]["name"],
+                arguments=args,
+            ))
+        return tool_calls
+
+    async def chat(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+    ) -> LLMResponse:
+        """Send chat completion request (non-streaming)."""
+        client = self._get_client()
+        payload = self._build_payload(messages, tools, stream=False)
 
         try:
             print(f"[DEBUG] API Request: {self.api_base}/chat/completions")
             print(f"[DEBUG] Model: {self.model}")
-            resp = await client.post("/chat/completions", json=payload, timeout=120.0)
+            resp = await client.post("/chat/completions", json=payload)
             resp.raise_for_status()
             data = resp.json()
         except httpx.HTTPStatusError as e:
@@ -128,22 +155,110 @@ class OpenAICompatProvider:
         choice = data["choices"][0]
         message = choice["message"]
 
-        tool_calls = []
-        if message.get("tool_calls"):
-            for tc in message["tool_calls"]:
-                args = tc["function"]["arguments"]
-                if isinstance(args, str):
-                    args = json.loads(args)
-                tool_calls.append(ToolCall(
-                    id=tc["id"],
-                    name=tc["function"]["name"],
-                    arguments=args,
-                ))
+        tool_calls = self._parse_tool_calls(message["tool_calls"]) if message.get("tool_calls") else []
 
         return LLMResponse(
             content=message.get("content"),
             tool_calls=tool_calls,
             finish_reason=choice.get("finish_reason", "stop"),
+        )
+
+    async def chat_stream(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+        on_chunk: Callable[[str], Awaitable[None]] | None = None,
+    ) -> LLMResponse:
+        """Send chat completion request with streaming.
+
+        Yields content chunks via on_chunk callback as they arrive.
+        Returns the complete LLMResponse after streaming finishes.
+        """
+        client = self._get_client()
+        payload = self._build_payload(messages, tools, stream=True)
+
+        print(f"[DEBUG] API Stream Request: {self.api_base}/chat/completions")
+        print(f"[DEBUG] Model: {self.model}")
+
+        content_parts: list[str] = []
+        tool_calls_map: dict[int, dict[str, Any]] = {}  # index -> accumulated tool call
+        finish_reason = "stop"
+
+        try:
+            async with client.stream("POST", "/chat/completions", json=payload) as response:
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    line = line.strip()
+                    if not line or not line.startswith("data: "):
+                        continue
+
+                    data_str = line[6:]  # Remove "data: " prefix
+                    if data_str == "[DONE]":
+                        break
+
+                    try:
+                        chunk = json.loads(data_str)
+                    except json.JSONDecodeError:
+                        continue
+
+                    choices = chunk.get("choices", [])
+                    if not choices:
+                        continue
+
+                    delta = choices[0].get("delta", {})
+                    finish_reason = choices[0].get("finish_reason", finish_reason)
+
+                    # Handle content streaming
+                    if delta.get("content"):
+                        content_parts.append(delta["content"])
+                        if on_chunk:
+                            await on_chunk(delta["content"])
+
+                    # Handle tool call streaming
+                    if delta.get("tool_calls"):
+                        for tc_delta in delta["tool_calls"]:
+                            idx = tc_delta.get("index", 0)
+                            if idx not in tool_calls_map:
+                                tool_calls_map[idx] = {
+                                    "id": tc_delta.get("id", ""),
+                                    "type": "function",
+                                    "function": {
+                                        "name": tc_delta.get("function", {}).get("name", ""),
+                                        "arguments": tc_delta.get("function", {}).get("arguments", ""),
+                                    },
+                                }
+                            else:
+                                # Accumulate arguments
+                                if tc_delta.get("id"):
+                                    tool_calls_map[idx]["id"] = tc_delta["id"]
+                                func_delta = tc_delta.get("function", {})
+                                if func_delta.get("name"):
+                                    tool_calls_map[idx]["function"]["name"] = func_delta["name"]
+                                if func_delta.get("arguments"):
+                                    tool_calls_map[idx]["function"]["arguments"] += func_delta["arguments"]
+
+        except httpx.HTTPStatusError as e:
+            print(f"[ERROR] Stream HTTP {e.response.status_code}: {e.response.text}")
+            raise
+        except httpx.ConnectError as e:
+            print(f"[ERROR] Stream connection failed to {self.api_base}")
+            raise
+        except Exception as e:
+            print(f"[ERROR] Stream request failed: {type(e).__name__}: {e}")
+            # Fallback to non-streaming if streaming fails
+            print("[INFO] Falling back to non-streaming request...")
+            return await self.chat(messages, tools)
+
+        # Build final response
+        full_content = "".join(content_parts) if content_parts else None
+        parsed_tool_calls = self._parse_tool_calls(
+            list(tool_calls_map.values())
+        ) if tool_calls_map else []
+
+        return LLMResponse(
+            content=full_content,
+            tool_calls=parsed_tool_calls,
+            finish_reason=finish_reason,
         )
 
     async def close(self):

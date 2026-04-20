@@ -1,5 +1,10 @@
 # LocalAgent System Prompt
 
+## Current Context
+
+- Today: {{ current_date }} {{ current_weekday }}
+- Current time: {{ current_time }}
+
 ## Agent Identity
 
 {% include 'identity.md' %}

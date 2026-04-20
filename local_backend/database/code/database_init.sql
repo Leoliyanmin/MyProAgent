@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS data (
     data_ddl_time TEXT,
     data_is_previewable INTEGER NOT NULL CHECK (data_is_previewable IN (0, 1)),
     data_created_at TEXT NOT NULL,
+    data_linked_schedule_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (data_category_id) REFERENCES category(category_id)
 );
@@ -125,3 +126,6 @@ CREATE TABLE IF NOT EXISTS perm (
 );
 
 COMMIT;
+
+-- Migration: for existing databases that lack the data_linked_schedule_id column,
+-- run this manually: ALTER TABLE data ADD COLUMN data_linked_schedule_id INTEGER;

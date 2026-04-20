@@ -481,6 +481,7 @@ def create_data(
     data_ddl_time: str | None,
     data_is_previewable: int,
     data_created_at: str,
+    data_linked_schedule_id: int | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> int:
     return _execute(
@@ -488,8 +489,8 @@ def create_data(
         INSERT INTO data (
             user_id, data_category_id, data_content_type, data_title,
             data_content_text, data_link_url, data_release_time,
-            data_ddl_time, data_is_previewable, data_created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            data_ddl_time, data_is_previewable, data_created_at, data_linked_schedule_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
@@ -502,6 +503,7 @@ def create_data(
             data_ddl_time,
             data_is_previewable,
             data_created_at,
+            data_linked_schedule_id,
         ),
         db_path,
     )
@@ -521,32 +523,47 @@ def get_data(data_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None
 
 def update_data(
     data_id: int,
-    data_title: str,
-    data_content_text: str | None,
-    data_link_url: str | None,
-    data_release_time: str | None,
-    data_ddl_time: str | None,
-    data_is_previewable: int,
+    data_title: str | None = None,
+    data_content_text: str | None = None,
+    data_link_url: str | None = None,
+    data_release_time: str | None = None,
+    data_ddl_time: str | None = None,
+    data_is_previewable: int | None = None,
+    data_linked_schedule_id: int | None | object = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> None:
-    _execute(
-        """
-        UPDATE data
-        SET data_title = ?, data_content_text = ?, data_link_url = ?,
-            data_release_time = ?, data_ddl_time = ?, data_is_previewable = ?
-        WHERE data_id = ?
-        """,
-        (
-            data_title,
-            data_content_text,
-            data_link_url,
-            data_release_time,
-            data_ddl_time,
-            data_is_previewable,
-            data_id,
-        ),
-        db_path,
-    )
+    update_fields = []
+    params = []
+
+    if data_title is not None:
+        update_fields.append("data_title = ?")
+        params.append(data_title)
+    if data_content_text is not None:
+        update_fields.append("data_content_text = ?")
+        params.append(data_content_text)
+    if data_link_url is not None:
+        update_fields.append("data_link_url = ?")
+        params.append(data_link_url)
+    if data_release_time is not None:
+        update_fields.append("data_release_time = ?")
+        params.append(data_release_time)
+    if data_ddl_time is not None:
+        update_fields.append("data_ddl_time = ?")
+        params.append(data_ddl_time)
+    if data_is_previewable is not None:
+        update_fields.append("data_is_previewable = ?")
+        params.append(data_is_previewable)
+    if data_linked_schedule_id is not None:
+        if isinstance(data_linked_schedule_id, int) or data_linked_schedule_id == 0:
+            update_fields.append("data_linked_schedule_id = ?")
+            params.append(data_linked_schedule_id if data_linked_schedule_id != 0 else None)
+
+    if not update_fields:
+        return
+
+    params.append(data_id)
+    query = f"UPDATE data SET {', '.join(update_fields)} WHERE data_id = ?"
+    _execute(query, tuple(params), db_path)
 
 
 def delete_data(data_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:

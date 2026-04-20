@@ -308,7 +308,7 @@ async def read_file(path: str) -> dict[str, Any]:
 
 @app.websocket("/ws/{session_key}")
 async def websocket_endpoint(websocket: WebSocket, session_key: str):
-    """WebSocket endpoint for real-time chat."""
+    """WebSocket endpoint for real-time chat with streaming support."""
     await websocket.accept()
     server = get_server()
     session = server.session_manager.get_or_create(session_key)
@@ -319,7 +319,6 @@ async def websocket_endpoint(websocket: WebSocket, session_key: str):
             if data.get("type") == "chat":
                 message = data.get("message", "")
 
-                # Send user message back
                 await websocket.send_json({
                     "type": "message",
                     "role": "user",
@@ -327,22 +326,39 @@ async def websocket_endpoint(websocket: WebSocket, session_key: str):
                 })
 
                 try:
-                    # Process message with streaming
-                    result = await server.agent.run(message, on_stream=None)
+                    streamed_parts: list[str] = []
 
-                    if result.content:
+                    async def on_stream(chunk: str):
+                        streamed_parts.append(chunk)
+                        await websocket.send_json({
+                            "type": "stream",
+                            "content": chunk,
+                        })
+
+                    async def on_tool(name: str, args: dict):
+                        await websocket.send_json({
+                            "type": "tool_start",
+                            "tool": name,
+                            "args": args,
+                        })
+
+                    result = await server.agent.run(message, on_stream=on_stream, on_tool=on_tool)
+
+                    if result.content and not streamed_parts:
                         await websocket.send_json({
                             "type": "message",
                             "role": "assistant",
                             "content": result.content
                         })
 
-                    # Save to session and memory
                     session.add_message("user", message)
                     if result.content:
                         session.add_message("assistant", result.content)
-                    server.session_manager.save(session)
-                    server.memory_store.add_entry(message)
+                    import asyncio
+                    await asyncio.gather(
+                        asyncio.to_thread(server.session_manager.save, session),
+                        asyncio.to_thread(server.memory_store.add_entry, message),
+                    )
 
                 except Exception as e:
                     await websocket.send_json({

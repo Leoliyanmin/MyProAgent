@@ -18,15 +18,18 @@
       </div>
 
       <div class="toolbar-right">
+        <button class="icon-btn refresh-btn" @click="refreshFromBackend" :class="{ spinning: isRefreshing }" title="同步">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+        </button>
         <div class="segmented-control">
-          <button class="segment" :class="{ active: viewType === 'day' }" @click="viewType = 'day'">日</button>
-          <button class="segment" :class="{ active: viewType === 'week' }" @click="viewType = 'week'">周</button>
-          <button class="segment" :class="{ active: viewType === 'month' }" @click="viewType = 'month'">月</button>
+<button class="segment" :class="{ active: calendarStore.viewType === 'day' }" @click="calendarStore.viewType = 'day'">日</button>
+        <button class="segment" :class="{ active: calendarStore.viewType === 'week' }" @click="calendarStore.viewType = 'week'">周</button>
+        <button class="segment" :class="{ active: calendarStore.viewType === 'month' }" @click="calendarStore.viewType = 'month'">月</button>
         </div>
       </div>
     </div>
 
-    <div class="calendar-grid-container" v-if="viewType === 'month'">
+    <div class="calendar-grid-container" v-if="calendarStore.viewType === 'month'">
       <div class="mock-calendar-body">
         <div class="weekdays-header">
           <span v-for="w in weekdays" :key="w">{{ w }}</span>
@@ -49,7 +52,7 @@
                 v-for="event in day.events" 
                 :key="event.id"
                 class="event-bar"
-                :class="{'is-todo': event.isTodo, 'is-completed': event.completed, 'multi-start': event.isStart, 'multi-mid': event.isMid, 'multi-end': event.isEnd}"
+                :class="{'is-completed': event.completed, 'multi-start': event.isStart, 'multi-mid': event.isMid, 'multi-end': event.isEnd}"
                 :style="{ backgroundColor: event.color ? event.color + '25' : '', color: event.color || '' }"
                 @click.stop="editEvent(event)"
                 :title="event.title"
@@ -76,7 +79,7 @@
             :class="{ 'is-today-text': day.isToday }"
             @click="openEventModal(day.date)"
           >
-            <span class="day-name">{{ weekdays[viewType === 'week' ? i : currentDate.getDay()] }}</span>
+            <span class="day-name">{{ weekdays[calendarStore.viewType === 'week' ? i : calendarStore.currentDate.getDay()] }}</span>
             <span class="day-num" :class="{ 'is-today-bg': day.isToday }">{{ day.dayNum }}</span>
           </div>
         </div>
@@ -93,7 +96,7 @@
               v-for="event in day.allDayEvents" 
               :key="event.id"
               class="event-bar"
-              :class="{'is-todo': event.isTodo, 'is-completed': event.completed}"
+              :class="{'is-completed': event.completed}"
               :style="{ backgroundColor: event.color ? event.color + '25' : '', color: event.color || '' }"
               @click.stop="editEvent(event)"
               :title="event.title"
@@ -103,22 +106,32 @@
           </div>
         </div>
         <div class="week-timeline-scroll">
-          <div class="week-timeline-grid" :class="{'day-layout': viewType === 'day'}">
+          <div class="week-timeline-grid" :class="{'day-layout': calendarStore.viewType === 'day'}">
             <div class="time-axis">
               <div class="time-slot" v-for="h in hours" :key="'t'+h">
                 <span>{{ h === 0 ? '12 AM' : (h < 12 ? h + ' AM' : (h === 12 ? '12 PM' : (h - 12) + ' PM')) }}</span>
                 <div class="time-separator"></div>
               </div>
             </div>
-            <div class="week-day-columns" :class="{'day-layout': viewType === 'day'}">
+            <div class="week-day-columns" :class="{'day-layout': calendarStore.viewType === 'day'}">
               <div 
                 v-for="(day, i) in visibleDays" 
                 :key="'wc'+i" 
                 class="week-day-column"
-                :class="{ 'is-today-col': day.isToday }"
+                :data-date="day.date"
+                :class="{ 'is-today-col': day.isToday, 'drag-over-col': timedDragOverDate === day.date }"
                 @click.self="openEventModal(day.date)"
+                @dragover.prevent="onTimedColumnDragOver($event, day)"
+                @drop="onTimedColumnDrop($event, day)"
               >
-                <div class="hour-slot" v-for="h in hours" :key="'ts'+h" @click.self="openEventModal(day.date, h)" @dragover.prevent="onTimedDragOver($event, day, h)" @drop="onTimedDrop($event, day, h)"></div>
+                <div
+                  class="hour-slot"
+                  v-for="h in hours"
+                  :key="'ts'+h"
+                  @click.self="openEventModal(day.date, h)"
+                  @dragover.prevent.stop="onTimedColumnDragOver($event, day)"
+                  @drop.prevent.stop="onTimedColumnDrop($event, day)"
+                ></div>
                 
                 <div
                   v-for="event in day.timedEvents"
@@ -126,9 +139,12 @@
                   class="timed-event-card"
                   :class="{'is-completed': event.completed}"
                   :style="getTimedEventStyle(event)"
-                  @click.stop="editEvent(event)"
+                  @click.stop="onTimedCardClick(event)"
+                  @mousedown.stop="onTimedMouseDragStart($event, event)"
                   draggable="true"
                   @dragstart="onTimedDragStart($event, event)"
+                  @dragover.prevent.stop="onTimedColumnDragOver($event, day)"
+                  @drop.prevent.stop="onTimedColumnDrop($event, day)"
                   @dragend="onTimedDragEnd"
                 >
                   <div class="timed-event-title">{{ event.title }}</div>
@@ -183,10 +199,7 @@
             </div>
           </div>
         </div>
-        <label class="checkbox-row" style="margin-top: 10px;">
-          <input type="checkbox" v-model="draftEvent.isTodo" />
-          同步到主界面 TODO list
-        </label>
+        <p v-if="validationMessage" class="form-validation-message">{{ validationMessage }}</p>
         <div class="modal-actions">
           <button class="mac-btn delete-btn-modal" v-if="isEditing" @click="deleteEvent">删除</button>
           <div style="flex: 1"></div>
@@ -201,20 +214,44 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useCalendarStore } from '../stores/calendar.js'
+import { useDashboardStore } from '../stores/dashboard.js'
 
 const calendarStore = useCalendarStore()
+const dashboardStore = useDashboardStore()
 
-const currentDate = ref(new Date())
-const viewType = ref('month')
+const isRefreshing = ref(false)
+
+const refreshFromBackend = async () => {
+  if (isRefreshing.value) return
+  isRefreshing.value = true
+  try {
+    await Promise.all([
+      calendarStore.loadSchedules(),
+      dashboardStore.loadTodosFromBackend()
+    ])
+  } catch (err) {
+    console.error('Failed to refresh calendar data:', err)
+  } finally {
+    isRefreshing.value = false
+  }
+}
+
 const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 
 const showModal = ref(false)
 const isEditing = ref(false)
-const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', priority: 2, isTodo: true, color: '#007aff' })
+const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', priority: 2, color: '#007aff' })
+const validationMessage = ref('')
 
 // Drag-and-drop state
 const draggingEvent = ref(null)
 const dragOverCellIndex = ref(null)
+const timedDragOverDate = ref(null)
+const manualDragEvent = ref(null)
+const manualDragging = ref(false)
+const manualDragStartX = ref(0)
+const manualDragStartY = ref(0)
+const suppressNextCardClick = ref(false)
 const isResizing = ref(false)
 const resizeStartY = ref(0)
 const resizeOriginalEnd = ref('')
@@ -233,24 +270,24 @@ const setPriority = (p) => {
 }
 
 const headerTitle = computed(() => {
-  const y = currentDate.value.getFullYear()
-  const m = currentDate.value.getMonth() + 1
-  const d = currentDate.value.getDate()
-  if (viewType.value === 'month') {
+  const y = calendarStore.currentDate.getFullYear()
+  const m = calendarStore.currentDate.getMonth() + 1
+  const d = calendarStore.currentDate.getDate()
+  if (calendarStore.viewType === 'month') {
     return `${y}年 ${m}月`
-  } else if (viewType.value === 'week') {
-    const sun = new Date(currentDate.value)
+  } else if (calendarStore.viewType === 'week') {
+    const sun = new Date(calendarStore.currentDate)
     sun.setDate(d - sun.getDay())
     const sat = new Date(sun)
     sat.setDate(sat.getDate() + 6)
     return `${sun.getFullYear()}年 ${sun.getMonth() + 1}月 ${sun.getDate()}日 - ${sat.getMonth() + 1}月 ${sat.getDate()}日`
   }
-  return `${y}年 ${m}月 ${d}日 ${weekdays[currentDate.value.getDay()]}`
+  return `${y}年 ${m}月 ${d}日 ${weekdays[calendarStore.currentDate.getDay()]}`
 })
 
 const daysInMonth = computed(() => {
-  const year = currentDate.value.getFullYear()
-  const month = currentDate.value.getMonth()
+  const year = calendarStore.currentDate.getFullYear()
+  const month = calendarStore.currentDate.getMonth()
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0)
   
@@ -297,14 +334,20 @@ const createDayObject = (d, isCurrentMonth) => {
 const getEventsForDay = (isoDate) => {
     return calendarStore.allEvents.filter(e => {
         return isoDate >= e.start && isoDate <= e.end
-    }).map(e => ({
-        ...e,
-        isAllDay: e.start !== e.end || !e.startTime,
-        isStart: isoDate === e.start,
-        isEnd: isoDate === e.end,
-        isMid: isoDate > e.start && isoDate < e.end
-    })).sort((a,b) => a.id - b.id)
-}
+    }).map(e => {
+        const startTime = e.startTime || ''
+        const endTime = e.endTime || ''
+        const isAllDay = (e.start === e.end) && (!startTime || startTime === '00:00') && (!endTime || endTime === '23:59' || endTime === '23:59:59')
+            || (e.start !== e.end && !startTime && !endTime)
+        return {
+            ...e,
+            isAllDay,
+            isStart: isoDate === e.start,
+            isEnd: isoDate === e.end,
+            isMid: isoDate > e.start && isoDate < e.end
+        }
+    }).sort((a,b) => a.id - b.id)
+  }
 
 const getTimedEventStyle = (event) => {
   const start = event.startTime || "00:00";
@@ -330,7 +373,7 @@ const getTimedEventStyle = (event) => {
 const calendarDays = computed(() => daysInMonth.value)
 
 const weekDays = computed(() => {
-  const current = currentDate.value
+  const current = calendarStore.currentDate
   const d = current.getDate()
   const day = current.getDay()
   const sun = new Date(current.getFullYear(), current.getMonth(), d - day)
@@ -344,54 +387,56 @@ const weekDays = computed(() => {
 })
 
 const singleDay = computed(() => {
-  return [createDayObject(currentDate.value, true)]
+  return [createDayObject(calendarStore.currentDate, true)]
 })
 
 const visibleDays = computed(() => {
-  return viewType.value === 'week' ? weekDays.value : singleDay.value
+  return calendarStore.viewType === 'week' ? weekDays.value : singleDay.value
 })
 
 const hours = Array.from({ length: 24 }, (_, i) => i)
 
-const goToToday = () => { currentDate.value = new Date() }
+const goToToday = () => { calendarStore.currentDate = new Date() }
 
 const prevPeriod = () => {
-  const c = currentDate.value
-  if (viewType.value === 'month') {
-    currentDate.value = new Date(c.getFullYear(), c.getMonth() - 1, 1)
-  } else if (viewType.value === 'week') {
-    currentDate.value = new Date(c.getFullYear(), c.getMonth(), c.getDate() - 7)
+  const c = calendarStore.currentDate
+  if (calendarStore.viewType === 'month') {
+    calendarStore.currentDate = new Date(c.getFullYear(), c.getMonth() - 1, 1)
+  } else if (calendarStore.viewType === 'week') {
+    calendarStore.currentDate = new Date(c.getFullYear(), c.getMonth(), c.getDate() - 7)
   } else {
-    currentDate.value = new Date(c.getFullYear(), c.getMonth(), c.getDate() - 1)
+    calendarStore.currentDate = new Date(c.getFullYear(), c.getMonth(), c.getDate() - 1)
   }
 }
 const nextPeriod = () => {
-  const c = currentDate.value
-  if (viewType.value === 'month') {
-    currentDate.value = new Date(c.getFullYear(), c.getMonth() + 1, 1)
-  } else if (viewType.value === 'week') {
-    currentDate.value = new Date(c.getFullYear(), c.getMonth(), c.getDate() + 7)
+  const c = calendarStore.currentDate
+  if (calendarStore.viewType === 'month') {
+    calendarStore.currentDate = new Date(c.getFullYear(), c.getMonth() + 1, 1)
+  } else if (calendarStore.viewType === 'week') {
+    calendarStore.currentDate = new Date(c.getFullYear(), c.getMonth(), c.getDate() + 7)
   } else {
-    currentDate.value = new Date(c.getFullYear(), c.getMonth(), c.getDate() + 1)
+    calendarStore.currentDate = new Date(c.getFullYear(), c.getMonth(), c.getDate() + 1)
   }
 }
 
 const openEventModal = (dateStr, hour = null) => {
+  validationMessage.value = ''
   let startTime = ''
   let endTime = ''
   if (hour !== null && typeof hour === 'number') {
     startTime = `${String(hour).padStart(2, '0')}:00`
     endTime = `${String(hour + 1).padStart(2, '0')}:00`
   }
-  draftEvent.value = { id: null, title: '', start: dateStr, end: dateStr, startTime, endTime, isTodo: false, priority: 2, color: '#007aff' }
+  draftEvent.value = { id: null, title: '', start: dateStr, end: dateStr, startTime, endTime, priority: 2, color: '#007aff' }
   isEditing.value = false
   showModal.value = true
 }
 
 const editEvent = (event) => {
+  validationMessage.value = ''
   draftEvent.value = { 
     ...event, 
-    color: event.color || (event.isTodo ? '#34c759' : '#007aff'),
+    color: event.color || '#007aff',
     priority: event.priority !== undefined ? event.priority : 2,
     startTime: event.startTime || '',
     endTime: event.endTime || ''
@@ -402,32 +447,74 @@ const editEvent = (event) => {
 
 const closeModal = () => { showModal.value = false }
 
-const saveEvent = () => {
+const toDateTime = (dateStr, timeStr, fallbackTime) => {
+  return new Date(`${dateStr}T${timeStr || fallbackTime}:00`)
+}
+
+const saveEvent = async () => {
+  validationMessage.value = ''
+
   if (!draftEvent.value.title.trim()) {
-    alert('请输入日程或任务的标题')
+    validationMessage.value = '请输入日程或任务的标题'
+    return
+  }
+
+  if (!draftEvent.value.start || !draftEvent.value.end) {
+    validationMessage.value = '请完整填写开始日期和结束日期'
+    return
+  }
+
+  if ((draftEvent.value.startTime && !draftEvent.value.endTime) || (!draftEvent.value.startTime && draftEvent.value.endTime)) {
+    validationMessage.value = '请同时填写开始时间和结束时间，或都留空'
     return
   }
 
   if (draftEvent.value.start > draftEvent.value.end) {
-    alert('开始日期不能晚于结束日期')
+    validationMessage.value = '开始日期不能晚于结束日期'
     return
   }
-  if (draftEvent.value.start === draftEvent.value.end && draftEvent.value.startTime && draftEvent.value.endTime) {
-    if (draftEvent.value.startTime > draftEvent.value.endTime) {
-      alert('开始时间不能晚于结束时间')
-      return
-    }
+
+  const startAt = toDateTime(draftEvent.value.start, draftEvent.value.startTime, '00:00')
+  const endAt = toDateTime(draftEvent.value.end, draftEvent.value.endTime, '23:59')
+  if (Number.isNaN(startAt.getTime()) || Number.isNaN(endAt.getTime())) {
+    validationMessage.value = '时间格式无效，请重新输入'
+    return
+  }
+
+  if (endAt.getTime() < startAt.getTime()) {
+    validationMessage.value = '结束时间不能早于开始时间'
+    return
   }
 
   if (isEditing.value) {
     calendarStore.updateEvent(draftEvent.value)
+    const existingInBasic = calendarStore.basicEvents.find(e => e.id === draftEvent.value.id)
+    if (existingInBasic) {
+      try {
+        await calendarStore.updateScheduleOnBackend(draftEvent.value.id, draftEvent.value)
+      } catch (err) {
+        console.error('Failed to sync schedule update to backend:', err)
+      }
+    }
   } else {
     calendarStore.addEvent(draftEvent.value)
+    try {
+      const result = await calendarStore.createScheduleOnBackend(draftEvent.value)
+      if (result && result.schedule_id) {
+        const idx = calendarStore.basicEvents.findIndex(e => e.id === draftEvent.value.id)
+        if (idx !== -1) {
+          calendarStore.basicEvents[idx] = { ...calendarStore.basicEvents[idx], id: result.schedule_id, source: 'remote' }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to sync new schedule to backend:', err)
+    }
   }
   closeModal()
 }
 
 const deleteEvent = () => {
+  validationMessage.value = ''
   if (draftEvent.value.id) {
     calendarStore.removeEvent(draftEvent.value.id)
   }
@@ -492,45 +579,145 @@ const onDragEnd = () => {
 // Week/Day view drag-and-drop handlers
 const onTimedDragStart = (e, event) => {
   draggingEvent.value = event
+  timedDragOverDate.value = event.start
   e.dataTransfer.effectAllowed = 'move'
   e.dataTransfer.setData('text/plain', event.id)
 }
 
-const onTimedDragOver = (e, day, hour) => {
+const onTimedColumnDragOver = (e, day) => {
   e.preventDefault()
+  timedDragOverDate.value = day.date
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = 'move'
+  }
 }
 
-const onTimedDrop = (e, day, hour) => {
+const minutesToTime = (minutes) => {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+const onTimedColumnDrop = (e, day) => {
   e.preventDefault()
-  if (!draggingEvent.value) return
+  if (!draggingEvent.value) {
+    timedDragOverDate.value = null
+    return
+  }
 
+  const columnEl = e.currentTarget.classList.contains('week-day-column')
+    ? e.currentTarget
+    : e.currentTarget.closest('.week-day-column')
+  if (!columnEl) {
+    timedDragOverDate.value = null
+    draggingEvent.value = null
+    return
+  }
+
+  const columnRect = columnEl.getBoundingClientRect()
   const event = draggingEvent.value
-  const [sh, sm] = (event.startTime || '00:00').split(':').map(Number)
-  const [eh, em] = (event.endTime || '23:59').split(':').map(Number)
-  const duration = (eh + em / 60) - (sh + sm / 60)
-
-  const newStartHour = hour
-  const newStartMin = Math.round(e.offsetY / 50 * 60 / 30) * 30 % 60
-  const newStartTime = `${String(newStartHour).padStart(2, '0')}:${String(newStartMin).padStart(2, '0')}`
-
-  const newEndTotal = newStartHour + newStartMin / 60 + duration
-  const newEndHour = Math.floor(newEndTotal) % 24
-  const newEndMin = Math.round((newEndTotal % 1) * 60 / 30) * 30 % 60
-  const newEndTime = `${String(newEndHour).padStart(2, '0')}:${String(newEndMin).padStart(2, '0')}`
-
-  calendarStore.updateEvent({
-    ...event,
-    start: day.date,
-    end: day.date,
-    startTime: newStartTime,
-    endTime: newEndTime
-  })
+  applyTimedDrop(event, day.date, columnRect, e.clientY)
 
   draggingEvent.value = null
+  timedDragOverDate.value = null
 }
 
 const onTimedDragEnd = () => {
   draggingEvent.value = null
+  timedDragOverDate.value = null
+}
+
+const onTimedCardClick = (event) => {
+  if (suppressNextCardClick.value) {
+    suppressNextCardClick.value = false
+    return
+  }
+  editEvent(event)
+}
+
+const applyTimedDrop = (event, targetDate, columnRect, clientY) => {
+  const relativeY = Math.max(0, Math.min(columnRect.height - 1, clientY - columnRect.top))
+  const rawMinutes = Math.round((relativeY / 50) * 60 / 30) * 30
+  const startMinutes = Math.max(0, Math.min(23 * 60 + 30, rawMinutes))
+
+  const [sh, sm] = (event.startTime || '00:00').split(':').map(Number)
+  const [eh, em] = (event.endTime || '23:59').split(':').map(Number)
+  const startBase = Number.isNaN(sh) || Number.isNaN(sm) ? 0 : sh * 60 + sm
+  const endBase = Number.isNaN(eh) || Number.isNaN(em) ? 23 * 60 + 59 : eh * 60 + em
+  const durationMinutes = Math.max(30, endBase - startBase)
+
+  const safeStartMinutes = Math.min(startMinutes, 23 * 60 + 59)
+  const safeEndMinutes = Math.min(23 * 60 + 59, safeStartMinutes + durationMinutes)
+
+  calendarStore.updateEvent({
+    ...event,
+    start: targetDate,
+    end: targetDate,
+    startTime: minutesToTime(safeStartMinutes),
+    endTime: minutesToTime(safeEndMinutes)
+  })
+}
+
+const clearManualDragState = () => {
+  manualDragEvent.value = null
+  manualDragging.value = false
+  timedDragOverDate.value = null
+  document.removeEventListener('mousemove', onTimedMouseMove)
+  document.removeEventListener('mouseup', onTimedMouseUp)
+}
+
+const onTimedMouseMove = (e) => {
+  if (!manualDragEvent.value) {
+    return
+  }
+
+  const movedX = Math.abs(e.clientX - manualDragStartX.value)
+  const movedY = Math.abs(e.clientY - manualDragStartY.value)
+
+  if (!manualDragging.value && movedX < 4 && movedY < 4) {
+    return
+  }
+
+  manualDragging.value = true
+  const target = document.elementFromPoint(e.clientX, e.clientY)
+  const column = target?.closest('.week-day-column')
+  timedDragOverDate.value = column?.dataset?.date || null
+}
+
+const onTimedMouseUp = (e) => {
+  if (!manualDragEvent.value) {
+    clearManualDragState()
+    return
+  }
+
+  if (manualDragging.value) {
+    const target = document.elementFromPoint(e.clientX, e.clientY)
+    const column = target?.closest('.week-day-column')
+    const targetDate = column?.dataset?.date
+    if (column && targetDate) {
+      applyTimedDrop(manualDragEvent.value, targetDate, column.getBoundingClientRect(), e.clientY)
+      suppressNextCardClick.value = true
+    }
+  }
+
+  clearManualDragState()
+}
+
+const onTimedMouseDragStart = (e, event) => {
+  if (e.button !== 0) {
+    return
+  }
+
+  if (e.target.closest('.resize-handle')) {
+    return
+  }
+
+  manualDragEvent.value = event
+  manualDragging.value = false
+  manualDragStartX.value = e.clientX
+  manualDragStartY.value = e.clientY
+  document.addEventListener('mousemove', onTimedMouseMove)
+  document.addEventListener('mouseup', onTimedMouseUp)
 }
 
 // Resize handler for week/day view
@@ -588,6 +775,12 @@ const onResizeStart = (e, event) => {
 .color-picker-row { margin-bottom: 12px; }
 .color-picker-row label { font-size: 12px; color: #555; }
 
+.form-validation-message {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #ff3b30;
+}
+
 .calendar-wrapper {
   background: var(--clr-bg-app, #ffffff);
   border-radius: 12px;
@@ -606,7 +799,7 @@ const onResizeStart = (e, event) => {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  background: var(--clr-bg-topbar, #fafafa);
+  background: #ffffff;
   flex-shrink: 0;
 }
 
@@ -631,6 +824,10 @@ const onResizeStart = (e, event) => {
   cursor: pointer; display: flex; align-items: center; justify-content: center; color: #86868b;
 }
 .icon-btn:hover { background: rgba(0, 0, 0, 0.05); }
+
+.refresh-btn { transition: transform 0.3s ease; }
+.refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .segmented-control { display: flex; background: rgba(0, 0, 0, 0.05); padding: 2px; border-radius: 8px; }
 .segment {

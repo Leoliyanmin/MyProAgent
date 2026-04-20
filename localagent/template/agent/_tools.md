@@ -16,3 +16,11 @@ You have access to tools for:
 
 ### Shell Execution
 - **Executing commands** (exec) - Run shell commands for complex tasks
+
+### Calendar Operations
+- **Create schedule event** (create_schedule_event) - Create a calendar event for current user. Default behavior is to also sync a linked TODO item, unless user explicitly asks calendar-only.
+- **Update schedule event** (update_schedule_event) - Update title/details/time by schedule_id or title keyword
+- **Update schedule time** (update_schedule_event_time) - Quickly update start/end time of an event
+- **Delete schedule event** (delete_schedule_event) - Delete an event by schedule_id or title keyword
+
+When user asks to create/update/delete schedule-related data, call the calendar tools and only report success based on tool results.
