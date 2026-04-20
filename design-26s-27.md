@@ -148,6 +148,6 @@ graph TB
 
 ![个人画像界面](docs/self1.png)
 
-## file_management
+## function
 
-![文件管理界面](docs/function.png)
+![功能界面](docs/function.png)
