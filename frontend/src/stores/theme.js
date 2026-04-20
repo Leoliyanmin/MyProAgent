@@ -2,22 +2,10 @@ import { defineStore } from 'pinia'
 import { computed, reactive, ref, watch } from 'vue'
 
 export const DEFAULTS = {
-  accent:      '#007aff',
-  bgApp:       '#f5f5f7',
-  bgAppImage:  '',
   bgSidebar:   '#ebebeb',
   bgTopbar:    '#ebebeb',
   bgContent:   '#f5f5f7',
   bgAgent:     '#ebebeb',
-  bgSidebarImage: '',
-  bgTopbarImage: '',
-  bgContentImage: '',
-  bgAgentImage: '',
-  bgCard:      '#ffffff',
-  textPrimary: '#1d1d1f',
-  textMuted:   '#6b7280',
-  borderColor: '#e5e7eb',
-  cardRadius:  12,
 }
 
 export const useThemeStore = defineStore('theme', () => {
@@ -33,7 +21,12 @@ export const useThemeStore = defineStore('theme', () => {
     try {
       const saved = localStorage.getItem('proagent_theme')
       if (saved) {
-        Object.assign(tokens, JSON.parse(saved))
+        const parsed = JSON.parse(saved)
+        for (const key of Object.keys(DEFAULTS)) {
+          if (typeof parsed[key] === 'string') {
+            tokens[key] = parsed[key]
+          }
+        }
       }
     } catch (e) {
       console.warn('Failed to load theme from storage:', e)
@@ -51,22 +44,20 @@ export const useThemeStore = defineStore('theme', () => {
 
   const applyToRoot = () => {
     const r = document.documentElement
-    r.style.setProperty('--clr-accent',       tokens.accent)
-    r.style.setProperty('--clr-bg-app',        tokens.bgApp)
-    r.style.setProperty('--clr-bg-app-image',  tokens.bgAppImage ? `url("${tokens.bgAppImage}")` : 'none')
+    r.style.setProperty('--clr-bg-app',        '#ffffff')
+    r.style.setProperty('--clr-bg-app-image',  'none')
     r.style.setProperty('--clr-bg-sidebar',    tokens.bgSidebar)
-    r.style.setProperty('--clr-bg-sidebar-image', tokens.bgSidebarImage ? `url("${tokens.bgSidebarImage}")` : 'none')
+    r.style.setProperty('--clr-bg-sidebar-image', 'none')
     r.style.setProperty('--clr-bg-topbar',     tokens.bgTopbar)
-    r.style.setProperty('--clr-bg-topbar-image', tokens.bgTopbarImage ? `url("${tokens.bgTopbarImage}")` : 'none')
+    r.style.setProperty('--clr-bg-topbar-image', 'none')
     r.style.setProperty('--clr-bg-content',    tokens.bgContent)
-    r.style.setProperty('--clr-bg-content-image', tokens.bgContentImage ? `url("${tokens.bgContentImage}")` : 'none')
+    r.style.setProperty('--clr-bg-content-image', 'none')
     r.style.setProperty('--clr-bg-agent',      tokens.bgAgent)
-    r.style.setProperty('--clr-bg-agent-image', tokens.bgAgentImage ? `url("${tokens.bgAgentImage}")` : 'none')
-    r.style.setProperty('--clr-bg-card',       tokens.bgCard)
-    r.style.setProperty('--clr-text-primary',  tokens.textPrimary)
-    r.style.setProperty('--clr-text-muted',    tokens.textMuted)
-    r.style.setProperty('--clr-border',        tokens.borderColor)
-    r.style.setProperty('--clr-card-radius',   tokens.cardRadius + 'px')
+    r.style.setProperty('--clr-bg-agent-image', 'none')
+    r.style.setProperty('--clr-bg-card',       '#ffffff')
+    r.style.setProperty('--clr-text-primary',  '#000000')
+    r.style.setProperty('--clr-text-secondary', '#000000')
+    r.style.setProperty('--clr-text-muted',    '#000000')
   }
 
   watch(tokens, () => {
@@ -77,6 +68,7 @@ export const useThemeStore = defineStore('theme', () => {
   const snapshot = () => ({ ...tokens })
 
   const setToken = (key, value) => {
+    if (!(key in DEFAULTS)) return
     history.value.push(snapshot())
     redoStack.value = []
     tokens[key] = value

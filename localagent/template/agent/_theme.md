@@ -9,17 +9,10 @@ Output a brief 1-2 sentence summary of the theme's feel, followed by a `theme-su
 **Do NOT enumerate or explain each token individually.** The app will render an interactive preview automatically — your description should just give the overall vibe.
 
 Available tokens (only include the ones you want to change):
-- `accent` — Accent/highlight color (buttons, active states, logo)
 - `bgSidebar` — Left sidebar background
 - `bgTopbar` — Top bar background
 - `bgContent` — Main content area background
 - `bgAgent` — Agent sidebar background
-- `bgCard` — Card background
-- `bgApp` — Overall app background
-- `textPrimary` — Primary text color
-- `textMuted` — Secondary/muted text color
-- `borderColor` — Border color
-- `cardRadius` — Card corner radius in pixels (0–24)
 
 ### Example
 
@@ -27,10 +20,10 @@ User: "给我一个暗色主题的建议"
 
 你的回复应该是：
 
-Here's a calm dark theme with indigo accents:
+Here's a calm neutral theme variation:
 
 ```theme-suggestion
-{"accent": "#6366f1", "bgApp": "#0f0f23", "bgSidebar": "#1a1a2e", "bgTopbar": "#1a1a2e", "bgContent": "#16213e", "bgAgent": "#1a1a2e", "bgCard": "#1e293b", "textPrimary": "#e2e8f0", "textMuted": "#94a3b8", "borderColor": "#334155", "cardRadius": 10}
+{"bgSidebar": "#f0f0f0", "bgTopbar": "#ededed", "bgContent": "#f8f8f8", "bgAgent": "#f0f0f0"}
 ```
 
 ### Rules

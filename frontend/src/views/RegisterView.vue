@@ -3,7 +3,7 @@
     <div class="auth-card">
       <div class="auth-header">
         <h1 class="mac-title">Create an Account</h1>
-        <p class="mac-subtitle">Sign up for AgentWorkspace</p>
+        <p class="mac-subtitle">Sign up for SPA</p>
       </div>
 
       <form @submit.prevent="handleRegister" class="auth-form">
@@ -20,7 +20,7 @@
         </div>
 
         <div class="form-group">
-          <label for="email" class="mac-label">Email</label>
+          <label for="email" class="mac-label">Email <span class="label-hint">(Only for SUSTech email)</span></label>
           <div class="email-input-wrapper">
             <input
               id="email"
@@ -246,7 +246,7 @@ const handleRegister = async () => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: var(--clr-bg-app, #f5f5f7);
+  background-color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   width: 100vw;
 }
@@ -254,7 +254,7 @@ const handleRegister = async () => {
 .auth-card {
   width: 100%;
   max-width: 440px;
-  background: var(--clr-bg-content, #ffffff);
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
   padding: 32px;
@@ -269,13 +269,13 @@ const handleRegister = async () => {
 .mac-title {
   font-size: 24px;
   font-weight: 600;
-  color: var(--clr-text-primary, #1d1d1f);
+  color: #000000;
   margin: 0 0 8px 0;
 }
 
 .mac-subtitle {
   font-size: 14px;
-  color: var(--clr-text-secondary, #86868b);
+  color: #000000;
   margin: 0;
 }
 
@@ -287,7 +287,7 @@ const handleRegister = async () => {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: var(--clr-text-secondary, #86868b);
+  color: #000000;
   margin-bottom: 8px;
 }
 
@@ -296,13 +296,28 @@ const handleRegister = async () => {
   height: 40px;
   padding: 0 12px;
   border-radius: 8px;
-  border: 1px solid var(--clr-border, #d2d2d7);
-  background-color: var(--clr-bg-app, #f5f5f7);
+  border: 1px solid #d2d2d7;
+  background-color: #ffffff;
   font-size: 14px;
-  color: var(--clr-text-primary, #1d1d1f);
+  color: #000000;
+  -webkit-text-fill-color: #000000;
+  caret-color: #000000;
   outline: none;
   transition: all 0.2s ease;
   box-sizing: border-box;
+}
+
+.mac-input::placeholder {
+  color: #6b7280;
+}
+
+.mac-input:-webkit-autofill,
+.mac-input:-webkit-autofill:hover,
+.mac-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #000000;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+  box-shadow: 0 0 0px 1000px #ffffff inset;
+  transition: background-color 9999s ease-in-out 0s;
 }
 
 .mac-input:focus {
@@ -336,14 +351,14 @@ const handleRegister = async () => {
   right: 12px;
   background: none;
   border: none;
-  color: var(--clr-text-secondary, #86868b);
+  color: #000000;
   font-size: 12px;
   cursor: pointer;
   padding: 0;
 }
 
 .eye-btn:hover {
-  color: var(--clr-primary, #007aff);
+  color: #000000;
 }
 
 .error-text {
@@ -356,7 +371,7 @@ const handleRegister = async () => {
 .label-hint {
   font-size: 12px;
   font-weight: 400;
-  color: var(--clr-text-secondary, #86868b);
+  color: #000000;
 }
 
 .api-error {
@@ -380,9 +395,9 @@ const handleRegister = async () => {
 }
 
 .mac-btn {
-  background-color: var(--clr-primary, #007aff);
-  color: white;
-  border: none;
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
   border-radius: 8px;
   height: 40px;
   font-size: 14px;
@@ -395,9 +410,9 @@ const handleRegister = async () => {
 }
 
 .mac-btn-sm {
-  background-color: var(--clr-bg-content, #e5e5ea);
-  color: var(--clr-text-primary, #1d1d1f);
-  border: 1px solid var(--clr-border, #d2d2d7);
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #d2d2d7;
   border-radius: 8px;
   height: 40px;
   font-size: 13px;
@@ -410,11 +425,11 @@ const handleRegister = async () => {
 }
 
 .mac-btn-sm:hover:not(:disabled) {
-  background-color: #d1d1d6;
+  background-color: #f5f5f5;
 }
 
 .mac-btn:hover:not(:disabled) {
-  background-color: var(--clr-primary-dark, #0062cc);
+  background-color: #1f1f1f;
 }
 
 .mac-btn:disabled, .mac-btn-sm:disabled {
@@ -433,11 +448,11 @@ const handleRegister = async () => {
 
 .mac-text {
   font-size: 13px;
-  color: var(--clr-text-secondary, #86868b);
+  color: #000000;
 }
 
 .mac-link {
-  color: var(--clr-primary, #007aff);
+  color: #000000;
   text-decoration: none;
   font-weight: 500;
 }

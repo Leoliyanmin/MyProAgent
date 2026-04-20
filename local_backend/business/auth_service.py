@@ -2,9 +2,18 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from config import settings
-import requests
+import httpx
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+_client: httpx.AsyncClient | None = None
+
+
+async def _get_client() -> httpx.AsyncClient:
+    global _client
+    if _client is None:
+        _client = httpx.AsyncClient(timeout=30.0)
+    return _client
 
 
 class AuthService:
@@ -33,47 +42,48 @@ class AuthService:
 
     def validate_email(self, email: str) -> bool:
         return email.endswith("@mail.sustech.edu.cn")
-    
+
     def validate_password(self, password: str) -> dict:
         if len(password) < 8:
             return {'valid': False, 'message': '密码长度至少为8位'}
-        
+
         if not any(char.isupper() for char in password):
             return {'valid': False, 'message': '密码必须包含至少一个大写字母'}
-        
+
         if not any(char.islower() for char in password):
             return {'valid': False, 'message': '密码必须包含至少一个小写字母'}
-        
+
         if not any(char.isdigit() for char in password):
             return {'valid': False, 'message': '密码必须包含至少一个数字'}
-        
+
         return {'valid': True, 'message': '密码格式正确'}
-    
+
     def validate_registration_data(self, email: str, password: str, confirm_password: str, verification_code: str) -> dict:
         email_validation = self.validate_email(email)
         if not email_validation:
             return {'valid': False, 'message': '邮箱格式不正确，必须使用@mail.sustech.edu.cn域名'}
-        
+
         password_validation = self.validate_password(password)
         if not password_validation['valid']:
             return password_validation
-        
+
         if password != confirm_password:
             return {'valid': False, 'message': '两次输入的密码不一致'}
-        
+
         if not verification_code or len(verification_code.strip()) == 0:
             return {'valid': False, 'message': '验证码不能为空'}
-        
+
         return {'valid': True, 'message': '注册数据验证通过'}
-    
-    def send_verification_code(self, email: str, purpose: str = "register") -> dict:
+
+    async def send_verification_code(self, email: str, purpose: str = "register") -> dict:
         try:
             url = f"{settings.SERVER_BACKEND_URL}/auth/verification/send"
             data = {
                 "email": email,
                 "purpose": purpose
             }
-            response = requests.post(url, json=data)
+            client = await _get_client()
+            response = await client.post(url, json=data)
             if response.status_code == 200:
                 result = response.json()
                 return result
@@ -88,8 +98,6 @@ class AuthService:
                 'success': False,
                 'message': '发送验证码失败，请稍后重试'
             }
-    
+
     def verify_registration_code(self, email: str, code: str) -> bool:
-        # 验证码验证由Server Backend在注册时处理
-        # 这里返回True，因为实际验证会在Server端进行
         return True

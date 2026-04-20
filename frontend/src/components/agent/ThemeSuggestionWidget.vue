@@ -13,12 +13,12 @@
         class="sch-sidebar zone-preview"
         :style="{ backgroundColor: tokens.bgSidebar || '#ebebeb' }"
       >
-        <div class="sch-logo" :style="{ backgroundColor: tokens.accent || '#007aff' }"></div>
-        <div class="sch-navitem" :style="{ backgroundColor: tokens.borderColor || '#e5e7eb' }"></div>
-        <div class="sch-navitem sch-navitem--dim" :style="{ backgroundColor: tokens.borderColor || '#e5e7eb' }"></div>
-        <div class="sch-navitem sch-navitem--dim" :style="{ backgroundColor: tokens.borderColor || '#e5e7eb' }"></div>
+        <div class="sch-logo"></div>
+        <div class="sch-navitem"></div>
+        <div class="sch-navitem sch-navitem--dim"></div>
+        <div class="sch-navitem sch-navitem--dim"></div>
         <div class="sch-spacer"></div>
-        <div class="sch-avatar" :style="{ backgroundColor: tokens.accent || '#007aff' }"></div>
+        <div class="sch-avatar"></div>
         <span class="zone-label">侧边栏</span>
       </div>
 
@@ -27,8 +27,8 @@
           class="sch-topbar zone-preview"
           :style="{ backgroundColor: tokens.bgTopbar || '#ebebeb' }"
         >
-          <div class="sch-segment" :style="{ backgroundColor: tokens.accent || '#007aff' }"></div>
-          <div class="sch-segment sch-segment--ghost" :style="{ backgroundColor: tokens.borderColor || '#e5e7eb' }"></div>
+          <div class="sch-segment"></div>
+          <div class="sch-segment sch-segment--ghost"></div>
           <span class="zone-label">顶栏</span>
         </div>
 
@@ -40,16 +40,16 @@
             class="sch-card"
             :style="{ backgroundColor: tokens.bgCard || '#ffffff', borderRadius: (tokens.cardRadius || 12) + 'px' }"
           >
-            <div class="sch-accent-bar" :style="{ backgroundColor: tokens.accent || '#007aff' }"></div>
-            <div class="sch-card-title" :style="{ color: tokens.textPrimary || '#1d1d1f' }">标题</div>
-            <div class="sch-card-desc" :style="{ color: tokens.textMuted || '#6b7280' }">描述内容</div>
+            <div class="sch-accent-bar"></div>
+            <div class="sch-card-title">标题</div>
+            <div class="sch-card-desc">描述内容</div>
           </div>
           <div
             class="sch-card"
             :style="{ backgroundColor: tokens.bgCard || '#ffffff', borderRadius: (tokens.cardRadius || 12) + 'px' }"
           >
-            <div class="sch-accent-bar" :style="{ backgroundColor: tokens.accent || '#007aff' }"></div>
-            <div class="sch-card-title" :style="{ color: tokens.textPrimary || '#1d1d1f' }">标题</div>
+            <div class="sch-accent-bar"></div>
+            <div class="sch-card-title">标题</div>
           </div>
           <span class="zone-label">内容区</span>
         </div>
@@ -59,23 +59,23 @@
         class="sch-agent zone-preview"
         :style="{ backgroundColor: tokens.bgAgent || '#ebebeb' }"
       >
-        <div class="sch-agent-header" :style="{ backgroundColor: tokens.borderColor || '#e5e7eb' }"></div>
+        <div class="sch-agent-header"></div>
         <div class="sch-agent-body">
-          <div class="sch-agent-line" :style="{ backgroundColor: tokens.textMuted || '#6b7280', opacity: 0.5 }"></div>
-          <div class="sch-agent-line sch-agent-line--short" :style="{ backgroundColor: tokens.textMuted || '#6b7280', opacity: 0.3 }"></div>
+          <div class="sch-agent-line"></div>
+          <div class="sch-agent-line sch-agent-line--short"></div>
         </div>
         <span class="zone-label">Agent</span>
       </div>
     </div>
 
     <div class="suggestion-actions">
-      <button class="accept-btn" @click="$emit('accept', tokens)">
+      <button class="accept-btn" @click="onAccept">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
         应用主题
       </button>
-      <button class="reject-btn" @click="dismissed = true">
+      <button class="reject-btn" @click="onDismiss">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -87,15 +87,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
-defineProps({
-  tokens: { type: Object, required: true }
+const props = defineProps({
+  tokens: { type: Object, required: true },
+  applied: { type: Boolean, default: false },
+  initiallyDismissed: { type: Boolean, default: false }
 })
 
-defineEmits(['accept'])
+const emit = defineEmits(['accept', 'dismiss'])
 
-const dismissed = ref(false)
+const localDismissed = ref(false)
+
+const dismissed = computed(() => props.initiallyDismissed || localDismissed.value)
+
+const onAccept = () => {
+  emit('accept', props.tokens)
+}
+
+const onDismiss = () => {
+  localDismissed.value = true
+  emit('dismiss')
+}
 </script>
 
 <style scoped>
@@ -158,11 +171,11 @@ const dismissed = ref(false)
   gap: 5px;
 }
 
-.sch-logo { width: 14px; height: 14px; border-radius: 3px; }
-.sch-navitem { height: 6px; border-radius: 3px; width: 100%; }
+.sch-logo { width: 14px; height: 14px; border-radius: 3px; background: rgba(0,0,0,0.12); }
+.sch-navitem { height: 6px; border-radius: 3px; width: 100%; background: rgba(0,0,0,0.08); }
 .sch-navitem--dim { opacity: 0.5; }
 .sch-spacer { flex: 1; }
-.sch-avatar { width: 12px; height: 12px; border-radius: 50%; align-self: center; }
+.sch-avatar { width: 12px; height: 12px; border-radius: 50%; align-self: center; background: rgba(0,0,0,0.12); }
 
 .sch-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
@@ -176,8 +189,8 @@ const dismissed = ref(false)
   border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
-.sch-segment { height: 12px; width: 28px; border-radius: 3px; }
-.sch-segment--ghost { opacity: 0.35; }
+.sch-segment { height: 12px; width: 28px; border-radius: 3px; background: rgba(0,0,0,0.1); opacity: 0.85; }
+.sch-segment--ghost { opacity: 0.35; background: rgba(0,0,0,0.06) !important; }
 
 .sch-content {
   flex: 1;
@@ -195,9 +208,9 @@ const dismissed = ref(false)
   gap: 3px;
 }
 
-.sch-accent-bar { height: 3px; border-radius: 2px; width: 35%; }
-.sch-card-title { font-size: 8px; font-weight: 600; line-height: 1; }
-.sch-card-desc { font-size: 7px; line-height: 1; }
+.sch-accent-bar { height: 3px; border-radius: 2px; width: 35%; background: rgba(0,0,0,0.12); }
+.sch-card-title { font-size: 8px; font-weight: 600; line-height: 1; color: rgba(0,0,0,0.6); }
+.sch-card-desc { font-size: 7px; line-height: 1; color: rgba(0,0,0,0.35); }
 
 .sch-agent {
   width: 36px;
@@ -209,9 +222,9 @@ const dismissed = ref(false)
   border-left: 1px solid rgba(0,0,0,0.06);
 }
 
-.sch-agent-header { height: 6px; border-radius: 3px; width: 100%; }
+.sch-agent-header { height: 6px; border-radius: 3px; width: 100%; background: rgba(0,0,0,0.08); }
 .sch-agent-body { flex: 1; display: flex; flex-direction: column; gap: 3px; padding-top: 3px; }
-.sch-agent-line { height: 4px; border-radius: 2px; width: 100%; }
+.sch-agent-line { height: 4px; border-radius: 2px; width: 100%; background: rgba(0,0,0,0.08); }
 .sch-agent-line--short { width: 55%; }
 
 .suggestion-actions {
@@ -234,12 +247,12 @@ const dismissed = ref(false)
 }
 
 .accept-btn {
-  background: #007aff;
+  background: rgba(0,0,0,0.75);
   color: white;
 }
 
 .accept-btn:hover {
-  background: #0069d9;
+  background: rgba(0,0,0,0.85);
 }
 
 .reject-btn {

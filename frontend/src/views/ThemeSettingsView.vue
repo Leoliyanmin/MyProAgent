@@ -31,13 +31,13 @@
       <div class="te-preview-col">
         <p class="col-label">布局预览</p>
 
-        <div class="schematic" :style="{ backgroundColor: store.tokens.bgApp, backgroundImage: store.tokens.bgAppImage ? `url(${store.tokens.bgAppImage})` : 'none', backgroundSize: 'cover' }">
+        <div class="schematic" :style="{ backgroundColor: '#ffffff' }">
 
           <!-- 侧边栏 zone -->
           <div
             class="sch-sidebar zone"
             :class="zoneClasses('bgSidebar')"
-            :style="{ backgroundColor: store.tokens.bgSidebar, backgroundImage: store.tokens.bgSidebarImage ? `url(${store.tokens.bgSidebarImage})` : 'none', backgroundSize: 'cover' }"
+            :style="{ backgroundColor: store.tokens.bgSidebar }"
             @click="pickZone('bgSidebar')"
           >
             <div class="sch-logo"></div>
@@ -54,7 +54,7 @@
             <div
               class="sch-topbar zone"
               :class="zoneClasses('bgTopbar')"
-              :style="{ backgroundColor: store.tokens.bgTopbar, backgroundImage: store.tokens.bgTopbarImage ? `url(${store.tokens.bgTopbarImage})` : 'none', backgroundSize: 'cover' }"
+              :style="{ backgroundColor: store.tokens.bgTopbar }"
               @click="pickZone('bgTopbar')"
             >
               <div class="sch-segment"></div>
@@ -65,7 +65,7 @@
             <div
               class="sch-content zone"
               :class="zoneClasses('bgContent')"
-              :style="{ backgroundColor: store.tokens.bgContent, backgroundImage: store.tokens.bgContentImage ? `url(${store.tokens.bgContentImage})` : 'none', backgroundSize: 'cover' }"
+              :style="{ backgroundColor: store.tokens.bgContent }"
               @click="pickZone('bgContent')"
             >
               <!-- 简化的内容占位 -->
@@ -78,7 +78,7 @@
           <div
             class="sch-agent zone"
             :class="zoneClasses('bgAgent')"
-            :style="{ backgroundColor: store.tokens.bgAgent, backgroundImage: store.tokens.bgAgentImage ? `url(${store.tokens.bgAgentImage})` : 'none', backgroundSize: 'cover' }"
+            :style="{ backgroundColor: store.tokens.bgAgent }"
             @click="pickZone('bgAgent')"
           >
             <div class="sch-agent-header"></div>
@@ -96,7 +96,7 @@
           <div
             class="live-preview"
             :style="{
-              backgroundColor: store.tokens.bgApp,
+              backgroundColor: '#ffffff',
               fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif'
             }"
           >
@@ -251,7 +251,7 @@ const store = useThemeStore()
 const META = {
   bgSidebar:   { label: '侧边栏背景',      desc: '左侧导航栏背景色',                 type: 'color',  canUpload: false },
   bgTopbar:    { label: '顶栏背景',        desc: '顶部页签栏背景色',                 type: 'color',  canUpload: false },
-  bgContent:   { label: '内容区背景',      desc: '中间主体内容区域背景色',           type: 'color',  canUpload: true  },
+  bgContent:   { label: '内容区背景',      desc: '中间主体内容区域背景色',           type: 'color',  canUpload: false },
   bgAgent:     { label: 'Agent背景',       desc: 'AI助手侧边栏背景色',               type: 'color',  canUpload: false },
 }
 

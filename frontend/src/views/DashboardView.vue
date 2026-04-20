@@ -29,15 +29,13 @@
 <script setup>
 import { ref } from 'vue'
 import VueGridLayout from 'vue3-grid-layout'
+import { useDashboardStore } from '../stores/dashboard'
 
-// 显式解构核心组件
 const { GridLayout, GridItem } = VueGridLayout
 
-// 1. 真实导入你刚才创建的小组件
 import WidgetTodo from '../components/widgets/WidgetTodo.vue'
 import WidgetMessages from '../components/widgets/WidgetMessages.vue'
 
-// 2. 更新类型映射字典，指向真实的导入对象
 const componentMap = {
   'todo': WidgetTodo,
   'messages': WidgetMessages
@@ -45,18 +43,14 @@ const componentMap = {
 
 const getComponentByType = (type) => componentMap[type]
 
-// 3. 核心状态：布局数据结构
-// 在 DashboardView.vue 的 <script setup> 中修改 layoutConfig
-const layoutConfig = ref([
-  { x: 0, y: 0, w: 6, h: 5, i: '3', type: 'todo', minW: 3, minH: 4 },    // TODO 允许稍微窄一点
-  { x: 6, y: 0, w: 6, h: 5, i: '4', type: 'messages', minW: 4, minH: 3 } // 消息列表
-])
-// 4. 编辑模式控制
+const dashboardStore = useDashboardStore()
+const layoutConfig = dashboardStore.layoutConfig
+
 const isEditing = ref(false)
 const toggleEditMode = () => {
   isEditing.value = !isEditing.value
   if (!isEditing.value) {
-    console.log('Saved layout schema:', layoutConfig.value)
+    dashboardStore.saveLayout()
   }
 }
 </script>

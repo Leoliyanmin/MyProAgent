@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
+import { tasksAPI } from '../services/api.js'
 
 const STORAGE_KEY = 'proagent_todos'
+const LAYOUT_STORAGE_KEY = 'proagent_layout'
 
 // 本地存储 helpers
 const loadTodosFromStorage = () => {
@@ -25,6 +27,102 @@ const saveTodosToStorage = (todos) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
   } catch (err) {
     console.error('Failed to save todos to localStorage:', err)
+  }
+}
+
+const DEFAULT_LAYOUT = [
+  { x: 0, y: 0, w: 6, h: 5, i: '3', type: 'todo', minW: 3, minH: 4 },
+  { x: 6, y: 0, w: 6, h: 5, i: '4', type: 'messages', minW: 4, minH: 3 }
+]
+
+const loadLayoutFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(LAYOUT_STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load layout from localStorage:', err)
+  }
+  return DEFAULT_LAYOUT
+}
+
+const saveLayoutToStorage = (layout) => {
+  try {
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layout))
+  } catch (err) {
+    console.error('Failed to save layout to localStorage:', err)
+  }
+}
+
+const isLocalGeneratedId = (id) => {
+  const numericId = Number(id)
+  return Number.isFinite(numericId) && numericId > 1000000000000
+}
+
+const extractLinkedScheduleId = (task) => {
+  const explicitId = task.data_linked_schedule_id ?? task.linked_schedule_id
+  if (explicitId != null) {
+    const num = Number(explicitId)
+    if (Number.isFinite(num) && num > 0) return num
+  }
+  const text = String(task.description || task.data_content_text || '')
+  const match = text.match(/\[SCHEDULE_LINK:(\d+)\]/)
+  if (!match) return null
+  const linkedId = Number(match[1])
+  return Number.isFinite(linkedId) ? linkedId : null
+}
+
+const parseDueDateTime = (value) => {
+  if (!value) {
+    return { date: '', time: '' }
+  }
+
+  const raw = String(value)
+  const normalized = raw.includes('T') ? raw : raw.replace(' ', 'T')
+  const [datePart = '', timePart = ''] = normalized.split('T')
+  return {
+    date: datePart,
+    time: (timePart || '').slice(0, 5)
+  }
+}
+
+const inferPriority = (task) => {
+  const text = String(task.priority || task.data_priority || '').toLowerCase().trim()
+  if (text === 'high' || text === 'p0' || text === 'p1') return 1
+  if (text === 'low' || text === 'p3') return 3
+  return 2
+}
+
+const inferColorByPriority = (priority) => {
+  if (priority === 0) return '#ff3b30'
+  if (priority === 1) return '#ff9500'
+  if (priority === 3) return '#34c759'
+  return '#007aff'
+}
+
+const mapRemoteTaskToTodo = (task) => {
+  const dueDate = task.due_date || task.data_ddl_time || ''
+  const { date, time } = parseDueDateTime(dueDate)
+  const priority = inferPriority(task)
+  const description = task.description || task.data_content_text || ''
+
+  return {
+    id: task.id ?? task.data_id,
+    title: task.title ?? task.data_title ?? '未命名任务',
+    completed: String(task.status || '').toLowerCase() === 'completed',
+    start: date || new Date().toISOString().split('T')[0],
+    end: date || new Date().toISOString().split('T')[0],
+    startTime: time,
+    endTime: time,
+    priority,
+    color: inferColorByPriority(priority),
+    description,
+    linkedScheduleId: extractLinkedScheduleId(task),
+    source: 'remote'
   }
 }
 
@@ -86,7 +184,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const addTodo = (taskPayload) => {
     if (typeof taskPayload === 'string') {
       const today = new Date().toISOString().split('T')[0]
-      todos.value.unshift({ id: Date.now(), title: taskPayload, completed: false, start: today, end: today, priority: 2, color: '#007aff' })
+      todos.value.unshift({ id: Date.now(), title: taskPayload, completed: false, start: today, end: today, priority: 2, color: '#007aff', source: 'local' })
     } else {
       const today = new Date().toISOString().split('T')[0]
       todos.value.unshift({
@@ -98,7 +196,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
         startTime: taskPayload.startTime || '',
         endTime: taskPayload.endTime || '',
         priority: taskPayload.priority !== undefined ? taskPayload.priority : 2,
-        color: taskPayload.color || '#007aff'
+        color: taskPayload.color || '#007aff',
+        source: taskPayload.source || 'local',
+        linkedScheduleId: taskPayload.linkedScheduleId || null,
+        description: taskPayload.description || ''
       })
     }
     saveTodosToStorage(todos.value)
@@ -124,12 +225,42 @@ export const useDashboardStore = defineStore('dashboard', () => {
   }
 
   const removeTodo = (id) => {
-    console.log('[DashboardStore] Removing todo with id:', id)
-    console.log('[DashboardStore] Todos before:', todos.value)
     todos.value = todos.value.filter(t => t.id !== id)
-    console.log('[DashboardStore] Todos after:', todos.value)
     saveTodosToStorage(todos.value)
-    console.log('[DashboardStore] Saved to localStorage')
+  }
+
+  const loadTodosFromBackend = async () => {
+    try {
+      const remoteTasks = await tasksAPI.getTasks()
+      const remoteTodos = (Array.isArray(remoteTasks) ? remoteTasks : []).map(mapRemoteTaskToTodo)
+
+      // Keep local-only draft todos while syncing remote-backed items.
+      const localOnlyTodos = todos.value.filter((todo) => {
+        if (todo?.source === 'local') return true
+        return isLocalGeneratedId(todo?.id)
+      })
+
+      todos.value = [...remoteTodos, ...localOnlyTodos]
+      saveTodosToStorage(todos.value)
+      return { success: true, count: remoteTodos.length }
+    } catch (err) {
+      console.error('Failed to load todos from backend:', err)
+      return { success: false, message: err?.message || '加载任务失败' }
+    }
+  }
+
+// ==============================
+  // 3. 布局配置状态 (本地存储)
+  // ==============================
+  const layoutConfig = ref(loadLayoutFromStorage())
+
+  const saveLayout = () => {
+    saveLayoutToStorage(layoutConfig.value)
+  }
+
+  const resetLayout = () => {
+    layoutConfig.value = DEFAULT_LAYOUT
+    saveLayoutToStorage(layoutConfig.value)
   }
 
   return {
@@ -143,6 +274,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     addTodo,
     updateTodo,
     toggleTodo,
-    removeTodo
+    removeTodo,
+    loadTodosFromBackend,
+
+    layoutConfig,
+    saveLayout,
+    resetLayout
   }
 })

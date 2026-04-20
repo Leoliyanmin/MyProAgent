@@ -222,10 +222,10 @@ watch(
 )
 
 const TOKEN_META = {
-  bgSidebar: { label: '侧边栏背景', desc: '左侧导航区域背景色', type: 'color', canUploadImage: true },
-  bgTopbar: { label: '顶栏背景', desc: '顶部标签栏背景色', type: 'color', canUploadImage: true },
-  bgContent: { label: '内容区背景', desc: '主内容区域背景色', type: 'color', canUploadImage: true },
-  bgAgent: { label: 'Agent 助手背景', desc: '右侧 Agent 侧边栏背景色', type: 'color', canUploadImage: true }
+  bgSidebar: { label: '侧边栏背景', desc: '左侧导航区域背景色', type: 'color', canUploadImage: false },
+  bgTopbar: { label: '顶栏背景', desc: '顶部标签栏背景色', type: 'color', canUploadImage: false },
+  bgContent: { label: '内容区背景', desc: '主内容区域背景色', type: 'color', canUploadImage: false },
+  bgAgent: { label: 'Agent 助手背景', desc: '右侧 Agent 侧边栏背景色', type: 'color', canUploadImage: false }
 }
 
 const quickKeys = [

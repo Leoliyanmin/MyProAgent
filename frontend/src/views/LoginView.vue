@@ -2,7 +2,7 @@
   <div class="auth-container">
     <div class="auth-card">
       <div class="auth-header">
-        <h1 class="mac-title">Login to AgentWorkspace</h1>
+        <h1 class="mac-title">Login to SPA</h1>
         <p class="mac-subtitle">Sign in to your account</p>
       </div>
 
@@ -126,15 +126,15 @@ const handleLogin = async () => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: var(--clr-bg-app, #f5f5f7);
+  background-color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   width: 100vw;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 400px;
-  background: var(--clr-bg-content, #ffffff);
+  max-width: 440px;
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
   padding: 32px;
@@ -149,25 +149,25 @@ const handleLogin = async () => {
 .mac-title {
   font-size: 24px;
   font-weight: 600;
-  color: var(--clr-text-primary, #1d1d1f);
+  color: #000000;
   margin: 0 0 8px 0;
 }
 
 .mac-subtitle {
   font-size: 14px;
-  color: var(--clr-text-secondary, #86868b);
+  color: #000000;
   margin: 0;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .mac-label {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: var(--clr-text-secondary, #86868b);
+  color: #000000;
   margin-bottom: 8px;
 }
 
@@ -176,13 +176,28 @@ const handleLogin = async () => {
   height: 40px;
   padding: 0 12px;
   border-radius: 8px;
-  border: 1px solid var(--clr-border, #d2d2d7);
-  background-color: var(--clr-bg-app, #f5f5f7);
+  border: 1px solid #d2d2d7;
+  background-color: #ffffff;
   font-size: 14px;
-  color: var(--clr-text-primary, #1d1d1f);
+  color: #000000;
+  -webkit-text-fill-color: #000000;
+  caret-color: #000000;
   outline: none;
   transition: all 0.2s ease;
   box-sizing: border-box;
+}
+
+.mac-input::placeholder {
+  color: #6b7280;
+}
+
+.mac-input:-webkit-autofill,
+.mac-input:-webkit-autofill:hover,
+.mac-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #000000;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+  box-shadow: 0 0 0px 1000px #ffffff inset;
+  transition: background-color 9999s ease-in-out 0s;
 }
 
 .mac-input:focus {
@@ -206,14 +221,14 @@ const handleLogin = async () => {
   right: 12px;
   background: none;
   border: none;
-  color: var(--clr-text-secondary, #86868b);
+  color: #000000;
   font-size: 12px;
   cursor: pointer;
   padding: 0;
 }
 
 .eye-btn:hover {
-  color: var(--clr-primary, #007aff);
+  color: #000000;
 }
 
 .error-text {
@@ -226,7 +241,7 @@ const handleLogin = async () => {
 .forgot-password-link {
   display: inline-block;
   font-size: 12px;
-  color: var(--clr-primary, #007aff);
+  color: #000000;
   text-decoration: none;
   margin-top: 6px;
 }
@@ -246,9 +261,9 @@ const handleLogin = async () => {
 }
 
 .mac-btn {
-  background-color: var(--clr-primary, #007aff);
-  color: white;
-  border: none;
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
   border-radius: 8px;
   height: 40px;
   font-size: 14px;
@@ -261,7 +276,7 @@ const handleLogin = async () => {
 }
 
 .mac-btn:hover:not(:disabled) {
-  background-color: var(--clr-primary-dark, #0062cc);
+  background-color: #1f1f1f;
 }
 
 .mac-btn:disabled {
@@ -280,11 +295,11 @@ const handleLogin = async () => {
 
 .mac-text {
   font-size: 13px;
-  color: var(--clr-text-secondary, #86868b);
+  color: #000000;
 }
 
 .mac-link {
-  color: var(--clr-primary, #007aff);
+  color: #000000;
   text-decoration: none;
   font-weight: 500;
 }
