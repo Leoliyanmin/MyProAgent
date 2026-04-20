@@ -136,15 +136,18 @@ graph TB
 
 ## 整体布局结构
 
-![整体布局结构](docs/image.png)
-
-*顶部菜单栏（主界面、个人界面），左侧菜单栏（通用功能和特有功能），主内容区域。*
-
-## 个人界面一
-
-![个人界面一](docs/image-1.png)
+![整体布局结构](docs/main.png)
 
 
-## 个人界面二
+## calendar
 
-![个人界面二](docs/image-2.png)
+![日程管理界面](docs/calendar.png)
+
+
+## self
+
+![个人画像界面](docs/self1.png)
+
+## file_management
+
+![文件管理界面](docs/function.png)
