@@ -474,6 +474,7 @@ def create_data(
     user_id: str,
     data_category_id: int,
     data_content_type: str,
+    data_classification_code: int,
     data_title: str,
     data_content_text: str | None,
     data_link_url: str | None,
@@ -487,15 +488,16 @@ def create_data(
     return _execute(
         """
         INSERT INTO data (
-            user_id, data_category_id, data_content_type, data_title,
+            user_id, data_category_id, data_content_type, data_classification_code, data_title,
             data_content_text, data_link_url, data_release_time,
             data_ddl_time, data_is_previewable, data_created_at, data_linked_schedule_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
             data_category_id,
             data_content_type,
+            data_classification_code,
             data_title,
             data_content_text,
             data_link_url,
@@ -529,6 +531,7 @@ def update_data(
     data_release_time: str | None = None,
     data_ddl_time: str | None = None,
     data_is_previewable: int | None = None,
+    data_classification_code: int | None = None,
     data_linked_schedule_id: int | None | object = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> None:
@@ -553,6 +556,9 @@ def update_data(
     if data_is_previewable is not None:
         update_fields.append("data_is_previewable = ?")
         params.append(data_is_previewable)
+    if data_classification_code is not None:
+        update_fields.append("data_classification_code = ?")
+        params.append(data_classification_code)
     if data_linked_schedule_id is not None:
         if isinstance(data_linked_schedule_id, int) or data_linked_schedule_id == 0:
             update_fields.append("data_linked_schedule_id = ?")

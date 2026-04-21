@@ -12,6 +12,9 @@ from database.code.database_command import (
 from datetime import datetime
 
 
+DATA_CLASSIFICATION_ASSIGNMENT = 3
+
+
 class TaskOperations:
     """任务相关数据库操作封装"""
 
@@ -25,6 +28,7 @@ class TaskOperations:
             user_id=user_id,
             data_category_id=task_category['category_id'],
             data_content_type='task',
+            data_classification_code=DATA_CLASSIFICATION_ASSIGNMENT,
             data_title=title,
             data_content_text=description,
             data_link_url=None,

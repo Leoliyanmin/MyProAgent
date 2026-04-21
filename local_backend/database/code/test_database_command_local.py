@@ -379,6 +379,7 @@ class LocalCommandTestRunner:
                 user_id=row["user_id"],
                 data_category_id=self._ids["category_id"],
                 data_content_type=row["data_content_type"],
+                data_classification_code=row["data_classification_code"],
                 data_title=row["data_title"],
                 data_content_text=row["data_content_text"],
                 data_link_url=row["data_link_url"],

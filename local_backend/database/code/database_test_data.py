@@ -51,6 +51,7 @@ TEST_DATA = {
     "data": {
         "user_id": "user-test-001",
         "data_content_type": "note",
+        "data_classification_code": 2,
         "data_title": "week1",
         "data_content_text": "initial checklist",
         "data_link_url": "https://example.com/week1",
