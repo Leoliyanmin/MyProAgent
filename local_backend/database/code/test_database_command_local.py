@@ -66,6 +66,7 @@ class LocalCommandTestRunner:
         self._ids: dict[str, int] = {}
         # 使用正常数据库路径（与database_command.py中的DEFAULT_DB_PATH一致）
         self.db_path = Path(__file__).resolve().parents[1] / "db" / "local.db"
+        self.db_dir = self.db_path.parent
         self.db_was_created = False
         self._ensure_db_ready()
 
@@ -107,7 +108,7 @@ class LocalCommandTestRunner:
         print(json.dumps(self._to_printable(result), indent=2, sort_keys=True, default=str))
 
     def _server_test_script(self) -> Path:
-        return Path(__file__).resolve().parents[3] / "server" / "database" / "code" / "test_database_command_server.py"
+        return Path(__file__).resolve().parents[3] / "server_backend" / "database" / "code" / "test_database_command_server.py"
 
     def _push_packet_to_server(self, packet: dict[str, object]) -> dict[str, object]:
         server_script = self._server_test_script()
@@ -216,6 +217,11 @@ class LocalCommandTestRunner:
     def _has_table_data(self, table: str) -> bool:
         if table == "user":
             return len(db.list_users(db_path=self.db_path)) > 0
+        if table == "user_match_profile":
+            return len(db.list_user_match_profiles(db_path=self.db_path)) > 0
+        if table == "match_result":
+            user_id = self.data["user"]["user_id"]
+            return len(db.list_match_results_by_user(user_id, db_path=self.db_path)) > 0
         if table == "personal_information":
             return len(db.list_personal_information(db_path=self.db_path)) > 0
         if table == "sync_state":
@@ -382,6 +388,7 @@ class LocalCommandTestRunner:
                 user_id=row["user_id"],
                 data_category_id=self._ids["category_id"],
                 data_content_type=row["data_content_type"],
+                data_classification_code=row["data_classification_code"],
                 data_title=row["data_title"],
                 data_content_text=row["data_content_text"],
                 data_link_url=row["data_link_url"],
@@ -413,6 +420,8 @@ class LocalCommandTestRunner:
                 schedule_related_link=row["schedule_related_link"],
                 schedule_recurrence_rule=row["schedule_recurrence_rule"],
                 schedule_color_tag=row["schedule_color_tag"],
+                schedule_priority=row.get("schedule_priority", 2),
+                schedule_is_completed=row.get("schedule_is_completed", 0),
                 db_path=self.db_path,
             )
             self._created.add(table)
@@ -428,6 +437,8 @@ class LocalCommandTestRunner:
             row = self.data["session"]
             self._ids["session_id"] = db.create_session(
                 user_id=row["user_id"],
+                session_title=row.get("session_title", ""),
+                session_created_at=row.get("session_created_at") or row["session_last_visited_at"],
                 session_last_visited_at=row["session_last_visited_at"],
                 db_path=self.db_path,
             )
@@ -473,6 +484,13 @@ class LocalCommandTestRunner:
             row = db.get_user(user_id, db_path=self.db_path)
             self._expect(row is not None, "get_user should return one row")
             result = {"get_user": row, "list_users": rows}
+        elif table == "user_match_profile":
+            rows = db.list_user_match_profiles(db_path=self.db_path)
+            self._expect(len(rows) >= 1, "list_user_match_profiles should contain at least one row")
+            user_id = rows[0]["user_id"]
+            row = db.get_user_match_profile(user_id, db_path=self.db_path)
+            self._expect(row is not None, "get_user_match_profile should return one row")
+            result = {"get_user_match_profile": row, "list_user_match_profiles": rows}
         elif table == "personal_information":
             rows = db.list_personal_information(db_path=self.db_path)
             self._expect(len(rows) >= 1, "list_personal_information should contain at least one row")
@@ -481,7 +499,8 @@ class LocalCommandTestRunner:
             self._expect(row is not None, "get_personal_information should return one row")
             result = row
         elif table == "match_result":
-            rows = db.list_match_results_by_user(user["user_id"], db_path=self.db_path)
+            user_id = self.data["user"]["user_id"]
+            rows = db.list_match_results_by_user(user_id, db_path=self.db_path)
             self._expect(len(rows) >= 1, "list_match_results_by_user should contain at least one row")
             result = rows
         elif table == "sync_state":

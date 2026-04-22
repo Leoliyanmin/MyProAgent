@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS data (
     user_id TEXT NOT NULL,
     data_category_id INTEGER NOT NULL,
     data_content_type TEXT NOT NULL,
+    data_classification_code INTEGER NOT NULL DEFAULT 1 CHECK (data_classification_code IN (1, 2, 3)),
     data_title TEXT NOT NULL,
     data_content_text TEXT,
     data_link_url TEXT,
@@ -77,6 +78,7 @@ CREATE TABLE IF NOT EXISTS data (
     data_ddl_time TEXT,
     data_is_previewable INTEGER NOT NULL CHECK (data_is_previewable IN (0, 1)),
     data_created_at TEXT NOT NULL,
+    data_linked_schedule_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (data_category_id) REFERENCES category(category_id)
 );
@@ -86,6 +88,7 @@ CREATE TABLE IF NOT EXISTS schedule (
     user_id TEXT NOT NULL,
     schedule_event_type TEXT NOT NULL,
     schedule_priority INTEGER NOT NULL DEFAULT 2 CHECK (schedule_priority IN (0, 1, 2, 3)),
+    schedule_is_completed INTEGER NOT NULL DEFAULT 0 CHECK (schedule_is_completed IN (0, 1)),
     schedule_title TEXT NOT NULL,
     schedule_start_time TEXT NOT NULL,
     schedule_end_time TEXT NOT NULL,
@@ -100,6 +103,8 @@ CREATE TABLE IF NOT EXISTS schedule (
 CREATE TABLE IF NOT EXISTS session (
     session_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
+    session_title TEXT NOT NULL DEFAULT '',
+    session_created_at TEXT NOT NULL,
     session_last_visited_at TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
@@ -126,3 +131,6 @@ CREATE TABLE IF NOT EXISTS perm (
 );
 
 COMMIT;
+
+-- Migration: for existing databases that lack the data_linked_schedule_id column,
+-- run this manually: ALTER TABLE data ADD COLUMN data_linked_schedule_id INTEGER;

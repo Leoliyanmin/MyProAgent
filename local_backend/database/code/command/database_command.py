@@ -476,6 +476,7 @@ def create_data(
     user_id: str,
     data_category_id: int,
     data_content_type: str,
+    data_classification_code: int,
     data_title: str,
     data_content_text: str | None,
     data_link_url: str | None,
@@ -483,20 +484,22 @@ def create_data(
     data_ddl_time: str | None,
     data_is_previewable: int,
     data_created_at: str,
+    data_linked_schedule_id: int | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> int:
     return _execute(
         """
         INSERT INTO data (
-            user_id, data_category_id, data_content_type, data_title,
+            user_id, data_category_id, data_content_type, data_classification_code, data_title,
             data_content_text, data_link_url, data_release_time,
-            data_ddl_time, data_is_previewable, data_created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            data_ddl_time, data_is_previewable, data_created_at, data_linked_schedule_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
             data_category_id,
             data_content_type,
+            data_classification_code,
             data_title,
             data_content_text,
             data_link_url,
@@ -504,6 +507,7 @@ def create_data(
             data_ddl_time,
             data_is_previewable,
             data_created_at,
+            data_linked_schedule_id,
         ),
         db_path,
     )
@@ -523,32 +527,51 @@ def get_data(data_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None
 
 def update_data(
     data_id: int,
-    data_title: str,
-    data_content_text: str | None,
-    data_link_url: str | None,
-    data_release_time: str | None,
-    data_ddl_time: str | None,
-    data_is_previewable: int,
+    data_title: str | None = None,
+    data_content_text: str | None = None,
+    data_link_url: str | None = None,
+    data_release_time: str | None = None,
+    data_ddl_time: str | None = None,
+    data_is_previewable: int | None = None,
+    data_classification_code: int | None = None,
+    data_linked_schedule_id: int | None | object = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> None:
-    _execute(
-        """
-        UPDATE data
-        SET data_title = ?, data_content_text = ?, data_link_url = ?,
-            data_release_time = ?, data_ddl_time = ?, data_is_previewable = ?
-        WHERE data_id = ?
-        """,
-        (
-            data_title,
-            data_content_text,
-            data_link_url,
-            data_release_time,
-            data_ddl_time,
-            data_is_previewable,
-            data_id,
-        ),
-        db_path,
-    )
+    update_fields = []
+    params = []
+
+    if data_title is not None:
+        update_fields.append("data_title = ?")
+        params.append(data_title)
+    if data_content_text is not None:
+        update_fields.append("data_content_text = ?")
+        params.append(data_content_text)
+    if data_link_url is not None:
+        update_fields.append("data_link_url = ?")
+        params.append(data_link_url)
+    if data_release_time is not None:
+        update_fields.append("data_release_time = ?")
+        params.append(data_release_time)
+    if data_ddl_time is not None:
+        update_fields.append("data_ddl_time = ?")
+        params.append(data_ddl_time)
+    if data_is_previewable is not None:
+        update_fields.append("data_is_previewable = ?")
+        params.append(data_is_previewable)
+    if data_classification_code is not None:
+        update_fields.append("data_classification_code = ?")
+        params.append(data_classification_code)
+    if data_linked_schedule_id is not None:
+        if isinstance(data_linked_schedule_id, int) or data_linked_schedule_id == 0:
+            update_fields.append("data_linked_schedule_id = ?")
+            params.append(data_linked_schedule_id if data_linked_schedule_id != 0 else None)
+
+    if not update_fields:
+        return
+
+    params.append(data_id)
+    query = f"UPDATE data SET {', '.join(update_fields)} WHERE data_id = ?"
+    _execute(query, tuple(params), db_path)
 
 
 def delete_data(data_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
@@ -570,19 +593,21 @@ def create_schedule(
     schedule_color_tag: str | None,
     db_path: str | Path = DEFAULT_DB_PATH,
     schedule_priority: int = 2,
+    schedule_is_completed: int = 0,
 ) -> int:
     return _execute(
         """
         INSERT INTO schedule (
-            user_id, schedule_event_type, schedule_priority, schedule_title, schedule_start_time,
+            user_id, schedule_event_type, schedule_priority, schedule_is_completed, schedule_title, schedule_start_time,
             schedule_end_time, schedule_location, schedule_description,
             schedule_related_link, schedule_recurrence_rule, schedule_color_tag
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
             schedule_event_type,
             schedule_priority,
+            schedule_is_completed,
             schedule_title,
             schedule_start_time,
             schedule_end_time,
@@ -620,6 +645,7 @@ def update_schedule(
     schedule_color_tag: str | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
     schedule_priority: int | None = None,
+    schedule_is_completed: int | None = None,
 ) -> None:
     # 构建动态更新语句
     update_fields = []
@@ -652,6 +678,9 @@ def update_schedule(
     if schedule_priority is not None:
         update_fields.append("schedule_priority = ?")
         params.append(schedule_priority)
+    if schedule_is_completed is not None:
+        update_fields.append("schedule_is_completed = ?")
+        params.append(schedule_is_completed)
     
     if not update_fields:
         return  # 没有更新字段
@@ -667,10 +696,18 @@ def delete_schedule(schedule_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> 
 
 # session
 
-def create_session(user_id: str, session_last_visited_at: str, db_path: str | Path = DEFAULT_DB_PATH) -> int:
+def create_session(
+    user_id: str,
+    session_last_visited_at: str,
+    session_title: str = "",
+    session_created_at: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> int:
+    if session_created_at is None:
+        session_created_at = session_last_visited_at
     return _execute(
-        "INSERT INTO session (user_id, session_last_visited_at) VALUES (?, ?)",
-        (user_id, session_last_visited_at),
+        "INSERT INTO session (user_id, session_title, session_created_at, session_last_visited_at) VALUES (?, ?, ?, ?)",
+        (user_id, session_title, session_created_at, session_last_visited_at),
         db_path,
     )
 

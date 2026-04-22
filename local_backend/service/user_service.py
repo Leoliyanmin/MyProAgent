@@ -8,8 +8,16 @@ import requests
 from config import settings
 from logging_config import get_logger
 
-# 创建日志器
 logger = get_logger("local_user_service")
+
+_client: httpx.AsyncClient | None = None
+
+
+async def _get_client() -> httpx.AsyncClient:
+    global _client
+    if _client is None:
+        _client = httpx.AsyncClient(timeout=30.0, trust_env=False)
+    return _client
 
 
 class UserService:
@@ -18,21 +26,19 @@ class UserService:
         self.user_handle = UserHandle()
         logger.info("Local UserService 初始化完成")
 
-    def register_user(self, user_data: dict):
+    async def register_user(self, user_data: dict):
         email = user_data.get('email', '')
         password = user_data.get('password', '')
         confirm_password = user_data.get('confirm_password', '')
         verification_code = user_data.get('verification_code', '')
         full_name = user_data.get('full_name', '')
-        
+
         logger.info(f"用户注册请求: email={email}, full_name={full_name}")
-        
-        # 验证数据
+
         if password != confirm_password:
             logger.warning(f"用户注册失败: 两次输入的密码不一致, email={email}")
             return {'success': False, 'message': '两次输入的密码不一致'}
-        
-        # 先调用服务器注册
+
         try:
             server_data = {
                 'email': email,
@@ -43,7 +49,8 @@ class UserService:
                 'student_id': user_data.get('student_id')
             }
             logger.debug(f"向服务器发送注册请求: {settings.SERVER_BACKEND_URL}/auth/register")
-            response = requests.post(f"{settings.SERVER_BACKEND_URL}/auth/register", json=server_data)
+            client = await _get_client()
+            response = await client.post(f"{settings.SERVER_BACKEND_URL}/auth/register", json=server_data)
             if response.status_code != 200:
                 logger.error(f"服务器注册失败: {response.text}, email={email}")
                 return {'success': False, 'message': f'服务器注册失败: {response.text}'}
@@ -60,13 +67,13 @@ class UserService:
         if not result['ok']:
             logger.error(f"本地用户创建失败: {result['message']}, email={email}")
             return {'success': False, 'message': result['message']}
-        
+
         logger.info(f"本地用户创建成功: email={email}")
-        
+
         access_token = self.auth_service.create_access_token(
             data={"sub": email, "user_id": email}
         )
-        
+
         logger.info(f"用户注册完成: email={email}")
         return {
             'success': True,
@@ -79,7 +86,7 @@ class UserService:
             }
         }
 
-    def login_user(self, email: str, password: str):
+    async def login_user(self, email: str, password: str):
         logger.info(f"用户登录请求: email={email}")
         '''
         # 首先尝试本地登录
@@ -130,7 +137,7 @@ class UserService:
                 logger.warning(f"服务器登录失败: {response.text}, email={email}")
         except Exception as e:
             logger.error(f"服务器登录异常: {str(e)}, email={email}", exc_info=True)
-        
+
         logger.warning(f"用户登录失败: 邮箱或密码错误, email={email}")
         return {'success': False, 'message': '邮箱或密码错误'}
 

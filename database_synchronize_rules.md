@@ -85,6 +85,12 @@
 
 说明：其中 user\_version、user\_last\_synced\_at、user\_data\_updated\_at 在数据库层写入 sync\_state。
 
+4.4 data（分类相关新增字段）
+
+|字段|类型|必填|说明|
+|-|-|-|-|
+|data\_classification\_code|integer|是|数据分类编码：1=公共，2=课程资料，3=作业|
+
 **5. 接口 1：同步探测**
 5.1 路径与方法  
 POST /api/v1/sync/probe

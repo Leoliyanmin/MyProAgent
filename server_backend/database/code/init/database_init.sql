@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS data (
     user_id TEXT NOT NULL,
     data_category_id INTEGER NOT NULL,
     data_content_type TEXT NOT NULL,
+    data_classification_code INTEGER NOT NULL DEFAULT 1 CHECK (data_classification_code IN (1, 2, 3)),
     data_title TEXT NOT NULL,
     data_content_text TEXT,
     data_link_url TEXT,

@@ -500,6 +500,7 @@ def create_data(
     user_id: str,
     data_category_id: int,
     data_content_type: str,
+    data_classification_code: int,
     data_title: str,
     data_content_text: str | None,
     data_link_url: str | None,
@@ -512,15 +513,16 @@ def create_data(
     return _execute(
         """
         INSERT INTO data (
-            user_id, data_category_id, data_content_type, data_title,
+            user_id, data_category_id, data_content_type, data_classification_code, data_title,
             data_content_text, data_link_url, data_release_time,
             data_ddl_time, data_is_previewable, data_created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
             data_category_id,
             data_content_type,
+            data_classification_code,
             data_title,
             data_content_text,
             data_link_url,
@@ -549,13 +551,15 @@ def update_data(
     data_release_time: str | None,
     data_ddl_time: str | None,
     data_is_previewable: int,
+    data_classification_code: int,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> None:
     _execute(
         """
         UPDATE data
         SET data_title = ?, data_content_text = ?, data_link_url = ?,
-            data_release_time = ?, data_ddl_time = ?, data_is_previewable = ?
+            data_release_time = ?, data_ddl_time = ?, data_is_previewable = ?,
+            data_classification_code = ?
         WHERE data_id = ?
         """,
         (
@@ -565,6 +569,7 @@ def update_data(
             data_release_time,
             data_ddl_time,
             data_is_previewable,
+            data_classification_code,
             data_id,
         ),
         db_path,

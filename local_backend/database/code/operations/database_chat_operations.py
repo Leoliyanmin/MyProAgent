@@ -20,7 +20,12 @@ class ChatOperations:
     def create_session(user_id: str) -> int:
         """创建会话"""
         now = datetime.utcnow().isoformat()
-        session_id = create_session(user_id=user_id, session_last_visited_at=now)
+        session_id = create_session(
+            user_id=user_id,
+            session_title="",
+            session_created_at=now,
+            session_last_visited_at=now,
+        )
         return session_id
 
     @staticmethod

@@ -33,6 +33,7 @@ class ScheduleOperations:
         end_time: str,
         event_type: str = "personal",
         priority_level: int = 2,
+        is_completed: int = 0,
         location: str | None = None,
         description: str | None = None,
         related_link: str | None = None,
@@ -53,6 +54,7 @@ class ScheduleOperations:
                 schedule_recurrence_rule=recurrence_rule,
                 schedule_color_tag=color_tag,
                 schedule_priority=priority_level,
+                schedule_is_completed=is_completed,
             )
             self._bump_sync_state(user_id)
             return schedule_id
@@ -76,6 +78,7 @@ class ScheduleOperations:
         start_time: str | None = None,
         end_time: str | None = None,
         priority_level: int | None = None,
+        is_completed: int | None = None,
         location: str | None = None,
         description: str | None = None,
         related_link: str | None = None,
@@ -92,6 +95,7 @@ class ScheduleOperations:
                 start_time,
                 end_time,
                 priority_level,
+                is_completed,
                 location,
                 description,
                 related_link,
@@ -112,6 +116,7 @@ class ScheduleOperations:
                 schedule_recurrence_rule=recurrence_rule,
                 schedule_color_tag=color_tag,
                 schedule_priority=priority_level,
+                schedule_is_completed=is_completed,
             )
             self._bump_sync_state(user_id)
             updated = db.get_schedule(schedule_id)

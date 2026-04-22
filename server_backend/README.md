@@ -201,3 +201,8 @@ python test_api.py
 - **数据统计**：用户数据统计和分析
 - **API网关**：统一API管理和限流
 - **微服务架构**：服务拆分和容器化
+
+## 测试配置
+TEST_MODE=false
+SKIP_VERIFICATION=false
+SKIP_RATE_LIMIT=true

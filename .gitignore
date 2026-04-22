@@ -1,18 +1,202 @@
+# ============================================
+# Project Root .gitignore (Merged)
+# ============================================
+
+# ----------------------------------------
+# Logs
+# ----------------------------------------
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ----------------------------------------
+# Node.js / Frontend
+# ----------------------------------------
+node_modules
+dist
+dist-ssr
+coverage
+*.local
+
+# ----------------------------------------
+# Python / Backend
+# ----------------------------------------
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.venv
+
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
-venv/
-ENV/
-.venv
 *.egg-info/
 dist/
 build/
+
+# ----------------------------------------
+# Database files
+# ----------------------------------------
 *.db
 *.sqlite
 *.sqlite3
+
+# Database directories (local and server)
+local_backend/database/db/
+server_backend/database/db/
+
+# ----------------------------------------
+# Environment variables (sensitive)
+# ----------------------------------------
 .env
+.env.local
+.env.*.local
+
+# Keep example files for reference
+!.env.example
+!**/.env.example
+
+# Backend logs
+backend/**/logs/
+backend/**/logs
+
+# Database directories
+backend/**/database/db/
+backend/**/database/code/*.db
+
+# ----------------------------------------
+# Editor / IDE
+# ----------------------------------------
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# IntelliJ / PyCharm
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ----------------------------------------
+# TypeScript / Build
+# ----------------------------------------
+*.tsbuildinfo
+.eslintcache
+
+# ----------------------------------------
+# Testing
+# ----------------------------------------
+# Cypress
+/cypress/videos/
+/cypress/screenshots/
+
+# Vitest
+__screenshots__/
+
+# ----------------------------------------
+# Vite
+# ----------------------------------------
+*.timestamp-*-*.mjs
+.vite/
+
+# Vite environment files (development)
+.env.development
+.env.development.local
+
+# ----------------------------------------
+# Frontend specific
+# ----------------------------------------
+# Test files (not for production)
+test*.html
+test*.js
+test-*.html
+test-*.js
+*_test.js
+*_test.cjs
+test_*.js
+test_*.cjs
+
+# Debug files
+debug.html
+
+# ----------------------------------------
+# Temporary / Generated files
+# ----------------------------------------
 .DS_Store
-*.log
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.bmp
+
+# Keep documentation screenshots
+!image-*.png
+!**/image-*.png
+
+# ----------------------------------------
+# Misc
+# ----------------------------------------
+*.bak
+*.tmp
+*.temp
+/personal
+
+# Agent session data (local only)
+.memory/
+.sessions/
+
+# ----------------------------------------
+# Tauri / Rust
+# ----------------------------------------
+# Rust build output
+frontend/src-tauri/target/
+frontend/src-tauri/Cargo.lock
+
+# Tauri generated files
+frontend/src-tauri/gen/
+
+# Sidecar binaries (platform-specific, auto-generated)
+# Keep the directory but ignore binaries
+frontend/src-tauri/binaries/*
+!frontend/src-tauri/binaries/.gitkeep
+
+# macOS specific
+frontend/src-tauri/*.app
+frontend/src-tauri/*.dmg
+*.dmg
+
+# Windows specific
+frontend/src-tauri/*.exe
+*.exe
+*.msi
+*.msm
+*.msp
+
+# Linux specific
+frontend/src-tauri/*.AppImage
+*.AppImage
+*.deb
+*.rpm
+
+# Bundle artifacts
+frontend/src-tauri/target/release/bundle/
+frontend/src-tauri/target/debug/bundle/
+
+# Config files with sensitive data
+config.json
+server_backend/config.py
+local/database/test_db/sync_packet_from_server.json
+local/database/test_db/sync_packet_to_server.json
+local/database/test_db/sync_packet_to_server.json
+local/database/test_db/sync_packet_from_server.json

@@ -12,13 +12,15 @@ from local_backend.database.code.command.database_command import (
 from datetime import datetime
 
 
+DATA_CLASSIFICATION_ASSIGNMENT = 3
+
+
 class TaskOperations:
     """任务相关数据库操作封装"""
 
     @staticmethod
-    def create_task(user_id: str, title: str, description: str = None, due_date: str = None) -> int:
+    def create_task(user_id: str, title: str, description: str = None, due_date: str = None, linked_schedule_id: int = None) -> int:
         """创建任务"""
-        # 确保任务分类存在
         task_category = TaskOperations._get_or_create_task_category(user_id)
         
         now = datetime.utcnow().isoformat()
@@ -26,6 +28,7 @@ class TaskOperations:
             user_id=user_id,
             data_category_id=task_category['category_id'],
             data_content_type='task',
+            data_classification_code=DATA_CLASSIFICATION_ASSIGNMENT,
             data_title=title,
             data_content_text=description,
             data_link_url=None,
@@ -33,6 +36,7 @@ class TaskOperations:
             data_ddl_time=due_date,
             data_is_previewable=0,
             data_created_at=now,
+            data_linked_schedule_id=linked_schedule_id,
         )
         
         TaskOperations._update_sync_version(user_id)
@@ -50,35 +54,39 @@ class TaskOperations:
         return [d for d in all_data if d['data_category_id'] in task_category_ids]
 
     @staticmethod
-    def update_task(user_id: str, task_id: int, title: str = None, description: str = None, due_date: str = None) -> None:
+    def update_task(user_id: str, task_id: int, title: str = None, description: str = None, due_date: str = None, linked_schedule_id: int | None | object = None) -> None:
         """更新任务"""
-        # 获取现有任务数据
         task_user_id = TaskOperations._get_task_user_id(task_id)
         if not task_user_id:
             raise ValueError(f"Task not found: {task_id}")
         
-        # 验证用户权限
         if task_user_id != user_id:
             raise ValueError(f"Task not found: {task_id}")
         
-        update_data(
-            data_id=task_id,
-            data_title=title,
-            data_content_text=description,
-            data_link_url=None,
-            data_release_time=None,
-            data_ddl_time=due_date,
-            data_is_previewable=0,
-        )
+        update_kwargs = {}
+        if title is not None:
+            update_kwargs['data_title'] = title
+        if description is not None:
+            update_kwargs['data_content_text'] = description
+        if due_date is not None:
+            update_kwargs['data_ddl_time'] = due_date
+        if linked_schedule_id is not None:
+            update_kwargs['data_linked_schedule_id'] = linked_schedule_id
+        
+        if not update_kwargs:
+            return
+        
+        update_kwargs['data_id'] = task_id
+        update_data(**update_kwargs)
         
         TaskOperations._update_sync_version(user_id)
 
     @staticmethod
-    def delete_task(user_id: str, task_id: int) -> None:
-        """删除任务"""
+    def delete_task(user_id: str, task_id: int) -> bool:
+        """删除任务，返回是否实际删除了记录"""
         task_user_id = TaskOperations._get_task_user_id(task_id)
         if not task_user_id:
-            raise ValueError(f"Task not found: {task_id}")
+            return False
         
         # 验证用户权限
         if task_user_id != user_id:
@@ -86,6 +94,7 @@ class TaskOperations:
         
         delete_data(task_id)
         TaskOperations._update_sync_version(user_id)
+        return True
 
     @staticmethod
     def _get_or_create_task_category(user_id: str) -> dict:

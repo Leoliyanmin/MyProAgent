@@ -1,0 +1,31 @@
+{
+  "providers": {
+    "anthropic": {
+      "apiKey": "sk-ant-xxxxx",
+      "apiBase": "https://api.anthropic.com"
+    },
+    "openai": {
+      "apiKey": "sk-xxxxx",
+      "apiBase": "https://api.openai.com/v1"
+    },
+    "deepseek": {
+      "apiKey": "sk-xxxxx"
+    },
+    "groq": {
+      "apiKey": "gsk_xxxxx"
+    },
+    "zhipu": {
+      "apiKey": "sk-xxxxx",
+      "api_base": "https://open.bigmodel.cn/api/paas/v4/"
+    },
+    "openrouter": {
+      "apiKey": "sk-or-v1-xxxxx"
+    }
+  },
+  "agent": {
+    "model": "glm-4.7",
+    "provider": "zhipu",
+    "maxIterations": 20,
+    "temperature": 0.7
+  }
+}

@@ -1,7 +1,82 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/py413vYq)
-https://kcnshyb9xgl3.feishu.cn/wiki/VOTmwDTd1ipr9JkpZ27cW0BCnrb 就是feishu
+
+飞书文档：https://kcnshyb9xgl3.feishu.cn/wiki/VOTmwDTd1ipr9JkpZ27cW0BCnrb
+
+# ProAgent - 智能协作工作台 (Full Stack)
+
+这是一个完整的全栈应用，整合了前端 Vue3 界面和后端 FastAPI 服务。
+
+![Version](https://img.shields.io/badge/version-0.0.0-blue)
+![Vue](https://img.shields.io/badge/Vue-3.5.29-green)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688)
+
+## 📁 项目结构
+
+```
+.
+├── frontend/                   # Vue3 前端应用
+│   ├── src/
+│   │   ├── components/         # Vue 组件
+│   │   │   ├── layout/       # 布局组件 (Sidebar, TopBar)
+│   │   │   ├── widgets/      # 仪表板小部件
+│   │   │   └── icons/        # 图标组件
+│   │   ├── views/            # 页面视图
+│   │   │   ├── DashboardView.vue      # 工作台概览
+│   │   │   ├── CalendarView.vue       # 日历管理
+│   │   │   ├── SelfPortraitView.vue   # 自我画像
+│   │   │   ├── ThemeSettingsView.vue  # 主题设置
+│   │   │   ├── FileManagerView.vue    # 文件管理
+│   │   │   └── UserSettingsView.vue   # 用户设置
+│   │   ├── stores/           # Pinia 状态管理
+│   │   ├── App.vue
+│   │   └── main.js
+│   ├── package.json
+│   ├── vite.config.js
+│   └── README.md             # 前端详细文档
+│
+├── local_backend/            # 本地后端 (FastAPI + SQLite)
+│   ├── business/             # 业务逻辑
+│   │   ├── agent_logic.py         # AI 助手逻辑
+│   │   ├── auth_service.py        # 认证服务
+│   │   ├── schedule_logic.py      # 日程逻辑
+│   │   └── task_logic.py          # 任务逻辑
+│   ├── database/             # 数据库层
+│   │   └── code/
+│   │       ├── database_init.sql       # 数据库初始化
+│   │       ├── database_schedule_*.py   # 日程数据库操作
+│   │       ├── database_task_*.py       # 任务数据库操作
+│   │       ├── database_user_*.py       # 用户数据库操作
+│   │       └── database_synchronize_*.py  # 数据同步操作
+│   ├── presentation/         # API 路由
+│   │   ├── agent_routes.py        # AI 助手接口
+│   │   ├── auth_routes.py         # 认证接口
+│   │   ├── schedule_routes.py     # 日程接口
+│   │   ├── task_routes.py         # 任务接口
+│   │   └── sync_routes.py         # 同步接口
+│   ├── service/              # 服务层
+│   ├── main.py               # 本地后端入口
+│   ├── requirements.txt      # 依赖
+│   └── README.md             # 本地后端文档
+│
+├── server_backend/           # 服务器后端 (远程同步)
+│   ├── business/             # 业务逻辑
+│   │   ├── auth_service.py        # 认证服务
+│   │   └── email_service.py       # 邮件服务
+│   ├── database/             # 数据库层
+│   ├── presentation/         # API 路由
+│   ├── service/              # 服务层
+│   ├── main.py               # 服务器后端入口
+│   ├── requirements.txt      # 依赖
+│   └── README.md             # 服务器后端文档
+│
+├── DATABASE_TESTING.md       # 数据库测试指南
+├── database_invoke_rules.md  # 数据库调用规范
+├── database_synchronize_rules.md  # 数据同步规范
+└── README.md                 # 本文档
+```
 
 ## 项目进度
+
 已完成以下功能：
 - ✅ Local Backend 和 Server Backend 基本框架
 - ✅ 用户认证系统（注册/登录）
@@ -11,18 +86,12 @@ https://kcnshyb9xgl3.feishu.cn/wiki/VOTmwDTd1ipr9JkpZ27cW0BCnrb 就是feishu
 - ✅ 数据同步机制（Local ↔ Server）
 - ✅ AI助手功能
 - ✅ 验证码服务（基于数据库实现）
+- ✅ 前端认证集成（登录/注册页面）
+- ✅ 退出登录功能
 
 正在开发中：
 - 🔄 寻友匹配功能
 - 🔄 文件管理功能
-
-## 项目架构
-
-# SUSTech Student Productivity Agent
-
-## 项目概述
-
-SUSTech Student Productivity Agent 是一个为南方科技大学学生设计的智能生产力助手，采用 **Local + Server** 双后端架构，提供本地离线功能和服务器同步备份能力。
 
 ## 系统架构
 
@@ -48,177 +117,94 @@ SUSTech Student Productivity Agent 是一个为南方科技大学学生设计的
 | 组件 | 职责 | 部署位置 | 技术栈 |
 |------|------|----------|--------|
 | **Local Backend** | 本地数据存储、核心业务逻辑、离线功能 | 用户设备本地 | FastAPI + SQLite |
-| **Server Backend** | 用户认证、数据同步、远程备份、邮件服务 | 服务器端 | FastAPI + SQLite (可替换为PostgreSQL) |
+| **Server Backend** | 用户认证、数据同步、远程备份、邮件服务 | 服务器端 | FastAPI + SQLite |
 
 ## 核心功能
 
-### 功能模块分配
+### 前端 (Vue3 + Vite)
+- 📊 **工作台概览** - 可拖拽布局，热力图、便签、待办、消息组件
+- 📅 **日历管理** - 日/周/月视图，事件管理，多日事件，待办同步
+- 🎨 **自我画像** - 个人资料、技能标签、背景图片、360°评价
+- 🎭 **主题设置** - 动态主题编辑、色彩管理
+- 📁 **文件管理** - 文件浏览、上传、下载
+- ⚙️ **用户设置** - 账户、通知、隐私、系统信息
 
-| 功能 | Local Backend | Server Backend |
-|------|--------------|---------------|
-| 用户注册/登录 | ✅ (本地验证 + 服务器同步) | ✅ (密码验证 + 验证码) |
-| 日程管理 | ✅ (完整CRUD) | ✅ (同步备份) |
-| 任务管理 | ✅ (完整CRUD) | ✅ (同步备份) |
-| AI助手 | ✅ (完整功能) | ❌ (本地实现) |
-| 文件管理 | ✅ (本地存储) | ❌ (本地实现) |
-| 数据同步 | ✅ (发起同步) | ✅ (接收同步) |
-| 验证码服务 | ❌ (调用Server) | ✅ (邮件发送 + 验证) |
+### 后端 (FastAPI + SQLite)
+- 🔐 **用户认证** - 注册/登录、JWT Token
+- 📅 **日程管理** - 完整 CRUD、提醒通知
+- ✅ **任务管理** - 完整 CRUD、优先级、时间
+- 🤖 **AI 助手** - 智能对话、任务建议
+- 🔄 **数据同步** - Local ↔ Server 双向同步
+- 📧 **邮件服务** - 验证码、通知邮件
+- 💾 **数据库** - SQLite 本地存储
 
-## 系统流程
+## 🚀 快速开始
 
-### 1. 用户注册流程 (验证码版本)
+### 方式一：Web 开发模式（推荐日常开发）
 
-```mermaid
-sequenceDiagram
-    participant Client as 前端
-    participant Local as Local Backend
-    participant Server as Server Backend
-    participant Email as 邮件服务
-    
-    Client->>Local: 请求发送验证码
-    Local->>Server: 转发验证码请求
-    Server->>Server: 生成验证码
-    Server->>Email: 发送验证码邮件
-    Server->>Server: 存储验证码到Redis
-    Server-->>Local: 返回验证码发送结果
-    Local-->>Client: 返回验证码发送结果
-    
-    Client->>Local: 提交注册信息(含验证码)
-    Local->>Server: 转发注册请求
-    Server->>Server: 验证验证码
-    Server->>Server: 验证邮箱和密码
-    Server->>Server: 创建用户记录
-    Server-->>Local: 返回注册结果
-    Local->>Local: 存储本地用户信息
-    Local-->>Client: 返回注册成功
+一键启动前端 + Local Backend + Server Backend：
+
+初始化数据库
+```bash
+cd local_backend
+python database/code/database_init.py
+cd ..
+cd server_backend
+python database/code/database_init.py
 ```
-
-### 2. 用户登录流程
-
-```mermaid
-sequenceDiagram
-    participant Client as 前端
-    participant Local as Local Backend
-    participant Server as Server Backend
-    
-    Client->>Local: 登录请求
-    Local->>Local: 本地验证
-    alt 本地验证成功
-        Local-->>Client: 返回本地令牌
-    else 本地验证失败
-        Local->>Server: 服务器验证
-        Server->>Server: 验证密码
-        Server-->>Local: 返回服务器令牌
-        Local->>Local: 同步用户信息
-        Local-->>Client: 返回登录成功
-    end
-```
-
-### 3. 数据同步流程
-
-```mermaid
-sequenceDiagram
-    participant Client as 前端
-    participant Local as Local Backend
-    participant Server as Server Backend
-    
-    alt 本地数据变更
-        Client->>Local: 修改数据
-        Local->>Local: 更新本地数据库
-        Local->>Server: 同步到服务器
-        Server->>Server: 存储同步数据
-        Server-->>Local: 确认同步成功
-    end
-    
-    alt 服务器数据同步
-        Local->>Server: 请求同步数据
-        Server->>Server: 查询用户数据
-        Server-->>Local: 返回同步数据
-        Local->>Local: 更新本地数据库
-        Local-->>Client: 通知数据更新
-    end
-```
-
-### 3.1 定时同步功能
-
-系统支持**本地到服务器的定时自动同步**，确保数据及时备份。
-
-**同步机制**：
-- **同步方向**：本地 → 服务器（单向）
-- **同步数据**：任务（tasks）、日程（schedules）
-- **触发方式**：定时自动触发 + 手动触发
-
-**定时任务配置**：
-
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| `SYNC_INTERVAL_MINUTES` | 同步间隔（分钟） | 60 |
-
-**调度器API**：
-
-| 接口 | 方法 | 功能 |
-|------|------|------|
-| `/api/v1/scheduler/status` | GET | 获取调度器状态 |
-| `/api/v1/scheduler/start` | POST | 启动调度器 |
-| `/api/v1/scheduler/stop` | POST | 停止调度器 |
-| `/api/v1/scheduler/trigger-sync` | POST | 手动触发同步 |
-
-**同步流程**：
-1. 服务启动时自动启动定时调度器
-2. 每隔指定时间（默认60分钟）执行同步
-3. 遍历所有用户，收集任务和日程数据
-4. 发送到服务器 `/sync/from-client` 接口
-5. 记录同步日志（成功/失败数量）
-
-### 4. 任务管理流程
-
-```mermaid
-sequenceDiagram
-    participant Client as 前端
-    participant Local as Local Backend
-    participant Server as Server Backend
-    
-    Client->>Local: 创建任务
-    Local->>Local: 存储本地任务
-    Local->>Server: 同步任务到服务器
-    Server->>Server: 存储任务备份
-    Server-->>Local: 确认同步成功
-    Local-->>Client: 返回创建成功
-    
-    Client->>Local: 请求AI学习计划
-    Local->>Local: 生成学习计划
-    Local-->>Client: 返回学习计划
-```
-
-### 5. AI助手流程
-
-```mermaid
-sequenceDiagram
-    participant Client as 前端
-    participant Local as Local Backend
-    
-    Client->>Local: 发送聊天消息
-    Local->>Local: 处理Agent逻辑
-    Local->>Local: 生成响应
-    Local->>Local: 存储聊天历史
-    Local-->>Client: 返回Agent响应
-```
-
-## 部署流程
-
-### 1. 本地开发环境部署
-
-#### Local Backend
 
 ```bash
-# 进入目录
+cd frontend
+npm install
+npm run dev
+```
+
+访问 http://localhost:5173
+
+### 方式二：Tauri 桌面应用
+
+构建独立桌面应用（包含所有后端）：
+
+```bash
+# 1. 安装依赖
+cd frontend
+npm install
+
+# 2. 构建 Python sidecar（打包后端为可执行文件）
+cd ../scripts
+pip install pyinstaller
+python build_sidecar.py
+
+# 3. 开发模式（带桌面窗口）
+cd ../frontend
+npm run tauri:dev
+
+# 4. 生产构建（生成 .app / .exe）
+npm run tauri:build
+```
+
+输出文件：
+- macOS: `src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
+- Windows: `src-tauri/target/release/bundle/nsis/ProAgent_*.exe`
+
+### 方式三：手动启动各服务
+
+#### 1. 启动后端 (Local)
+
+```bash
 cd local_backend
+
+# 创建虚拟环境
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# 或: venv\Scripts\activate  # Windows
 
 # 安装依赖
 pip install -r requirements.txt
 
 # 配置环境变量
-copy .env.example .env
+cp .env.example .env
+# 编辑 .env 文件配置
 
 # 初始化数据库
 python database/code/database_init.py
@@ -227,17 +213,36 @@ python database/code/database_init.py
 uvicorn main:app --reload --host 0.0.0.0 --port 8002
 ```
 
-#### Server Backend
+后端服务将在 http://localhost:8002 运行
+
+### 2. 启动前端
 
 ```bash
-# 进入目录
+cd frontend
+
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+```
+
+前端将在 http://localhost:5173 运行
+
+### 3. 启动服务器后端 (可选，用于远程同步)
+
+```bash
 cd server_backend
+
+# 创建虚拟环境
+python -m venv venv
+source venv/bin/activate
 
 # 安装依赖
 pip install -r requirements.txt
 
 # 配置环境变量
-copy .env.example .env
+cp .env.example .env
 
 # 初始化数据库
 python database/code/database_init.py
@@ -246,327 +251,25 @@ python database/code/database_init.py
 uvicorn main:app --reload --host 0.0.0.0 --port 8001
 ```
 
-### 2. 生产环境部署
-
-#### Local Backend
-- 使用PyInstaller打包为可执行文件
-- 配置为系统服务自动启动
-- 定期备份本地数据库文件
-
-#### Server Backend
-- 部署在云服务器上
-- 使用PostgreSQL数据库
-- 配置Gunicorn + Nginx
-- 启用HTTPS
-- 配置监控和日志管理
-- 配置有效的SMTP服务用于发送验证码
-
-## 系统集成
-
-### 前端集成
-
-前端应用可以通过以下方式集成：
-
-1. **Local Backend API**：http://localhost:8002
-2. **Server Backend API**：http://localhost:8001 (开发环境)
-
-### API文档
+## API文档
 
 - **Local Backend**：http://localhost:8002/docs
 - **Server Backend**：http://localhost:8001/docs
 
-### 环境变量配置
-
-| 配置项 | Local Backend | Server Backend | 说明 |
-|--------|---------------|----------------|------|
-| APP_NAME | ✅ | ✅ | 应用名称 |
-| APP_VERSION | ✅ | ✅ | 应用版本 |
-| DEBUG | ✅ | ✅ | 调试模式 |
-| LOG_LEVEL | ✅ | ✅ | 日志级别 (DEBUG/INFO/WARNING/ERROR) |
-| DATABASE_URL | ✅ | ✅ | 数据库连接字符串 |
-| SECRET_KEY | ✅ | ✅ | JWT密钥 |
-| ALGORITHM | ✅ | ✅ | JWT算法 |
-| ACCESS_TOKEN_EXPIRE_MINUTES | ✅ | ✅ | 令牌过期时间 |
-| CORS_ORIGINS | ✅ | ✅ | CORS允许的源 |
-| SERVER_BACKEND_URL | ✅ | ❌ | 服务器后端地址 |
-| SYNC_INTERVAL_MINUTES | ✅ | ❌ | 定时同步间隔（分钟） |
-| TEST_MODE | ❌ | ✅ | 测试模式，跳过邮件发送 |
-| SKIP_VERIFICATION | ❌ | ✅ | 跳过验证码验证 |
-| SKIP_RATE_LIMIT | ❌ | ✅ | 跳过频率限制 |
-
-| SMTP_HOST | ❌ | ✅ | SMTP服务器地址 |
-| SMTP_PORT | ❌ | ✅ | SMTP端口 |
-| SMTP_USER | ❌ | ✅ | SMTP用户名 |
-| SMTP_PASSWORD | ❌ | ✅ | SMTP密码 |
-| SMTP_FROM_EMAIL | ❌ | ✅ | 发件人邮箱 |
-| SMTP_FROM_NAME | ❌ | ✅ | 发件人名称 |
-| VERIFICATION_CODE_LENGTH | ❌ | ✅ | 验证码长度 |
-| VERIFICATION_CODE_EXPIRE_MINUTES | ❌ | ✅ | 验证码过期时间(分钟) |
-| RATE_LIMIT_MAX_REQUESTS | ❌ | ✅ | 频率限制最大请求数 |
-| RATE_LIMIT_WINDOW_MINUTES | ❌ | ✅ | 频率限制时间窗口(分钟) |
-
-## 验证码系统说明
-
-### 1. 验证码流程
-
-1. **发送验证码**：前端调用 `/auth/verification/send` 接口，提供邮箱地址和用途（register/reset_password）
-2. **接收验证码**：系统生成6位数字验证码，发送到用户邮箱
-3. **验证验证码**：用户在注册或重置密码时提交验证码
-4. **验证结果**：系统验证验证码是否正确且未过期
-
-### 2. 测试模式
-
-在开发环境中，可以启用测试模式来绕过邮件发送：
-
-```env
-TEST_MODE=true
-```
-
-启用测试模式后：
-- 系统会生成验证码但不会发送邮件
-- 响应中会包含 `test_code` 字段，直接返回生成的验证码
-- 方便开发和测试时使用
-
-### 3. 跳过验证码验证
-
-在开发环境中，可以跳过验证码验证：
-
-```env
-SKIP_VERIFICATION=true
-```
-
-启用后，注册和重置密码时不需要验证码即可完成操作。
-
-### 4. 跳过频率限制
-
-在开发环境中，可以跳过频率限制：
-
-```env
-SKIP_RATE_LIMIT=true
-```
-
-启用后，系统不会限制验证码发送的频率，方便测试。
-
-## 系统监控
-
-### 健康检查
-
-- **Local Backend**：http://localhost:8002/health
-- **Server Backend**：http://localhost:8001/health
-
-### 日志管理
-
-项目采用统一的日志系统，支持以下日志级别：
-
-| 级别 | 说明 | 使用场景 |
-|------|------|----------|
-| **DEBUG** | 调试信息 | 开发阶段详细调试，记录变量值、函数调用等 |
-| **INFO** | 一般信息 | 记录正常运行状态、关键操作完成等 |
-| **WARNING** | 警告信息 | 记录潜在问题、异常情况但不影响系统运行 |
-| **ERROR** | 错误信息 | 记录严重错误、异常堆栈等，需要关注和修复 |
-
-#### 日志配置
-
-在 `.env` 文件中设置日志级别：
-
-```env
-LOG_LEVEL=INFO
-```
-
-#### 日志级别过滤规则
-
-日志级别采用"**包含式**"过滤机制，设置某个级别后，会输出该级别及以上的所有日志类型：
-
-| 设置的级别 | 输出的日志类型 | 适用场景 |
-|------------|----------------|----------|
-| **DEBUG** | DEBUG + INFO + WARNING + ERROR（全部） | 开发调试阶段，需要详细日志 |
-| **INFO** | INFO + WARNING + ERROR | 正常运行环境，记录关键操作 |
-| **WARNING** | WARNING + ERROR | 生产环境，仅关注警告和错误 |
-| **ERROR** | 仅 ERROR | 生产环境，仅记录严重错误 |
-
-**示例**：
-
-```python
-# 设置 LOG_LEVEL=DEBUG 时
-logger.debug("这是调试信息")    # ✅ 会输出
-logger.info("这是一般信息")     # ✅ 会输出
-logger.warning("这是警告")      # ✅ 会输出
-logger.error("这是错误")        # ✅ 会输出
-
-# 设置 LOG_LEVEL=INFO 时
-logger.debug("这是调试信息")    # ❌ 不会输出（被过滤）
-logger.info("这是一般信息")     # ✅ 会输出
-logger.warning("这是警告")      # ✅ 会输出
-logger.error("这是错误")        # ✅ 会输出
-```
-
-#### 日志输出
-
-- **控制台输出**：实时显示到控制台
-- **文件输出**：自动写入 `logs/` 目录，按日期分割
-- **日志文件命名**：`{app_name}_{yyyy-mm-dd}.log`
-- **日志滚动**：单个文件最大10MB，保留最近5个备份
-
-#### 日志格式
-
-```
-2024-01-15 10:30:45,123 - server_backend - INFO - auth_service:45 - 用户登录成功: user_id=test@example.com
-```
-
-格式说明：`{时间戳} - {应用名称} - {日志级别} - {模块:行号} - {日志消息}`
-
-#### 日志文件位置
-
-- **Local Backend**：`local_backend/logs/`
-- **Server Backend**：`server_backend/logs/`
-
-## 安全考虑
-
-1. **数据安全**：
-   - 密码在服务器端验证和存储
-   - 本地存储加密后的密码
-   - 传输使用HTTPS
-
-2. **认证安全**：
-   - JWT令牌认证
-   - 令牌过期机制
-   - 防暴力攻击措施
-   - 验证码频率限制
-
-3. **数据保护**：
-   - 本地数据文件权限控制
-   - 服务器数据备份
-   - 数据传输加密
-
-## 性能优化
-
-1. **Local Backend**：
-   - 本地缓存
-   - 延迟加载
-   - 批处理操作
-
-2. **Server Backend**：
-   - 数据库索引优化
-   - 缓存机制
-   - 异步处理
-
-## 扩展规划
-
-1. **功能扩展**：
-   - 多语言支持
-   - 第三方服务集成
-   - 高级AI功能
-
-2. **架构扩展**：
-   - 微服务架构
-   - 容器化部署
-   - 负载均衡
-
-3. **技术升级**：
-   - 数据库迁移到PostgreSQL
-   - 引入缓存系统
-   - 实现消息队列
-
-## 开发指南
-
-### 代码结构
-
-```
-team-project-26spring-26s-27/
-├── local_backend/         # 本地后端
-│   ├── database/         # 数据库层
-│   ├── business/         # 业务层
-│   ├── service/          # 服务层
-│   ├── presentation/     # 表现层
-│   ├── config.py         # 配置文件
-│   ├── main.py           # 应用入口
-│   ├── init_db.py        # 数据库初始化
-│   ├── requirements.txt  # 依赖包
-│   └── README.md         # 本地后端文档
-├── server_backend/        # 服务器后端
-│   ├── database/         # 数据库层
-│   ├── business/         # 业务层
-│   │   └── email_service.py  # 邮件和验证码服务
-│   ├── service/          # 服务层
-│   ├── presentation/     # 表现层
-│   ├── config.py         # 配置文件
-│   ├── main.py           # 应用入口
-│   ├── init_db.py        # 数据库初始化
-│   ├── requirements.txt  # 依赖包
-│   └── README.md         # 服务器后端文档
-└── README.md            # 整体流程文档
-```
-
-### 开发流程
-
-1. **环境搭建**：
-   - 安装Python 3.13
-   - 安装依赖包
-   - 配置环境变量
-
-2. **代码开发**：
-   - 遵循四层架构
-   - 编写单元测试
-   - 代码风格一致
-
-3. **测试**：
-   - 运行API测试
-   - 验证功能完整性
-   - 检查性能和安全
-
-4. **部署**：
-   - 本地测试
-   - 服务器部署
-   - 监控和维护
-
-## 故障排除
-
-### 常见问题
-
-1. **依赖兼容性**：
-   - Python 3.13需要特定版本的依赖
-   - 已固定pydantic==1.10.20和sqlalchemy==1.4.50
-
-2. **同步失败**：
-   - 检查网络连接
-   - 验证服务器地址配置
-   - 查看同步日志
-
-3. **认证问题**：
-   - 检查JWT密钥配置
-   - 验证用户凭证
-   - 查看认证日志
-
-4. **数据库问题**：
-   - 检查数据库连接字符串
-   - 验证数据库权限
-   - 查看数据库日志
-
-5. **验证码问题**：
-   - 验证SMTP配置是否正确
-   - 查看邮件发送日志
-   - 开发环境可启用TEST_MODE绕过邮件发送
-
-6. **频率限制问题**：
-   - 开发环境可启用SKIP_RATE_LIMIT绕过频率限制
-
-## 贡献指南
-
-1. **代码贡献**：
-   - 遵循代码风格
-   - 编写测试用例
-   - 提交Pull Request
-
-2. **文档贡献**：
-   - 更新README文件
-   - 编写API文档
-   - 完善开发指南
-
-3. **问题反馈**：
-   - 提交Issue
-   - 提供详细的错误信息
-   - 建议改进方案
-
-## 许可证
-
-MIT License
+## 🛠️ 技术栈
+
+| 层级 | 技术 | 版本 |
+|------|------|------|
+| 前端框架 | Vue | 3.5.29 |
+| 构建工具 | Vite | 7.3.1 |
+| 状态管理 | Pinia | 3.0.4 |
+| UI 布局 | vue3-grid-layout | 1.0.0 |
+| 图表 | ECharts | ^6.0.0 |
+| 后端框架 | FastAPI | 0.100+ |
+| 数据库 | SQLite | 3 |
+| ORM | SQLAlchemy | 2.0+ |
+| 认证 | JWT | - |
+
+## 开发团队
+
+Made with ❤️ by Team 26S-27
