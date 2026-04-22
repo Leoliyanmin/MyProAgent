@@ -200,3 +200,4 @@ local/database/test_db/sync_packet_from_server.json
 local/database/test_db/sync_packet_to_server.json
 local/database/test_db/sync_packet_to_server.json
 local/database/test_db/sync_packet_from_server.json
+bb_result.txt
