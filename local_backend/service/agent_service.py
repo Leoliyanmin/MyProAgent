@@ -1,5 +1,5 @@
 from business.agent_logic import AgentLogic
-from database.code.database_chat_handle import ChatHandle
+from database.code.handle.database_chat_handle import ChatHandle
 
 
 class AgentService:

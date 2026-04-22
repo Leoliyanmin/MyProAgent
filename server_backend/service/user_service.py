@@ -2,8 +2,8 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from database.code.database_user_handle import ServerUserHandle
-from database.code.database_code_handle import CodeHandle
+from database.code.handle.database_user_handle import ServerUserHandle
+from database.code.handle.database_code_handle import CodeHandle
 from business.email_service import EmailService
 from datetime import datetime
 from logging_config import get_logger
@@ -25,8 +25,9 @@ class UserService:
         confirm_password = user_data.get('confirm_password', '')
         verification_code = user_data.get('verification_code', '')
         full_name = user_data.get('full_name', '')
+        username = user_data.get('username', '')
         
-        logger.info(f"用户注册请求: email={email}, full_name={full_name}")
+        logger.info(f"用户注册请求: email={email}, full_name={full_name}, username={username}")
         
         # 验证密码
         if password != confirm_password:
@@ -40,8 +41,11 @@ class UserService:
         # if not code_result['ok']:
         #     return {'success': False, 'message': code_result['message']}
         
+        # 使用 username 或 email 作为用户名
+        user_name = username if username else email.split('@')[0]
+        
         # 创建用户
-        result = self.user_handle.register_user(email, full_name, password)
+        result = self.user_handle.register_user(email, user_name, password)
         if not result['ok']:
             logger.error(f"用户注册失败: {result['message']}, email={email}")
             return {'success': False, 'message': result['message']}

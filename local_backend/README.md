@@ -12,6 +12,7 @@ Local Backend 是 SUSTech Student Productivity Agent 项目的本地后端服务
 - **AI助手**：智能对话和学习助手功能
 - **文件管理**：本地文件存储和管理
 - **数据同步**：与服务器后端的数据同步
+- **Blackboard集成**：CAS认证绑定、课程与作业数据同步
 
 ## 技术架构
 
@@ -70,6 +71,19 @@ CORS_ORIGINS=["http://localhost:3000", "http://localhost:8080"]
 
 # 服务器后端配置
 SERVER_BACKEND_URL=http://localhost:8001
+
+# Blackboard配置
+CAS_SERVER_URL=https://cas.sustech.edu.cn/cas
+CAS_VALIDATE_PATH=/validate
+CAS_LOGIN_PATH=/login
+BLACKBOARD_URL=https://bb.sustech.edu.cn
+BLACKBOARD_LOGIN_PATH=/webapps/login/?action=login&new_loc=%2Fwebapps%2Fportal%2Fexecute%2FdefaultTab
+BLACKBOARD_COURSE_PATH=/webapps/blackboard/content/listContent.jsp
+BLACKBOARD_ASSIGNMENT_PATH=/webapps/assignments/content/listContent.jsp
+BLACKBOARD_CALLBACK_URL=http://localhost:8002/api/v1/blackboard/callback
+BLACKBOARD_BIND_SUCCESS_URL=http://localhost:3000/blackboard/bind/success
+BLACKBOARD_BIND_FAILURE_URL=http://localhost:3000/blackboard/bind/failure
+ENCRYPTION_KEY=your-encryption-key-here-123456789012345678901234
 ```
 
 ### 3. 初始化数据库
@@ -80,16 +94,16 @@ python database/code/database_init.py
 
 ### 4. 启动服务
 
-**默认端口：8000**
+**默认端口：8002**
 
 ```bash
 
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8002
 ```
 
 ### 5. 访问API文档
 
-打开浏览器访问：http://localhost:8000/docs
+打开浏览器访问：http://localhost:8002/docs
 
 ## API端点
 
@@ -111,6 +125,36 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 | **Agent** | /agent/history/{session_id} | GET | 获取对话历史 |
 | **同步** | /sync/to-server | POST | 同步数据到服务器 |
 | **同步** | /sync/from-server | GET | 从服务器同步数据 |
+| **Blackboard** | /api/v1/blackboard/bind | POST | 发起Blackboard绑定 |
+| **Blackboard** | /api/v1/blackboard/callback | GET | CAS回调处理 |
+| **Blackboard** | /api/v1/blackboard/sync | POST | 手动同步数据 |
+| **Blackboard** | /api/v1/blackboard/status | GET | 获取绑定状态 |
+| **Blackboard** | /api/v1/blackboard/unbind | POST | 解绑Blackboard |
+
+## Blackboard集成
+
+### 功能概述
+
+Blackboard集成模块允许用户通过南科大CAS认证绑定Blackboard账号，自动同步课程与作业数据。
+
+### 绑定流程
+
+1. **发起绑定**：调用 `/api/v1/blackboard/bind` 获取CAS登录URL
+2. **CAS认证**：用户在CAS登录页输入账号密码
+3. **回调处理**：CAS验证成功后回调 `/api/v1/blackboard/callback`
+4. **数据同步**：自动同步课程和作业数据到本地
+
+### 数据存储
+
+- **课程数据**：存储到 `category` 表（`category_kind = 'course'`）
+- **作业数据**：存储到 `data` 表（`data_content_type = 'assignment'`）
+- **会话信息**：加密存储到 `account` 表（`account_platform_type = 'blackboard'`）
+
+### 安全措施
+
+- **会话加密**：使用AES-256加密存储Blackboard会话Cookie
+- **数据隔离**：每个用户的数据独立存储
+- **定期同步**：支持手动触发数据同步
 
 ## 离线功能
 

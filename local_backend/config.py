@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 from typing import List
 
 
@@ -23,8 +23,19 @@ class Settings(BaseSettings):
     # 服务器后端配置
     SERVER_BACKEND_URL: str = "http://localhost:8001"
     
-    class Config:
-        env_file = ".env"
+    # Blackboard配置
+    CAS_SERVER_URL: str = "https://cas.sustech.edu.cn/cas"
+    CAS_VALIDATE_PATH: str = "/validate"
+    CAS_LOGIN_PATH: str = "/login"
+    BLACKBOARD_URL: str = "https://bb.sustech.edu.cn"
+    BLACKBOARD_LOGIN_PATH: str = "/webapps/login/?action=login&new_loc=%2Fwebapps%2Fportal%2Fexecute%2FdefaultTab"
+    BLACKBOARD_COURSE_PATH: str = "/webapps/blackboard/content/listContent.jsp"
+    BLACKBOARD_ASSIGNMENT_PATH: str = "/webapps/assignments/content/listContent.jsp"
+    BLACKBOARD_CALLBACK_URL: str = "http://localhost:8002/api/v1/blackboard/callback"
+    ENCRYPTION_KEY: str = "your-encryption-key-here-123456789012345678901234"
+    SYNC_INTERVAL_MINUTES: int = 60  # 本地到服务器定时同步间隔（分钟）
+    
+    model_config = {"env_file": ".env", "extra": "allow"}
 
 
 settings = Settings()

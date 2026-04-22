@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_DB_PATH = BASE_DIR.parent / "db" / "local.db"
+DEFAULT_DB_PATH = BASE_DIR.parent.parent / "db" / "local.db"
 SQLITE_BUSY_TIMEOUT_MS = 5000
 SQLITE_RETRY_COUNT = 5
 SQLITE_RETRY_DELAY_SEC = 0.05

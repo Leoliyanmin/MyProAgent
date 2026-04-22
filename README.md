@@ -139,6 +139,37 @@ sequenceDiagram
     end
 ```
 
+### 3.1 定时同步功能
+
+系统支持**本地到服务器的定时自动同步**，确保数据及时备份。
+
+**同步机制**：
+- **同步方向**：本地 → 服务器（单向）
+- **同步数据**：任务（tasks）、日程（schedules）
+- **触发方式**：定时自动触发 + 手动触发
+
+**定时任务配置**：
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `SYNC_INTERVAL_MINUTES` | 同步间隔（分钟） | 60 |
+
+**调度器API**：
+
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/api/v1/scheduler/status` | GET | 获取调度器状态 |
+| `/api/v1/scheduler/start` | POST | 启动调度器 |
+| `/api/v1/scheduler/stop` | POST | 停止调度器 |
+| `/api/v1/scheduler/trigger-sync` | POST | 手动触发同步 |
+
+**同步流程**：
+1. 服务启动时自动启动定时调度器
+2. 每隔指定时间（默认60分钟）执行同步
+3. 遍历所有用户，收集任务和日程数据
+4. 发送到服务器 `/sync/from-client` 接口
+5. 记录同步日志（成功/失败数量）
+
 ### 4. 任务管理流程
 
 ```mermaid
@@ -193,7 +224,7 @@ copy .env.example .env
 python database/code/database_init.py
 
 # 启动服务
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8002
 ```
 
 #### Server Backend
@@ -236,12 +267,12 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8001
 
 前端应用可以通过以下方式集成：
 
-1. **Local Backend API**：http://localhost:8000
+1. **Local Backend API**：http://localhost:8002
 2. **Server Backend API**：http://localhost:8001 (开发环境)
 
 ### API文档
 
-- **Local Backend**：http://localhost:8000/docs
+- **Local Backend**：http://localhost:8002/docs
 - **Server Backend**：http://localhost:8001/docs
 
 ### 环境变量配置
@@ -258,6 +289,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8001
 | ACCESS_TOKEN_EXPIRE_MINUTES | ✅ | ✅ | 令牌过期时间 |
 | CORS_ORIGINS | ✅ | ✅ | CORS允许的源 |
 | SERVER_BACKEND_URL | ✅ | ❌ | 服务器后端地址 |
+| SYNC_INTERVAL_MINUTES | ✅ | ❌ | 定时同步间隔（分钟） |
 | TEST_MODE | ❌ | ✅ | 测试模式，跳过邮件发送 |
 | SKIP_VERIFICATION | ❌ | ✅ | 跳过验证码验证 |
 | SKIP_RATE_LIMIT | ❌ | ✅ | 跳过频率限制 |
@@ -319,7 +351,7 @@ SKIP_RATE_LIMIT=true
 
 ### 健康检查
 
-- **Local Backend**：http://localhost:8000/health
+- **Local Backend**：http://localhost:8002/health
 - **Server Backend**：http://localhost:8001/health
 
 ### 日志管理

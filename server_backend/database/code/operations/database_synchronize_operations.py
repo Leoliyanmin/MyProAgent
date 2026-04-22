@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from server_backend.database.code.command import database_command as db
+from ..command import database_command as db
 
 USER_FIELDS = (
     "user_id",

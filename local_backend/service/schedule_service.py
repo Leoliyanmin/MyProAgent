@@ -1,5 +1,5 @@
 from business.schedule_logic import ScheduleLogic
-from database.code.database_schedule_handle import ScheduleHandle
+from database.code.handle.database_schedule_handle import ScheduleHandle
 
 
 class ScheduleService:

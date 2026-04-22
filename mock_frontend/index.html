@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Frontend - Blackboard集成测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .tab {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            background: white;
+            color: #667eea;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            margin-bottom: 25px;
+        }
+        .card-title {
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+            color: white;
+        }
+        .status-box {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .status-content {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .info-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .info-card .label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        .info-card .value {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+            word-break: break-all;
+        }
+        .hidden {
+            display: none;
+        }
+        .api-url {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 10px;
+        }
+        .iframe-container {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <div class="header">
+            <h1>Mock Frontend</h1>
+            <p>Blackboard集成测试 - 模拟前端界面</p>
+        </div>
+
+        <div class="tabs">
+            <button 
+                v-for="tab in tabs" 
+                :key="tab.id"
+                :class="['tab', { active: activeTab === tab.id }]"
+                @click="activeTab = tab.id"
+            >
+                {{ tab.name }}
+            </button>
+        </div>
+
+        <!-- 用户认证 Tab -->
+        <div v-show="activeTab === 'auth'" class="card">
+            <h2 class="card-title">用户认证</h2>
+            
+            <div class="form-group">
+                <label for="email">邮箱地址</label>
+                <input type="email" v-model="authForm.email" placeholder="test@mail.sustech.edu.cn">
+            </div>
+            
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" v-model="authForm.username" placeholder="请输入用户名">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" v-model="authForm.password" placeholder="至少8位，包含大小写字母和数字">
+            </div>
+            
+            <button class="btn btn-primary" @click="sendVerificationCode()">发送验证码</button>
+            <button class="btn btn-primary" @click="registerUser()">注册</button>
+            <button class="btn btn-success" @click="loginUser()">登录</button>
+            
+            <div class="api-url">API: POST /auth/send-verification-code | POST /auth/register | POST /auth/login</div>
+            
+            <div :class="['status-box', 'status-' + authStatus.type, { hidden: !authStatus.show }]">
+                <div class="status-content">{{ authStatus.message }}</div>
+            </div>
+        </div>
+
+        <!-- Blackboard绑定 Tab -->
+        <div v-show="activeTab === 'blackboard'" class="card">
+            <h2 class="card-title">Blackboard绑定</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="label">用户ID</div>
+                    <div class="value">{{ userInfo.userId || '-' }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">绑定状态</div>
+                    <div class="value">{{ bbStatus.isBound ? '已绑定' : '未绑定' }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">Access Token</div>
+                    <div class="value">{{ userInfo.accessToken ? userInfo.accessToken.substring(0, 30) + '...' : '-' }}</div>
+                </div>
+            </div>
+            
+            <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin-bottom: 20px; border-radius: 0 10px 10px 0;">
+                <strong>绑定说明</strong>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #555;">点击"开始绑定"按钮，系统将通过CAS单点登录完成Blackboard账号绑定。</p>
+            </div>
+            
+            <button class="btn btn-primary" @click="checkBbStatus()">检查绑定状态</button>
+            <button class="btn btn-success" @click="startBbBinding()">开始绑定</button>
+            <button class="btn btn-warning" @click="unbindBb()">解绑账号</button>
+            
+            <!-- 手动输入Cookie测试区域 -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <h3 style="margin-bottom: 15px; color: #333;">手动输入Cookie测试（调试用）</h3>
+                
+                <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; border-left: 4px solid #ff9800;">
+                    <strong>获取方法：</strong>打开浏览器 → 访问Blackboard → F12 → Application → Cookies → https://bb.sustech.edu.cn
+                </div>
+                
+                <div class="form-group">
+                    <label for="cookieInput"><span style="color: #dc3545;">*</span> JSESSIONID（必需）</label>
+                    <input type="text" id="cookieInput" v-model="manualCookie.jsessionid" placeholder="请输入JSESSIONID">
+                </div>
+                
+                <div class="form-group">
+                    <label for="sSessionIdInput"><span style="color: #dc3545;">*</span> s_session_id（必需）</label>
+                    <input type="text" id="sSessionIdInput" v-model="manualCookie.sSessionId" placeholder="请输入s_session_id">
+                </div>
+                
+                <button class="btn btn-info" @click="bindWithManualCookie()">使用手动输入的Cookie绑定</button>
+                <button class="btn btn-secondary" @click="testCookieOnly()">仅测试Cookie有效性（不绑定）</button>
+                
+                <div class="api-url">API: POST /api/v1/blackboard/bind?cookies=xxx</div>
+            </div>
+            
+            <div class="api-url">API: GET /api/v1/blackboard/status | POST /api/v1/blackboard/bind (ticket方式)</div>
+            
+            <div :class="['status-box', 'status-' + bbStatus.type, { hidden: !bbStatus.show }]">
+                <div class="status-content">{{ bbStatus.message }}</div>
+            </div>
+        </div>
+
+        <!-- 数据同步 Tab -->
+        <div v-show="activeTab === 'sync'" class="card">
+            <h2 class="card-title">数据同步</h2>
+            
+            <button class="btn btn-primary" @click="syncBbData()">同步Blackboard数据</button>
+            <button class="btn btn-success" @click="syncLocalToServer()">本地同步到服务器</button>
+            
+            <div class="api-url">API: POST /api/v1/blackboard/sync | POST /api/v1/sync/to-server</div>
+            
+            <div :class="['status-box', 'status-' + syncStatus.type, { hidden: !syncStatus.show }]">
+                <div class="status-content">{{ syncStatus.message }}</div>
+            </div>
+        </div>
+
+        <!-- 调试信息 Tab -->
+        <div v-show="activeTab === 'debug'" class="card">
+            <h2 class="card-title">调试信息</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="label">后端地址</div>
+                    <div class="value">{{ backendUrl }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">是否已登录</div>
+                    <div class="value">{{ userInfo.accessToken ? '是' : '否' }}</div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" @click="clearSession()">清除会话</button>
+            <button class="btn btn-warning" @click="testConnection()">测试连接</button>
+            
+            <div :class="['status-box', 'status-' + debugStatus.type, { hidden: !debugStatus.show }]">
+                <div class="status-content">{{ debugStatus.message }}</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                // 常量配置
+                const backendUrl = 'http://localhost:8002';
+                const BB_URL = 'https://bb.sustech.edu.cn';
+                const CAS_SERVER_URL = 'https://cas.sustech.edu.cn/cas/login';
+                const CALLBACK_URL = 'http://localhost:8080/cas_callback.html';
+                
+                // 响应式状态
+                const activeTab = ref('auth');
+                const tabs = [
+                    { id: 'auth', name: '用户认证' },
+                    { id: 'blackboard', name: 'Blackboard绑定' },
+                    { id: 'sync', name: '数据同步' },
+                    { id: 'debug', name: '调试信息' }
+                ];
+                
+                const authForm = reactive({
+                    email: '12312202@mail.sustech.edu.cn',
+                    username: 'admin',
+                    password: '12345678'
+                });
+                
+                const userInfo = reactive({
+                    userId: null,
+                    accessToken: null
+                });
+                
+                const authStatus = reactive({ show: false, type: 'info', message: '' });
+                const bbStatus = reactive({ show: false, type: 'info', message: '', isBound: false });
+                const syncStatus = reactive({ show: false, type: 'info', message: '' });
+                const debugStatus = reactive({ show: false, type: 'info', message: '' });
+                
+                // 手动输入Cookie的表单（仅保留必需字段）
+                const manualCookie = reactive({
+                    jsessionid: '',
+                    sSessionId: ''
+                });
+                
+                // 显示状态
+                const showStatus = (statusObj, type, message) => {
+                    statusObj.show = true;
+                    statusObj.type = type;
+                    statusObj.message = message;
+                };
+                
+                // 发送请求
+                const sendRequest = async (url, method = 'GET', body = null) => {
+                    try {
+                        const options = {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+                        if (body) options.body = JSON.stringify(body);
+                        if (userInfo.accessToken) {
+                            options.headers.Authorization = `Bearer ${userInfo.accessToken}`;
+                        }
+                        
+                        const response = await fetch(url, options);
+                        const data = await response.json();
+                        return { status: response.status, data };
+                    } catch (error) {
+                        return { status: 0, data: { error: error.message } };
+                    }
+                };
+                
+                // 发送验证码
+                const sendVerificationCode = async () => {
+                    const result = await sendRequest(`${backendUrl}/auth/send-verification-code`, 'POST', { email: authForm.email });
+                    if (result.status === 200) {
+                        showStatus(authStatus, 'success', `✓ 验证码发送成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(authStatus, 'error', `✗ 发送失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 注册用户
+                const registerUser = async () => {
+                    const result = await sendRequest(`${backendUrl}/auth/register`, 'POST', {
+                        email: authForm.email,
+                        username: authForm.username,
+                        password: authForm.password,
+                        confirm_password: authForm.password,
+                        verification_code: '123456'
+                    });
+                    if (result.status === 200) {
+                        showStatus(authStatus, 'success', `✓ 注册成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(authStatus, 'error', `✗ 注册失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 登录用户
+                const loginUser = async () => {
+                    const result = await sendRequest(`${backendUrl}/auth/login`, 'POST', { 
+                        email: authForm.email, 
+                        password: authForm.password 
+                    });
+                    if (result.status === 200) {
+                        userInfo.accessToken = result.data.access_token;
+                        userInfo.userId = result.data.user_id;
+                        showStatus(authStatus, 'success', `✓ 登录成功\n\n用户ID: ${userInfo.userId}\nToken: ${userInfo.accessToken.substring(0, 50)}...`);
+                    } else {
+                        showStatus(authStatus, 'error', `✗ 登录失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 检查BB绑定状态
+                const checkBbStatus = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/blackboard/status`);
+                    if (result.status === 200) {
+                        bbStatus.isBound = result.data.is_bound;
+                        showStatus(bbStatus, 'info', `✓ 查询成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(bbStatus, 'error', `✗ 查询失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 使用Tauri API获取指定域名的Cookie
+                // 注意：在真实的Tauri应用中，需要安装并配置tauri-plugin-http
+                const tauriGetCookies = async (url) => {
+                    showStatus(bbStatus, 'info', `通过Tauri获取 ${url} 的Cookie...`);
+                    
+                    try {
+                        // 检查是否在Tauri环境中运行
+                        if (window.__TAURI__) {
+                            // 真实Tauri环境：使用tauri-plugin-http获取Cookie
+                            // 需要先安装：cargo add tauri-plugin-http
+                            const { getCookies } = await import('@tauri-apps/plugin-http');
+                            const cookies = await getCookies(url);
+                            
+                            // 转换为键值对格式
+                            const cookiesDict = {};
+                            for (const cookie of cookies) {
+                                cookiesDict[cookie.name] = cookie.value;
+                            }
+                            return cookiesDict;
+                        } else {
+                            // 非Tauri环境：使用fetch获取Cookie（受同源策略限制）
+                            // 这里作为回退方案，实际在Tauri中不会走到这里
+                            const response = await fetch(url, {
+                                method: 'GET',
+                                credentials: 'include'
+                            });
+                            
+                            // 从响应头获取Set-Cookie
+                            const setCookieHeader = response.headers.get('Set-Cookie');
+                            if (setCookieHeader) {
+                                const cookiesDict = {};
+                                const cookiePairs = setCookieHeader.split(',');
+                                for (const pair of cookiePairs) {
+                                    const [nameValue] = pair.split(';');
+                                    const [name, value] = nameValue.split('=').map(s => s.trim());
+                                    if (name && value) {
+                                        cookiesDict[name] = value;
+                                    }
+                                }
+                                return cookiesDict;
+                            }
+                            
+                            // 如果没有获取到Cookie，返回空对象
+                            return {};
+                        }
+                    } catch (error) {
+                        console.error('获取Cookie失败:', error);
+                        showStatus(bbStatus, 'error', `获取Cookie失败: ${error.message}`);
+                        throw error;
+                    }
+                };
+                
+                // 通过Cookie绑定BB账号（Tauri实现）
+                const startBbBinding = async () => {
+                    showStatus(bbStatus, 'info', '开始绑定Blackboard账号...');
+                    
+                    try {
+                        // 步骤1：通过Tauri获取Blackboard的Cookie
+                        const bbUrl = 'https://bb.sustech.edu.cn';
+                        const cookies = await tauriGetCookies(bbUrl);
+                        showStatus(bbStatus, 'info', `获取到Cookie: ${JSON.stringify(Object.keys(cookies))}`);
+                        
+                        // 步骤2：验证是否获取到JSESSIONID
+                        if (!cookies || !cookies['JSESSIONID']) {
+                            showStatus(bbStatus, 'error', '✗ 未能获取Blackboard的JSESSIONID\n\n请先在浏览器中登录Blackboard，然后重试');
+                            return;
+                        }
+                        
+                        // 步骤3：将Cookie转换为JSON字符串并发送给后端
+                        const cookiesJson = JSON.stringify(cookies);
+                        showStatus(bbStatus, 'info', '正在绑定账号...');
+                        
+                        const result = await sendRequest(`${backendUrl}/api/v1/blackboard/bind?cookies=${encodeURIComponent(cookiesJson)}`, 'POST');
+                        
+                        if (result.status === 200) {
+                            showStatus(bbStatus, 'success', `✓ 绑定成功！\n\n${JSON.stringify(result.data, null, 2)}`);
+                            bbStatus.isBound = true;
+                        } else {
+                            showStatus(bbStatus, 'error', `✗ 绑定失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                        }
+                        
+                    } catch (error) {
+                        showStatus(bbStatus, 'error', `✗ 请求异常\n\n${error.message}`);
+                    }
+                };
+                
+                // 解绑BB账号
+                const unbindBb = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/blackboard/unbind`, 'POST');
+                    if (result.status === 200) {
+                        showStatus(bbStatus, 'success', `✓ 解绑成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                        bbStatus.isBound = false;
+                    } else {
+                        showStatus(bbStatus, 'error', `✗ 解绑失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 构建Cookie对象（仅包含必需的两个Cookie）
+                const buildCookieObject = () => {
+                    const cookies = {};
+                    
+                    // 必需的Cookie
+                    if (manualCookie.jsessionid.trim()) {
+                        cookies['JSESSIONID'] = manualCookie.jsessionid.trim();
+                    }
+                    if (manualCookie.sSessionId.trim()) {
+                        cookies['s_session_id'] = manualCookie.sSessionId.trim();
+                    }
+                    
+                    return cookies;
+                };
+                
+                // 使用手动输入的Cookie绑定
+                const bindWithManualCookie = async () => {
+                    // 验证必需的Cookie
+                    if (!manualCookie.jsessionid.trim()) {
+                        showStatus(bbStatus, 'error', '✗ 请输入JSESSIONID');
+                        return;
+                    }
+                    if (!manualCookie.sSessionId.trim()) {
+                        showStatus(bbStatus, 'error', '✗ 请输入s_session_id');
+                        return;
+                    }
+                    
+                    // 构建完整的Cookie对象
+                    const cookies = buildCookieObject();
+                    
+                    showStatus(bbStatus, 'info', `准备绑定，Cookie数量: ${Object.keys(cookies).length}\nCookie键: ${JSON.stringify(Object.keys(cookies))}`);
+                    
+                    try {
+                        const cookiesJson = JSON.stringify(cookies);
+                        const result = await sendRequest(
+                            `${backendUrl}/api/v1/blackboard/bind?cookies=${encodeURIComponent(cookiesJson)}`,
+                            'POST'
+                        );
+                        
+                        if (result.status === 200) {
+                            showStatus(bbStatus, 'success', `✓ 绑定成功！\n\n${JSON.stringify(result.data, null, 2)}`);
+                            bbStatus.isBound = true;
+                        } else {
+                            showStatus(bbStatus, 'error', `✗ 绑定失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                        }
+                    } catch (error) {
+                        showStatus(bbStatus, 'error', `✗ 请求异常\n\n${error.message}`);
+                    }
+                };
+                
+                // 仅测试Cookie有效性（不绑定）
+                const testCookieOnly = async () => {
+                    // 验证必需的Cookie
+                    if (!manualCookie.jsessionid.trim()) {
+                        showStatus(bbStatus, 'error', '✗ 请输入JSESSIONID');
+                        return;
+                    }
+                    if (!manualCookie.sSessionId.trim()) {
+                        showStatus(bbStatus, 'error', '✗ 请输入s_session_id');
+                        return;
+                    }
+                    
+                    // 构建完整的Cookie对象
+                    const cookies = buildCookieObject();
+                    
+                    showStatus(bbStatus, 'info', `正在测试Cookie有效性...\nCookie数量: ${Object.keys(cookies).length}\nCookie键: ${JSON.stringify(Object.keys(cookies))}`);
+                    
+                    try {
+                        const cookiesJson = JSON.stringify(cookies);
+                        const result = await sendRequest(
+                            `${backendUrl}/api/v1/blackboard/test-cookie?cookies=${encodeURIComponent(cookiesJson)}`,
+                            'POST'
+                        );
+                        
+                        if (result.status === 200) {
+                            showStatus(bbStatus, 'success', `✓ Cookie有效！\n\n${JSON.stringify(result.data, null, 2)}`);
+                        } else {
+                            showStatus(bbStatus, 'error', `✗ Cookie无效或测试失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                        }
+                    } catch (error) {
+                        showStatus(bbStatus, 'error', `✗ 测试失败\n\n${error.message}`);
+                    }
+                };
+                
+                // 同步BB数据
+                const syncBbData = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/blackboard/sync`, 'POST');
+                    if (result.status === 200) {
+                        showStatus(syncStatus, 'success', `✓ 同步成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(syncStatus, 'error', `✗ 同步失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 本地同步到服务器
+                const syncLocalToServer = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/sync/to-server`, 'POST');
+                    if (result.status === 200) {
+                        showStatus(syncStatus, 'success', `✓ 同步成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(syncStatus, 'error', `✗ 同步失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 清除会话
+                const clearSession = () => {
+                    userInfo.accessToken = null;
+                    userInfo.userId = null;
+                    bbStatus.isBound = false;
+                    showStatus(debugStatus, 'info', '✓ 会话已清除');
+                };
+                
+                // 测试连接
+                const testConnection = async () => {
+                    const result = await sendRequest(`${backendUrl}/auth/health`);
+                    if (result.status === 200) {
+                        showStatus(debugStatus, 'success', `✓ 连接成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(debugStatus, 'error', `✗ 连接失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 页面加载时初始化
+                onMounted(() => {
+                    // 页面加载完成后可以执行一些初始化操作
+                    console.log('页面加载完成');
+                });
+                
+                return {
+                    backendUrl,
+                    activeTab,
+                    tabs,
+                    authForm,
+                    userInfo,
+                    authStatus,
+                    bbStatus,
+                    syncStatus,
+                    debugStatus,
+                    manualCookie,
+                    sendVerificationCode,
+                    registerUser,
+                    loginUser,
+                    checkBbStatus,
+                    startBbBinding,
+                    unbindBb,
+                    bindWithManualCookie,
+                    testCookieOnly,
+                    syncBbData,
+                    syncLocalToServer,
+                    clearSession,
+                    testConnection
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

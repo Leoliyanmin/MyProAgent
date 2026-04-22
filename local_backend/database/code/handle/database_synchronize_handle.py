@@ -6,8 +6,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from local_backend.database.code.command import database_command as db
-from local_backend.database.code.operations import database_synchronize_operations as ops
+from ..command import database_command as db
+from ..operations import database_synchronize_operations as ops
 
 
 def _now_iso() -> str:
