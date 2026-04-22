@@ -1,5 +1,5 @@
 import logging
-from database.code.database_code_operations import CodeOperations
+from database.code.operations.database_code_operations import CodeOperations
 
 logger = logging.getLogger(__name__)
 

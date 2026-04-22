@@ -1,9 +1,10 @@
 ========================================
 Blackboard 爬取结果
 ========================================
-时间: 2026-04-22 17:09:40
+时间: 2026-04-22 19:43:03
 总课程数: 4
-HTML长度: 4521 字符
+课程列表HTML长度: 4521 字符
+日历页面HTML长度: 48194 字符
 
 ========================================
 原始课程列表页面 HTML
@@ -12,7 +13,7 @@ HTML长度: 4521 字符
 <div class="noItems" style="display:none">您的所有课程均已隐藏。</div>
       
       <h3 class='termHeading-coursefakeclass'>
-       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', 'b6254b13-5bf1-42e0-a3ab-81567f37c1f2')">
+       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', 'ab60abdc-d7ad-49ca-a64a-94751281ec66')">
         <span class="hideoff">收拢</span>
         2026春（Spring 2026）</a>
        </h3>
@@ -119,6 +120,7 @@ HTML长度: 4521 字符
     })();
    </script>
    
+
 
 ========================================
 爬取结果 (JSON格式)

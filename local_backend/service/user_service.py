@@ -4,6 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from business.auth_service import AuthService
 from database.code.handle.database_user_handle import UserHandle
+import httpx
 import requests
 from config import settings
 from logging_config import get_logger
