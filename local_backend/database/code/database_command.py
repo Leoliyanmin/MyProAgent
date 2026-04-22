@@ -591,19 +591,21 @@ def create_schedule(
     schedule_color_tag: str | None,
     db_path: str | Path = DEFAULT_DB_PATH,
     schedule_priority: int = 2,
+    schedule_is_completed: int = 0,
 ) -> int:
     return _execute(
         """
         INSERT INTO schedule (
-            user_id, schedule_event_type, schedule_priority, schedule_title, schedule_start_time,
+            user_id, schedule_event_type, schedule_priority, schedule_is_completed, schedule_title, schedule_start_time,
             schedule_end_time, schedule_location, schedule_description,
             schedule_related_link, schedule_recurrence_rule, schedule_color_tag
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
             schedule_event_type,
             schedule_priority,
+            schedule_is_completed,
             schedule_title,
             schedule_start_time,
             schedule_end_time,
@@ -641,6 +643,7 @@ def update_schedule(
     schedule_color_tag: str | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
     schedule_priority: int | None = None,
+    schedule_is_completed: int | None = None,
 ) -> None:
     # 构建动态更新语句
     update_fields = []
@@ -673,6 +676,9 @@ def update_schedule(
     if schedule_priority is not None:
         update_fields.append("schedule_priority = ?")
         params.append(schedule_priority)
+    if schedule_is_completed is not None:
+        update_fields.append("schedule_is_completed = ?")
+        params.append(schedule_is_completed)
     
     if not update_fields:
         return  # 没有更新字段
@@ -688,10 +694,18 @@ def delete_schedule(schedule_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> 
 
 # session
 
-def create_session(user_id: str, session_last_visited_at: str, db_path: str | Path = DEFAULT_DB_PATH) -> int:
+def create_session(
+    user_id: str,
+    session_last_visited_at: str,
+    session_title: str = "",
+    session_created_at: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> int:
+    if session_created_at is None:
+        session_created_at = session_last_visited_at
     return _execute(
-        "INSERT INTO session (user_id, session_last_visited_at) VALUES (?, ?)",
-        (user_id, session_last_visited_at),
+        "INSERT INTO session (user_id, session_title, session_created_at, session_last_visited_at) VALUES (?, ?, ?, ?)",
+        (user_id, session_title, session_created_at, session_last_visited_at),
         db_path,
     )
 

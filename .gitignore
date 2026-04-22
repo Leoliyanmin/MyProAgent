@@ -195,3 +195,8 @@ frontend/src-tauri/target/debug/bundle/
 
 # Config files with sensitive data
 config.json
+server_backend/config.py
+local/database/test_db/sync_packet_from_server.json
+local/database/test_db/sync_packet_to_server.json
+local/database/test_db/sync_packet_to_server.json
+local/database/test_db/sync_packet_from_server.json

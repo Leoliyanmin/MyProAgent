@@ -9,9 +9,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "SUSTech Student Productivity Agent (Server)"
     APP_VERSION: str = "0.1.0"
     DEBUG: bool = True
-    TEST_MODE: bool = False
-    SKIP_VERIFICATION: bool = False  # 是否跳过验证码验证
-    SKIP_RATE_LIMIT: bool = False  # 是否跳过频率限制
+    TEST_MODE: bool = True
+    SKIP_VERIFICATION: bool = True  # 是否跳过验证码验证
+    SKIP_RATE_LIMIT: bool = True  # 是否跳过频率限制
     LOG_LEVEL: str = "INFO"  # 日志级别: DEBUG, INFO, WARNING, ERROR
     
     # 数据库配置（Server使用SQLite，实际部署可替换为PostgreSQL）

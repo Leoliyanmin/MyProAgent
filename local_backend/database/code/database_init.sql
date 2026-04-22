@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS schedule (
     user_id TEXT NOT NULL,
     schedule_event_type TEXT NOT NULL,
     schedule_priority INTEGER NOT NULL DEFAULT 2 CHECK (schedule_priority IN (0, 1, 2, 3)),
+    schedule_is_completed INTEGER NOT NULL DEFAULT 0 CHECK (schedule_is_completed IN (0, 1)),
     schedule_title TEXT NOT NULL,
     schedule_start_time TEXT NOT NULL,
     schedule_end_time TEXT NOT NULL,
@@ -101,6 +102,8 @@ CREATE TABLE IF NOT EXISTS schedule (
 CREATE TABLE IF NOT EXISTS session (
     session_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
+    session_title TEXT NOT NULL DEFAULT '',
+    session_created_at TEXT NOT NULL,
     session_last_visited_at TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );

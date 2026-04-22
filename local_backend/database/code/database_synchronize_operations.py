@@ -78,6 +78,7 @@ SCHEDULE_FIELDS = (
     "user_id",
     "schedule_event_type",
     "schedule_priority",
+    "schedule_is_completed",
     "schedule_title",
     "schedule_start_time",
     "schedule_end_time",
@@ -91,6 +92,8 @@ SCHEDULE_FIELDS = (
 SESSION_FIELDS = (
     "session_id",
     "user_id",
+    "session_title",
+    "session_created_at",
     "session_last_visited_at",
 )
 
@@ -649,6 +652,9 @@ class LocalSyncImporter:
                 )
 
             for row in content.get("schedule", []):
+                normalized_schedule_completed = _normalize_binary_flag(row.get("schedule_is_completed"))
+                if normalized_schedule_completed is None:
+                    normalized_schedule_completed = 0
                 db.create_schedule(
                     user_id=user_id,
                     schedule_event_type=row.get("schedule_event_type", ""),
@@ -661,6 +667,7 @@ class LocalSyncImporter:
                     schedule_recurrence_rule=row.get("schedule_recurrence_rule"),
                     schedule_color_tag=row.get("schedule_color_tag"),
                     schedule_priority=_normalize_schedule_priority(row.get("schedule_priority")),
+                    schedule_is_completed=normalized_schedule_completed,
                 )
 
             session_id_map: dict[int, int] = {}
@@ -669,6 +676,8 @@ class LocalSyncImporter:
                     continue
                 new_id = db.create_session(
                     user_id=user_id,
+                    session_title=row.get("session_title", ""),
+                    session_created_at=row.get("session_created_at") or row.get("session_last_visited_at", _now_iso()),
                     session_last_visited_at=row.get("session_last_visited_at", _now_iso()),
                 )
                 session_id_map[int(row["session_id"])] = new_id

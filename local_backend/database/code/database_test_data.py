@@ -64,6 +64,7 @@ TEST_DATA = {
         "user_id": "user-test-001",
         "schedule_event_type": "meeting",
         "schedule_priority": 2,
+        "schedule_is_completed": 0,
         "schedule_title": "daily standup",
         "schedule_start_time": "2026-03-31T11:00:00+00:00",
         "schedule_end_time": "2026-03-31T11:30:00+00:00",
@@ -75,6 +76,8 @@ TEST_DATA = {
     },
     "session": {
         "user_id": "user-test-001",
+        "session_title": "",
+        "session_created_at": "2026-03-31T10:12:00+00:00",
         "session_last_visited_at": "2026-03-31T10:12:00+00:00",
     },
     "chat": {
