@@ -439,7 +439,12 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
         agent_service.profile_store.update_profile(user_id, update)
 
     profile = agent_service.profile_store.get_profile(user_id)
-    mbti = agent_service.mbti_inferencer.infer_mbti(profile)
+    raw_messages = [
+        it["user_input"]["raw_message"]
+        for it in interactions
+        if it.get("user_input", {}).get("raw_message")
+    ]
+    mbti = agent_service.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages)
     agent_service.profile_store.update_mbti(user_id, mbti)
 
     return {

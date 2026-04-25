@@ -63,7 +63,7 @@ class AgentService:
         self.agent = LocalAgent(workspace=self.workspace)
         print(f"[AgentService] LocalAgent initialized in {time.time() - start:.2f}s")
 
-        personal_base = Path(__file__).parent.parent.parent / "personal"
+        personal_base = Path(__file__).parent.parent.parent / "personality"
         self.interaction_logger = InteractionLogger(personal_base / "interactions")
         self.profile_extractor = ProfileExtractor()
         self.mbti_inferencer = MBTIInferencer()
@@ -641,7 +641,13 @@ class AgentService:
             self.interaction_logger.log_interaction(interaction_data)
             self.profile_store.update_profile(user_id, profile_update)
             profile = self.profile_store.get_profile(user_id)
-            mbti = self.mbti_inferencer.infer_mbti(profile)
+            all_interactions = self.interaction_logger.get_user_interactions(user_id, limit=9999)
+            raw_messages = [
+                it["user_input"]["raw_message"]
+                for it in all_interactions
+                if it.get("user_input", {}).get("raw_message")
+            ]
+            mbti = self.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages)
             self.profile_store.update_mbti(user_id, mbti)
         except Exception as e:
             print(f"[AgentService] _log_interaction error: {e}")
