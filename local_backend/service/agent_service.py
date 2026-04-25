@@ -18,6 +18,11 @@ from localagent.agent import LocalAgent
 from localagent.session import SessionManager
 from localagent.memory import MemoryStore
 
+personal_path = Path(__file__).parent.parent.parent / "personal"
+if str(personal_path) not in sys.path:
+    sys.path.insert(0, str(personal_path))
+from personal import InteractionLogger, ProfileExtractor, MBTIInferencer, UserProfileStore
+
 
 class AgentService:
     CALENDAR_MUTATION_TOOLS = {
@@ -57,6 +62,12 @@ class AgentService:
         start = time.time()
         self.agent = LocalAgent(workspace=self.workspace)
         print(f"[AgentService] LocalAgent initialized in {time.time() - start:.2f}s")
+
+        personal_base = Path(__file__).parent.parent.parent / "personal"
+        self.interaction_logger = InteractionLogger(personal_base / "interactions")
+        self.profile_extractor = ProfileExtractor()
+        self.mbti_inferencer = MBTIInferencer()
+        self.profile_store = UserProfileStore(personal_base / "profiles")
 
     def process_query(self, user_id: str, message: str, session_id: str = None):
         # 如果没有 session_id，创建一个新会话
@@ -239,6 +250,8 @@ class AgentService:
         )
 
         pending_deletions = self._extract_pending_deletions(result.content)
+
+        await self._log_interaction(user_id, message, result, session_id)
 
         return {
             'response': result.content,
@@ -595,3 +608,90 @@ class AgentService:
                 'error': str(e),
                 'type': type(e).__name__,
             }
+
+    async def _log_interaction(self, user_id: str, message: str, result, session_id: str):
+        try:
+            intent = self._classify_intent(message)
+            interaction_data = {
+                "metadata": {"user_id": user_id, "session_id": session_id, "platform": "web"},
+                "user_input": {
+                    "raw_message": message,
+                    "intent_category": intent,
+                    "keywords": self._extract_keywords(message),
+                    "language": "zh",
+                    "sentiment": "neutral",
+                    "urgency": "low",
+                    "message_length": len(message),
+                    "contains_file_reference": "false"
+                },
+                "agent_output": {
+                    "raw_response": getattr(result, 'content', ''),
+                    "response_length": len(getattr(result, 'content', '') or ''),
+                    "follow_up_required": False,
+                    "suggested_actions": []
+                },
+                "tool_execution": {
+                    "tools_invoked": [{"tool_name": t} for t in getattr(result, 'tools_used', [])],
+                    "files_accessed": [],
+                    "total_execution_time_ms": 0
+                }
+            }
+            profile_update = self.profile_extractor.extract_from_interaction(interaction_data)
+            interaction_data["user_profile_update"] = profile_update
+            self.interaction_logger.log_interaction(interaction_data)
+            self.profile_store.update_profile(user_id, profile_update)
+            profile = self.profile_store.get_profile(user_id)
+            mbti = self.mbti_inferencer.infer_mbti(profile)
+            self.profile_store.update_mbti(user_id, mbti)
+        except Exception as e:
+            print(f"[AgentService] _log_interaction error: {e}")
+
+    def _classify_intent(self, message: str) -> str:
+        text = message.lower()
+        if any(kw in text for kw in ["任务", "todo", "代办", "完成"]):
+            return "task_delegation"
+        if any(kw in text for kw in ["文件", "文件夹", "目录", "创建", "删除"]):
+            return "file_operation"
+        if any(kw in text for kw in ["日程", "安排", "会议", "日历", "明天", "今天"]):
+            return "schedule_management"
+        if any(kw in text for kw in ["学习", "课程", "作业", "考试", "复习"]):
+            return "study_plan"
+        if any(kw in text for kw in ["什么", "如何", "为什么", "怎么", "？"]):
+            return "question"
+        return "casual_chat"
+
+    def _extract_keywords(self, message: str) -> list:
+        import re
+        tokens = re.findall(r'[\w\u4e00-\u9fff]+', message)
+        stop_words = {"的", "了", "是", "在", "有", "我", "你", "他", "她", "它", "们", "这", "那", "不", "也", "就", "都", "和", "与", "或"}
+        return [t for t in tokens if len(t) > 1 and t not in stop_words][:10]
+
+    def get_user_profile(self, user_id: str) -> dict:
+        profile = self.profile_store.get_profile(user_id)
+        mbti = profile.get("mbti_inference", {})
+        profile["mbti_inference"] = mbti
+        return profile
+
+    def get_user_mbti(self, user_id: str) -> dict:
+        profile = self.profile_store.get_profile(user_id)
+        return profile.get("mbti_inference", {})
+
+    def get_user_interactions(self, user_id: str, limit: int = 20, offset: int = 0) -> dict:
+        all_interactions = self.interaction_logger.get_user_interactions(user_id, limit=9999)
+        total = len(all_interactions)
+        page = all_interactions[offset:offset + limit]
+        items = []
+        for item in page:
+            meta = item.get("metadata", {})
+            user_input = item.get("user_input", {})
+            agent_output = item.get("agent_output", {})
+            tools = item.get("tool_execution", {}).get("tools_invoked", [])
+            items.append({
+                "conversation_id": meta.get("conversation_id", ""),
+                "timestamp": meta.get("timestamp", ""),
+                "user_message_preview": (user_input.get("raw_message", "") or "")[:80],
+                "agent_response_preview": (agent_output.get("raw_response", "") or "")[:80],
+                "intent_category": user_input.get("intent_category", ""),
+                "tools_used_count": len(tools),
+            })
+        return {"total": total, "limit": limit, "offset": offset, "interactions": items}

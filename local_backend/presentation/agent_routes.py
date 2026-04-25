@@ -383,9 +383,85 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
             await websocket.close(code=4000, reason=str(e))
         except:
             pass
-    except Exception as e:
-        print(f"WebSocket error: {e}")
-        try:
-            await websocket.close(code=4000, reason=str(e))
-        except:
-            pass
+
+
+# ==================== 用户画像端点 ====================
+
+@router.get("/profile")
+async def get_user_profile(user_id: str = Depends(get_current_user_id)):
+    """获取当前用户的完整画像（含 MBTI）"""
+    profile = agent_service.get_user_profile(user_id)
+    return profile
+
+
+@router.get("/profile/mbti")
+async def get_user_mbti(user_id: str = Depends(get_current_user_id)):
+    """获取 MBTI 推断结果"""
+    mbti = agent_service.get_user_mbti(user_id)
+    return mbti
+
+
+@router.get("/profile/interactions")
+async def get_user_interactions(
+    limit: int = 20,
+    offset: int = 0,
+    user_id: str = Depends(get_current_user_id),
+):
+    """获取交互历史列表（分页）"""
+    return agent_service.get_user_interactions(user_id, limit, offset)
+
+
+@router.get("/profile/interactions/{conversation_id}")
+async def get_interaction_detail(
+    conversation_id: str,
+    user_id: str = Depends(get_current_user_id),
+):
+    """获取单条交互详情"""
+    interaction = agent_service.interaction_logger.get_interaction(conversation_id)
+    if not interaction:
+        raise HTTPException(status_code=404, detail="交互记录不存在")
+    if interaction.get("metadata", {}).get("user_id") != user_id:
+        raise HTTPException(status_code=403, detail="无权查看他人的交互记录")
+    return interaction
+
+
+@router.post("/profile/reanalyze")
+async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
+    """重新分析所有交互，更新画像和 MBTI"""
+    interactions = agent_service.interaction_logger.get_user_interactions(user_id, limit=9999)
+    if not interactions:
+        return {"success": True, "message": "没有交互记录需要分析", "interactions_processed": 0}
+
+    agent_service.profile_store.delete_profile(user_id)
+
+    for interaction in interactions:
+        update = agent_service.profile_extractor.extract_from_interaction(interaction)
+        agent_service.profile_store.update_profile(user_id, update)
+
+    profile = agent_service.profile_store.get_profile(user_id)
+    mbti = agent_service.mbti_inferencer.infer_mbti(profile)
+    agent_service.profile_store.update_mbti(user_id, mbti)
+
+    return {
+        "success": True,
+        "message": "重新分析完成",
+        "interactions_processed": len(interactions),
+        "profile_updated": True,
+        "mbti_updated": True
+    }
+
+
+@router.delete("/profile/interactions/{conversation_id}")
+async def delete_interaction(
+    conversation_id: str,
+    user_id: str = Depends(get_current_user_id),
+):
+    """删除单条交互记录"""
+    interaction = agent_service.interaction_logger.get_interaction(conversation_id)
+    if not interaction:
+        raise HTTPException(status_code=404, detail="交互记录不存在")
+    if interaction.get("metadata", {}).get("user_id") != user_id:
+        raise HTTPException(status_code=403, detail="无权删除他人的交互记录")
+
+    success = agent_service.interaction_logger.delete_interaction(conversation_id)
+    return {"success": success, "message": "删除成功" if success else "删除失败"}
