@@ -262,10 +262,18 @@ async function fetchProfile() {
     mbtiConfidence.value = mbti.confidence || ''
     mbtiDescription.value = mbti.description || ''
 
-    interestsList.value = (p.interests || []).slice(0, 10)
-    analysisSkills.value = (p.skills || []).slice(0, 10)
-    workPreference.value = p.preferred_work_style || ''
-    behaviorPattern.value = p.behavior_patterns ? (p.behavior_patterns.join('；') || '') : ''
+    interestsList.value = (p.interests_identified || []).map(i => i.topic).slice(0, 10)
+    analysisSkills.value = (p.skills_demonstrated || []).map(s => s.skill).slice(0, 10)
+
+    const prefs = p.preferences_inferred || {}
+    workPreference.value = `沟通风格: ${prefs.communication_style || 'casual'}, 语言: ${prefs.preferred_language || 'zh'}`
+
+    const patterns = p.study_work_patterns || {}
+    const topicStr = patterns.topic_areas?.length ? patterns.topic_areas.join(', ') : ''
+    behaviorPattern.value = [
+      `工作风格: ${patterns.work_style || 'flexible'}`,
+      topicStr ? `关注领域: ${topicStr}` : ''
+    ].filter(Boolean).join('；')
 
     const hist = await profileAPI.getInteractions(5, 0)
     interactions.value = hist.interactions || []
@@ -323,6 +331,10 @@ function renderRadarChart() {
     radarChartInstance = echarts.init(radarRef.value)
 
     const scores = mbtiScores.value
+    const ei = scores.E_I || {}
+    const sn = scores.S_N || {}
+    const tf = scores.T_F || {}
+    const jp = scores.J_P || {}
     const option = {
       radar: {
         indicator: [
@@ -352,14 +364,14 @@ function renderRadarChart() {
         type: 'radar',
         data: [{
           value: [
-            scores.E || 0,
-            scores.I || 0,
-            scores.S || 0,
-            scores.N || 0,
-            scores.T || 0,
-            scores.F || 0,
-            scores.J || 0,
-            scores.P || 0,
+            ei.E || 0,
+            ei.I || 0,
+            sn.S || 0,
+            sn.N || 0,
+            tf.T || 0,
+            tf.F || 0,
+            jp.J || 0,
+            jp.P || 0,
           ],
           name: 'MBTI 维度',
           areaStyle: {
