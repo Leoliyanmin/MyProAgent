@@ -43,6 +43,7 @@ class VerificationCodeResponse(BaseModel):
     message: str
     expires_in: Optional[int] = None
     retry_after: Optional[int] = None
+    test_code: Optional[str] = None
 
 
 class ScheduleBase(BaseModel):

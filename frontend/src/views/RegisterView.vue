@@ -205,7 +205,12 @@ const sendCode = async () => {
     const result = await auth.sendVerificationCode(form.email, 'register')
 
     if (result.success) {
-      // Start countdown
+      if (result.test_code) {
+        successMsg.value = `Verification code sent. Test code: ${result.test_code}`
+        form.verificationCode = result.test_code
+      } else {
+        successMsg.value = 'Verification code sent!'
+      }
       countdown.value = 60
       const timer = setInterval(() => {
         countdown.value--

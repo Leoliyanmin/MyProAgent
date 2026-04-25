@@ -16,7 +16,8 @@ async def send_verification_code(request: VerificationCodeRequest):
         success=result['success'],
         message=result['message'],
         expires_in=result.get('expires_in'),
-        retry_after=result.get('retry_after')
+        retry_after=result.get('retry_after'),
+        test_code=result.get('test_code')
     )
 
 
