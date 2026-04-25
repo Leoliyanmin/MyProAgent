@@ -71,8 +71,26 @@
         <h3>MBTI 维度分析</h3>
         <div v-if="loading.ai" class="loading">加载中...</div>
 
-        <div v-if="!loading.ai && mbtiScores" class="radar-container">
-          <div ref="radarRef" class="radar-chart"></div>
+        <div v-if="!loading.ai && mbtiScores" class="dimension-breakdown">
+          <div v-for="pair in dimensionPairs" :key="pair.label" class="dimension-pair">
+            <div class="dimension-pair-label">{{ pair.label }}</div>
+            <div class="dimension-bars">
+              <div class="dim-bar-row">
+                <span class="dim-name">{{ pair.left.name }}</span>
+                <div class="dim-bar-track">
+                  <div class="dim-bar-fill" :style="{ width: pair.left.percent + '%' }"></div>
+                </div>
+                <span class="dim-value">{{ pair.left.percent }}%</span>
+              </div>
+              <div class="dim-bar-row">
+                <span class="dim-name">{{ pair.right.name }}</span>
+                <div class="dim-bar-track">
+                  <div class="dim-bar-fill right" :style="{ width: pair.right.percent + '%' }"></div>
+                </div>
+                <span class="dim-value">{{ pair.right.percent }}%</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div v-if="!loading.ai && mbtiDescription" class="mbti-desc">
@@ -195,7 +213,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, onMounted, nextTick } from 'vue'
+import { computed, reactive, ref, onMounted } from 'vue'
 import { profileAPI } from '../services/api.js'
 
 const skillOptions = ['Vue', 'Node.js', 'UI 设计', '数据分析', '产品思维', '自动化']
@@ -245,9 +263,40 @@ const analysisSkills = ref([])
 const workPreference = ref('')
 const behaviorPattern = ref('')
 const interactions = ref([])
-const radarRef = ref(null)
 
-let radarChartInstance = null
+const dimensionPairs = computed(() => {
+  const s = mbtiScores.value
+  if (!s) return []
+  const ei = s.E_I || {}
+  const sn = s.S_N || {}
+  const tf = s.T_F || {}
+  const jp = s.J_P || {}
+
+  const toPct = (v) => Math.round((v || 0) * 100)
+
+  return [
+    {
+      label: 'E/I · 能量来源',
+      left: { name: '外向 (E)', percent: toPct(ei.E) },
+      right: { name: '内向 (I)', percent: toPct(ei.I) },
+    },
+    {
+      label: 'S/N · 认知方式',
+      left: { name: '实感 (S)', percent: toPct(sn.S) },
+      right: { name: '直觉 (N)', percent: toPct(sn.N) },
+    },
+    {
+      label: 'T/F · 决策依据',
+      left: { name: '理性 (T)', percent: toPct(tf.T) },
+      right: { name: '情感 (F)', percent: toPct(tf.F) },
+    },
+    {
+      label: 'J/P · 生活方式',
+      left: { name: '判断 (J)', percent: toPct(jp.J) },
+      right: { name: '感知 (P)', percent: toPct(jp.P) },
+    },
+  ]
+})
 
 async function fetchProfile() {
   loading.ai = true
@@ -257,7 +306,12 @@ async function fetchProfile() {
     profile.value = p
 
     const mbti = p.mbti_inference || {}
-    mbtiScores.value = mbti.scores || null
+    const rawScores = mbti.scores || {}
+    if (rawScores.E_I && rawScores.S_N && rawScores.T_F && rawScores.J_P) {
+      mbtiScores.value = rawScores
+    } else {
+      mbtiScores.value = null
+    }
     mbtiType.value = mbti.mbti_type || ''
     mbtiConfidence.value = mbti.confidence || ''
     mbtiDescription.value = mbti.description || ''
@@ -277,9 +331,6 @@ async function fetchProfile() {
 
     const hist = await profileAPI.getInteractions(5, 0)
     interactions.value = hist.interactions || []
-
-    await nextTick()
-    renderRadarChart()
   } catch (e) {
     console.error('[Profile] fetch error:', e)
     error.ai = '加载画像数据失败，请确保已有对话记录'
@@ -319,80 +370,6 @@ function formatTime(ts) {
   } catch {
     return ts
   }
-}
-
-function renderRadarChart() {
-  if (!radarRef.value || !mbtiScores.value) return
-
-  import('echarts').then((echarts) => {
-    if (radarChartInstance) {
-      radarChartInstance.dispose()
-    }
-    radarChartInstance = echarts.init(radarRef.value)
-
-    const scores = mbtiScores.value
-    const ei = scores.E_I || {}
-    const sn = scores.S_N || {}
-    const tf = scores.T_F || {}
-    const jp = scores.J_P || {}
-    const option = {
-      radar: {
-        indicator: [
-          { name: '外向(E)', max: 1 },
-          { name: '内向(I)', max: 1 },
-          { name: '实感(S)', max: 1 },
-          { name: '直觉(N)', max: 1 },
-          { name: '理性(T)', max: 1 },
-          { name: '情感(F)', max: 1 },
-          { name: '判断(J)', max: 1 },
-          { name: '感知(P)', max: 1 },
-        ],
-        shape: 'circle',
-        center: ['50%', '50%'],
-        radius: '65%',
-        axisName: {
-          fontSize: 11,
-          color: '#374151'
-        },
-        splitArea: {
-          areaStyle: {
-            color: ['rgba(14,165,233,0.02)', 'rgba(14,165,233,0.05)']
-          }
-        }
-      },
-      series: [{
-        type: 'radar',
-        data: [{
-          value: [
-            ei.E || 0,
-            ei.I || 0,
-            sn.S || 0,
-            sn.N || 0,
-            tf.T || 0,
-            tf.F || 0,
-            jp.J || 0,
-            jp.P || 0,
-          ],
-          name: 'MBTI 维度',
-          areaStyle: {
-            color: 'rgba(14,165,233,0.2)'
-          },
-          lineStyle: {
-            color: '#0ea5e9',
-            width: 2
-          },
-          itemStyle: {
-            color: '#0284c7'
-          }
-        }]
-      }]
-    }
-
-    radarChartInstance.setOption(option)
-
-    const handleResize = () => radarChartInstance?.resize()
-    window.addEventListener('resize', handleResize)
-  })
 }
 
 onMounted(() => {
@@ -696,17 +673,6 @@ onMounted(() => {
   line-height: 1.5;
 }
 
-.radar-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.radar-chart {
-  width: 300px;
-  height: 300px;
-}
-
 .mbti-desc {
   background: #f0f9ff;
   border-radius: 8px;
@@ -823,5 +789,74 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.dimension-breakdown {
+  margin-top: 16px;
+}
+
+.dimension-breakdown h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: #1d1d1f;
+}
+
+.dimension-pair {
+  margin-bottom: 14px;
+}
+
+.dimension-pair-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.dimension-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dim-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dim-name {
+  width: 70px;
+  font-size: 12px;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.dim-bar-track {
+  flex: 1;
+  height: 10px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dim-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+  transition: width 0.4s ease;
+}
+
+.dim-bar-fill.right {
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
+
+.dim-value {
+  width: 34px;
+  font-size: 11px;
+  color: #6b7280;
+  text-align: right;
+  flex-shrink: 0;
 }
 </style>
