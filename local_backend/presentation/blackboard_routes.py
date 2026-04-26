@@ -52,23 +52,3 @@ async def unbind_bb(user_id: str = Depends(get_current_user_id)):
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '解绑失败'))
     return result
-
-@router.post("/test-cookie")
-async def test_cookie(cookies: str):
-    """测试Cookie有效性（不绑定）
-    
-    用于调试目的，验证Cookie是否可以成功访问Blackboard。
-    
-    Args:
-        cookies: Blackboard的Cookie字符串（JSON格式）
-    
-    Returns:
-        Cookie测试结果
-    """
-    if not cookies:
-        raise HTTPException(status_code=400, detail="cookies不能为空")
-    
-    result = blackboard_service.test_cookie_validity(cookies)
-    if not result.get('success'):
-        raise HTTPException(status_code=400, detail=result.get('message', '测试失败'))
-    return result

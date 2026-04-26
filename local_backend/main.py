@@ -9,6 +9,7 @@ from presentation.task_routes import router as task_router
 from presentation.agent_routes import router as agent_router
 from presentation.sync_routes import router as sync_router
 from presentation.blackboard_routes import router as blackboard_router
+from presentation.tis_routes import router as tis_router
 from presentation.scheduler_routes import router as scheduler_router
 from logging_config import setup_logging
 from service.scheduler_service import scheduler_service
@@ -68,6 +69,7 @@ app.include_router(task_router)
 app.include_router(agent_router)
 app.include_router(sync_router)
 app.include_router(blackboard_router)
+app.include_router(tis_router)
 app.include_router(scheduler_router)
 
 

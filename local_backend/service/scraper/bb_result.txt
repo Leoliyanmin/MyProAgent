@@ -1,10 +1,9 @@
 ========================================
 Blackboard 爬取结果
 ========================================
-时间: 2026-04-22 19:43:03
+时间: 2026-04-26 21:49:34
 总课程数: 4
-课程列表HTML长度: 4521 字符
-日历页面HTML长度: 48194 字符
+HTML长度: 4154 字符
 
 ========================================
 原始课程列表页面 HTML
@@ -13,7 +12,7 @@ Blackboard 爬取结果
 <div class="noItems" style="display:none">您的所有课程均已隐藏。</div>
       
       <h3 class='termHeading-coursefakeclass'>
-       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', 'ab60abdc-d7ad-49ca-a64a-94751281ec66')">
+       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', 'f2ad38de-43ac-41ba-bedc-2791259f4bb7')">
         <span class="hideoff">收拢</span>
         2026春（Spring 2026）</a>
        </h3>
@@ -30,18 +29,18 @@ Blackboard 爬取结果
 <div class="courseDataBlock"><span class="dataBlockLabel">
 公告: 
 </span>
-<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1">4/17 第三次讲座</a></li><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1">4/10 第二次讲座</a></li><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1">3/20 第一次讲座</a></li><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1">课程QQ群</a></li></ul></div></li>
+<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1">4/24 第四次讲座</a></li></ul></div></li>
 <li>
 <img alt='' src='/images/ci/icons/bookopen_li.gif' width='12' height='12' />
 <a href=" /webapps/blackboard/execute/launcher?type=Course&id=_8205_1&url=" target="_top">Operating Systems Spring 2026</a>
-</li>
-<li>
-<img alt='' src='/images/ci/icons/bookopen_li.gif' width='12' height='12' />
-<a href=" /webapps/blackboard/execute/launcher?type=Course&id=_8012_1&url=" target="_top">Software Engineering Spring 2026</a>
 <div class="courseDataBlock"><span class="dataBlockLabel">
 公告: 
 </span>
-<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8012_1">Week 9 Sprint 1 Review (项目答辩通知)</a></li></ul></div></li>
+<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">Mid term exam information</a></li></ul></div></li>
+<li>
+<img alt='' src='/images/ci/icons/bookopen_li.gif' width='12' height='12' />
+<a href=" /webapps/blackboard/execute/launcher?type=Course&id=_8012_1&url=" target="_top">Software Engineering Spring 2026</a>
+</li>
 </ul>
         </div>
       
@@ -120,7 +119,6 @@ Blackboard 爬取结果
     })();
    </script>
    
-
 
 ========================================
 爬取结果 (JSON格式)
@@ -1290,19 +1288,7 @@ Blackboard 爬取结果
       "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/launcher?type=Course&id=_8444_1&url=",
       "announcements": [
         {
-          "title": "4/17 第三次讲座",
-          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1"
-        },
-        {
-          "title": "4/10 第二次讲座",
-          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1"
-        },
-        {
-          "title": "3/20 第一次讲座",
-          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1"
-        },
-        {
-          "title": "课程QQ群",
+          "title": "4/24 第四次讲座",
           "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1"
         }
       ],
@@ -1313,7 +1299,12 @@ Blackboard 爬取结果
       "id": "_8205_1",
       "name": "Operating Systems Spring 2026",
       "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/launcher?type=Course&id=_8205_1&url=",
-      "announcements": [],
+      "announcements": [
+        {
+          "title": "Mid term exam information",
+          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1"
+        }
+      ],
       "course_materials": [
         {
           "label": "Resource",
@@ -1466,7 +1457,7 @@ Blackboard 爬取结果
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "Lecture Slides 内容 L01 course intro L02 OS Basics L03 Processes L04 Address Translation L05 Paging L06 Demand Paging L07 Linux Memory Management L08 CPU Scheduling",
+              "text": "Lecture Slides 内容 L01 course intro L02 OS Basics L03 Processes L04 Address Translation L05 Paging L06 Demand Paging L07 Linux Memory Management L08 CPU Scheduling L09 Synchronization",
               "links": [
                 {
                   "text": "L01 course intro",
@@ -1499,6 +1490,10 @@ Blackboard 爬取结果
                 {
                   "text": "L08 CPU Scheduling",
                   "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-623120-dt-content-rid-19463917_1/xid-19463917_1"
+                },
+                {
+                  "text": "L09 Synchronization",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-623635-dt-content-rid-19497632_1/xid-19497632_1"
                 }
               ]
             }
@@ -1534,6 +1529,10 @@ Blackboard 爬取结果
             },
             {
               "title": "L08 CPU Scheduling",
+              "blocks": []
+            },
+            {
+              "title": "L09 Synchronization",
               "blocks": []
             }
           ]
@@ -2225,12 +2224,7 @@ Blackboard 爬取结果
       "id": "_8012_1",
       "name": "Software Engineering Spring 2026",
       "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/launcher?type=Course&id=_8012_1&url=",
-      "announcements": [
-        {
-          "title": "Week 9 Sprint 1 Review (项目答辩通知)",
-          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8012_1"
-        }
-      ],
+      "announcements": [],
       "course_materials": [
         {
           "label": "Lectures",
@@ -2238,7 +2232,7 @@ Blackboard 爬取结果
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "Lectures Content Week 1 Attached Files: lecture1-introduction.pdf ( 2.115 MB ) Week 2 Attached Files: lecture2-process.pdf ( 2.873 MB ) Week 3 Attached Files: lecture3-requirements.pdf ( 2.583 MB ) Week 4 Attached Files: lecture4-vcs.pdf ( 2.552 MB ) Week 5 Attached Files: lecture5-design.pdf ( 4.914 MB ) Week 6 Attached Files: lecture6-build.pdf ( 2.458 MB ) Week 7 Attached Files: lecture7-quality.pdf ( 2.603 MB ) Week 8 Attached Files: lecture8-testing.pdf ( 2.671 MB )",
+              "text": "Lectures Content Week 1 Attached Files: lecture1-introduction.pdf ( 2.115 MB ) Week 2 Attached Files: lecture2-process.pdf ( 2.873 MB ) Week 3 Attached Files: lecture3-requirements.pdf ( 2.583 MB ) Week 4 Attached Files: lecture4-vcs.pdf ( 2.552 MB ) Week 5 Attached Files: lecture5-design.pdf ( 4.914 MB ) Week 6 Attached Files: lecture6-build.pdf ( 2.458 MB ) Week 7 Attached Files: lecture7-quality.pdf ( 2.603 MB ) Week 8 Attached Files: lecture8-testing.pdf ( 2.671 MB ) Week 9 Attached Files: lecture9-testing2.pdf ( 2.114 MB ) 23.HarmonyOS应用测试.pdf ( 5.772 MB ) Week 10 Attached Files: lecture10-documentation.pdf ( 1.992 MB ) Week 11 Attached Files: lecture11-cicd.pdf ( 3.005 MB )",
               "links": [
                 {
                   "text": "lecture1-introduction.pdf",
@@ -2327,6 +2321,54 @@ Blackboard 爬取结果
                 {
                   "text": "lecture8-testing.pdf",
                   "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588362-dt-content-rid-19081321_1/xid-19081321_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#close"
+                },
+                {
+                  "text": "lecture9-testing2.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588363-dt-content-rid-19081322_1/xid-19081322_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#close"
+                },
+                {
+                  "text": "23.HarmonyOS应用测试.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588363-dt-content-rid-19500916_1/xid-19500916_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#close"
+                },
+                {
+                  "text": "lecture10-documentation.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588364-dt-content-rid-19081323_1/xid-19081323_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#close"
+                },
+                {
+                  "text": "lecture11-cicd.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588365-dt-content-rid-19081324_1/xid-19081324_1"
                 },
                 {
                   "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588340_1&mode=reset#contextMenu",
@@ -2455,6 +2497,55 @@ Blackboard 爬取结果
                     {
                       "text": "lecture8-testing.pdf",
                       "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588362-dt-content-rid-19081321_1/xid-19081321_1"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Week 9",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Attached Files: lecture9-testing2.pdf ( 2.114 MB ) 23.HarmonyOS应用测试.pdf ( 5.772 MB )",
+                  "links": [
+                    {
+                      "text": "lecture9-testing2.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588363-dt-content-rid-19081322_1/xid-19081322_1"
+                    },
+                    {
+                      "text": "23.HarmonyOS应用测试.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588363-dt-content-rid-19500916_1/xid-19500916_1"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Week 10",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Attached Files: lecture10-documentation.pdf ( 1.992 MB )",
+                  "links": [
+                    {
+                      "text": "lecture10-documentation.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588364-dt-content-rid-19081323_1/xid-19081323_1"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Week 11",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Attached Files: lecture11-cicd.pdf ( 3.005 MB )",
+                  "links": [
+                    {
+                      "text": "lecture11-cicd.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588365-dt-content-rid-19081324_1/xid-19081324_1"
                     }
                   ]
                 }
