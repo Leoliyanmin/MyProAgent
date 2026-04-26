@@ -69,11 +69,19 @@ CREATE TABLE IF NOT EXISTS category (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_category_user_kind_link
+ON category (
+    user_id,
+    category_kind,
+    COALESCE(category_link, '')
+);
+
 CREATE TABLE IF NOT EXISTS data (
     data_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
     data_category_id INTEGER NOT NULL,
     data_content_type TEXT NOT NULL,
+    data_classification_code INTEGER NOT NULL DEFAULT 1 CHECK (data_classification_code IN (1, 2, 3)),
     data_title TEXT NOT NULL,
     data_content_text TEXT,
     data_link_url TEXT,
@@ -83,6 +91,14 @@ CREATE TABLE IF NOT EXISTS data (
     data_created_at TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (data_category_id) REFERENCES category(category_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_data_user_category_type_link
+ON data (
+    user_id,
+    data_category_id,
+    data_content_type,
+    COALESCE(data_link_url, '')
 );
 
 CREATE TABLE IF NOT EXISTS schedule (

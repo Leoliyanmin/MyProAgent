@@ -12,26 +12,33 @@ import readline from 'readline'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(__dirname, '..')
 
+// 检测操作系统
+const isWindows = process.platform === 'win32'
+
 const services = [
   {
     name: 'VITE',
     color: '\x1b[34m', // Blue
-    command: 'npm',
-    args: ['run', 'dev:frontend'],
+    command: isWindows ? 'cmd' : 'npm',
+    args: isWindows ? ['/c', 'npm', 'run', 'dev:frontend'] : ['run', 'dev:frontend'],
     cwd: resolve(rootDir, 'frontend')
   },
   {
     name: 'LOCAL',
     color: '\x1b[32m', // Green
-    command: 'uvicorn',
-    args: ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8002'],
+    command: isWindows ? 'cmd' : 'uvicorn',
+    args: isWindows 
+      ? ['/c', 'uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8002']
+      : ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8002'],
     cwd: resolve(rootDir, 'local_backend')
   },
   {
     name: 'SERVER',
     color: '\x1b[33m', // Yellow
-    command: 'uvicorn',
-    args: ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8001'],
+    command: isWindows ? 'cmd' : 'uvicorn',
+    args: isWindows
+      ? ['/c', 'uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8001']
+      : ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8001'],
     cwd: resolve(rootDir, 'server_backend')
   }
 ]
@@ -51,9 +58,11 @@ function log(name, color, message) {
 
 function startService(service) {
   return new Promise((resolve, reject) => {
+    // 使用 shell: true 来解决环境变量问题
     const proc = spawn(service.command, service.args, {
       cwd: service.cwd,
-      stdio: ['pipe', 'pipe', 'pipe']
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: true  // 关键：启用 shell 模式
     })
 
     proc.stdout.on('data', (data) => {

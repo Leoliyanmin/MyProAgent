@@ -201,6 +201,52 @@ export const schedulesAPI = {
 // ==================== AI Agent API ====================
 
 export const agentAPI = {
+  // Local Agent API (direct connection to localagent on port 8000)
+  local: {
+    getBaseUrl: () => 'http://127.0.0.1:8000',
+
+    getStatus: async () => {
+      const response = await fetch(`${agentAPI.local.getBaseUrl()}/api/status`)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      return response.json()
+    },
+
+    testConnection: async () => {
+      const response = await fetch(`${agentAPI.local.getBaseUrl()}/api/test`)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      return response.json()
+    },
+
+    updateConfig: async (config) => {
+      const response = await fetch(`${agentAPI.local.getBaseUrl()}/api/config/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      return response.json()
+    }
+  },
+
+  // Backend Agent API (authenticated, port 8002)
+  backend: {
+    getStatus: async () => {
+      return fetchWithAuth('/agent/status')
+    },
+
+    testConnection: async () => {
+      return fetchWithAuth('/agent/test')
+    },
+
+    updateConfig: async (config) => {
+      return fetchWithAuth('/agent/config/update', {
+        method: 'POST',
+        body: JSON.stringify(config)
+      })
+    }
+  },
+
+  // Server Agent API (authenticated)
   // Chat with AI agent (original)
   chat: async (message, session_id = null) => {
     return fetchWithAuth('/agent/chat', {
@@ -387,10 +433,43 @@ export const syncAPI = {
   }
 }
 
+// ==================== Profile API (用户画像) ====================
+
+export const profileAPI = {
+  getProfile: async () => {
+    return fetchWithAuth('/agent/profile')
+  },
+
+  getMBTI: async () => {
+    return fetchWithAuth('/agent/profile/mbti')
+  },
+
+  getInteractions: async (limit = 20, offset = 0) => {
+    return fetchWithAuth(`/agent/profile/interactions?limit=${limit}&offset=${offset}`)
+  },
+
+  getInteractionDetail: async (conversationId) => {
+    return fetchWithAuth(`/agent/profile/interactions/${conversationId}`)
+  },
+
+  reanalyze: async () => {
+    return fetchWithAuth('/agent/profile/reanalyze', {
+      method: 'POST'
+    })
+  },
+
+  deleteInteraction: async (conversationId) => {
+    return fetchWithAuth(`/agent/profile/interactions/${conversationId}`, {
+      method: 'DELETE'
+    })
+  }
+}
+
 export default {
   auth: authAPI,
   tasks: tasksAPI,
   schedules: schedulesAPI,
   agent: agentAPI,
-  sync: syncAPI
+  sync: syncAPI,
+  profile: profileAPI
 }

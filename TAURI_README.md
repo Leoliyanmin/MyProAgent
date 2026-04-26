@@ -66,6 +66,10 @@ ProAgent 的桌面端版本，基于 Tauri + Vue 3 + Python FastAPI。
 ### 1. 安装依赖
 
 ```bash
+# 编辑 .config.json 文件配置配置模型
+cp config.example.json config.json
+```
+```bash
 # 前端依赖
 cd frontend
 npm install

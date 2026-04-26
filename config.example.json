@@ -15,7 +15,7 @@
       "apiKey": "gsk_xxxxx"
     },
     "zhipu": {
-      "api_key": "745ae27e8e6442e3b7cccbfc0bd03617.EuhH7qsVdSgf5hgw",
+      "apiKey": "sk-xxxxx",
       "api_base": "https://open.bigmodel.cn/api/paas/v4/"
     },
     "openrouter": {

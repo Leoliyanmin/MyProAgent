@@ -63,6 +63,7 @@ DATA_FIELDS = (
     "user_id",
     "data_category_id",
     "data_content_type",
+    "data_classification_code",
     "data_title",
     "data_content_text",
     "data_link_url",
@@ -171,6 +172,19 @@ def _normalize_binary_flag(value: Any) -> int | None:
     if normalized in (0, 1):
         return normalized
     return None
+
+
+def _normalize_data_classification_code(value: Any) -> int | None:
+    normalized = _coerce_int(value)
+    if normalized in (1, 2, 3):
+        return normalized
+    return None
+
+
+def _default_data_classification_code(data_content_type: Any) -> int:
+    if isinstance(data_content_type, str) and data_content_type.lower() == "task":
+        return 3
+    return 1
 
 
 def _normalize_schedule_priority(value: Any) -> int:
@@ -321,6 +335,24 @@ def validate_sync_packet(payload: dict[str, Any] | str | Path) -> dict[str, Any]
                 is_shared = row.get("is_shared")
                 if is_shared is not None and _normalize_binary_flag(is_shared) is None:
                     errors.append(f"{prefix}.is_shared must be 0 or 1")
+
+    data_rows = content.get("data")
+    if "data" in content and data_rows is not None:
+        if not isinstance(data_rows, list):
+            errors.append("payload.data must be list when provided")
+        else:
+            for index, row in enumerate(data_rows):
+                prefix = f"payload.data[{index}]"
+                if not isinstance(row, dict):
+                    errors.append(f"{prefix} must be object")
+                    continue
+
+                data_classification_code = row.get("data_classification_code")
+                if (
+                    data_classification_code is not None
+                    and _normalize_data_classification_code(data_classification_code) is None
+                ):
+                    errors.append(f"{prefix}.data_classification_code must be one of 1, 2, 3")
 
     meta = content.get("meta", {})
     if isinstance(meta, dict):
@@ -586,10 +618,18 @@ class ServerSyncImporter:
                 new_category_id = category_id_map.get(int(old_category_id))
                 if new_category_id is None:
                     continue
+                normalized_data_classification = _normalize_data_classification_code(
+                    row.get("data_classification_code")
+                )
+                if normalized_data_classification is None:
+                    normalized_data_classification = _default_data_classification_code(
+                        row.get("data_content_type")
+                    )
                 db.create_data(
                     user_id=user_id,
                     data_category_id=new_category_id,
                     data_content_type=row.get("data_content_type", ""),
+                    data_classification_code=normalized_data_classification,
                     data_title=row.get("data_title", ""),
                     data_content_text=row.get("data_content_text"),
                     data_link_url=row.get("data_link_url"),

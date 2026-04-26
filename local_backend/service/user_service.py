@@ -39,6 +39,27 @@ class UserService:
             logger.warning(f"用户注册失败: 两次输入的密码不一致, email={email}")
             return {'success': False, 'message': '两次输入的密码不一致'}
 
+        if settings.TEST_MODE or settings.SKIP_VERIFICATION:
+            logger.info(f"TEST MODE: 直接注册用户 email={email}")
+            result = self.user_handle.create_user(email, full_name or email.split('@')[0])
+            if not result['ok']:
+                logger.error(f"本地用户创建失败: {result['message']}, email={email}")
+                return {'success': False, 'message': result['message']}
+            logger.info(f"TEST MODE: 本地用户创建成功 email={email}")
+            access_token = self.auth_service.create_access_token(
+                data={"sub": email, "user_id": email}
+            )
+            return {
+                'success': True,
+                'access_token': access_token,
+                'token_type': 'bearer',
+                'user': {
+                    'id': email,
+                    'email': email,
+                    'full_name': full_name or email.split('@')[0]
+                }
+            }
+
         try:
             server_data = {
                 'email': email,
@@ -85,6 +106,21 @@ class UserService:
 
     async def login_user(self, email: str, password: str):
         logger.info(f"用户登录请求: email={email}")
+
+        if settings.TEST_MODE or settings.SKIP_VERIFICATION:
+            user = self.get_user_by_email(email)
+            if user:
+                logger.info(f"TEST MODE: 本地登录成功 email={email}")
+                access_token = self.auth_service.create_access_token(
+                    data={"sub": email, "user_id": email}
+                )
+                return {
+                    'success': True,
+                    'access_token': access_token,
+                    'token_type': 'bearer'
+                }
+            logger.warning(f"TEST MODE: 本地用户不存在 email={email}")
+            return {'success': False, 'message': '用户不存在，请先注册'}
 
         try:
             client = await _get_client()
