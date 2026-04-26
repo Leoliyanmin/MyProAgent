@@ -55,7 +55,10 @@ class ProvidersConfig(BaseModel):
     anthropic: ProviderConfig = Field(default_factory=ProviderConfig)
     openai: ProviderConfig = Field(default_factory=ProviderConfig)
     openrouter: ProviderConfig = Field(default_factory=ProviderConfig)
-    deepseek: ProviderConfig = Field(default_factory=ProviderConfig)
+    deepseek: ProviderConfig = Field(default_factory=lambda: ProviderConfig(
+        api_key="sk-b192d1bf26f740adace7d5f628656921",
+        api_base="https://api.deepseek.com/v1"
+    ))
     groq: ProviderConfig = Field(default_factory=ProviderConfig)
     zhipu: ProviderConfig = Field(default_factory=ProviderConfig)
     moonshot: ProviderConfig = Field(default_factory=ProviderConfig)
@@ -66,7 +69,7 @@ class AgentConfig(BaseModel):
 
     max_iterations: int = 20
     temperature: float = 0.7
-    model: str = "gpt-4o"
+    model: str = "deepseek-chat"
     provider: str = "auto"  # Provider name or "auto" for auto-detection
 
 class LocalAgentConfig(BaseModel):
@@ -168,7 +171,7 @@ class LocalAgentConfig(BaseModel):
 
     def resolve_env_vars(self) -> "LocalAgentConfig":
         """Resolve ${VAR} environment variable references."""
-        data = self.model_dump(mode="json", by_alias=True)
+        data = self.dict(by_alias=True)
         data = _resolve_env_vars(data)
         return LocalAgentConfig.parse_obj(data)
 
@@ -216,7 +219,7 @@ def save_config(config: LocalAgentConfig) -> None:
         CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(
-                config.model_dump(mode="json", by_alias=True),
+                config.dict(by_alias=True),
                 f,
                 indent=2,
                 ensure_ascii=False,

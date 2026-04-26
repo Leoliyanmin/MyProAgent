@@ -1,0 +1,113 @@
+{
+  "user_id": "local_test_user@mail.sustech.edu.cn",
+  "interests_identified": [
+    {
+      "topic": "社交活动",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "热闹场所",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "旅行",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "北京",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "户外活动",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "休闲娱乐",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "个人成长",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "自我提升",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "运动",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "跑步",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    },
+    {
+      "topic": "运动健身",
+      "confidence": 0.8,
+      "source": "llm_inferred"
+    }
+  ],
+  "skills_demonstrated": [
+    {
+      "skill": "跑步",
+      "level": "intermediate",
+      "evidence": "llm_inferred"
+    }
+  ],
+  "preferences_inferred": {
+    "communication_style": "casual",
+    "response_length_preference": "short",
+    "preferred_language": "zh",
+    "preferred_tool_usage": "automatic"
+  },
+  "study_work_patterns": {
+    "topic_areas": [],
+    "typical_task_types": [],
+    "active_hours": [
+      "evening",
+      "afternoon"
+    ],
+    "work_style": "flexible"
+  },
+  "personality_indicators": {
+    "detail_oriented": 0.5,
+    "proactive": 0.5,
+    "collaborative": 0.537518310546875
+  },
+  "mbti_inference": {
+    "mbti_type": "ENFP",
+    "scores": {
+      "E_I": {
+        "E": 0.8,
+        "I": 0.4
+      },
+      "S_N": {
+        "S": 0.6,
+        "N": 0.6
+      },
+      "T_F": {
+        "T": 0.496,
+        "F": 0.833
+      },
+      "J_P": {
+        "J": 0.3,
+        "P": 1.0
+      }
+    },
+    "confidence": 0.718,
+    "description": "竞选者型 - 热情、有创造力的自由精神",
+    "last_updated": "2026-04-26T19:18:41.603568"
+  },
+  "interaction_count": 14,
+  "last_updated": "2026-04-26T19:18:41.603568"
+}

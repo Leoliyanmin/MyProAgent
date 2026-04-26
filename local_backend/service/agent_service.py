@@ -21,7 +21,7 @@ from localagent.memory import MemoryStore
 personal_path = Path(__file__).parent.parent.parent / "personal"
 if str(personal_path) not in sys.path:
     sys.path.insert(0, str(personal_path))
-from personal import InteractionLogger, ProfileExtractor, MBTIInferencer, UserProfileStore
+from personality import InteractionLogger, ProfileExtractor, MBTIInferencer, UserProfileStore
 
 
 class AgentService:
@@ -65,8 +65,8 @@ class AgentService:
 
         personal_base = Path(__file__).parent.parent.parent / "personality"
         self.interaction_logger = InteractionLogger(personal_base / "interactions")
-        self.profile_extractor = ProfileExtractor()
-        self.mbti_inferencer = MBTIInferencer()
+        self.profile_extractor = ProfileExtractor(llm_provider=self.agent.provider)
+        self.mbti_inferencer = MBTIInferencer(llm_provider=self.agent.provider)
         self.profile_store = UserProfileStore(personal_base / "profiles")
 
     def process_query(self, user_id: str, message: str, session_id: str = None):
@@ -636,7 +636,7 @@ class AgentService:
                     "total_execution_time_ms": 0
                 }
             }
-            profile_update = self.profile_extractor.extract_from_interaction(interaction_data)
+            profile_update = await self.profile_extractor.extract_from_interaction(interaction_data)
             interaction_data["user_profile_update"] = profile_update
             self.interaction_logger.log_interaction(interaction_data)
             self.profile_store.update_profile(user_id, profile_update)
@@ -647,7 +647,7 @@ class AgentService:
                 for it in all_interactions
                 if it.get("user_input", {}).get("raw_message")
             ]
-            mbti = self.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages)
+            mbti = await self.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages)
             self.profile_store.update_mbti(user_id, mbti)
         except Exception as e:
             print(f"[AgentService] _log_interaction error: {e}")

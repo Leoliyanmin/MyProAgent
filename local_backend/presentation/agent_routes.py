@@ -428,15 +428,29 @@ async def get_interaction_detail(
 @router.post("/profile/reanalyze")
 async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
     """重新分析所有交互，更新画像和 MBTI"""
+    import datetime
+    start_time = datetime.datetime.now()
+    print(f"\n{'='*60}")
+    print(f"[Reanalyze] 开始重新分析用户 {user_id}")
+
     interactions = agent_service.interaction_logger.get_user_interactions(user_id, limit=9999)
     if not interactions:
+        print(f"[Reanalyze] 没有交互记录需要分析")
+        print(f"{'='*60}")
         return {"success": True, "message": "没有交互记录需要分析", "interactions_processed": 0}
 
-    agent_service.profile_store.delete_profile(user_id)
+    total = len(interactions)
+    print(f"[Reanalyze] 找到 {total} 条交互记录，开始逐条分析...")
 
-    for interaction in interactions:
-        update = agent_service.profile_extractor.extract_from_interaction(interaction)
+    agent_service.profile_store.delete_profile(user_id)
+    print(f"[Reanalyze] 已清除旧画像")
+
+    for i, interaction in enumerate(interactions, 1):
+        msg = interaction.get("user_input", {}).get("raw_message", "")[:50]
+        print(f"\n[Reanalyze] [{i}/{total}] 正在分析交互: \"{msg}...\"")
+        update = await agent_service.profile_extractor.extract_from_interaction(interaction)
         agent_service.profile_store.update_profile(user_id, update)
+        print(f"[Reanalyze] [{i}/{total}] 完成")
 
     profile = agent_service.profile_store.get_profile(user_id)
     raw_messages = [
@@ -444,8 +458,14 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
         for it in interactions
         if it.get("user_input", {}).get("raw_message")
     ]
-    mbti = agent_service.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages)
+    print(f"\n[Reanalyze] 开始 MBTI 大模型分析（共 {len(raw_messages)} 条对话）...")
+    mbti = await agent_service.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages)
     agent_service.profile_store.update_mbti(user_id, mbti)
+    print(f"[Reanalyze] MBTI 分析完成: {mbti.get('mbti_type', 'unknown')}")
+
+    elapsed = (datetime.datetime.now() - start_time).total_seconds()
+    print(f"[Reanalyze] 全部完成！耗时 {elapsed:.1f} 秒")
+    print(f"{'='*60}\n")
 
     return {
         "success": True,
