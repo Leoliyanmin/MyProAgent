@@ -188,3 +188,7 @@ frontend/src-tauri/*.AppImage
 # Bundle artifacts
 frontend/src-tauri/target/release/bundle/
 frontend/src-tauri/target/debug/bundle/
+*.json
+*.jsonl
+*.md
+*.txt
