@@ -372,9 +372,9 @@ def create_account(
     user_id: str,
     account_platform_type: str,
     account_platform_username: str,
-    content: str | None,
-    account_bind_time: str | None,
-    account_last_sync_time: str | None,
+    content: str | None = None,
+    account_bind_time: str | None = None,
+    account_last_sync_time: str | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> int:
     return _execute(
@@ -425,16 +425,35 @@ def create_category(
     category_content: str | None,
     category_link: str | None,
     category_created_at: str,
+    category_source: str | None = None,
+    category_external_id: str | None = None,
+    category_term: str | None = None,
+    category_meta_json: str | None = None,
+    category_updated_at: str | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> int:
     return _execute(
         """
         INSERT INTO category (
             user_id, category_kind, category_title, category_content,
-            category_link, category_created_at
-        ) VALUES (?, ?, ?, ?, ?, ?)
+            category_link, category_source, category_external_id,
+            category_term, category_meta_json, category_updated_at,
+            category_created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (user_id, category_kind, category_title, category_content, category_link, category_created_at),
+        (
+            user_id,
+            category_kind,
+            category_title,
+            category_content,
+            category_link,
+            category_source,
+            category_external_id,
+            category_term,
+            category_meta_json,
+            category_updated_at,
+            category_created_at,
+        ),
         db_path,
     )
 
@@ -453,15 +472,41 @@ def update_category(
     category_title: str,
     category_content: str | None,
     category_link: str | None,
+    category_source: str | None = None,
+    category_external_id: str | None = None,
+    category_term: str | None = None,
+    category_meta_json: str | None = None,
+    category_updated_at: str | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> None:
+    update_fields = [
+        "category_kind = ?",
+        "category_title = ?",
+        "category_content = ?",
+        "category_link = ?",
+    ]
+    params: list[object] = [category_kind, category_title, category_content, category_link]
+
+    if category_source is not None:
+        update_fields.append("category_source = ?")
+        params.append(category_source)
+    if category_external_id is not None:
+        update_fields.append("category_external_id = ?")
+        params.append(category_external_id)
+    if category_term is not None:
+        update_fields.append("category_term = ?")
+        params.append(category_term)
+    if category_meta_json is not None:
+        update_fields.append("category_meta_json = ?")
+        params.append(category_meta_json)
+    if category_updated_at is not None:
+        update_fields.append("category_updated_at = ?")
+        params.append(category_updated_at)
+
+    params.append(category_id)
     _execute(
-        """
-        UPDATE category
-        SET category_kind = ?, category_title = ?, category_content = ?, category_link = ?
-        WHERE category_id = ?
-        """,
-        (category_kind, category_title, category_content, category_link, category_id),
+        f"UPDATE category SET {', '.join(update_fields)} WHERE category_id = ?",
+        tuple(params),
         db_path,
     )
 
@@ -484,6 +529,18 @@ def create_data(
     data_ddl_time: str | None,
     data_is_previewable: int,
     data_created_at: str,
+    data_source: str | None = None,
+    data_external_id: str | None = None,
+    data_term: str | None = None,
+    data_week: str | None = None,
+    data_weekday: int | None = None,
+    data_period_start: int | None = None,
+    data_period_end: int | None = None,
+    data_start_time: str | None = None,
+    data_end_time: str | None = None,
+    data_meta_json: str | None = None,
+    data_raw_json: str | None = None,
+    data_updated_at: str | None = None,
     data_linked_schedule_id: int | None = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> int:
@@ -492,8 +549,11 @@ def create_data(
         INSERT INTO data (
             user_id, data_category_id, data_content_type, data_classification_code, data_title,
             data_content_text, data_link_url, data_release_time,
-            data_ddl_time, data_is_previewable, data_created_at, data_linked_schedule_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            data_ddl_time, data_is_previewable, data_source, data_external_id,
+            data_term, data_week, data_weekday, data_period_start, data_period_end,
+            data_start_time, data_end_time, data_meta_json, data_raw_json,
+            data_updated_at, data_created_at, data_linked_schedule_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
@@ -506,6 +566,18 @@ def create_data(
             data_release_time,
             data_ddl_time,
             data_is_previewable,
+            data_source,
+            data_external_id,
+            data_term,
+            data_week,
+            data_weekday,
+            data_period_start,
+            data_period_end,
+            data_start_time,
+            data_end_time,
+            data_meta_json,
+            data_raw_json,
+            data_updated_at,
             data_created_at,
             data_linked_schedule_id,
         ),
@@ -534,6 +606,18 @@ def update_data(
     data_ddl_time: str | None = None,
     data_is_previewable: int | None = None,
     data_classification_code: int | None = None,
+    data_source: str | None = None,
+    data_external_id: str | None = None,
+    data_term: str | None = None,
+    data_week: str | None = None,
+    data_weekday: int | None = None,
+    data_period_start: int | None = None,
+    data_period_end: int | None = None,
+    data_start_time: str | None = None,
+    data_end_time: str | None = None,
+    data_meta_json: str | None = None,
+    data_raw_json: str | None = None,
+    data_updated_at: str | None = None,
     data_linked_schedule_id: int | None | object = None,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> None:
@@ -561,6 +645,42 @@ def update_data(
     if data_classification_code is not None:
         update_fields.append("data_classification_code = ?")
         params.append(data_classification_code)
+    if data_source is not None:
+        update_fields.append("data_source = ?")
+        params.append(data_source)
+    if data_external_id is not None:
+        update_fields.append("data_external_id = ?")
+        params.append(data_external_id)
+    if data_term is not None:
+        update_fields.append("data_term = ?")
+        params.append(data_term)
+    if data_week is not None:
+        update_fields.append("data_week = ?")
+        params.append(data_week)
+    if data_weekday is not None:
+        update_fields.append("data_weekday = ?")
+        params.append(data_weekday)
+    if data_period_start is not None:
+        update_fields.append("data_period_start = ?")
+        params.append(data_period_start)
+    if data_period_end is not None:
+        update_fields.append("data_period_end = ?")
+        params.append(data_period_end)
+    if data_start_time is not None:
+        update_fields.append("data_start_time = ?")
+        params.append(data_start_time)
+    if data_end_time is not None:
+        update_fields.append("data_end_time = ?")
+        params.append(data_end_time)
+    if data_meta_json is not None:
+        update_fields.append("data_meta_json = ?")
+        params.append(data_meta_json)
+    if data_raw_json is not None:
+        update_fields.append("data_raw_json = ?")
+        params.append(data_raw_json)
+    if data_updated_at is not None:
+        update_fields.append("data_updated_at = ?")
+        params.append(data_updated_at)
     if data_linked_schedule_id is not None:
         if isinstance(data_linked_schedule_id, int) or data_linked_schedule_id == 0:
             update_fields.append("data_linked_schedule_id = ?")

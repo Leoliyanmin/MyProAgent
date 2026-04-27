@@ -86,7 +86,8 @@ class BlackboardCourseOperations:
         course_id: str,
         course_name: str,
         course_link: Optional[str] = None,
-        course_content: Optional[str] = None
+        course_content: Optional[str] = None,
+        course_term: Optional[str] = None,
     ) -> int:
         """创建或更新课程信息"""
         # 先检查是否已存在该课程
@@ -94,7 +95,12 @@ class BlackboardCourseOperations:
         existing_course = None
         
         for category in existing_categories:
-            if category['category_kind'] == 'course' and category['category_title'] == course_name:
+            if category['category_kind'] != 'course':
+                continue
+            if course_id and category.get('category_external_id') == course_id:
+                existing_course = category
+                break
+            if category['category_title'] == course_name:
                 existing_course = category
                 break
         
@@ -105,7 +111,12 @@ class BlackboardCourseOperations:
                 category_kind='course',
                 category_title=course_name,
                 category_content=course_content,
-                category_link=course_link
+                category_link=course_link,
+                category_source='tis',
+                category_external_id=course_id or None,
+                category_term=course_term,
+                category_meta_json=course_content,
+                category_updated_at=time.strftime('%Y-%m-%d %H:%M:%S'),
             )
             return existing_course['category_id']
         else:
@@ -117,6 +128,11 @@ class BlackboardCourseOperations:
                 category_title=course_name,
                 category_content=course_content,
                 category_link=course_link,
+                category_source='tis',
+                category_external_id=course_id or None,
+                category_term=course_term,
+                category_meta_json=course_content,
+                category_updated_at=created_at,
                 category_created_at=created_at
             )
     
@@ -150,9 +166,12 @@ class BlackboardAssignmentOperations:
         existing_assignment = None
         
         for data in existing_data:
-            if (data['data_category_id'] == course_id and 
-                data['data_content_type'] == 'assignment' and 
-                data['data_title'] == assignment_name):
+            if data['data_category_id'] != course_id or data['data_content_type'] != 'assignment':
+                continue
+            if assignment_id and data.get('data_external_id') == assignment_id:
+                existing_assignment = data
+                break
+            if data['data_title'] == assignment_name:
                 existing_assignment = data
                 break
         
@@ -165,7 +184,12 @@ class BlackboardAssignmentOperations:
                 data_link_url=assignment_link,
                 data_release_time=None,
                 data_ddl_time=due_date,
-                data_is_previewable=is_previewable
+                data_is_previewable=is_previewable,
+                data_source='tis',
+                data_external_id=assignment_id or None,
+                data_meta_json=assignment_content,
+                data_raw_json=assignment_content,
+                data_updated_at=time.strftime('%Y-%m-%d %H:%M:%S'),
             )
             return existing_assignment['data_id']
         else:
@@ -175,12 +199,18 @@ class BlackboardAssignmentOperations:
                 user_id=user_id,
                 data_category_id=course_id,
                 data_content_type='assignment',
+                data_classification_code=1,
                 data_title=assignment_name,
                 data_content_text=assignment_content,
                 data_link_url=assignment_link,
                 data_release_time=None,
                 data_ddl_time=due_date,
                 data_is_previewable=is_previewable,
+                data_source='tis',
+                data_external_id=assignment_id or None,
+                data_meta_json=assignment_content,
+                data_raw_json=assignment_content,
+                data_updated_at=created_at,
                 data_created_at=created_at
             )
     

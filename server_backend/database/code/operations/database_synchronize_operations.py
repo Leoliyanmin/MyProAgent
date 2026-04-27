@@ -53,6 +53,11 @@ CATEGORY_FIELDS = (
     "category_title",
     "category_content",
     "category_link",
+    "category_source",
+    "category_external_id",
+    "category_term",
+    "category_meta_json",
+    "category_updated_at",
     "category_created_at",
 )
 
@@ -68,6 +73,18 @@ DATA_FIELDS = (
     "data_release_time",
     "data_ddl_time",
     "data_is_previewable",
+    "data_source",
+    "data_external_id",
+    "data_term",
+    "data_week",
+    "data_weekday",
+    "data_period_start",
+    "data_period_end",
+    "data_start_time",
+    "data_end_time",
+    "data_meta_json",
+    "data_raw_json",
+    "data_updated_at",
     "data_created_at",
 )
 
@@ -606,6 +623,11 @@ class ServerSyncImporter:
                     category_title=row.get("category_title", ""),
                     category_content=row.get("category_content"),
                     category_link=row.get("category_link"),
+                    category_source=row.get("category_source"),
+                    category_external_id=row.get("category_external_id"),
+                    category_term=row.get("category_term"),
+                    category_meta_json=row.get("category_meta_json"),
+                    category_updated_at=row.get("category_updated_at"),
                     category_created_at=row.get("category_created_at", _now_iso()),
                 )
                 category_id_map[int(row["category_id"])] = new_id
@@ -635,6 +657,18 @@ class ServerSyncImporter:
                     data_release_time=row.get("data_release_time"),
                     data_ddl_time=row.get("data_ddl_time"),
                     data_is_previewable=int(row.get("data_is_previewable", 0)),
+                    data_source=row.get("data_source"),
+                    data_external_id=row.get("data_external_id"),
+                    data_term=row.get("data_term"),
+                    data_week=row.get("data_week"),
+                    data_weekday=_coerce_int(row.get("data_weekday")),
+                    data_period_start=_coerce_int(row.get("data_period_start")),
+                    data_period_end=_coerce_int(row.get("data_period_end")),
+                    data_start_time=row.get("data_start_time"),
+                    data_end_time=row.get("data_end_time"),
+                    data_meta_json=row.get("data_meta_json"),
+                    data_raw_json=row.get("data_raw_json"),
+                    data_updated_at=row.get("data_updated_at"),
                     data_created_at=row.get("data_created_at", _now_iso()),
                 )
 
