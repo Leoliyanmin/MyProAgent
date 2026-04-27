@@ -1,182 +1,289 @@
-# backend/services/tis_scraper.py
-# 从教务系统(TIS)爬取课程信息
+# grab_tis_json_v2.py
+# pip install requests
+import json, requests, os, re
+from pathlib import Path
+from typing import Dict, List
+from .get_cookies import get_cookies_for_user
 
-import os
-import re
-from collections import defaultdict
-from typing import Dict, Iterable, List, Optional, Any
-import httpx
-
-from services.tools import ensure_tis_session, post_json
-
-
-CAS_LOGIN = "https://cas.sustech.edu.cn/cas/login"
-TIS_SERVICE_URL = "https://tis.sustech.edu.cn/cas"
-TIS_BASE_URL = "https://tis.sustech.edu.cn/"
-WEEKDAY_LABELS = {
-    1: ("Monday", "星期一"),
-    2: ("Tuesday", "星期二"),
-    3: ("Wednesday", "星期三"),
-    4: ("Thursday", "星期四"),
-    5: ("Friday", "星期五"),
-    6: ("Saturday", "星期六"),
-    7: ("Sunday", "星期日"),
+URL = "https://tis.sustech.edu.cn/Xskbcx/queryXskbcxList"  # DevTools 的 Request URL
+FORM = {  # DevTools → Payload 的表单键值（若原请求是 GET，就把 main 里改成 s.get(..., params=FORM)）
+    "bs": "2",
+    "xn": "2025-2026",
+    "xq": "1",
 }
+HEADERS = {
+    "User-Agent": "Mozilla/5.0",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "X-Requested-With": "XMLHttpRequest",
+    "Referer": "https://tis.sustech.edu.cn/webroot/decision/",
+}
+# ========================
 
-
-def build_period_map(rows: Iterable[Dict]) -> Dict[int, Dict[str, Optional[str]]]:
-    period_map: Dict[int, Dict[str, Optional[str]]] = {}
-    for row in rows:
-        try:
-            idx = int(row.get("xj"))
-        except (TypeError, ValueError):
+def _raw_cookie_to_dict(raw: str) -> Dict[str, str]:
+    
+    jar = {}
+    for seg in raw.split(";"):
+        if "=" not in seg:
             continue
-        period_map[idx] = {
-            "label": row.get("djms"),
-            "start": row.get("kssj"),
-            "end": row.get("jssj"),
-        }
-    return period_map
+        k, v = seg.split("=", 1)
+        k = k.strip()
+        v = v.strip()
+        if k:
+            jar[k] = v
+    return jar
+
+def load_tis_cookies(path: str = "util/data/cookies.json") -> Dict[str, str]:
+   
+    p = Path(path)
+    if not p.exists():
+        return {}
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        # 不是 JSON，就当成原始 Cookie 行
+        return _raw_cookie_to_dict(p.read_text(encoding="utf-8"))
+    # 1) services.tis.cookies
+    cookies = (
+        data.get("services", {}).get("tis", {}).get("cookies")
+        if isinstance(data, dict) else None
+    )
+    if isinstance(cookies, dict) and cookies:
+        return cookies
+    # 2) 顶层就是字典 cookie
+    if isinstance(data, dict) and any("=" not in k for k in data.keys()):
+        # 粗判：键里没有等号，就把它当 cookie dict
+        return data
+    # 3) services.tis.raw 或 顶层 raw
+    raw = data.get("services", {}).get("tis", {}).get("raw") if isinstance(data, dict) else None
+    if not raw:
+        raw = data.get("raw") if isinstance(data, dict) else None
+    if isinstance(raw, str) and raw.strip():
+        return _raw_cookie_to_dict(raw)
+    return {}
 
 
-def parse_course_entry(raw: Dict, period_map: Dict[int, Dict[str, Optional[str]]]) -> Dict[str, Optional[str]]:
-    key = raw.get("KEY", "")
-    day_match = re.match(r"xq(\d+)_jc", key)
-    day = int(day_match.group(1)) if day_match else 0
-    segments = re.findall(r"\[(.*?)\]", raw.get("SKSJ", ""))
-    start_period = raw.get("KSJC")
-    end_period = raw.get("JSJC")
-    start_info = period_map.get(start_period) if isinstance(start_period, int) else None
-    end_info = period_map.get(end_period) if isinstance(end_period, int) else None
+
+def parse_kbxx(kbxx: str) -> Dict[str, str]:
+
+    if not kbxx:
+        return {}
+    
+    lines = kbxx.strip().split('\n')
+    if len(lines) < 4:
+        return {}
+    
+    course_name = lines[0].strip()
+    
+
+    teacher_match = re.search(r'\[([^\]]+)\]', lines[1])
+    teacher = teacher_match.group(1) if teacher_match else ""
+    
+    # 提取周次、地点、时间 [1-5,7-16周][商学院206][1-2节]
+    info_line = lines[3]
+    weeks_match = re.search(r'\[([^\]]*周)\]', info_line)
+    location_match = re.search(r'\[([^\]]*)\]', info_line[info_line.find(']') + 1:])
+    time_match = re.search(r'\[([^\]]*节)\]', info_line)
+    
+    weeks = weeks_match.group(1) if weeks_match else ""
+    location = location_match.group(1) if location_match else ""
+    time_slots = time_match.group(1) if time_match else ""
+    
+    # 确定星期几
+    weekday_map = {
+        "1": "星期一", "2": "星期二", "3": "星期三", 
+        "4": "星期四", "5": "星期五", "6": "星期六", "7": "星期日"
+    }
+    weekday = weekday_map.get("1", "星期一")  # 默认星期一，实际应该从key字段获取
+    
     return {
-        "day": day,
-        "title": (raw.get("SKSJ", "").split("\n") or [""])[0].strip(),
-        "teacher": segments[0] if len(segments) > 0 else "",
-        "group": segments[1] if len(segments) > 1 else "",
-        "weeks": segments[2] if len(segments) > 2 else "",
-        "location": segments[3] if len(segments) > 3 else "",
-        "periods": segments[4] if len(segments) > 4 else "",
-        "start": start_info.get("start") if start_info else None,
-        "end": end_info.get("end") if end_info else None,
+        "course_name": course_name,
+        "teacher": teacher,
+        "weekday": weekday,
+        "weeks": weeks,
+        "location": location,
+        "time_slots": time_slots
     }
 
+def get_weekday_from_key(key: str) -> str:
+    """
+    从key字段提取星期几
+    格式: "xq1_jc1" -> xq1表示星期1
+    """
+    weekday_map = {
+        "1": "星期一", "2": "星期二", "3": "星期三", 
+        "4": "星期四", "5": "星期五", "6": "星期六", "7": "星期日"
+    }
+    
+    match = re.search(r'xq(\d+)', key)
+    if match:
+        day_num = match.group(1)
+        return weekday_map.get(day_num, "星期一")
+    return "星期一"
 
-def render_course_line(course: Dict[str, Optional[str]]) -> str:
-    time_window = None
-    if course.get("start") and course.get("end"):
-        time_window = f"{course['start']}-{course['end']}"
-    elif course.get("periods"):
-        time_window = course["periods"]
-    parts: List[str] = []
-    if time_window:
-        parts.append(f"[{time_window}]")
-    if course.get("title"):
-        parts.append(course["title"])
-    if course.get("teacher"):
-        parts.append(course["teacher"])
-    if course.get("location"):
-        parts.append(course["location"])
-    if course.get("weeks"):
-        parts.append(f"周次:{course['weeks']}")
-    if course.get("group"):
-        parts.append(course["group"])
-    return " | ".join(parts)
+def process_schedule_data(raw_data: List[Dict]) -> List[Dict]:
+    """
+    处理原始课程数据，生成格式化的课程信息
+    """
+    processed_courses = []
+    
+    for item in raw_data:
+        kbxx = item.get("kbxx", "")
+        key = item.get("key", "")
+        
+        if not kbxx:
+            continue
+            
+        course_info = parse_kbxx(kbxx)
+        if not course_info:
+            continue
+            
+        # 从key字段获取正确的星期几
+        course_info["weekday"] = get_weekday_from_key(key)
+        
+        processed_courses.append(course_info)
+    
+    return processed_courses
 
-
-async def get_student_id(client: httpx.AsyncClient) -> str:
-    """从已登录的客户端获取学生学号(student_id)"""
-    await ensure_tis_session(client)
-    user_info = await post_json(client, "user/me")
-    # 返回学号信息
-    return user_info.get("xh", "")
-
-
-async def run_tis_scraper(cli: "httpx.AsyncClient", week_override: Optional[str] = None) -> Dict[str, Any]:
+def generate_processed_json(input_file: str = "tis_schedule_raw.json", output_file: str = "tis_schedule_processed.json"):
+    """
+    生成处理过的课程JSON文件
+    """
+    input_path = Path(input_file)
+    if not input_path.exists():
+        print(f" 输入文件不存在: {input_path}")
+        return
+    
     try:
-        await ensure_tis_session(cli)
-        user_info = await post_json(cli, "user/me")
-        term_info = await post_json(cli, "component/querydangqianxnxq")
-        current_week = await post_json(cli, "component/querydangqianzc")
-        target_week = week_override or os.environ.get("TIS_WEEK", "").strip() or str(current_week)
-        if not target_week.isdigit():
-            raise RuntimeError(f"无效的周次参数: {target_week}")
-
-        period_rows = await post_json(
-            cli,
-            "component/queryKbjg",
-            {"xn": term_info["XN"], "xq": term_info["XQ"], "pylx": user_info.get("pylx")},
-        )
-        period_map = build_period_map(period_rows)
-
-        raw_courses = await post_json(
-            cli,
-            "xszykb/queryxszykbzhou",
-            {"xn": term_info["XN"], "xq": term_info["XQ"], "zc": target_week},
-        )
-        if not isinstance(raw_courses, list):
-            raise RuntimeError("课表接口返回数据格式异常。")
-
-        # 解析课程数据
-        parsed_courses = []
-        for raw in raw_courses:
-            course = parse_course_entry(raw, period_map)
-            if course.get("day"):
-                parsed_courses.append(course)
-
-        # 按星期分组
-        grouped = defaultdict(list)
-        for course in parsed_courses:
-            grouped[course["day"]].append(course)
-
-        # 使用user_info中的真实姓名，不依赖username
-        user_name = user_info.get("xm") or user_info.get("xm_en") or "Unknown User"
-        department = user_info.get("bmmc") or user_info.get("bmmc_en") or "Unknown Department"
-        term_name = term_info.get("XNXQ") or term_info
-        print(f"用户: {user_name} | 院系: {department} | 学期: {term_name} | 第 {target_week} 周")
-
-        result_dict = {
-            "user": user_name,
-            "department": department,
-            "term": term_name,
-            "week": target_week,
-            "total_courses": len(parsed_courses),
-            "schedule": {}
-        }
-
-        if not grouped:
-            print("当前周无课程安排。")
-            result_dict["schedule"] = {}
-            return result_dict
-
-        for day in range(1, 8):
-            day_courses = grouped.get(day)
-            if not day_courses:
-                continue
-            label_en, label_cn = WEEKDAY_LABELS.get(day, (f"Day {day}", f"第{day}天"))
-            print(f"\n{label_cn} / {label_en}")
-            day_courses.sort(key=lambda item: (item.get("start") or "", item.get("periods") or ""))
-
-            day_schedule = []
-            for course in day_courses:
-                print("  " + render_course_line(course))
-
-                course_detail = {
-                    "title": course.get("title", ""),
-                    "teacher": course.get("teacher", ""),
-                    "group": course.get("group", ""),
-                    "weeks": course.get("weeks", ""),
-                    "location": course.get("location", ""),
-                    "periods": course.get("periods", ""),
-                    "start": course.get("start", ""),
-                    "end": course.get("end", ""),
-                }
-
-                day_schedule.append(course_detail)
-
-            result_dict["schedule"][label_cn] = day_schedule
-
-        return result_dict
-
+        with open(input_path, 'r', encoding='utf-8') as f:
+            raw_data = json.load(f)
+        
+        processed_courses = process_schedule_data(raw_data)
+        
+        output_path = Path(output_file)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(processed_courses, f, ensure_ascii=False, indent=2)
+        
+        print(f"已生成处理后的课程数据: {output_path.resolve()}")
+        print(f"共处理 {len(processed_courses)} 门课程")
+        
     except Exception as e:
-        print(f"爬取课程信息时发生错误: {str(e)}")
-        raise e
+        print(f" 处理失败: {e}")
+
+def fetch_tis_schedule_data(sid: str = None, password: str = None, cookies_file: str = "util/data/cookies.json", prefer_env: bool = True) -> Dict:
+    """
+    从TIS获取课表数据
+    
+    Args:
+        sid: 学号（如果提供，会先获取cookies）
+        password: 密码（如果提供，会先获取cookies）
+        cookies_file: cookies文件路径
+        prefer_env: 是否优先使用环境变量
+        
+    Returns:
+        原始课表数据
+    """
+    cookies = {}
+    
+    # 如果提供了学号和密码，先获取cookies
+    if sid and password:
+        print("正在获取TIS cookies...")
+        cookies_data = get_cookies_for_user(sid, password, cookies_file)
+        if "error" in cookies_data:
+            print(f"获取cookies失败: {cookies_data['error']}")
+            return {}
+        
+        # 提取TIS cookies
+        tis_service = cookies_data.get("services", {}).get("tis", {})
+        if tis_service.get("is_valid"):
+            cookies = tis_service.get("cookies", {})
+            print("使用新获取的TIS cookies")
+        else:
+            print("获取的TIS cookies无效")
+            return {}
+    else:
+        # 从文件读取cookies
+        cookies = load_tis_cookies()
+        if not cookies:
+            print("没有读取到 Cookie。请提供学号和密码，或在环境变量 TIS_COOKIE 设置原始 Cookie 行，或提供 cookies.json。")
+            return {}
+
+    s = requests.Session()
+    s.headers.update(HEADERS)
+    s.cookies.update(cookies)
+
+    # 发送请求
+    print("正在获取课表数据...")
+    r = s.post(URL, data=FORM, timeout=20)
+    r.raise_for_status()
+
+    ctype = (r.headers.get("Content-Type") or "").lower()
+    if "json" not in ctype:
+        print("返回非 JSON：", ctype)
+        print(r.text[:500])
+        return {}
+
+    data = r.json()
+    print("成功获取课表数据")
+    return data
+
+
+def save_raw_schedule_data(data: Dict, output_file: str = "tis_schedule_raw.json") -> bool:
+    """
+    保存原始课表数据
+    
+    Args:
+        data: 原始数据
+        output_file: 输出文件名
+        
+    Returns:
+        是否保存成功
+    """
+    try:
+        out = Path(output_file)
+        out.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"已保存原始数据：{out.resolve()}")
+        return True
+    except Exception as e:
+        print(f"保存原始数据失败：{e}")
+        return False
+
+
+def fetch_and_process_schedule(sid: str = None, password: str = None,
+                              cookies_file: str = "util/data/cookies.json", 
+                              raw_output: str = "data/tis_schedule_raw.json",
+                              processed_output: str = "data/tis_schedule_processed.json") -> List[Dict]:
+    """
+    获取并处理课表数据
+    
+    Args:
+        sid: 学号（如果提供，会先获取cookies）
+        password: 密码（如果提供，会先获取cookies）
+        cookies_file: cookies文件路径
+        raw_output: 原始数据输出文件名
+        processed_output: 处理后数据输出文件名
+        
+    Returns:
+        处理后的课表数据
+    """
+    # 1. 获取原始数据
+    raw_data = fetch_tis_schedule_data(sid, password, cookies_file)
+    if not raw_data:
+        return []
+    
+    # # 2. 保存原始数据
+    # save_raw_schedule_data(raw_data, raw_output)
+    
+    # 3. 处理数据
+    processed_courses = process_schedule_data(raw_data)
+    
+    # # 4. 保存处理后的数据
+    # try:
+    #     output_path = Path(processed_output)
+    #     with open(output_path, 'w', encoding='utf-8') as f:
+    #         json.dump(processed_courses, f, ensure_ascii=False, indent=2)
+    #     print(f"已生成处理后的课程数据: {output_path.resolve()}")
+    #     print(f"共处理 {len(processed_courses)} 门课程")
+    # except Exception as e:
+    #     print(f"保存处理后数据失败: {e}")
+    
+    return processed_courses

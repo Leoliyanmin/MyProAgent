@@ -142,7 +142,24 @@ class TisService:
                 student_name = student_info.get('xm')
                 
                 logger.info(f"TIS绑定成功: user_id={user_id}, 学号={student_id}, 姓名={student_name}")
-                
+                '''
+                # ============ 测试爬取指定URL ============
+                try:
+                    # 测试爬取指定URL（可在后端修改此URL）
+                    test_url = "https://tis.sustech.edu.cn/Xskbcx/queryXskbcxList"
+                    logger.info(f"开始测试爬取URL: {test_url}")
+                    test_result = scraper.test_fetch_url(test_url, "POST")
+                    if test_result.get('success'):
+                        logger.info(f"URL爬取成功，状态码: {test_result.get('status_code')}")
+                        logger.info(f"响应内容预览: {str(test_result.get('content'))[:300]}")
+                    else:
+                        logger.warning(f"URL爬取失败: {test_result.get('error')}")
+                except Exception as e:
+                    logger.error(f"测试爬取URL时发生错误: {str(e)}")
+                    import traceback
+                    logger.error(f"错误堆栈: {traceback.format_exc()}")
+                # ============ 测试爬取指定URL结束 ============
+                '''
                 # 生成tis_result.txt
                 try:
                     logger.info("开始爬取课程表...")
@@ -170,12 +187,7 @@ class TisService:
                 
                 return {
                     'success': True, 
-                    'message': 'TIS账号绑定成功',
-                    'user_info': {
-                        'student_id': student_id,
-                        'name': student_name,
-                        'department': student_info.get('bmmc')
-                    }
+                    'message': 'TIS账号绑定成功'
                 }
                 
             except Exception as e:
