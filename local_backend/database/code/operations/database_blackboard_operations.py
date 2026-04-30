@@ -227,3 +227,163 @@ class BlackboardAssignmentOperations:
     def delete_assignment(self, data_id: int) -> None:
         """删除作业"""
         delete_data(data_id)
+
+
+class BlackboardAnnouncementOperations:
+    """Blackboard公告相关的数据库操作"""
+    
+    def create_or_update_announcement(
+        self,
+        user_id: str,
+        course_id: int,
+        announcement_id: str,
+        announcement_name: str,
+        announcement_content: Optional[str] = None,
+        announcement_link: Optional[str] = None,
+        release_time: Optional[str] = None,
+        is_previewable: int = 1
+    ) -> int:
+        """创建或更新公告信息"""
+        existing_data = list_data_by_user(user_id)
+        existing_announcement = None
+        
+        for data in existing_data:
+            if data['data_category_id'] != course_id or data['data_content_type'] != 'announcement':
+                continue
+            if announcement_id and data.get('data_external_id') == announcement_id:
+                existing_announcement = data
+                break
+            if data['data_title'] == announcement_name:
+                existing_announcement = data
+                break
+        
+        if existing_announcement:
+            update_data(
+                data_id=existing_announcement['data_id'],
+                data_title=announcement_name,
+                data_content_text=announcement_content,
+                data_link_url=announcement_link,
+                data_release_time=release_time,
+                data_ddl_time=None,
+                data_is_previewable=is_previewable,
+                data_source='blackboard',
+                data_external_id=announcement_id or None,
+                data_meta_json=announcement_content,
+                data_raw_json=announcement_content,
+                data_updated_at=time.strftime('%Y-%m-%d %H:%M:%S'),
+            )
+            return existing_announcement['data_id']
+        else:
+            created_at = time.strftime('%Y-%m-%d %H:%M:%S')
+            return create_data(
+                user_id=user_id,
+                data_category_id=course_id,
+                data_content_type='announcement',
+                data_classification_code=2,
+                data_title=announcement_name,
+                data_content_text=announcement_content,
+                data_link_url=announcement_link,
+                data_release_time=release_time,
+                data_ddl_time=None,
+                data_is_previewable=is_previewable,
+                data_source='blackboard',
+                data_external_id=announcement_id or None,
+                data_meta_json=announcement_content,
+                data_raw_json=announcement_content,
+                data_updated_at=created_at,
+                data_created_at=created_at
+            )
+    
+    def get_announcements(self, user_id: str, course_id: Optional[int] = None) -> List[Dict]:
+        """获取用户的公告"""
+        data_list = list_data_by_user(user_id)
+        announcements = [d for d in data_list if d['data_content_type'] == 'announcement']
+        
+        if course_id:
+            announcements = [a for a in announcements if a['data_category_id'] == course_id]
+        
+        return announcements
+    
+    def delete_announcement(self, data_id: int) -> None:
+        """删除公告"""
+        delete_data(data_id)
+
+
+class BlackboardCourseMaterialOperations:
+    """Blackboard课程资料相关的数据库操作"""
+    
+    def create_or_update_course_material(
+        self,
+        user_id: str,
+        course_id: int,
+        material_id: str,
+        material_name: str,
+        material_content: Optional[str] = None,
+        material_link: Optional[str] = None,
+        release_time: Optional[str] = None,
+        is_previewable: int = 1
+    ) -> int:
+        """创建或更新课程资料信息"""
+        existing_data = list_data_by_user(user_id)
+        existing_material = None
+        
+        for data in existing_data:
+            if data['data_category_id'] != course_id or data['data_content_type'] != 'material':
+                continue
+            if material_id and data.get('data_external_id') == material_id:
+                existing_material = data
+                break
+            if data['data_title'] == material_name:
+                existing_material = data
+                break
+        
+        if existing_material:
+            update_data(
+                data_id=existing_material['data_id'],
+                data_title=material_name,
+                data_content_text=material_content,
+                data_link_url=material_link,
+                data_release_time=release_time,
+                data_ddl_time=None,
+                data_is_previewable=is_previewable,
+                data_source='blackboard',
+                data_external_id=material_id or None,
+                data_meta_json=material_content,
+                data_raw_json=material_content,
+                data_updated_at=time.strftime('%Y-%m-%d %H:%M:%S'),
+            )
+            return existing_material['data_id']
+        else:
+            created_at = time.strftime('%Y-%m-%d %H:%M:%S')
+            return create_data(
+                user_id=user_id,
+                data_category_id=course_id,
+                data_content_type='material',
+                data_classification_code=3,
+                data_title=material_name,
+                data_content_text=material_content,
+                data_link_url=material_link,
+                data_release_time=release_time,
+                data_ddl_time=None,
+                data_is_previewable=is_previewable,
+                data_source='blackboard',
+                data_external_id=material_id or None,
+                data_meta_json=material_content,
+                data_raw_json=material_content,
+                data_updated_at=created_at,
+                data_created_at=created_at
+            )
+    
+    def get_course_materials(self, user_id: str, course_id: Optional[int] = None) -> List[Dict]:
+        """获取用户的课程资料"""
+        data_list = list_data_by_user(user_id)
+        materials = [d for d in data_list if d['data_content_type'] == 'material']
+        
+        if course_id:
+            materials = [m for m in materials if m['data_category_id'] == course_id]
+        
+        return materials
+    
+    def delete_course_material(self, data_id: int) -> None:
+        """删除课程资料"""
+        delete_data(data_id)

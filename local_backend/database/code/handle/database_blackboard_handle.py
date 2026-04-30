@@ -1,10 +1,15 @@
 from local_backend.database.code.operations.database_blackboard_operations import (
     BlackboardAccountOperations,
     BlackboardCourseOperations,
-    BlackboardAssignmentOperations
+    BlackboardAssignmentOperations,
+    BlackboardAnnouncementOperations,
+    BlackboardCourseMaterialOperations
 )
 from typing import Optional, Dict, List, Tuple
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BlackboardHandle:
@@ -14,6 +19,8 @@ class BlackboardHandle:
         self.account_ops = BlackboardAccountOperations()
         self.course_ops = BlackboardCourseOperations()
         self.assignment_ops = BlackboardAssignmentOperations()
+        self.announcement_ops = BlackboardAnnouncementOperations()
+        self.course_material_ops = BlackboardCourseMaterialOperations()
     
     def handle_bind_blackboard(
         self,
@@ -132,6 +139,80 @@ class BlackboardHandle:
                 'message': f'作业同步失败: {str(e)}'
             }
     
+    def handle_sync_announcements(
+        self,
+        user_id: str,
+        course_id: int,
+        announcements: List[Dict]
+    ) -> Dict:
+        """处理公告同步"""
+        try:
+            synced_announcements = []
+            for announcement in announcements:
+                announcement_id = self.announcement_ops.create_or_update_announcement(
+                    user_id=user_id,
+                    course_id=course_id,
+                    announcement_id=announcement.get('id'),
+                    announcement_name=announcement.get('title'),
+                    announcement_content=json.dumps(announcement.get('content', {})),
+                    announcement_link=announcement.get('url'),
+                    release_time=announcement.get('date'),
+                    is_previewable=1
+                )
+                synced_announcements.append({
+                    'id': announcement_id,
+                    'name': announcement.get('title'),
+                    'date': announcement.get('date')
+                })
+            
+            return {
+                'success': True,
+                'message': f'成功同步 {len(synced_announcements)} 条公告',
+                'synced_announcements': synced_announcements
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'公告同步失败: {str(e)}'
+            }
+    
+    def handle_sync_course_materials(
+        self,
+        user_id: str,
+        course_id: int,
+        course_materials: List[Dict]
+    ) -> Dict:
+        """处理课程资料同步"""
+        try:
+            synced_course_materials = []
+            for material in course_materials:
+                material_id = self.course_material_ops.create_or_update_course_material(
+                    user_id=user_id,
+                    course_id=course_id,
+                    material_id=material.get('id'),
+                    material_name=material.get('title'),
+                    material_content=json.dumps(material.get('content', {})),
+                    material_link=material.get('url'),
+                    release_time=material.get('date'),
+                    is_previewable=1
+                )
+                synced_course_materials.append({
+                    'id': material_id,
+                    'name': material.get('title'),
+                    'date': material.get('date')
+                })
+            
+            return {
+                'success': True,
+                'message': f'成功同步 {len(synced_course_materials)} 份课程资料',
+                'synced_course_materials': synced_course_materials
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'课程资料同步失败: {str(e)}'
+            }
+    
     def handle_full_sync(
         self,
         user_id: str,
@@ -144,24 +225,79 @@ class BlackboardHandle:
             if not courses_result['success']:
                 return courses_result
             
+            # 获取所有课程（只查询一次）
+            all_courses = self.course_ops.get_courses(user_id)
+            
             # 同步作业
             all_assignments = []
             for course in sync_data.get('courses', []):
-                # 查找课程ID
-                courses = self.course_ops.get_courses(user_id)
+                # 查找课程ID（使用更宽松的匹配）
+                course_name = course.get('name', '')
                 course_id = None
-                for c in courses:
-                    if c['category_title'] == course.get('name'):
+                for c in all_courses:
+                    category_title = c.get('category_title', '')
+                    # 宽松匹配：包含匹配或相等匹配
+                    if category_title == course_name or course_name in category_title or category_title in course_name:
                         course_id = c['category_id']
                         break
                 
-                if course_id and 'assignments' in course:
+                if not course_id:
+                    logger.warning(f"未找到课程ID，课程名: {course_name}")
+                    continue
+                
+                if 'assignments' in course and course['assignments']:
                     assignments_result = self.handle_sync_assignments(
                         user_id, course_id, course['assignments']
                     )
                     if not assignments_result['success']:
                         return assignments_result
                     all_assignments.extend(assignments_result['synced_assignments'])
+            
+            # 同步公告
+            all_announcements = []
+            for course in sync_data.get('courses', []):
+                course_name = course.get('name', '')
+                course_id = None
+                for c in all_courses:
+                    category_title = c.get('category_title', '')
+                    if category_title == course_name or course_name in category_title or category_title in course_name:
+                        course_id = c['category_id']
+                        break
+                
+                if not course_id:
+                    logger.warning(f"未找到课程ID，课程名: {course_name}")
+                    continue
+                
+                if 'announcements' in course and course['announcements']:
+                    announcements_result = self.handle_sync_announcements(
+                        user_id, course_id, course['announcements']
+                    )
+                    if not announcements_result['success']:
+                        return announcements_result
+                    all_announcements.extend(announcements_result['synced_announcements'])
+            
+            # 同步课程资料
+            all_course_materials = []
+            for course in sync_data.get('courses', []):
+                course_name = course.get('name', '')
+                course_id = None
+                for c in all_courses:
+                    category_title = c.get('category_title', '')
+                    if category_title == course_name or course_name in category_title or category_title in course_name:
+                        course_id = c['category_id']
+                        break
+                
+                if not course_id:
+                    logger.warning(f"未找到课程ID，课程名: {course_name}")
+                    continue
+                
+                if 'course_materials' in course and course['course_materials']:
+                    materials_result = self.handle_sync_course_materials(
+                        user_id, course_id, course['course_materials']
+                    )
+                    if not materials_result['success']:
+                        return materials_result
+                    all_course_materials.extend(materials_result['synced_course_materials'])
             
             # 更新同步时间
             account = self.account_ops.get_blackboard_account(user_id)
@@ -170,9 +306,11 @@ class BlackboardHandle:
             
             return {
                 'success': True,
-                'message': f'同步完成，共同步 {len(courses_result["synced_courses"])} 门课程和 {len(all_assignments)} 个作业',
+                'message': f'同步完成，共同步 {len(courses_result["synced_courses"])} 门课程、{len(all_assignments)} 个作业、{len(all_announcements)} 条公告和 {len(all_course_materials)} 份课程资料',
                 'synced_courses': courses_result['synced_courses'],
-                'synced_assignments': all_assignments
+                'synced_assignments': all_assignments,
+                'synced_announcements': all_announcements,
+                'synced_course_materials': all_course_materials
             }
         except Exception as e:
             return {

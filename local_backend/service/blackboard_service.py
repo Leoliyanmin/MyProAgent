@@ -84,7 +84,7 @@ class BlackboardService:
             if missing_required:
                 logger.error(f"Cookie中缺少必需的字段: {missing_required}")
                 return {'success': False, 'message': f'Cookie中缺少必需的字段: {", ".join(missing_required)}'}
-            
+            '''
             # 可选Cookie列表
             optional_cookies = ['BBSESSION', 'COOKIE_CONSENT_ACCEPTED', '_ga', '_ga_0KD226TRZ5', 
                                'CdnSignedValidation', 'BbClientCalenderTimeZone', 
@@ -94,7 +94,7 @@ class BlackboardService:
             missing_optional = [c for c in optional_cookies if c not in cookies_dict]
             if missing_optional:
                 logger.info(f"缺少可选Cookie: {missing_optional}")
-            
+            '''
             # 创建Session并设置Cookie（使用改进的方法）
             session = self._create_session_with_cookies(cookies_dict)
             
@@ -125,15 +125,36 @@ class BlackboardService:
                         'id': course.get('id', ''),
                         'name': course.get('name', ''),
                         'link': course.get('url', ''),
-                        'assignments': []
+                        'assignments': [],
+                        'announcements': [],
+                        'course_materials': []
                     }
-                    for assignment in course.get('assignments', []):
+                    # 适配爬虫返回的 upload_assignments 结构
+                    for assignment in course.get('upload_assignments', []):
                         course_data['assignments'].append({
-                            'id': assignment.get('id', ''),
-                            'name': assignment.get('title', ''),
+                            'id': assignment.get('label', ''),
+                            'name': assignment.get('label', ''),
                             'link': assignment.get('url', ''),
-                            'due_date': assignment.get('due_date', ''),
-                            'status': assignment.get('status', '未提交')
+                            'due_date': '',
+                            'content': assignment.get('content_blocks', [])
+                        })
+                    # 添加公告（适配爬虫返回的结构）
+                    for announcement in course.get('announcements', []):
+                        course_data['announcements'].append({
+                            'id': announcement.get('id', '') or announcement.get('label', ''),
+                            'title': announcement.get('title', '') or announcement.get('label', ''),
+                            'url': announcement.get('url', ''),
+                            'date': announcement.get('date', ''),
+                            'content': announcement.get('content', '') or announcement.get('content_blocks', '')
+                        })
+                    # 添加课程资料（适配爬虫返回的结构：label, url, content_blocks）
+                    for material in course.get('course_materials', []):
+                        course_data['course_materials'].append({
+                            'id': material.get('id', '') or material.get('label', ''),
+                            'title': material.get('title', '') or material.get('label', ''),
+                            'url': material.get('url', ''),
+                            'date': material.get('date', ''),
+                            'content': material.get('content', '') or material.get('content_blocks', '')
                         })
                     courses_data.append(course_data)
                 
@@ -142,12 +163,16 @@ class BlackboardService:
                     sync_data={'courses': courses_data}
                 )
                 
-                total_announcements = sum(len(course.get('announcements', [])) for course in scrape_result.get('courses', []))
-                total_course_materials = sum(len(course.get('course_materials', [])) for course in scrape_result.get('courses', []))
-                total_upload_assignments = sum(len(course.get('upload_assignments', [])) for course in scrape_result.get('courses', []))
+                if not sync_result['success']:
+                    logger.error(f"数据同步失败: {sync_result.get('message', '未知错误')}")
+                    return {'success': False, 'message': f"数据同步失败: {sync_result.get('message', '未知错误')}"}
+                
+                total_announcements = len(sync_result.get('synced_announcements', []))
+                total_course_materials = len(sync_result.get('synced_course_materials', []))
+                total_upload_assignments = len(sync_result.get('synced_assignments', []))
                 course_names = [course.get('name', '') for course in scrape_result.get('courses', [])]
                 
-                logger.info(f"数据同步结果: 课程数={len(course_names)}, 公告数={total_announcements}, 课程资料数={total_course_materials}, 作业数={total_upload_assignments}, 课程名={course_names}")
+                logger.info(f"数据同步结果: 课程数={len(sync_result.get('synced_courses', []))}, 公告数={total_announcements}, 课程资料数={total_course_materials}, 作业数={total_upload_assignments}, 课程名={course_names}")
             
             # 存储账号信息
             username = user_id.split('@')[0] if '@' in user_id else user_id

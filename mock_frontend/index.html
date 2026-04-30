@@ -270,7 +270,6 @@
                 </div>
                 
                 <button class="btn btn-info" @click="bindWithManualCookie()">使用手动输入的Cookie绑定</button>
-                <button class="btn btn-secondary" @click="testCookieOnly()">仅测试Cookie有效性（不绑定）</button>
                 
                 <div class="api-url">API: POST /api/v1/blackboard/bind?cookies=xxx</div>
             </div>
@@ -279,6 +278,70 @@
             
             <div :class="['status-box', 'status-' + bbStatus.type, { hidden: !bbStatus.show }]">
                 <div class="status-content">{{ bbStatus.message }}</div>
+            </div>
+        </div>
+
+        <!-- TIS教务系统 Tab -->
+        <div v-show="activeTab === 'tis'" class="card">
+            <h2 class="card-title">TIS教务系统</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="label">用户ID</div>
+                    <div class="value">{{ userInfo.userId || '-' }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">绑定状态</div>
+                    <div class="value">{{ tisStatus.isBound ? '已绑定' : '未绑定' }}</div>
+                </div>
+            </div>
+            
+            <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 0 10px 10px 0;">
+                <strong>TIS绑定说明</strong>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #555;">点击"开始绑定"按钮，系统将通过Tauri获取TIS的Cookie完成账号绑定。</p>
+            </div>
+            
+            <button class="btn btn-primary" @click="checkTisStatus()">检查绑定状态</button>
+            <button class="btn btn-success" @click="startTisBinding()">开始绑定</button>
+            <button class="btn btn-warning" @click="unbindTis()">解绑账号</button>
+            
+            <!-- 手动输入Cookie测试区域 -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <h3 style="margin-bottom: 15px; color: #333;">手动输入Cookie测试（调试用）</h3>
+                
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; border-left: 4px solid #2196f3;">
+                    <strong>获取方法：</strong>打开浏览器 → 访问TIS → F12 → Application → Cookies → https://tis.sustech.edu.cn
+                </div>
+                
+                <div class="form-group">
+                    <label for="tisJsessionid"><span style="color: #dc3545;">*</span> JSESSIONID（必需）</label>
+                    <input type="text" id="tisJsessionid" v-model="tisCookie.JSESSIONID" placeholder="请输入JSESSIONID">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tisRoute">route（必需）</label>
+                    <input type="text" id="tisRoute" v-model="tisCookie.route" placeholder="请输入route">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tisTgc"><span style="color: #dc3545;">*</span> TGC（必需，CAS认证Cookie）</label>
+                    <input type="text" id="tisTgc" v-model="tisCookie.TGC" placeholder="请输入TGC">
+                </div>
+                
+                <button class="btn btn-info" @click="bindWithTisCookie()">使用手动输入的Cookie绑定</button>
+            </div>
+            
+            <!-- 同步课表区域 -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <h3 style="margin-bottom: 15px; color: #333;">同步课表</h3>
+                
+                <button class="btn btn-primary" @click="syncTisSchedule()">同步课表数据</button>
+                
+                <div class="api-url">API: POST /api/v1/tis/sync</div>
+            </div>
+            
+            <div :class="['status-box', 'status-' + tisStatus.type, { hidden: !tisStatus.show }]">
+                <div class="status-content">{{ tisStatus.message }}</div>
             </div>
         </div>
 
@@ -333,9 +396,10 @@
                 
                 // 响应式状态
                 const activeTab = ref('auth');
-                const tabs = [
+    const tabs = [
                     { id: 'auth', name: '用户认证' },
                     { id: 'blackboard', name: 'Blackboard绑定' },
+                    { id: 'tis', name: 'TIS教务系统' },
                     { id: 'sync', name: '数据同步' },
                     { id: 'debug', name: '调试信息' }
                 ];
@@ -353,6 +417,7 @@
                 
                 const authStatus = reactive({ show: false, type: 'info', message: '' });
                 const bbStatus = reactive({ show: false, type: 'info', message: '', isBound: false });
+                const tisStatus = reactive({ show: false, type: 'info', message: '', isBound: false });
                 const syncStatus = reactive({ show: false, type: 'info', message: '' });
                 const debugStatus = reactive({ show: false, type: 'info', message: '' });
                 
@@ -360,6 +425,13 @@
                 const manualCookie = reactive({
                     jsessionid: '',
                     sSessionId: ''
+                });
+                
+                // TIS Cookie表单
+                const tisCookie = reactive({
+                    JSESSIONID: '',
+                    route: '',
+                    TGC: ''
                 });
                 
                 // 显示状态
@@ -590,37 +662,118 @@
                     }
                 };
                 
-                // 仅测试Cookie有效性（不绑定）
-                const testCookieOnly = async () => {
+                // 检查TIS绑定状态
+                const checkTisStatus = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/tis/status`);
+                    if (result.status === 200) {
+                        tisStatus.isBound = result.data.is_bound;
+                        showStatus(tisStatus, 'info', `✓ 查询成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(tisStatus, 'error', `✗ 查询失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 通过Cookie绑定TIS账号（Tauri实现）
+                const startTisBinding = async () => {
+                    showStatus(tisStatus, 'info', '开始绑定TIS账号...');
+                    
+                    try {
+                        // 步骤1：通过Tauri获取TIS的Cookie
+                        const tisUrl = 'https://tis.sustech.edu.cn';
+                        const cookies = await tauriGetCookies(tisUrl);
+                        showStatus(tisStatus, 'info', `获取到Cookie: ${JSON.stringify(Object.keys(cookies))}`);
+                        
+                        // 步骤2：验证是否获取到JSESSIONID
+                        if (!cookies || !cookies['JSESSIONID']) {
+                            showStatus(tisStatus, 'error', '✗ 未能获取TIS的JSESSIONID\n\n请先在浏览器中登录TIS，然后重试');
+                            return;
+                        }
+                        
+                        // 步骤3：将Cookie转换为JSON字符串并发送给后端
+                        const cookiesJson = JSON.stringify(cookies);
+                        showStatus(tisStatus, 'info', '正在绑定账号...');
+                        
+                        const result = await sendRequest(`${backendUrl}/api/v1/tis/bind`, 'POST', { cookies: cookiesJson });
+                        
+                        if (result.status === 200) {
+                            showStatus(tisStatus, 'success', `✓ 绑定成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                            tisStatus.isBound = true;
+                        } else {
+                            showStatus(tisStatus, 'error', `✗ 绑定失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                        }
+                        
+                    } catch (error) {
+                        showStatus(tisStatus, 'error', `✗ 请求异常\n\n${error.message}`);
+                    }
+                };
+                
+                // 解绑TIS账号
+                const unbindTis = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/tis/unbind`, 'POST');
+                    if (result.status === 200) {
+                        showStatus(tisStatus, 'success', `✓ 解绑成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                        tisStatus.isBound = false;
+                    } else {
+                        showStatus(tisStatus, 'error', `✗ 解绑失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 使用手动输入的Cookie绑定TIS
+                const bindWithTisCookie = async () => {
                     // 验证必需的Cookie
-                    if (!manualCookie.jsessionid.trim()) {
-                        showStatus(bbStatus, 'error', '✗ 请输入JSESSIONID');
+                    if (!tisCookie.JSESSIONID.trim()) {
+                        showStatus(tisStatus, 'error', '✗ 请输入JSESSIONID');
                         return;
                     }
-                    if (!manualCookie.sSessionId.trim()) {
-                        showStatus(bbStatus, 'error', '✗ 请输入s_session_id');
+                    if (!tisCookie.route.trim()) {
+                        showStatus(tisStatus, 'error', '✗ 请输入route');
+                        return;
+                    }
+                    if (!tisCookie.TGC.trim()) {
+                        showStatus(tisStatus, 'error', '✗ 请输入TGC');
                         return;
                     }
                     
                     // 构建完整的Cookie对象
-                    const cookies = buildCookieObject();
+                    const cookies = {};
+                    if (tisCookie.JSESSIONID.trim()) {
+                        cookies['JSESSIONID'] = tisCookie.JSESSIONID.trim();
+                    }
+                    if (tisCookie.route.trim()) {
+                        cookies['route'] = tisCookie.route.trim();
+                    }
+                    if (tisCookie.TGC.trim()) {
+                        cookies['TGC'] = tisCookie.TGC.trim();
+                    }
                     
-                    showStatus(bbStatus, 'info', `正在测试Cookie有效性...\nCookie数量: ${Object.keys(cookies).length}\nCookie键: ${JSON.stringify(Object.keys(cookies))}`);
+                    showStatus(tisStatus, 'info', `准备绑定，Cookie数量: ${Object.keys(cookies).length}\nCookie键: ${JSON.stringify(Object.keys(cookies))}`);
                     
                     try {
                         const cookiesJson = JSON.stringify(cookies);
                         const result = await sendRequest(
-                            `${backendUrl}/api/v1/blackboard/test-cookie?cookies=${encodeURIComponent(cookiesJson)}`,
-                            'POST'
+                            `${backendUrl}/api/v1/tis/bind`,
+                            'POST',
+                            { cookies: cookiesJson }
                         );
                         
                         if (result.status === 200) {
-                            showStatus(bbStatus, 'success', `✓ Cookie有效！\n\n${JSON.stringify(result.data, null, 2)}`);
+                            showStatus(tisStatus, 'success', `✓ 绑定成功！\n\n${JSON.stringify(result.data, null, 2)}`);
+                            tisStatus.isBound = true;
                         } else {
-                            showStatus(bbStatus, 'error', `✗ Cookie无效或测试失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                            showStatus(tisStatus, 'error', `✗ 绑定失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
                         }
                     } catch (error) {
-                        showStatus(bbStatus, 'error', `✗ 测试失败\n\n${error.message}`);
+                        showStatus(tisStatus, 'error', `✗ 请求异常\n\n${error.message}`);
+                    }
+                };
+                
+                // 同步TIS课表数据
+                const syncTisSchedule = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/tis/sync`, 'POST');
+                    if (result.status === 200) {
+                        showStatus(tisStatus, 'success', `✓ 同步成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(tisStatus, 'error', `✗ 同步失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
                     }
                 };
                 
@@ -676,9 +829,11 @@
                     userInfo,
                     authStatus,
                     bbStatus,
+                    tisStatus,
                     syncStatus,
                     debugStatus,
                     manualCookie,
+                    tisCookie,
                     sendVerificationCode,
                     registerUser,
                     loginUser,
@@ -686,7 +841,11 @@
                     startBbBinding,
                     unbindBb,
                     bindWithManualCookie,
-                    testCookieOnly,
+                    checkTisStatus,
+                    startTisBinding,
+                    unbindTis,
+                    bindWithTisCookie,
+                    syncTisSchedule,
                     syncBbData,
                     syncLocalToServer,
                     clearSession,

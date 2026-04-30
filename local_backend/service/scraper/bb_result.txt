@@ -1,9 +1,9 @@
 ========================================
 Blackboard 爬取结果
 ========================================
-时间: 2026-04-26 21:49:34
+时间: 2026-04-30 17:00:12
 总课程数: 4
-HTML长度: 4154 字符
+HTML长度: 4248 字符
 
 ========================================
 原始课程列表页面 HTML
@@ -12,7 +12,7 @@ HTML长度: 4154 字符
 <div class="noItems" style="display:none">您的所有课程均已隐藏。</div>
       
       <h3 class='termHeading-coursefakeclass'>
-       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', 'f2ad38de-43ac-41ba-bedc-2791259f4bb7')">
+       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', '3d45e524-1bab-48b4-be9a-3b375e36c2fb')">
         <span class="hideoff">收拢</span>
         2026春（Spring 2026）</a>
        </h3>
@@ -26,17 +26,14 @@ HTML长度: 4154 字符
 <li>
 <img alt='' src='/images/ci/icons/bookopen_li.gif' width='12' height='12' />
 <a href=" /webapps/blackboard/execute/launcher?type=Course&id=_8444_1&url=" target="_top">Frontier Seminars in Computer Science and Technology III Spring 2026</a>
-<div class="courseDataBlock"><span class="dataBlockLabel">
-公告: 
-</span>
-<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1">4/24 第四次讲座</a></li></ul></div></li>
+</li>
 <li>
 <img alt='' src='/images/ci/icons/bookopen_li.gif' width='12' height='12' />
 <a href=" /webapps/blackboard/execute/launcher?type=Course&id=_8205_1&url=" target="_top">Operating Systems Spring 2026</a>
 <div class="courseDataBlock"><span class="dataBlockLabel">
 公告: 
 </span>
-<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">Mid term exam information</a></li></ul></div></li>
+<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">Project is released</a></li><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">【reminder】Please submit Assignment3 on time【ddl: 5.13 14:00】</a></li><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">Mid term exam information</a></li></ul></div></li>
 <li>
 <img alt='' src='/images/ci/icons/bookopen_li.gif' width='12' height='12' />
 <a href=" /webapps/blackboard/execute/launcher?type=Course&id=_8012_1&url=" target="_top">Software Engineering Spring 2026</a>
@@ -1154,6 +1151,63 @@ HTML长度: 4154 字符
           ]
         },
         {
+          "label": "--Week 10",
+          "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598932_1&mode=reset",
+          "content_blocks": [
+            {
+              "type": "paragraph",
+              "text": "--Week 10 Content Lab 10 Attached Files: lab10.zip ( 1.026 GB ) CNN_basic.ipynb ( 1.222 MB )",
+              "links": [
+                {
+                  "text": "lab10.zip",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-598963-dt-content-rid-19513760_1/xid-19513760_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598932_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598932_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598932_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598932_1&mode=reset#close"
+                },
+                {
+                  "text": "CNN_basic.ipynb",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-598963-dt-content-rid-19523916_1/xid-19523916_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598932_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598932_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598932_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598932_1&mode=reset#close"
+                }
+              ]
+            }
+          ],
+          "content_section_blocks": [
+            {
+              "title": "Lab 10",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Attached Files: lab10.zip ( 1.026 GB ) CNN_basic.ipynb ( 1.222 MB )",
+                  "links": [
+                    {
+                      "text": "lab10.zip",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-598963-dt-content-rid-19513760_1/xid-19513760_1"
+                    },
+                    {
+                      "text": "CNN_basic.ipynb",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-598963-dt-content-rid-19523916_1/xid-19523916_1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
           "label": "-- Book",
           "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598938_1&mode=reset",
           "content_blocks": [
@@ -1286,12 +1340,7 @@ HTML长度: 4154 字符
       "id": "_8444_1",
       "name": "Frontier Seminars in Computer Science and Technology III Spring 2026",
       "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/launcher?type=Course&id=_8444_1&url=",
-      "announcements": [
-        {
-          "title": "4/24 第四次讲座",
-          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8444_1"
-        }
-      ],
+      "announcements": [],
       "course_materials": [],
       "upload_assignments": []
     },
@@ -1300,6 +1349,14 @@ HTML长度: 4154 字符
       "name": "Operating Systems Spring 2026",
       "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/launcher?type=Course&id=_8205_1&url=",
       "announcements": [
+        {
+          "title": "Project is released",
+          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1"
+        },
+        {
+          "title": "【reminder】Please submit Assignment3 on time【ddl: 5.13 14:00】",
+          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1"
+        },
         {
           "title": "Mid term exam information",
           "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1"
@@ -2072,20 +2129,77 @@ HTML长度: 4154 字符
           ]
         },
         {
+          "label": "--Lab 10",
+          "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601808_1&mode=reset",
+          "content_blocks": [
+            {
+              "type": "paragraph",
+              "text": "--Lab 10 内容 Lab 已附加文件: lab10.pdf ( 496.791 KB ) lab10-en.pdf ( 378.521 KB )",
+              "links": [
+                {
+                  "text": "lab10.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-601853-dt-content-rid-19104454_1/xid-19104454_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601808_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601808_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601808_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601808_1&mode=reset#close"
+                },
+                {
+                  "text": "lab10-en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-601853-dt-content-rid-19104455_1/xid-19104455_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601808_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601808_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601808_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601808_1&mode=reset#close"
+                }
+              ]
+            }
+          ],
+          "content_section_blocks": [
+            {
+              "title": "Lab",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "已附加文件: lab10.pdf ( 496.791 KB ) lab10-en.pdf ( 378.521 KB )",
+                  "links": [
+                    {
+                      "text": "lab10.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-601853-dt-content-rid-19104454_1/xid-19104454_1"
+                    },
+                    {
+                      "text": "lab10-en.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-601853-dt-content-rid-19104455_1/xid-19104455_1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
           "label": "--Assignment",
           "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset",
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "--Assignment 内容 Assignment2 已附加文件: assignment2-en.pdf ( 353.127 KB ) assignment2-uaccess.zip ( 527.465 KB )",
+              "text": "--Assignment 内容 Assignment3 已附加文件: assignment3-cow.zip ( 383.324 KB ) assignment3-en.pdf ( 171.68 KB )",
               "links": [
                 {
-                  "text": "Assignment2",
-                  "href": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_621981_1&course_id=_8205_1&group_id=&mode=view"
+                  "text": "Assignment3",
+                  "href": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_624074_1&course_id=_8205_1&group_id=&mode=view"
                 },
                 {
-                  "text": "assignment2-en.pdf",
-                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-621981-dt-content-rid-19386073_1/xid-19386073_1"
+                  "text": "assignment3-cow.zip",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624074-dt-content-rid-19521196_1/xid-19521196_1"
                 },
                 {
                   "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
@@ -2096,8 +2210,8 @@ HTML长度: 4154 字符
                   "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
                 },
                 {
-                  "text": "assignment2-uaccess.zip",
-                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-621981-dt-content-rid-19386074_1/xid-19386074_1"
+                  "text": "assignment3-en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624074-dt-content-rid-19521197_1/xid-19521197_1"
                 },
                 {
                   "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
@@ -2112,19 +2226,108 @@ HTML长度: 4154 字符
           ],
           "content_section_blocks": [
             {
-              "title": "Assignment2",
+              "title": "Assignment3",
               "blocks": [
                 {
                   "type": "paragraph",
-                  "text": "已附加文件: assignment2-en.pdf ( 353.127 KB ) assignment2-uaccess.zip ( 527.465 KB )",
+                  "text": "已附加文件: assignment3-cow.zip ( 383.324 KB ) assignment3-en.pdf ( 171.68 KB )",
                   "links": [
                     {
-                      "text": "assignment2-en.pdf",
-                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-621981-dt-content-rid-19386073_1/xid-19386073_1"
+                      "text": "assignment3-cow.zip",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624074-dt-content-rid-19521196_1/xid-19521196_1"
                     },
                     {
-                      "text": "assignment2-uaccess.zip",
-                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-621981-dt-content-rid-19386074_1/xid-19386074_1"
+                      "text": "assignment3-en.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624074-dt-content-rid-19521197_1/xid-19521197_1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Project",
+          "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset",
+          "content_blocks": [
+            {
+              "type": "paragraph",
+              "text": "Project 内容 project 已附加文件: GitHub_SSH_Key.pdf ( 337.429 KB ) GitHub_SSH_Key_en.pdf ( 52.365 KB ) project_cn.pdf ( 1.226 MB ) project_en.pdf ( 664.791 KB )",
+              "links": [
+                {
+                  "text": "GitHub_SSH_Key.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624077-dt-content-rid-19522430_1/xid-19522430_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#close"
+                },
+                {
+                  "text": "GitHub_SSH_Key_en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624077-dt-content-rid-19522431_1/xid-19522431_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#close"
+                },
+                {
+                  "text": "project_cn.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624077-dt-content-rid-19522432_1/xid-19522432_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#close"
+                },
+                {
+                  "text": "project_en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624077-dt-content-rid-19522433_1/xid-19522433_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601815_1&mode=reset#close"
+                }
+              ]
+            }
+          ],
+          "content_section_blocks": [
+            {
+              "title": "project",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "已附加文件: GitHub_SSH_Key.pdf ( 337.429 KB ) GitHub_SSH_Key_en.pdf ( 52.365 KB ) project_cn.pdf ( 1.226 MB ) project_en.pdf ( 664.791 KB )",
+                  "links": [
+                    {
+                      "text": "GitHub_SSH_Key.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624077-dt-content-rid-19522430_1/xid-19522430_1"
+                    },
+                    {
+                      "text": "GitHub_SSH_Key_en.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624077-dt-content-rid-19522431_1/xid-19522431_1"
+                    },
+                    {
+                      "text": "project_cn.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624077-dt-content-rid-19522432_1/xid-19522432_1"
+                    },
+                    {
+                      "text": "project_en.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624077-dt-content-rid-19522433_1/xid-19522433_1"
                     }
                   ]
                 }
@@ -2177,22 +2380,22 @@ HTML长度: 4154 字符
           ]
         },
         {
-          "label": "Assignment2",
-          "url": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_621981_1&course_id=_8205_1&group_id=&mode=view",
+          "label": "Assignment3",
+          "url": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_624074_1&course_id=_8205_1&group_id=&mode=view",
           "parent_label": "--Assignment",
           "parent_url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset",
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "--Assignment 内容 Assignment2 已附加文件: assignment2-en.pdf ( 353.127 KB ) assignment2-uaccess.zip ( 527.465 KB )",
+              "text": "--Assignment 内容 Assignment3 已附加文件: assignment3-cow.zip ( 383.324 KB ) assignment3-en.pdf ( 171.68 KB )",
               "links": [
                 {
-                  "text": "Assignment2",
-                  "href": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_621981_1&course_id=_8205_1&group_id=&mode=view"
+                  "text": "Assignment3",
+                  "href": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_624074_1&course_id=_8205_1&group_id=&mode=view"
                 },
                 {
-                  "text": "assignment2-en.pdf",
-                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-621981-dt-content-rid-19386073_1/xid-19386073_1"
+                  "text": "assignment3-cow.zip",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624074-dt-content-rid-19521196_1/xid-19521196_1"
                 },
                 {
                   "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
@@ -2203,8 +2406,8 @@ HTML长度: 4154 字符
                   "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
                 },
                 {
-                  "text": "assignment2-uaccess.zip",
-                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-621981-dt-content-rid-19386074_1/xid-19386074_1"
+                  "text": "assignment3-en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624074-dt-content-rid-19521197_1/xid-19521197_1"
                 },
                 {
                   "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
@@ -2559,7 +2762,7 @@ HTML长度: 4154 字符
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "Labs Content Lab introduction Lab Structure Tutorial – A guided session introducing key concepts and techniques. Practice – Hands-on exercises to apply the learned concepts. Practice Rules Each practice is allocated one week for completion . You may submit and have it checked during the current or next week's lab session . On-site verification only – No offline or remote submissions will be accepted. Late Submission Penalty – If checked after the deadline, the score will be multiplied by 0.8. Grading Practice – Evaluated based on completed exercises. Attendance – Recorded separately from practice scores. Week 1 Attached Files: github-classroom.pdf ( 213.183 KB ) Tutorial 1. Read project requirement in Project - Description and Project - Team Formation. 2. Read \" Academic Integrity \" (in \"about the course\") carefully. Practice 1. Team up and set up GitHub classroom (see attached). 2. HarmonyOS App 101: Build \"Hello World\" in DevEco Studio. Chapter 1: https://developer.huawei.com/consumer/cn/codelabsPortal/getstarted/101718800110527001 Week 2 Attached Files: Tutorial2-Teedy Setup.pdf ( 9.433 MB ) Practice2-Teedy Setup.pdf ( 4.999 MB ) GitHub Authentication & Git Remote Access.pdf ( 1.909 MB ) Week 3 Attached Files: Tutorial3-GitHub Project Management.pdf ( 1.841 MB ) Practice3-Requirement Analysis for Teedy.pdf ( 4.005 MB ) Week 4 Attached Files: Tutorial 4 - Introduction of Git.pdf ( 2.068 MB ) Practice 4 - Branching and Pull Request.pdf ( 3.778 MB ) GitHub Authentication & Git Remote Access.pdf ( 1.909 MB ) Week 6 Attached Files: Tutorial6-Maven.pdf ( 5.002 MB ) Practice6-Maven.pdf ( 394.233 KB ) Week 8 Attached Files: Tutorial7-CodeReview.pdf ( 6.975 MB ) Tutorial7-Linters.pdf ( 1.297 MB ) Practice7-PMD.pdf ( 219.299 KB )",
+              "text": "Labs Content Lab introduction Lab Structure Tutorial – A guided session introducing key concepts and techniques. Practice – Hands-on exercises to apply the learned concepts. Practice Rules Each practice is allocated one week for completion . You may submit and have it checked during the current or next week's lab session . On-site verification only – No offline or remote submissions will be accepted. Late Submission Penalty – If checked after the deadline, the score will be multiplied by 0.8. Grading Practice – Evaluated based on completed exercises. Attendance – Recorded separately from practice scores. Week 1 Attached Files: github-classroom.pdf ( 213.183 KB ) Tutorial 1. Read project requirement in Project - Description and Project - Team Formation. 2. Read \" Academic Integrity \" (in \"about the course\") carefully. Practice 1. Team up and set up GitHub classroom (see attached). 2. HarmonyOS App 101: Build \"Hello World\" in DevEco Studio. Chapter 1: https://developer.huawei.com/consumer/cn/codelabsPortal/getstarted/101718800110527001 Week 2 Attached Files: Tutorial2-Teedy Setup.pdf ( 9.433 MB ) Practice2-Teedy Setup.pdf ( 4.999 MB ) GitHub Authentication & Git Remote Access.pdf ( 1.909 MB ) Week 3 Attached Files: Tutorial3-GitHub Project Management.pdf ( 1.841 MB ) Practice3-Requirement Analysis for Teedy.pdf ( 4.005 MB ) Week 4 Attached Files: Tutorial 4 - Introduction of Git.pdf ( 2.068 MB ) Practice 4 - Branching and Pull Request.pdf ( 3.778 MB ) GitHub Authentication & Git Remote Access.pdf ( 1.909 MB ) Week 6 Attached Files: Tutorial6-Maven.pdf ( 5.002 MB ) Practice6-Maven.pdf ( 394.233 KB ) Week 8 Attached Files: Tutorial7-CodeReview.pdf ( 6.975 MB ) Tutorial7-Linters.pdf ( 1.297 MB ) Practice7-PMD.pdf ( 219.299 KB ) Week 10 Attached Files: Practice8-Coverage.pdf ( 50.556 KB ) Tutorial8-Testing.pdf ( 706.348 KB )",
               "links": [
                 {
                   "text": "github-classroom.pdf",
@@ -2740,6 +2943,30 @@ HTML长度: 4154 字符
                 {
                   "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close",
                   "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close"
+                },
+                {
+                  "text": "Practice8-Coverage.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588377-dt-content-rid-19080000_1/xid-19080000_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close"
+                },
+                {
+                  "text": "Tutorial8-Testing.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588377-dt-content-rid-19081301_1/xid-19081301_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close"
                 }
               ]
             }
@@ -2879,6 +3106,25 @@ HTML长度: 4154 字符
                   ]
                 }
               ]
+            },
+            {
+              "title": "Week 10",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Attached Files: Practice8-Coverage.pdf ( 50.556 KB ) Tutorial8-Testing.pdf ( 706.348 KB )",
+                  "links": [
+                    {
+                      "text": "Practice8-Coverage.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588377-dt-content-rid-19080000_1/xid-19080000_1"
+                    },
+                    {
+                      "text": "Tutorial8-Testing.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588377-dt-content-rid-19081301_1/xid-19081301_1"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },
@@ -2888,7 +3134,7 @@ HTML长度: 4154 字符
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "Quiz Content Quiz 1 Quiz 2 Quiz 3 Quiz 4 Quiz 5 Quiz 6 Quiz 7",
+              "text": "Quiz Content Quiz 1 Quiz 2 Quiz 3 Quiz 4 Quiz 5 Quiz 6 Quiz 7 Quiz 8",
               "links": [
                 {
                   "text": "Quiz 1",
@@ -2917,6 +3163,10 @@ HTML长度: 4154 字符
                 {
                   "text": "Quiz 7",
                   "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/launchAssessment.jsp?course_id=_8012_1&content_id=_588391_1&mode=view"
+                },
+                {
+                  "text": "Quiz 8",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/launchAssessment.jsp?course_id=_8012_1&content_id=_588392_1&mode=view"
                 }
               ]
             }
@@ -2948,6 +3198,10 @@ HTML长度: 4154 字符
             },
             {
               "title": "Quiz 7",
+              "blocks": []
+            },
+            {
+              "title": "Quiz 8",
               "blocks": []
             }
           ]
@@ -3375,7 +3629,7 @@ HTML长度: 4154 字符
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "My Grades Content Order by: Course Order Last Activity Due Date (Latest First) Due Date (Oldest First) All Graded Upcoming Submitted Item Last Activity Grade Status Quiz 7 Due: Apr 21, 2026 Test Apr 21, 2026 12:09 PM Graded 50.00 /50 Quiz 6 Due: Apr 14, 2026 Test Apr 14, 2026 12:10 PM Graded 60.00 /60 Quiz 5 Due: Apr 7, 2026 Test Apr 7, 2026 12:15 PM Graded 8.00 /10 Selected topic Apr 7, 2026 11:14 AM Graded 3 milestone1 Apr 7, 2026 11:01 AM Graded 4.50 /5 Quiz 4 Due: Mar 31, 2026 Test Mar 31, 2026 12:12 PM Graded 60.00 /60 Quiz 3 Due: Mar 24, 2026 Test Mar 24, 2026 12:11 PM Graded 10.00 /10 Quiz 2 Due: Mar 17, 2026 Test Mar 17, 2026 12:09 PM Graded 30.00 /30 Quiz 1 Due: Mar 10, 2026 Test Mar 10, 2026 12:10 PM Graded 30.00 /30 AI as a Silver Bullet? Due: Mar 22, 2026 Survey Mar 3, 2026 10:59 AM Graded Completed Academic Integrity Due: Mar 22, 2026 Assignment Mar 5, 2026 8:13 PM Submitted - Needs Grading Final Exam Upcoming - Lab Upcoming - /15 Lecture Upcoming - /10 Open Source PR Due: May 20, 2026 Assignment Upcoming - /6 Overall Upcoming - Participation Bonus Upcoming - /1 Project Bonus Upcoming - /10,000 Sprint1 Upcoming - /10 SPRINT2 Upcoming - /10,000 Total 252.50 /255 Weighted Total - Submission Receipts 1",
+              "text": "My Grades Content Order by: Course Order Last Activity Due Date (Latest First) Due Date (Oldest First) All Graded Upcoming Submitted Item Last Activity Grade Status Quiz 8 Due: Apr 28, 2026 Test Apr 28, 2026 12:10 PM Graded 30.00 /30 Quiz 7 Due: Apr 21, 2026 Test Apr 21, 2026 12:09 PM Graded 50.00 /50 Quiz 6 Due: Apr 14, 2026 Test Apr 14, 2026 12:10 PM Graded 60.00 /60 Quiz 5 Due: Apr 7, 2026 Test Apr 7, 2026 12:15 PM Graded 8.00 /10 Selected topic Apr 7, 2026 11:14 AM Graded 3 milestone1 Apr 7, 2026 11:01 AM Graded 4.50 /5 Quiz 4 Due: Mar 31, 2026 Test Mar 31, 2026 12:12 PM Graded 60.00 /60 Quiz 3 Due: Mar 24, 2026 Test Mar 24, 2026 12:11 PM Graded 10.00 /10 Quiz 2 Due: Mar 17, 2026 Test Mar 17, 2026 12:09 PM Graded 30.00 /30 Quiz 1 Due: Mar 10, 2026 Test Mar 10, 2026 12:10 PM Graded 30.00 /30 AI as a Silver Bullet? Due: Mar 22, 2026 Survey Mar 3, 2026 10:59 AM Graded Completed Academic Integrity Due: Mar 22, 2026 Assignment Mar 5, 2026 8:13 PM Submitted - Needs Grading Final Exam Upcoming - Lab Upcoming - /15 Lecture Upcoming - /10 Open Source PR Due: May 20, 2026 Assignment Upcoming - /6 Overall Upcoming - Participation Bonus Upcoming - /1 Project Bonus Upcoming - /10,000 SPRINT2 Upcoming - /10,000 Total 292.50 /295 Weighted Total - Submission Receipts 1",
               "links": [
                 {
                   "text": "1",
@@ -3384,7 +3638,7 @@ HTML长度: 4154 字符
               ]
             }
           ],
-          "content_text": "My Grades Content Order by: Course Order Last Activity Due Date (Latest First) Due Date (Oldest First) All Graded Upcoming Submitted Item Last Activity Grade Status Quiz 7 Due: Apr 21, 2026 Test Apr 21, 2026 12:09 PM Graded 50.00 /50 Quiz 6 Due: Apr 14, 2026 Test Apr 14, 2026 12:10 PM Graded 60.00 /60 Quiz 5 Due: Apr 7, 2026 Test Apr 7, 2026 12:15 PM Graded 8.00 /10 Selected topic Apr 7, 2026 11:14 AM Graded 3 milestone1 Apr 7, 2026 11:01 AM Graded 4.50 /5 Quiz 4 Due: Mar 31, 2026 Test Mar 31, 2026 12:12 PM Graded 60.00 /60 Quiz 3 Due: Mar 24, 2026 Test Mar 24, 2026 12:11 PM Graded 10.00 /10 Quiz 2 Due: Mar 17, 2026 Test Mar 17, 2026 12:09 PM Graded 30.00 /30 Quiz 1 Due: Mar 10, 2026 Test Mar 10, 2026 12:10 PM Graded 30.00 /30 AI as a Silver Bullet? Due: Mar 22, 2026 Survey Mar 3, 2026 10:59 AM Graded Completed Academic Integrity Due: Mar 22, 2026 Assignment Mar 5, 2026 8:13 PM Submitted - Needs Grading Final Exam Upcoming - Lab Upcoming - /15 Lecture Upcoming - /10 Open Source PR Due: May 20, 2026 Assignment Upcoming - /6 Overall Upcoming - Participation Bonus Upcoming - /1 Project Bonus Upcoming - /10,000 Sprint1 Upcoming - /10 SPRINT2 Upcoming - /10,000 Total 252.50 /255 Weighted Total - Submission Receipts 1"
+          "content_text": "My Grades Content Order by: Course Order Last Activity Due Date (Latest First) Due Date (Oldest First) All Graded Upcoming Submitted Item Last Activity Grade Status Quiz 8 Due: Apr 28, 2026 Test Apr 28, 2026 12:10 PM Graded 30.00 /30 Quiz 7 Due: Apr 21, 2026 Test Apr 21, 2026 12:09 PM Graded 50.00 /50 Quiz 6 Due: Apr 14, 2026 Test Apr 14, 2026 12:10 PM Graded 60.00 /60 Quiz 5 Due: Apr 7, 2026 Test Apr 7, 2026 12:15 PM Graded 8.00 /10 Selected topic Apr 7, 2026 11:14 AM Graded 3 milestone1 Apr 7, 2026 11:01 AM Graded 4.50 /5 Quiz 4 Due: Mar 31, 2026 Test Mar 31, 2026 12:12 PM Graded 60.00 /60 Quiz 3 Due: Mar 24, 2026 Test Mar 24, 2026 12:11 PM Graded 10.00 /10 Quiz 2 Due: Mar 17, 2026 Test Mar 17, 2026 12:09 PM Graded 30.00 /30 Quiz 1 Due: Mar 10, 2026 Test Mar 10, 2026 12:10 PM Graded 30.00 /30 AI as a Silver Bullet? Due: Mar 22, 2026 Survey Mar 3, 2026 10:59 AM Graded Completed Academic Integrity Due: Mar 22, 2026 Assignment Mar 5, 2026 8:13 PM Submitted - Needs Grading Final Exam Upcoming - Lab Upcoming - /15 Lecture Upcoming - /10 Open Source PR Due: May 20, 2026 Assignment Upcoming - /6 Overall Upcoming - Participation Bonus Upcoming - /1 Project Bonus Upcoming - /10,000 SPRINT2 Upcoming - /10,000 Total 292.50 /295 Weighted Total - Submission Receipts 1"
         }
       ],
       "upload_assignments": [
