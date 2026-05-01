@@ -85,14 +85,22 @@ class EmailService:
 
             write_mail_result(scrape_result)
 
-            return {
-                'success': True,
-                'message': f'邮件爬取完成，共 {scrape_result.get("total", 0)} 封邮件，本次获取 {len(scrape_result.get("messages", []))} 封',
-                'data': {
-                    'total': scrape_result.get('total', 0),
-                    'synced': len(scrape_result.get('messages', [])),
-                },
-            }
+            sync_result = self.email_handle.handle_sync_messages(
+                user_id=user_id,
+                messages=scrape_result.get('messages', []),
+            )
+
+            if sync_result['success']:
+                return {
+                    'success': True,
+                    'message': sync_result['message'],
+                    'data': {
+                        'total': scrape_result.get('total', 0),
+                        'synced': len(scrape_result.get('messages', [])),
+                    },
+                }
+            else:
+                return sync_result
 
         except Exception as e:
             logger.error(f"同步邮件数据失败: {str(e)}")

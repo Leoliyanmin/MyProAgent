@@ -2,9 +2,11 @@ from local_backend.database.code.operations.database_email_operations import (
     EmailAccountOperations,
     EmailMessageOperations,
 )
+from local_backend.database.code.command.database_command import create_category, list_categories_by_user
 from typing import Optional, Dict, List
 import json
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +15,26 @@ class EmailHandle:
     def __init__(self):
         self.account_ops = EmailAccountOperations()
         self.message_ops = EmailMessageOperations()
+
+    def _ensure_mail_category(self, user_id: str) -> int:
+        categories = list_categories_by_user(user_id)
+        for cat in categories:
+            if cat['category_kind'] == 'mail':
+                return cat['category_id']
+        created_at = time.strftime('%Y-%m-%d %H:%M:%S')
+        return create_category(
+            user_id=user_id,
+            category_kind='mail',
+            category_title='邮件收件箱',
+            category_content=None,
+            category_link=None,
+            category_source='email',
+            category_external_id=None,
+            category_term=None,
+            category_meta_json=None,
+            category_updated_at=created_at,
+            category_created_at=created_at,
+        )
 
     def handle_bind_email(
         self,
@@ -66,10 +88,12 @@ class EmailHandle:
         messages: List[Dict],
     ) -> Dict:
         try:
+            category_id = self._ensure_mail_category(user_id)
             synced_messages = []
             for msg in messages:
                 msg_id = self.message_ops.create_or_update_message(
                     user_id=user_id,
+                    category_id=category_id,
                     mail_id=msg.get('mail_id', ''),
                     subject=msg.get('subject', ''),
                     sender=msg.get('sender', ''),

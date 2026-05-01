@@ -1,10 +1,11 @@
 import imaplib
-import email
+from email import message_from_bytes
+from email.header import decode_header
+from email.utils import parsedate_to_datetime
+from email.message import Message
 import os
 import ssl
 import traceback
-from email.header import decode_header
-from email.utils import parsedate_to_datetime
 from typing import Dict, List, Optional, Any
 import logging
 from datetime import datetime, timedelta
@@ -79,7 +80,7 @@ def _decode_mime_header(header_value: Optional[str]) -> str:
     return " ".join(result).strip()
 
 
-def _extract_email_body(msg: email.message.Message, max_size: int = 10240) -> str:
+def _extract_email_body(msg: Message, max_size: int = 10240) -> str:
     body = ""
     if msg.is_multipart():
         for part in msg.walk():
@@ -206,7 +207,7 @@ class MailScraper:
         for msg_id in message_ids:
             _, msg_data = conn.fetch(msg_id, "(FLAGS BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE)])")
             raw_header = msg_data[0][1] if msg_data and len(msg_data[0]) > 1 else b""
-            msg = email.message_from_bytes(raw_header)
+            msg = message_from_bytes(raw_header)
             sender = _decode_mime_header(msg.get("From", ""))
             subject = _decode_mime_header(msg.get("Subject", ""))
             date_str = _parse_email_date(msg.get("Date", ""))
@@ -241,7 +242,7 @@ class MailScraper:
         for msg_id in message_ids:
             _, msg_data = conn.fetch(msg_id, "(FLAGS BODY.PEEK[])")
             raw_email = msg_data[0][1] if msg_data and len(msg_data[0]) > 1 else b""
-            msg = email.message_from_bytes(raw_email)
+            msg = message_from_bytes(raw_email)
             sender = _decode_mime_header(msg.get("From", ""))
             subject = _decode_mime_header(msg.get("Subject", ""))
             date_str = _parse_email_date(msg.get("Date", ""))
@@ -275,7 +276,7 @@ class MailScraper:
         for msg_id in message_ids:
             _, msg_data = conn.fetch(msg_id, "(FLAGS BODY.PEEK[])")
             raw_email = msg_data[0][1] if msg_data and len(msg_data[0]) > 1 else b""
-            msg = email.message_from_bytes(raw_email)
+            msg = message_from_bytes(raw_email)
             sender = _decode_mime_header(msg.get("From", ""))
             subject = _decode_mime_header(msg.get("Subject", ""))
             date_str = _parse_email_date(msg.get("Date", ""))

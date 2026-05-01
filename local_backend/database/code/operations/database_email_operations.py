@@ -68,6 +68,7 @@ class EmailMessageOperations:
     def create_or_update_message(
         self,
         user_id: str,
+        category_id: int,
         mail_id: str,
         subject: str,
         sender: str,
@@ -98,7 +99,7 @@ class EmailMessageOperations:
             created_at = time.strftime('%Y-%m-%d %H:%M:%S')
             return create_data(
                 user_id=user_id,
-                data_category_id=0,
+                data_category_id=category_id,
                 data_content_type='mail',
                 data_classification_code=4,
                 data_title=subject,

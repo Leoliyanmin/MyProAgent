@@ -390,9 +390,9 @@ _init_bundle_LOCALE_SETTINGS();
          class="courseArrow"       onClick="page.ContextMenu.changeArrowInBreadcrumb(1, event );">
 <span class="contextMenuContainer" style=" display: inline;" bb:menuGeneratorURL="/webapps/blackboard/execute/getCrossCourseMenuHTML?course_id=_8012_1" bb:navItem="" bb:contextParameters="" bb:menuOrder="" bb:overwriteNavItems="" bb:beforeShowFunc="">
    
-  <a  id="cmlink_c9d6cb41b21b46c9be8582ff10feda7e" role="button" onfocus="page.ContextMenu.LI(event, 'cmdiv_c9d6cb41b21b46c9be8582ff10feda7e',false);" onmouseover="page.ContextMenu.LI(event, 'cmdiv_c9d6cb41b21b46c9be8582ff10feda7e',false);" class="cmimg editmode jsInit  " href="#contextMenu" title="Course-to-Course Navigation"> <img src="/images/ci/icons/cmlink_generic.gif" alt="Course-to-Course Navigation" ></a>
-  <div id="cmdiv_c9d6cb41b21b46c9be8582ff10feda7e" class="cmdiv" style="display: none;">
-   <ul id="cmul0_c9d6cb41b21b46c9be8582ff10feda7e"> 
+  <a  id="cmlink_f2d361c812f74f709063818a20651be8" role="button" onfocus="page.ContextMenu.LI(event, 'cmdiv_f2d361c812f74f709063818a20651be8',false);" onmouseover="page.ContextMenu.LI(event, 'cmdiv_f2d361c812f74f709063818a20651be8',false);" class="cmimg editmode jsInit  " href="#contextMenu" title="Course-to-Course Navigation"> <img src="/images/ci/icons/cmlink_generic.gif" alt="Course-to-Course Navigation" ></a>
+  <div id="cmdiv_f2d361c812f74f709063818a20651be8" class="cmdiv" style="display: none;">
+   <ul id="cmul0_f2d361c812f74f709063818a20651be8"> 
     <li class="contextmenubar_top">
       <a href="#close" class="close-menu">
         <span class="close-contextmenu" data-icon="X" role="presentation" aria-hidden="true"></span>
@@ -836,7 +836,7 @@ handleAchievements(jsonArray);
                                                              page.decoratePageBanner();
                                                              attemptInlineGrader = new attemptGrading.inlineGrader( 'currentAttempt', '', '', '', 'false' );
                                                              attemptListInlineGrader = new inlineGraderList.keyboardAccessible( 'currentAttempt_attemptListButton', 'currentAttempt_attemptList' );
-                                                             page.ContextMenu.hideMenuDiv('c9d6cb41b21b46c9be8582ff10feda7e');
+                                                             page.ContextMenu.hideMenuDiv('f2d361c812f74f709063818a20651be8');
                                                              new page.PageHelpToggler(true, 'Help is On: Click to hide page help.', 'Help is Off: Click to show page help.', false );
                                                              breadcrumbs.rightMostNavItem = '';
                                                              breadcrumbs.rightMostParentURL = '/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_593810_1&mode=reset';
@@ -849,7 +849,7 @@ handleAchievements(jsonArray);
                                                              new page.PaletteController('myGroups', 'myGroups_link', false, false);
                                                              theCourseMenu = new courseMenu.CourseMenu('/webapps/blackboard/execute/doCourseMenuAction', '/webapps/blackboard/execute/getCourseMenuContextMenu');
                                                              tool_service.init ('300000', 'Suppress-Session-Timestamp-Update' );
-                                                             cookieConsent = new CookieConsent('/webapps/privacy-disclosure/'); cookieConsent.checkCookieAcceptance( 'blackboard.platform.security.NonceUtil.nonce=82e53b70-aa00-46c0-8516-180a6c3b0d6a',true );
+                                                             cookieConsent = new CookieConsent('/webapps/privacy-disclosure/'); cookieConsent.checkCookieAcceptance( 'blackboard.platform.security.NonceUtil.nonce=2a9b552c-57c9-49ca-9e31-e7104eed6571',true );
                                                              if (typeof(initEditors) == 'function') { initEditors(); }; 
                                                              if (window['org'] && window['org']['owasp']) { org.owasp.esapi.ESAPI.initialize(); }; 
                                                              quickLinks.createHelper();
