@@ -1,0 +1,1630 @@
+========================================
+TIS 爬取结果
+========================================
+时间: 2026-04-30 17:02:38
+用户: 陈子严
+院系: 计算机科学与工程系
+学期: 2026春季
+周次: 10
+课程总数: 9
+
+========================================
+原始用户信息
+========================================
+{
+  "yhdm": "12312202",
+  "xm": "陈子严",
+  "xm_en": "Chen Ziyan",
+  "kyf": "1",
+  "id": "0393BD1209E9E985E063CA0412AC58AE9KNTVAAZ5N",
+  "bmdm": "020070",
+  "bmmc": "计算机科学与工程系",
+  "bmmc_en": "Department of Computer Science and Engineering",
+  "sfxs": "1",
+  "sfzx": "1",
+  "sfzj": "1",
+  "sfzc": "0",
+  "pyccm": "03",
+  "pylx": "1",
+  "lxdh": "13965381002",
+  "sfytxxjk": "0",
+  "username": "12312202",
+  "loginType": "cas",
+  "yhsf": "03",
+  "authorities": [
+    {
+      "authority": "160000031"
+    },
+    {
+      "authority": "160000032"
+    },
+    {
+      "authority": "160000033"
+    },
+    {
+      "authority": "160000034"
+    },
+    {
+      "authority": "160000035"
+    },
+    {
+      "authority": "1620"
+    },
+    {
+      "authority": "1622"
+    },
+    {
+      "authority": "1625"
+    },
+    {
+      "authority": "160000004"
+    },
+    {
+      "authority": "1626"
+    },
+    {
+      "authority": "00701"
+    },
+    {
+      "authority": "00703"
+    },
+    {
+      "authority": "00203"
+    },
+    {
+      "authority": "00705"
+    },
+    {
+      "authority": "00205"
+    },
+    {
+      "authority": "06020403"
+    },
+    {
+      "authority": "10267"
+    },
+    {
+      "authority": "029999"
+    },
+    {
+      "authority": "1020009991"
+    },
+    {
+      "authority": "1020099"
+    },
+    {
+      "authority": "102008"
+    },
+    {
+      "authority": "1020999"
+    },
+    {
+      "authority": "102999"
+    },
+    {
+      "authority": "SQ_1_CDJY_CK"
+    },
+    {
+      "authority": "10278"
+    },
+    {
+      "authority": "022180"
+    },
+    {
+      "authority": "00215"
+    },
+    {
+      "authority": "00216"
+    },
+    {
+      "authority": "SQ_1_CDJY_CK"
+    },
+    {
+      "authority": "102120"
+    },
+    {
+      "authority": "SQ_1_CDJY_CK"
+    },
+    {
+      "authority": "SQ_1_CDJY_CK"
+    },
+    {
+      "authority": "10204"
+    },
+    {
+      "authority": "00210"
+    },
+    {
+      "authority": "02009"
+    },
+    {
+      "authority": "06020402"
+    },
+    {
+      "authority": "06020401"
+    },
+    {
+      "authority": "06020403"
+    },
+    {
+      "authority": "06020403"
+    },
+    {
+      "authority": "06020402"
+    },
+    {
+      "authority": "06020401"
+    },
+    {
+      "authority": "06020402"
+    },
+    {
+      "authority": "06020403"
+    },
+    {
+      "authority": "06020401"
+    },
+    {
+      "authority": "00208"
+    },
+    {
+      "authority": "10223"
+    },
+    {
+      "authority": "10202"
+    },
+    {
+      "authority": "10203"
+    },
+    {
+      "authority": "10205"
+    }
+  ],
+  "accountNonExpired": true,
+  "accountNonLocked": true,
+  "credentialsNonExpired": true,
+  "enabled": true,
+  "rolecode": [
+    "01"
+  ],
+  "role": [
+    {
+      "jsdm": "01",
+      "jsmc": "学生（本）",
+      "jsmc_en": null,
+      "cjr": null,
+      "sfsyjs": null,
+      "xtdm": "jwxt",
+      "gljb": null,
+      "sjjs": null,
+      "kyf": null,
+      "yhdm": "12312202",
+      "sfxj": "0",
+      "mainpage": null,
+      "authManagerEntitySet": null,
+      "cjrxm": null
+    }
+  ],
+  "roleAuth": {
+    "01": [
+      {
+        "qxdm": "16000001",
+        "xtdm": "jwxt",
+        "fqxdm": "16",
+        "qxmc": "大学生创新训练计划申请",
+        "qxmc_en": "大学生创新训练计划申请",
+        "xssx": "48",
+        "icon": "iconchuangxinxing",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "16000003",
+        "xtdm": "jwxt",
+        "fqxdm": "16",
+        "qxmc": "大创延续资助项目申请",
+        "qxmc_en": "大创延续资助项目申请",
+        "xssx": "50",
+        "icon": "iconshenqing",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "160000031",
+        "xtdm": "jwxt",
+        "fqxdm": "16000003",
+        "qxmc": "延续项目立项申请",
+        "qxmc_en": "延续项目立项申请",
+        "url": "/bdpz/queryPzSq/494AF40CD1236D0FE0631F1712ACB842",
+        "xssx": "60",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "160000032",
+        "xtdm": "jwxt",
+        "fqxdm": "16000003",
+        "qxmc": "延续项目中期检查申请",
+        "qxmc_en": "延续项目中期检查申请",
+        "url": "/bdpz/queryPzSq/494AF40CD1246D0FE0631F1712ACB842",
+        "xssx": "61",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "160000033",
+        "xtdm": "jwxt",
+        "fqxdm": "16000003",
+        "qxmc": "延续项目结题申请",
+        "qxmc_en": "延续项目结题申请",
+        "url": "/bdpz/queryPzSq/494AF40CD1256D0FE0631F1712ACB842",
+        "xssx": "62",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "160000034",
+        "xtdm": "jwxt",
+        "fqxdm": "16000003",
+        "qxmc": "延续项目变更申请",
+        "qxmc_en": "延续项目变更申请",
+        "url": "/bdpz/queryPzSq/4D4415D50DB39605E0631F1712AC67E3",
+        "xssx": "63",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "160000035",
+        "xtdm": "jwxt",
+        "fqxdm": "16000003",
+        "qxmc": "延续项目个人参与项目查看",
+        "qxmc_en": "延续项目个人参与项目查看",
+        "url": "/bdpz/queryPzCx/494AF40CD1236D0FE0631F1712ACB842",
+        "xssx": "64",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "1620",
+        "xtdm": "jwxt",
+        "fqxdm": "16000001",
+        "qxmc": "立项申请",
+        "qxmc_en": "立项申请",
+        "url": "/bdpz/queryPzSq/2E9D84F2BEA83247E0630100007FC639",
+        "xssx": "65",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "1622",
+        "xtdm": "jwxt",
+        "fqxdm": "16000001",
+        "qxmc": "中期检查申请",
+        "qxmc_en": "中期检查申请",
+        "url": "/bdpz/queryPzSq/2E7B49AA18587C78E0630100007F04ED",
+        "xssx": "66",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "1625",
+        "xtdm": "jwxt",
+        "fqxdm": "16000001",
+        "qxmc": "结题申请",
+        "qxmc_en": "结题申请",
+        "url": "/bdpz/queryPzSq/2EA18958A8786085E0630100007F131C",
+        "xssx": "67",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "160000004",
+        "xtdm": "jwxt",
+        "fqxdm": "16000001",
+        "qxmc": "项目变更申请",
+        "qxmc_en": "项目变更申请",
+        "url": "/bdpz/queryPzSq/486D45494EEE3412E0631F1712AC0574",
+        "xssx": "68",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "1626",
+        "xtdm": "jwxt",
+        "fqxdm": "16000001",
+        "qxmc": "大创项目个人参与项目查看",
+        "qxmc_en": "大创项目个人参与项目查看",
+        "url": "/bdpz/queryPzCx/2E9D84F2BEA83247E0630100007FC639",
+        "xssx": "69",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "00701",
+        "xtdm": "jwxt",
+        "fqxdm": "007",
+        "qxmc": "我要选课",
+        "url": "/Xsxk/query/1",
+        "xssx": "759",
+        "icon": "iconxueshengxuanke",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "00703",
+        "xtdm": "jwxt",
+        "fqxdm": "007",
+        "qxmc": "加课申请",
+        "url": "/Xsxksq/query/1/xsbxsq",
+        "xssx": "813",
+        "icon": "iconbukeguanli-shangkexueyuan",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "00203",
+        "xtdm": "jwxt",
+        "fqxdm": "002",
+        "qxmc": "个人考试查询",
+        "url": "/kscxtj/queryXskscxByXh",
+        "xssx": "859",
+        "icon": "iconchaxuntongji1",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "00705",
+        "xtdm": "jwxt",
+        "fqxdm": "007",
+        "qxmc": "4-8周特殊W退课申请",
+        "qxmc_en": "退课申请",
+        "url": "/Xsxksq/query/1/xstxsq",
+        "xssx": "864",
+        "icon": "iconxuankeguanli3",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "00205",
+        "xtdm": "jwxt",
+        "fqxdm": "002",
+        "qxmc": "等级考试成绩查询（学生）",
+        "url": "/Sljks/querycxtj/1",
+        "xssx": "885",
+        "icon": "iconrenwuguanli9",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "002",
+        "xtdm": "jwxt",
+        "fqxdm": "-1",
+        "qxmc": "业务查询",
+        "xssx": "1541",
+        "icon": "iconchaxuntongji",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#E4AA52"
+      },
+      {
+        "qxdm": "102",
+        "xtdm": "jwxt",
+        "fqxdm": "-1",
+        "qxmc": "业务办理",
+        "xssx": "1560",
+        "icon": "iconchuangyezhe",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#5894C8"
+      },
+      {
+        "qxdm": "007",
+        "xtdm": "jwxt",
+        "fqxdm": "-1",
+        "qxmc": "选课业务",
+        "xssx": "1569",
+        "icon": "iconxuanke2",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#8F994E"
+      },
+      {
+        "qxdm": "16",
+        "xtdm": "jwxt",
+        "fqxdm": "-1",
+        "qxmc": "大学生创新训练计划",
+        "qxmc_en": "Innovation and Entrepreneurship",
+        "xssx": "1726",
+        "icon": "iconicon-test",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#FF9900"
+      },
+      {
+        "qxdm": "06020403",
+        "xtdm": "jwxt",
+        "fqxdm": "060204",
+        "qxmc": "查看",
+        "url": "06020403",
+        "xssx": "2310",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "10267",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "校外学分认定申请",
+        "qxmc_en": "校外学分认定申请",
+        "url": "/jljh/xwxfrd/queryXwxfrdSq/1/1/jljh_xwxfrdsq",
+        "xssx": "9999",
+        "icon": "iconlixiangshenqing",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "029999",
+        "xtdm": "jwxt",
+        "fqxdm": "002",
+        "qxmc": "2022秋季二级制课程查询",
+        "qxmc_en": "二级制课程查询",
+        "url": "/browserRedirect/queryReport?viewlet=byyt/ksgl/学生选择二级记分制学生名单.cpt&__bypagesize__=false",
+        "xssx": "9999",
+        "icon": "iconline-normal",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "1020009991",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "校外学分认定（辅修）",
+        "qxmc_en": "校外学分认定（辅修）",
+        "url": "/jljh/xwxfrd/queryXwxfrdSq/1/1/jljh_xwxfrdsq/1",
+        "xssx": "9999",
+        "icon": "iconlixiangshenqing",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "1020099",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "大学生创新训练计划",
+        "qxmc_en": "大学生创新训练计划",
+        "url": "/managelist/16",
+        "xssx": "9999",
+        "icon": "iconchuangxinxing",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "102008",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "成果收集申请",
+        "qxmc_en": "成果收集申请",
+        "url": "/cgsj/queryCgsjsq",
+        "xssx": "9999",
+        "icon": "iconkechengguanli1",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "1020999",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "放弃辅修",
+        "qxmc_en": "放弃辅修",
+        "url": "/fqfxzy/query/1/0",
+        "xssx": "9999",
+        "icon": "iconxinzengxinjian",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "102999",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "特色班申请",
+        "qxmc_en": "特色班申请",
+        "url": "/xs/tsbsq/TXjTsbsq/query/sq/tsbsq_xs/1",
+        "xssx": "9999",
+        "icon": "iconbanji",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "延续资助项目立项模板@160000031",
+        "xtdm": "jwxt",
+        "fqxdm": "160000031",
+        "qxmc": "延续资助项目立项模板",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "大创立项申报书模板@1620",
+        "xtdm": "jwxt",
+        "fqxdm": "1620",
+        "qxmc": "大创立项申报书模板",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "SQ_1_CDJY_CK",
+        "xtdm": "jwxt",
+        "fqxdm": "14102",
+        "qxmc": "查看流程",
+        "url": "/CDJY_BUTTON",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "10278",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "评教任务",
+        "url": "studentAssess/studentEvaluationTaskPage",
+        "xssx": "9999",
+        "icon": "iconpingjiao",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "022180",
+        "xtdm": "jwxt",
+        "fqxdm": "002",
+        "qxmc": "学业修读情况查询",
+        "url": "/cjgl/grcjcx/cjxqList",
+        "xssx": "9999",
+        "icon": "iconzhuanyepeiyangfangan",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "00215",
+        "xtdm": "jwxt",
+        "fqxdm": "002",
+        "qxmc": "全校课表(本研)",
+        "url": "/Xsxktz/queryRwxxcxList/3",
+        "xssx": "9999",
+        "icon": "iconquanxiaopeiyangfanganchakan",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "00216",
+        "xtdm": "jwxt",
+        "fqxdm": "002",
+        "qxmc": "上课节次时间查询",
+        "url": "/browserRedirect/queryReport?viewlet=byyt/zyzx/上课节次时间查询.cpt&__bypagesize__=false",
+        "xssx": "9999",
+        "icon": "iconshijianzhongbiao",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "SQ_1_CDJY_CK",
+        "xtdm": "jwxt",
+        "fqxdm": "1401",
+        "qxmc": "查看流程",
+        "url": "/CDJY_BUTTON",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "102120",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "保研申请",
+        "url": "/xjgl/yjstm/xsbysq/go",
+        "xssx": "9999",
+        "icon": "iconlixiangshenqing",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "SQ_1_CDJY_CK",
+        "xtdm": "jwxt",
+        "fqxdm": "10204",
+        "qxmc": "查看流程",
+        "url": "/CDJY_BUTTON",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "SQ_1_CDJY_CK",
+        "xtdm": "jwxt",
+        "fqxdm": "10113",
+        "qxmc": "查看流程",
+        "url": "/CDJY_BUTTON",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "10204",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "场地借用申请",
+        "url": "/cdjy/query/1/sq",
+        "xssx": "9999",
+        "icon": "iconchangditouying",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "00210",
+        "xtdm": "jwxt",
+        "fqxdm": "002",
+        "qxmc": "查看课程",
+        "url": "/kck/kcxxwh/getXsck",
+        "xssx": "9999",
+        "icon": "iconkecheng",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "02009",
+        "xtdm": "jwxt",
+        "fqxdm": "002",
+        "qxmc": "绩点排名查询",
+        "url": "cjgl/xscjgl/xsgrcjcx/xspjxfjcx",
+        "xssx": "9999",
+        "icon": "iconchaxuntongji2",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "06020402",
+        "xtdm": "jwxt",
+        "fqxdm": "00210",
+        "qxmc": "公共",
+        "url": "06020402",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "06020401",
+        "xtdm": "jwxt",
+        "fqxdm": "00210",
+        "qxmc": "导出",
+        "url": "06020401",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "06020403",
+        "xtdm": "jwxt",
+        "fqxdm": "00210",
+        "qxmc": "查看",
+        "url": "06020403",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "06020403",
+        "xtdm": "jwxt",
+        "fqxdm": "00102",
+        "qxmc": "查看",
+        "url": "06020403",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "06020402",
+        "xtdm": "jwxt",
+        "fqxdm": "00102",
+        "qxmc": "公共",
+        "url": "06020402",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "06020401",
+        "xtdm": "jwxt",
+        "fqxdm": "00102",
+        "qxmc": "导出",
+        "url": "06020401",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "06020402",
+        "xtdm": "jwxt",
+        "fqxdm": "2707",
+        "qxmc": "公共",
+        "url": "06020402",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "06020403",
+        "xtdm": "jwxt",
+        "fqxdm": "2707",
+        "qxmc": "查看",
+        "url": "06020403",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "06020401",
+        "xtdm": "jwxt",
+        "fqxdm": "2707",
+        "qxmc": "导出",
+        "url": "06020401",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "00208",
+        "xtdm": "jwxt",
+        "fqxdm": "002",
+        "qxmc": "个人成绩查询",
+        "url": "cjgl/grcjcx/go/1",
+        "xssx": "9999",
+        "icon": "iconchengjiguanli2",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "10223",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "预毕业证明打印申请",
+        "url": "/xjgl/ybyzmdy/queryYbyzmdy/1",
+        "xssx": "9999",
+        "icon": "iconlixiangshenqing",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "延续资助项目结题模板@160000033",
+        "xtdm": "jwxt",
+        "fqxdm": "160000033",
+        "qxmc": "延续资助项目结题模板",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "延续资助项目中期检查模板@160000032",
+        "xtdm": "jwxt",
+        "fqxdm": "160000032",
+        "qxmc": "延续资助项目中期检查模板",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "大创中期检查模板@1622",
+        "xtdm": "jwxt",
+        "fqxdm": "1622",
+        "qxmc": "大创中期检查模板",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "大创结题模板@1625",
+        "xtdm": "jwxt",
+        "fqxdm": "1625",
+        "qxmc": "大创结题模板",
+        "xssx": "9999",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "qxlb": "1",
+        "sfsc": "0"
+      },
+      {
+        "qxdm": "10202",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "学籍异动申请",
+        "url": "/xjgl/ydsq/queryYdsqList?pylxTab=1",
+        "xssx": "11684",
+        "icon": "iconlixiangshenqing",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "10203",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "选专业学生申请",
+        "url": "/xjgl/zzygl/xssbForm",
+        "xssx": "11686",
+        "icon": "iconzhongxiushenqing",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      },
+      {
+        "qxdm": "10205",
+        "xtdm": "jwxt",
+        "fqxdm": "102",
+        "qxmc": "辅修专业申请",
+        "url": "/xjgl/fxzygl/xsfxzysq/1",
+        "xssx": "11690",
+        "icon": "iconziliao",
+        "kyf": "1",
+        "jsdm": "01",
+        "jsmc": "学生（本）",
+        "sfsc": "0",
+        "bgcolor": "#2d8cf0"
+      }
+    ]
+  },
+  "dataAuth": {
+    "01": {
+      "xiaoqus": [
+        ""
+      ],
+      "zys": [
+        ""
+      ],
+      "njs": [
+        ""
+      ],
+      "bmdms": [
+        ""
+      ],
+      "bjs": [
+        ""
+      ],
+      "jyss": [
+        ""
+      ],
+      "xms": [
+        ""
+      ]
+    }
+  },
+  "xkxg_xs": {
+    "xsid": "0393BD1209E9E985E063CA0412AC58AE9KNTVAAZ5N",
+    "xh": "12312202",
+    "xm": "陈子严",
+    "xm_en": "Chen Ziyan",
+    "xjnj": "2023",
+    "xjyxdm": "020070",
+    "xjzydm": "018",
+    "xjzyfxdm": null,
+    "bjdm": "0182301",
+    "bjnj": "2023",
+    "bjyxdm": "020070",
+    "bjzydm": "018",
+    "bjxqdm": "1",
+    "jxb": null,
+    "jxbnj": null,
+    "jxbyxdm": null,
+    "jxbzydm": null,
+    "jxbxqdm": null,
+    "sffxxs": "0",
+    "fxyxdm": null,
+    "fxzydm": null,
+    "fxbjdm": null,
+    "xjxqdm": "1",
+    "xjdldm": null,
+    "xjxbdm": "1",
+    "xjpyccdm": "03",
+    "xjsfzc": "0",
+    "pylx": "1",
+    "xjsfjf": "0",
+    "sfjljhs": "0",
+    "sfgcljrc": "0",
+    "sfzygcs": "0",
+    "sfpt": "0",
+    "wyyzm": "0",
+    "xjbyzt": null,
+    "xjsfzx": "1",
+    "xjxslbdm": null,
+    "xz": "4",
+    "sflxs": "0",
+    "sfwzyxs": "0",
+    "wzyyxdm": null,
+    "wzyzydm": null,
+    "wzybjdm": null,
+    "fxnj": null,
+    "wzynj": null
+  },
+  "userId": "0393BD1209E9E985E063CA0412AC58AE9KNTVAAZ5N"
+}
+
+========================================
+原始学期信息
+========================================
+{
+  "XNXQ_EN": "2026Spring",
+  "XN": "2025-2026",
+  "XNXQ": "2026春季",
+  "XQ": "2"
+}
+
+========================================
+原始课程数据
+========================================
+[
+  {
+    "id": null,
+    "xh": null,
+    "xm": null,
+    "xm_en": null,
+    "xn": null,
+    "xq": null,
+    "zc": null,
+    "qsjsz": null,
+    "xqj": null,
+    "jc": null,
+    "jsjc": "8",
+    "ksjc": "7",
+    "zylx": null,
+    "rwh": null,
+    "czsj": null,
+    "cddm": null,
+    "cdmc": null,
+    "cdmc_en": null,
+    "skjs": null,
+    "skjs_em": null,
+    "kcdm": null,
+    "kcmc": null,
+    "kcmc_em": null,
+    "ljkcdm": null,
+    "ljkcmc": null,
+    "ljkcmc_en": null,
+    "glsjid": null,
+    "xkfsdm": null,
+    "zyxxms": null,
+    "key": "xq1_jc4",
+    "kbxx": "计算机操作系统\n[张殷乾]\n[计算机操作系统-01班-英文]\n[1-15周][一教107][7-8节]",
+    "kbxx_en": "计算机操作系统\n[Zhang Yinqian]\n[Operating Systems-001]\n[1-15周][一教107][7-8节]",
+    "xnxqmc": null,
+    "xnxqmc_en": null,
+    "bjmc": null,
+    "bjmc_en": null,
+    "sksj": null,
+    "sksj_en": null,
+    "sxbj": null,
+    "xb": "2",
+    "sknr": null,
+    "pylx": "1"
+  },
+  {
+    "id": null,
+    "xh": null,
+    "xm": null,
+    "xm_en": null,
+    "xn": null,
+    "xq": null,
+    "zc": null,
+    "qsjsz": null,
+    "xqj": null,
+    "jc": null,
+    "jsjc": "10",
+    "ksjc": "9",
+    "zylx": null,
+    "rwh": null,
+    "czsj": null,
+    "cddm": null,
+    "cdmc": null,
+    "cdmc_en": null,
+    "skjs": null,
+    "skjs_em": null,
+    "kcdm": null,
+    "kcmc": null,
+    "kcmc_em": null,
+    "ljkcdm": null,
+    "ljkcmc": null,
+    "ljkcmc_en": null,
+    "glsjid": null,
+    "xkfsdm": null,
+    "zyxxms": null,
+    "key": "xq1_jc5",
+    "kbxx": "计算机操作系统\n[张殷乾]\n[计算机操作系统-01班-英文-1组]\n[1-15周][智华楼504机房][9-10节]",
+    "kbxx_en": "计算机操作系统\n[Zhang Yinqian]\n[Operating Systems-001A]\n[1-15周][智华楼504机房][9-10节]",
+    "xnxqmc": null,
+    "xnxqmc_en": null,
+    "bjmc": null,
+    "bjmc_en": null,
+    "sksj": null,
+    "sksj_en": null,
+    "sxbj": null,
+    "xb": "2",
+    "sknr": null,
+    "pylx": "1"
+  },
+  {
+    "id": null,
+    "xh": null,
+    "xm": null,
+    "xm_en": null,
+    "xn": null,
+    "xq": null,
+    "zc": null,
+    "qsjsz": null,
+    "xqj": null,
+    "jc": null,
+    "jsjc": "4",
+    "ksjc": "3",
+    "zylx": null,
+    "rwh": null,
+    "czsj": null,
+    "cddm": null,
+    "cdmc": null,
+    "cdmc_en": null,
+    "skjs": null,
+    "skjs_em": null,
+    "kcdm": null,
+    "kcmc": null,
+    "kcmc_em": null,
+    "ljkcdm": null,
+    "ljkcmc": null,
+    "ljkcmc_en": null,
+    "glsjid": null,
+    "xkfsdm": null,
+    "zyxxms": null,
+    "key": "xq2_jc2",
+    "kbxx": "软件工程\n[陶伊达]\n[软件工程-01班-英文]\n[1-15周][智华楼207][3-4节]",
+    "kbxx_en": "软件工程\n[Tao Yida]\n[Software Engineering-001]\n[1-15周][智华楼207][3-4节]",
+    "xnxqmc": null,
+    "xnxqmc_en": null,
+    "bjmc": null,
+    "bjmc_en": null,
+    "sksj": null,
+    "sksj_en": null,
+    "sxbj": null,
+    "xb": "5",
+    "sknr": null,
+    "pylx": "1"
+  },
+  {
+    "id": null,
+    "xh": null,
+    "xm": null,
+    "xm_en": null,
+    "xn": null,
+    "xq": null,
+    "zc": null,
+    "qsjsz": null,
+    "xqj": null,
+    "jc": null,
+    "jsjc": "6",
+    "ksjc": "5",
+    "zylx": null,
+    "rwh": null,
+    "czsj": null,
+    "cddm": null,
+    "cdmc": null,
+    "cdmc_en": null,
+    "skjs": null,
+    "skjs_em": null,
+    "kcdm": null,
+    "kcmc": null,
+    "kcmc_em": null,
+    "ljkcdm": null,
+    "ljkcmc": null,
+    "ljkcmc_en": null,
+    "glsjid": null,
+    "xkfsdm": null,
+    "zyxxms": null,
+    "key": "xq2_jc3",
+    "kbxx": "软件工程\n[赵耀]\n[软件工程-01班-英文-1组]\n[1-15周][智华楼508机房][5-6节]",
+    "kbxx_en": "软件工程\n[Zhao Yao]\n[Software Engineering-001A]\n[1-15周][智华楼508机房][5-6节]",
+    "xnxqmc": null,
+    "xnxqmc_en": null,
+    "bjmc": null,
+    "bjmc_en": null,
+    "sksj": null,
+    "sksj_en": null,
+    "sxbj": null,
+    "xb": "5",
+    "sknr": null,
+    "pylx": "1"
+  },
+  {
+    "id": null,
+    "xh": null,
+    "xm": null,
+    "xm_en": null,
+    "xn": null,
+    "xq": null,
+    "zc": null,
+    "qsjsz": null,
+    "xqj": null,
+    "jc": null,
+    "jsjc": "8",
+    "ksjc": "7",
+    "zylx": null,
+    "rwh": null,
+    "czsj": null,
+    "cddm": null,
+    "cdmc": null,
+    "cdmc_en": null,
+    "skjs": null,
+    "skjs_em": null,
+    "kcdm": null,
+    "kcmc": null,
+    "kcmc_em": null,
+    "ljkcdm": null,
+    "ljkcmc": null,
+    "ljkcmc_en": null,
+    "glsjid": null,
+    "xkfsdm": null,
+    "zyxxms": null,
+    "key": "xq3_jc4",
+    "kbxx": "计算机视觉\n[郑锋]\n[计算机视觉-01班-双语]\n[1-15周][智华楼207][7-8节]",
+    "kbxx_en": "计算机视觉\n[Zheng Feng]\n[Computer Vision-001]\n[1-15周][智华楼207][7-8节]",
+    "xnxqmc": null,
+    "xnxqmc_en": null,
+    "bjmc": null,
+    "bjmc_en": null,
+    "sksj": null,
+    "sksj_en": null,
+    "sxbj": null,
+    "xb": "4",
+    "sknr": null,
+    "pylx": "1"
+  },
+  {
+    "id": null,
+    "xh": null,
+    "xm": null,
+    "xm_en": null,
+    "xn": null,
+    "xq": null,
+    "zc": null,
+    "qsjsz": null,
+    "xqj": null,
+    "jc": null,
+    "jsjc": "10",
+    "ksjc": "9",
+    "zylx": null,
+    "rwh": null,
+    "czsj": null,
+    "cddm": null,
+    "cdmc": null,
+    "cdmc_en": null,
+    "skjs": null,
+    "skjs_em": null,
+    "kcdm": null,
+    "kcmc": null,
+    "kcmc_em": null,
+    "ljkcdm": null,
+    "ljkcmc": null,
+    "ljkcmc_en": null,
+    "glsjid": null,
+    "xkfsdm": null,
+    "zyxxms": null,
+    "key": "xq3_jc5",
+    "kbxx": "计算机视觉\n[郑锋]\n[计算机视觉-01班-双语-1组]\n[1-15周][智华楼509机房][9-10节]",
+    "kbxx_en": "计算机视觉\n[Zheng Feng]\n[Computer Vision-001A]\n[1-15周][智华楼509机房][9-10节]",
+    "xnxqmc": null,
+    "xnxqmc_en": null,
+    "bjmc": null,
+    "bjmc_en": null,
+    "sksj": null,
+    "sksj_en": null,
+    "sxbj": null,
+    "xb": "4",
+    "sknr": null,
+    "pylx": "1"
+  },
+  {
+    "id": null,
+    "xh": null,
+    "xm": null,
+    "xm_en": null,
+    "xn": null,
+    "xq": null,
+    "zc": null,
+    "qsjsz": null,
+    "xqj": null,
+    "jc": null,
+    "jsjc": "6",
+    "ksjc": "5",
+    "zylx": null,
+    "rwh": null,
+    "czsj": null,
+    "cddm": null,
+    "cdmc": null,
+    "cdmc_en": null,
+    "skjs": null,
+    "skjs_em": null,
+    "kcdm": null,
+    "kcmc": null,
+    "kcmc_em": null,
+    "ljkcdm": null,
+    "ljkcmc": null,
+    "ljkcmc_en": null,
+    "glsjid": null,
+    "xkfsdm": null,
+    "zyxxms": null,
+    "key": "xq5_jc3",
+    "kbxx": "体育VI\n[车晓曦]\n[体育VI-中文-乒乓球（进阶）1班]\n[1-15周][综合训练馆与学生活动中心三楼乒乓球馆][5-6节]",
+    "kbxx_en": "体育VI\n[Che Xiaoxi]\n[Physical EducationVI-038]\n[1-15周][综合训练馆与学生活动中心三楼乒乓球馆][5-6节]",
+    "xnxqmc": null,
+    "xnxqmc_en": null,
+    "bjmc": null,
+    "bjmc_en": null,
+    "sksj": null,
+    "sksj_en": null,
+    "sxbj": null,
+    "xb": "6",
+    "sknr": null,
+    "pylx": "1"
+  },
+  {
+    "id": null,
+    "xh": null,
+    "xm": null,
+    "xm_en": null,
+    "xn": null,
+    "xq": null,
+    "zc": null,
+    "qsjsz": null,
+    "xqj": null,
+    "jc": null,
+    "jsjc": "8",
+    "ksjc": "7",
+    "zylx": null,
+    "rwh": null,
+    "czsj": null,
+    "cddm": null,
+    "cdmc": null,
+    "cdmc_en": null,
+    "skjs": null,
+    "skjs_em": null,
+    "kcdm": null,
+    "kcmc": null,
+    "kcmc_em": null,
+    "ljkcdm": null,
+    "ljkcmc": null,
+    "ljkcmc_en": null,
+    "glsjid": null,
+    "xkfsdm": null,
+    "zyxxms": null,
+    "key": "xq5_jc4",
+    "kbxx": "计算机科学与技术前沿讲座 III\n[徐炀]\n[计算机科学与技术前沿讲座 III-01班-双语]\n[2-14双周][智华楼208][7-8节]",
+    "kbxx_en": "计算机科学与技术前沿讲座 III\n[Xu Yang]\n[Frontier Seminars in Computer Science and Technology III-001]\n[2-14双周][智华楼208][7-8节]",
+    "xnxqmc": null,
+    "xnxqmc_en": null,
+    "bjmc": null,
+    "bjmc_en": null,
+    "sksj": null,
+    "sksj_en": null,
+    "sxbj": null,
+    "xb": "3",
+    "sknr": null,
+    "pylx": "1"
+  },
+  {
+    "id": null,
+    "xh": null,
+    "xm": null,
+    "xm_en": null,
+    "xn": null,
+    "xq": null,
+    "zc": null,
+    "qsjsz": null,
+    "xqj": null,
+    "jc": null,
+    "jsjc": "10",
+    "ksjc": "9",
+    "zylx": null,
+    "rwh": null,
+    "czsj": null,
+    "cddm": null,
+    "cdmc": null,
+    "cdmc_en": null,
+    "skjs": null,
+    "skjs_em": null,
+    "kcdm": null,
+    "kcmc": null,
+    "kcmc_em": null,
+    "ljkcdm": null,
+    "ljkcmc": null,
+    "ljkcmc_en": null,
+    "glsjid": null,
+    "xkfsdm": null,
+    "zyxxms": null,
+    "key": "xq6_jc5",
+    "kbxx": "创新实践II\n[陈杉]\n[创新实践II-01班-双语]\n[1-15周][无地点][9-10节]",
+    "kbxx_en": "创新实践II\n[Chen Shan]\n[Group Projects II-001]\n[1-15周][无地点][9-10节]",
+    "xnxqmc": null,
+    "xnxqmc_en": null,
+    "bjmc": null,
+    "bjmc_en": null,
+    "sksj": null,
+    "sksj_en": null,
+    "sxbj": null,
+    "xb": "1",
+    "sknr": null,
+    "pylx": "1"
+  }
+]
+
+========================================
+整理后的课程表
+========================================
+{
+  "success": true,
+  "user": "陈子严",
+  "department": "计算机科学与工程系",
+  "term": "2026春季",
+  "week": "10",
+  "total_courses": 9,
+  "schedule": {
+    "星期一": [
+      {
+        "title": "计算机操作系统",
+        "teacher": "张殷乾",
+        "weeks": "1-15周",
+        "location": "一教107",
+        "periods": "7-8节",
+        "start": "16:20",
+        "end": "18:10"
+      },
+      {
+        "title": "计算机操作系统",
+        "teacher": "张殷乾",
+        "weeks": "1-15周",
+        "location": "智华楼504机房",
+        "periods": "9-10节",
+        "start": "19:00",
+        "end": "20:50"
+      }
+    ],
+    "星期二": [
+      {
+        "title": "软件工程",
+        "teacher": "陶伊达",
+        "weeks": "1-15周",
+        "location": "智华楼207",
+        "periods": "3-4节",
+        "start": "10:20",
+        "end": "12:10"
+      },
+      {
+        "title": "软件工程",
+        "teacher": "赵耀",
+        "weeks": "1-15周",
+        "location": "智华楼508机房",
+        "periods": "5-6节",
+        "start": "14:00",
+        "end": "15:50"
+      }
+    ],
+    "星期三": [
+      {
+        "title": "计算机视觉",
+        "teacher": "郑锋",
+        "weeks": "1-15周",
+        "location": "智华楼207",
+        "periods": "7-8节",
+        "start": "16:20",
+        "end": "18:10"
+      },
+      {
+        "title": "计算机视觉",
+        "teacher": "郑锋",
+        "weeks": "1-15周",
+        "location": "智华楼509机房",
+        "periods": "9-10节",
+        "start": "19:00",
+        "end": "20:50"
+      }
+    ],
+    "星期五": [
+      {
+        "title": "体育VI",
+        "teacher": "车晓曦",
+        "weeks": "1-15周",
+        "location": "综合训练馆与学生活动中心三楼乒乓球馆",
+        "periods": "5-6节",
+        "start": "14:00",
+        "end": "15:50"
+      },
+      {
+        "title": "计算机科学与技术前沿讲座 III",
+        "teacher": "徐炀",
+        "weeks": "2-14双周",
+        "location": "智华楼208",
+        "periods": "7-8节",
+        "start": "16:20",
+        "end": "18:10"
+      }
+    ],
+    "星期六": [
+      {
+        "title": "创新实践II",
+        "teacher": "陈杉",
+        "weeks": "1-15周",
+        "location": "无地点",
+        "periods": "9-10节",
+        "start": "19:00",
+        "end": "20:50"
+      }
+    ]
+  }
+}

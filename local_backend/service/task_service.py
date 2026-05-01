@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from business.task_logic import TaskLogic
-from database.code.database_task_handle import TaskHandle
+from database.code.handle.database_task_handle import TaskHandle
 from logging_config import get_logger
 
 # 创建日志器

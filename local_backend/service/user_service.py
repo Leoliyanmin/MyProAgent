@@ -3,8 +3,9 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from business.auth_service import AuthService
-from database.code.database_user_handle import UserHandle
+from database.code.handle.database_user_handle import UserHandle
 import httpx
+import requests
 from config import settings
 from logging_config import get_logger
 
@@ -80,8 +81,11 @@ class UserService:
         except Exception as e:
             logger.error(f"服务器注册异常: {str(e)}, email={email}", exc_info=True)
             return {'success': False, 'message': '服务器注册失败，请稍后重试'}
-
-        result = self.user_handle.create_user(email, full_name)
+        
+        # 服务器注册成功后，本地注册
+        # 使用 email 前缀作为用户名（如果没有提供 full_name）
+        username = full_name if full_name else email.split('@')[0]
+        result = self.user_handle.create_user(email, username)
         if not result['ok']:
             logger.error(f"本地用户创建失败: {result['message']}, email={email}")
             return {'success': False, 'message': result['message']}
@@ -123,24 +127,31 @@ class UserService:
             return {'success': False, 'message': '用户不存在，请先注册'}
 
         try:
-            client = await _get_client()
-            response = await client.post(
+            response = requests.post(
                 f"{settings.SERVER_BACKEND_URL}/auth/login",
                 json={'email': email, 'password': password}
             )
             if response.status_code == 200:
                 server_data = response.json()
-                full_name = server_data.get('user', {}).get('full_name', '') or email.split('@')[0]
-                self.user_handle.create_user(email, full_name)
-                logger.info(f"服务器登录成功并同步用户到本地: email={email}")
-
+                # 同步用户到本地
+                full_name = server_data.get('user', {}).get('full_name', '')
+                # 如果没有 full_name，使用 email 前缀作为用户名
+                username = full_name if full_name else email.split('@')[0]
+                create_result = self.user_handle.create_user(email, username)
+                if create_result['ok']:
+                    logger.info(f"服务器登录成功并同步用户到本地: email={email}")
+                else:
+                    logger.warning(f"用户同步失败（可能已存在）: {create_result.get('message')}, email={email}")
+                
+                # 使用本地生成的token
                 access_token = self.auth_service.create_access_token(
                     data={"sub": email, "user_id": email}
                 )
                 return {
                     'success': True,
                     'access_token': access_token,
-                    'token_type': 'bearer'
+                    'token_type': 'bearer',
+                    'user_id': email
                 }
             else:
                 logger.warning(f"服务器登录失败: {response.text}, email={email}")

@@ -253,7 +253,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8001
 
 ## API文档
 
-- **Local Backend**：http://localhost:8000/docs
+- **Local Backend**：http://localhost:8002/docs
 - **Server Backend**：http://localhost:8001/docs
 
 ## 🛠️ 技术栈

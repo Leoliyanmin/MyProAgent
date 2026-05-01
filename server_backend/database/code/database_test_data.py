@@ -68,7 +68,6 @@ TEST_DATA = {
     "schedule": {
         "user_id": "user-test-001",
         "schedule_event_type": "meeting",
-        "schedule_priority": 2,
         "schedule_title": "daily standup",
         "schedule_start_time": "2026-03-31T11:00:00+00:00",
         "schedule_end_time": "2026-03-31T11:30:00+00:00",

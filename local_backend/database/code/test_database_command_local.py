@@ -8,9 +8,12 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-import database_command as db
-import database_synchronize_handle as sync_handle
-from database_test_data import get_test_data
+# 添加父目录到路径，以便正确导入模块
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+
+from database.code.command import database_command as db
+from database.code.handle import database_synchronize_handle as sync_handle
+from database.code.database_test_data import get_test_data
 
 
 INSERT_ORDER = [

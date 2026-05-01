@@ -192,7 +192,16 @@ frontend/src-tauri/*.AppImage
 # Bundle artifacts
 frontend/src-tauri/target/release/bundle/
 frontend/src-tauri/target/debug/bundle/
+
+# Data and config files
 *.json
 *.jsonl
 *.md
 *.txt
+config.json
+server_backend/config.py
+local/database/test_db/sync_packet_from_server.json
+local/database/test_db/sync_packet_to_server.json
+
+# mock data
+mock_frontend/

@@ -161,3 +161,25 @@
 5. 是否按前后端差异完成并发控制。
 6. 是否避免了跨层职责混用（handle 代替 operations，或上层直调 command）。
 
+## 11\. category 与 data 语义说明
+
+### 11.1 category 的字段语义
+
+1. category\_kind 表示“这个种类属于哪一类”，用于表达分类维度。
+2. category\_kind 典型值示例：课程、邮件。
+3. category\_title 表示“该分类在该维度下的具体名称”。
+4. category\_title 典型值示例：语文、数学、企业邮箱。
+
+### 11.2 data 与 category 的关联语义
+
+1. data 与 category 是从属关系：每个 data 必须属于一个 category。
+2. data 通过 data\_category\_id 关联到 category.category\_id。
+3. 不允许出现“无 category 归属”的 data。
+4. 当 category 被删除时，必须按业务规则处理其下 data（删除、迁移或阻止删除），并在对应 operations/handle 中显式实现。
+
+### 11.3 设计与调用约束建议
+
+1. 创建 data 前，应先确保目标 category 已存在且合法。
+2. category\_kind 用于上层筛选（例如课程类、邮件类）。
+3. category\_title 用于同一 kind 下的具体分组展示与检索。
+

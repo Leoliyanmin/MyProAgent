@@ -8,9 +8,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-import database_command as db
-import database_synchronize_handle as sync_handle
+import command.database_command as db
+from database.code.handle.database_synchronize_handle import handle_sync_request
 from database_test_data import get_test_data
 
 
@@ -351,7 +352,6 @@ class ServerCommandTestRunner:
                 schedule_related_link=row["schedule_related_link"],
                 schedule_recurrence_rule=row["schedule_recurrence_rule"],
                 schedule_color_tag=row["schedule_color_tag"],
-                schedule_priority=row.get("schedule_priority", 2),
                 db_path=self.db_path,
             )
             self._created.add(table)
@@ -574,7 +574,7 @@ class ServerCommandTestRunner:
 
         originals = self._patch_db_path_for_handle()
         try:
-            probe_resp = sync_handle.handle_sync_request(
+            probe_resp = handle_sync_request(
                 {
                     "action": "probe",
                     "payload": {
@@ -587,7 +587,7 @@ class ServerCommandTestRunner:
             )
             self._expect(probe_resp.get("ok") is True, "server probe failed")
 
-            pull_resp = sync_handle.handle_sync_request(
+            pull_resp = handle_sync_request(
                 {
                     "action": "pull",
                     "payload": {
@@ -604,7 +604,7 @@ class ServerCommandTestRunner:
             self._expect(isinstance(categories, list) and len(categories) > 0, "server pull packet has no category rows")
             marker = f"server-sync-marker-{int(datetime.now(timezone.utc).timestamp())}"
             categories[0]["category_title"] = marker
-            push_resp = sync_handle.handle_sync_request(
+            push_resp = handle_sync_request(
                 {
                     "action": "push",
                     "payload": push_packet,
@@ -619,7 +619,7 @@ class ServerCommandTestRunner:
             )
 
             now_iso = datetime.now(timezone.utc).isoformat()
-            ack_resp = sync_handle.handle_sync_request(
+            ack_resp = handle_sync_request(
                 {
                     "action": "ack",
                     "payload": {
@@ -659,7 +659,7 @@ class ServerCommandTestRunner:
 
         originals = self._patch_db_path_for_handle()
         try:
-            push_resp = sync_handle.handle_sync_request(
+            push_resp = handle_sync_request(
                 {
                     "action": "push",
                     "payload": payload,
@@ -735,7 +735,7 @@ class ServerCommandTestRunner:
 
         originals = self._patch_db_path_for_handle()
         try:
-            pull_resp = sync_handle.handle_sync_request(
+            pull_resp = handle_sync_request(
                 {
                     "action": "pull",
                     "payload": {
