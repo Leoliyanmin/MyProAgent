@@ -123,3 +123,11 @@ class EmailService:
             return data.get('password', '')
         except (json.JSONDecodeError, TypeError):
             return encrypted
+
+    def get_email_messages(self, user_id: str) -> Dict:
+        try:
+            result = self.email_handle.handle_get_messages(user_id)
+            return result
+        except Exception as e:
+            logger.error(f"获取邮件列表失败: {str(e)}")
+            return {'success': False, 'message': str(e)}

@@ -52,3 +52,39 @@ async def unbind_bb(user_id: str = Depends(get_current_user_id)):
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '解绑失败'))
     return result
+
+
+@router.get("/courses")
+async def get_bb_courses(user_id: str = Depends(get_current_user_id)):
+    """获取已同步的课程列表"""
+    result = blackboard_service.get_bb_courses(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
+    return result
+
+
+@router.get("/assignments")
+async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
+    """获取已同步的作业列表（含 due_date）"""
+    result = blackboard_service.get_bb_assignments(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
+    return result
+
+
+@router.get("/announcements")
+async def get_bb_announcements(user_id: str = Depends(get_current_user_id)):
+    """获取已同步的公告列表"""
+    result = blackboard_service.get_bb_announcements(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
+    return result
+
+
+@router.get("/materials")
+async def get_bb_course_materials(user_id: str = Depends(get_current_user_id)):
+    """获取已同步的课程资料列表"""
+    result = blackboard_service.get_bb_course_materials(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
+    return result

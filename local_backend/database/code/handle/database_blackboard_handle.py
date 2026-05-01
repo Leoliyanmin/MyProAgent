@@ -331,3 +331,35 @@ class BlackboardHandle:
                 'success': False,
                 'message': f'解绑失败: {str(e)}'
             }
+    
+    def handle_get_courses(self, user_id: str) -> Dict:
+        """获取同步的课程列表"""
+        try:
+            courses = self.course_ops.get_courses(user_id)
+            return {'success': True, 'courses': courses}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}
+
+    def handle_get_assignments(self, user_id: str) -> Dict:
+        """获取同步的作业列表（含 due_date）"""
+        try:
+            data = self.assignment_ops.get_assignments(user_id)
+            return {'success': True, 'assignments': data}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}
+
+    def handle_get_announcements(self, user_id: str) -> Dict:
+        """获取同步的公告列表"""
+        try:
+            data = self.announcement_ops.get_announcements(user_id)
+            return {'success': True, 'announcements': data}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}
+
+    def handle_get_course_materials(self, user_id: str) -> Dict:
+        """获取同步的课程资料列表"""
+        try:
+            data = self.course_material_ops.get_course_materials(user_id)
+            return {'success': True, 'course_materials': data}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}

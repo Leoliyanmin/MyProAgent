@@ -56,3 +56,12 @@ async def unbind_email(user_id: str = Depends(get_current_user_id)):
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '解绑失败'))
     return result
+
+
+@router.get("/messages")
+async def get_email_messages(user_id: str = Depends(get_current_user_id)):
+    """获取已同步的邮件列表"""
+    result = email_service.get_email_messages(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
+    return result

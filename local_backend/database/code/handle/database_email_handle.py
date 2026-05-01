@@ -132,3 +132,10 @@ class EmailHandle:
                 'success': False,
                 'message': f'解绑失败: {str(e)}',
             }
+
+    def handle_get_messages(self, user_id: str) -> Dict:
+        try:
+            messages = self.message_ops.get_messages(user_id)
+            return {'success': True, 'messages': messages}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}

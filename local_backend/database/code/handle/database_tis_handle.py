@@ -157,3 +157,17 @@ class TisHandle:
         except Exception as e:
             logger.error(f"同步TIS课表失败: {e}")
             return {'success': False, 'message': f'同步课表失败: {str(e)}'}
+
+    def handle_get_schedule(self, user_id: str) -> Dict:
+        """获取已同步的TIS课表"""
+        try:
+            categories = list_categories_by_user(user_id)
+            tis_courses = [c for c in categories if c['category_kind'] == 'course' and c.get('category_source') == 'tis']
+            tis_terms = [c for c in categories if c['category_kind'] == 'term' and c.get('category_source') == 'tis']
+            return {
+                'success': True,
+                'courses': tis_courses,
+                'terms': tis_terms,
+            }
+        except Exception as e:
+            return {'success': False, 'message': str(e)}

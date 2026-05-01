@@ -193,3 +193,12 @@ class TisService:
             return json.loads(encrypted_cookie)
         except (json.JSONDecodeError, TypeError):
             return {}
+
+    def get_tis_schedule(self, user_id: str) -> Dict:
+        """获取已同步的TIS课表数据"""
+        try:
+            result = self.tis_handle.handle_get_schedule(user_id)
+            return result
+        except Exception as e:
+            logger.error(f"获取课表失败: {str(e)}")
+            return {'success': False, 'message': str(e)}
