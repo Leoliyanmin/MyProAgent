@@ -135,7 +135,7 @@ class BlackboardService:
                             'id': assignment.get('label', ''),
                             'name': assignment.get('label', ''),
                             'link': assignment.get('url', ''),
-                            'due_date': '',
+                            'due_date': assignment.get('due_date', ''),
                             'content': assignment.get('content_blocks', [])
                         })
                     # 添加公告（适配爬虫返回的结构）
@@ -223,10 +223,10 @@ class BlackboardService:
                         'link': course.get('url', ''),
                         'assignments': []
                     }
-                    for assignment in course.get('assignments', []):
+                    for assignment in course.get('upload_assignments', []):
                         course_data['assignments'].append({
-                            'id': assignment.get('id', ''),
-                            'name': assignment.get('title', ''),
+                            'id': assignment.get('label', ''),
+                            'name': assignment.get('label', ''),
                             'link': assignment.get('url', ''),
                             'due_date': assignment.get('due_date', ''),
                             'status': assignment.get('status', '未提交')
