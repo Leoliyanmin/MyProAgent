@@ -1,0 +1,58 @@
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
+
+from service.email_service import EmailService
+from presentation.dependencies import get_current_user_id
+
+router = APIRouter(prefix="/api/v1/email", tags=["email"])
+security = HTTPBearer()
+
+email_service = EmailService()
+
+
+class EmailBindRequest(BaseModel):
+    email_address: str
+    app_password: str
+
+
+@router.get("/status")
+async def get_email_status(user_id: str = Depends(get_current_user_id)):
+    result = email_service.get_email_status(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '获取状态失败'))
+    return result
+
+
+@router.post("/bind")
+async def bind_email(request: EmailBindRequest, user_id: str = Depends(get_current_user_id)):
+    if not request.email_address or not request.app_password:
+        raise HTTPException(status_code=400, detail="邮箱地址和客户端专用密码不能为空")
+
+    result = email_service.bind_with_app_password(
+        user_id=user_id,
+        email_address=request.email_address,
+        app_password=request.app_password,
+    )
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '绑定失败'))
+    return result
+
+
+@router.post("/sync")
+async def sync_email_data(
+    max_messages: int = Query(default=50, ge=1, le=200, description="最大同步邮件数"),
+    user_id: str = Depends(get_current_user_id),
+):
+    result = email_service.sync_email_data(user_id, max_messages=max_messages)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '同步失败'))
+    return result
+
+
+@router.post("/unbind")
+async def unbind_email(user_id: str = Depends(get_current_user_id)):
+    result = email_service.unbind_email(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '解绑失败'))
+    return result

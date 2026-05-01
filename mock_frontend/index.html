@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mock Frontend - Blackboard集成测试</title>
+    <title>Mock Frontend - Blackboard/TIS/邮箱集成测试</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
     <style>
         * {
@@ -111,6 +111,10 @@
             background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
             color: white;
         }
+        .btn-info {
+            background: linear-gradient(135deg, #2196f3 0%, #21cbf3 100%);
+            color: white;
+        }
         .status-box {
             padding: 15px;
             border-radius: 10px;
@@ -179,7 +183,7 @@
     <div id="app" class="container">
         <div class="header">
             <h1>Mock Frontend</h1>
-            <p>Blackboard集成测试 - 模拟前端界面</p>
+            <p>Blackboard / TIS / 邮箱集成测试 - 模拟前端界面</p>
         </div>
 
         <div class="tabs">
@@ -345,6 +349,80 @@
             </div>
         </div>
 
+        <!-- 邮箱绑定 Tab -->
+        <div v-show="activeTab === 'email'" class="card">
+            <h2 class="card-title">邮箱绑定（IMAP）</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="label">用户ID</div>
+                    <div class="value">{{ userInfo.userId || '-' }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">绑定状态</div>
+                    <div class="value">{{ emailStatus.isBound ? '已绑定' : '未绑定' }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="label">邮箱地址</div>
+                    <div class="value">{{ emailStatus.emailAddress || '-' }}</div>
+                </div>
+            </div>
+            
+            <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin-bottom: 20px; border-radius: 0 10px 10px 0;">
+                <strong>邮箱绑定说明</strong>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #555;">
+                    使用南科大邮箱的 <strong>客户端专用密码</strong> 完成绑定。
+                    获取方式：登录学校邮箱 → 设置 → 客户端专用密码 → 生成新密码。
+                    注意：不是登录密码，是客户端专用密码！
+                </p>
+            </div>
+            
+            <button class="btn btn-primary" @click="checkEmailStatus()">检查绑定状态</button>
+            <button class="btn btn-warning" @click="unbindEmail()">解绑账号</button>
+            
+            <!-- 手动绑定区域 -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <h3 style="margin-bottom: 15px; color: #333;">手动绑定邮箱</h3>
+                
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; border-left: 4px solid #4caf50;">
+                    <strong>IMAP服务器：</strong>imap.exmail.qq.com（端口 993）<br>
+                    <strong>邮箱格式：</strong>学号@mail.sustech.edu.cn
+                </div>
+
+                <div class="form-group">
+                    <label for="emailAddress"><span style="color: #dc3545;">*</span> 邮箱地址</label>
+                    <input type="email" id="emailAddress" v-model="emailForm.address" placeholder="学号@mail.sustech.edu.cn">
+                </div>
+                
+                <div class="form-group">
+                    <label for="appPassword"><span style="color: #dc3545;">*</span> 客户端专用密码</label>
+                    <input type="password" id="appPassword" v-model="emailForm.appPassword" placeholder="请输入客户端专用密码（非登录密码）">
+                </div>
+                
+                <button class="btn btn-success" @click="bindWithEmail()">绑定邮箱</button>
+                
+                <div class="api-url">API: POST /api/v1/email/bind</div>
+            </div>
+            
+            <!-- 同步邮件区域 -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <h3 style="margin-bottom: 15px; color: #333;">同步邮件</h3>
+                
+                <div class="form-group">
+                    <label for="maxMessages">最大同步邮件数（1-200）</label>
+                    <input type="number" id="maxMessages" v-model.number="emailForm.maxMessages" min="1" max="200" style="width: 120px;">
+                </div>
+                
+                <button class="btn btn-success" @click="syncEmailData()">同步邮件数据</button>
+                
+                <div class="api-url">API: POST /api/v1/email/sync?max_messages=50</div>
+            </div>
+            
+            <div :class="['status-box', 'status-' + emailStatus.type, { hidden: !emailStatus.show }]">
+                <div class="status-content">{{ emailStatus.message }}</div>
+            </div>
+        </div>
+
         <!-- 数据同步 Tab -->
         <div v-show="activeTab === 'sync'" class="card">
             <h2 class="card-title">数据同步</h2>
@@ -400,6 +478,7 @@
                     { id: 'auth', name: '用户认证' },
                     { id: 'blackboard', name: 'Blackboard绑定' },
                     { id: 'tis', name: 'TIS教务系统' },
+                    { id: 'email', name: '邮箱绑定' },
                     { id: 'sync', name: '数据同步' },
                     { id: 'debug', name: '调试信息' }
                 ];
@@ -432,6 +511,16 @@
                     JSESSIONID: '',
                     route: '',
                     TGC: ''
+                });
+                
+                // 邮箱状态
+                const emailStatus = reactive({ show: false, type: 'info', message: '', isBound: false, emailAddress: '' });
+                
+                // 邮箱表单
+                const emailForm = reactive({
+                    address: '',
+                    appPassword: '',
+                    maxMessages: 50
                 });
                 
                 // 显示状态
@@ -777,6 +866,73 @@
                     }
                 };
                 
+                // ==================== 邮箱绑定 ====================
+                
+                // 检查邮箱绑定状态
+                const checkEmailStatus = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/email/status`);
+                    if (result.status === 200) {
+                        emailStatus.isBound = result.data.is_bound;
+                        emailStatus.emailAddress = result.data.email_address || '';
+                        showStatus(emailStatus, 'info', `✓ 查询成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(emailStatus, 'error', `✗ 查询失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 绑定邮箱
+                const bindWithEmail = async () => {
+                    if (!emailForm.address.trim()) {
+                        showStatus(emailStatus, 'error', '✗ 请输入邮箱地址');
+                        return;
+                    }
+                    if (!emailForm.appPassword.trim()) {
+                        showStatus(emailStatus, 'error', '✗ 请输入客户端专用密码');
+                        return;
+                    }
+                    
+                    showStatus(emailStatus, 'info', `正在绑定邮箱: ${emailForm.address}...`);
+                    
+                    const result = await sendRequest(`${backendUrl}/api/v1/email/bind`, 'POST', {
+                        email_address: emailForm.address.trim(),
+                        app_password: emailForm.appPassword
+                    });
+                    
+                    if (result.status === 200) {
+                        emailStatus.isBound = true;
+                        emailStatus.emailAddress = emailForm.address.trim();
+                        showStatus(emailStatus, 'success', `✓ 绑定成功！\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(emailStatus, 'error', `✗ 绑定失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 同步邮件数据
+                const syncEmailData = async () => {
+                    const maxMessages = emailForm.maxMessages || 50;
+                    showStatus(emailStatus, 'info', `正在同步邮件（最多 ${maxMessages} 封）...`);
+                    
+                    const result = await sendRequest(`${backendUrl}/api/v1/email/sync?max_messages=${maxMessages}`, 'POST');
+                    
+                    if (result.status === 200) {
+                        showStatus(emailStatus, 'success', `✓ 同步成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(emailStatus, 'error', `✗ 同步失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
+                // 解绑邮箱
+                const unbindEmail = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/email/unbind`, 'POST');
+                    if (result.status === 200) {
+                        emailStatus.isBound = false;
+                        emailStatus.emailAddress = '';
+                        showStatus(emailStatus, 'success', `✓ 解绑成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                    } else {
+                        showStatus(emailStatus, 'error', `✗ 解绑失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
                 // 同步BB数据
                 const syncBbData = async () => {
                     const result = await sendRequest(`${backendUrl}/api/v1/blackboard/sync`, 'POST');
@@ -834,6 +990,8 @@
                     debugStatus,
                     manualCookie,
                     tisCookie,
+                    emailStatus,
+                    emailForm,
                     sendVerificationCode,
                     registerUser,
                     loginUser,
@@ -848,6 +1006,10 @@
                     syncTisSchedule,
                     syncBbData,
                     syncLocalToServer,
+                    checkEmailStatus,
+                    bindWithEmail,
+                    syncEmailData,
+                    unbindEmail,
                     clearSession,
                     testConnection
                 };
