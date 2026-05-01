@@ -607,6 +607,7 @@ class LocalCommandTestRunner:
             rows_after = db.list_accounts_by_user(user_id, db_path=self.db_path)
             self._expect(len(rows_after) == len(rows_before) - 1, "account should delete exactly one row")
         elif table == "match_result":
+            user_id = self.data["user"]["user_id"]
             rows_before = db.list_match_results_by_user(user_id, db_path=self.db_path)
             self._expect(len(rows_before) >= 1, "match_result should contain at least one row before delete")
             db.delete_match_result(rows_before[0]["id"], db_path=self.db_path)
@@ -624,6 +625,11 @@ class LocalCommandTestRunner:
             db.delete_personal_information(user_id, db_path=self.db_path)
             row = db.get_personal_information(user_id, db_path=self.db_path)
             self._expect(row is None, "personal_information should be deleted")
+        elif table == "user_match_profile":
+            user_id = self.data["user"]["user_id"]
+            db.delete_user_match_profile(user_id, db_path=self.db_path)
+            row = db.get_user_match_profile(user_id, db_path=self.db_path)
+            self._expect(row is None, "user_match_profile should be deleted")
         elif table == "user":
             rows = db.list_users(db_path=self.db_path)
             user_id = rows[0]["user_id"]
