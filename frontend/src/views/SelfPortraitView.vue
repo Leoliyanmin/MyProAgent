@@ -5,7 +5,126 @@
       <p>完善你的能力、偏好和目标，让团队与 Agent 更懂你。</p>
     </div>
 
-    <div class="portrait-layout">
+    <div class="tab-bar">
+      <button
+        :class="['tab-btn', { active: activeTab === 'ai' }]"
+        @click="activeTab = 'ai'"
+      >AI 画像分析</button>
+      <button
+        :class="['tab-btn', { active: activeTab === 'manual' }]"
+        @click="activeTab = 'manual'"
+      >手动编辑</button>
+    </div>
+
+    <!-- AI 画像分析 Tab -->
+    <div v-if="activeTab === 'ai'" class="portrait-layout">
+      <section class="editor-panel card-shell">
+        <h3>AI 分析画像</h3>
+        <div v-if="loading.ai" class="loading">加载中...</div>
+
+        <template v-if="!loading.ai && profile">
+          <div class="info-section">
+            <span class="info-label">MBTI 类型</span>
+            <div class="mbti-badge">{{ mbtiType || '分析中...' }}</div>
+            <span v-if="mbtiConfidence" class="mbti-confidence">置信度: {{ mbtiConfidence }}</span>
+          </div>
+
+          <div class="info-section">
+            <span class="info-label">兴趣领域</span>
+            <div class="tag-list">
+              <span
+                v-for="item in interestsList"
+                :key="item"
+                class="tag-chip active"
+              >{{ item }}</span>
+              <span v-if="!interestsList.length" class="empty-chip">暂无数据</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <span class="info-label">技能标签</span>
+            <div class="tag-list">
+              <span
+                v-for="item in analysisSkills"
+                :key="item"
+                class="tag-chip active"
+              >{{ item }}</span>
+              <span v-if="!analysisSkills.length" class="empty-chip">暂无数据</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <span class="info-label">工作偏好</span>
+            <div class="preference-text">{{ workPreference || '暂无数据' }}</div>
+          </div>
+
+          <div class="info-section">
+            <span class="info-label">行为模式</span>
+            <div class="preference-text">{{ behaviorPattern || '暂无数据' }}</div>
+          </div>
+        </template>
+
+        <div v-if="error.ai" class="error-banner">{{ error.ai }}</div>
+      </section>
+
+      <section class="preview-panel card-shell">
+        <h3>MBTI 维度分析</h3>
+        <div v-if="loading.ai" class="loading">加载中...</div>
+
+        <div v-if="!loading.ai && mbtiScores" class="dimension-breakdown">
+          <div v-for="pair in dimensionPairs" :key="pair.label" class="dimension-pair">
+            <div class="dimension-pair-label">{{ pair.label }}</div>
+            <div class="dimension-bars">
+              <div class="dim-bar-row">
+                <span class="dim-name">{{ pair.left.name }}</span>
+                <div class="dim-bar-track">
+                  <div class="dim-bar-fill" :style="{ width: pair.left.percent + '%' }"></div>
+                </div>
+                <span class="dim-value">{{ pair.left.percent }}%</span>
+              </div>
+              <div class="dim-bar-row">
+                <span class="dim-name">{{ pair.right.name }}</span>
+                <div class="dim-bar-track">
+                  <div class="dim-bar-fill right" :style="{ width: pair.right.percent + '%' }"></div>
+                </div>
+                <span class="dim-value">{{ pair.right.percent }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="!loading.ai && mbtiDescription" class="mbti-desc">
+          <strong>类型描述</strong>
+          <p>{{ mbtiDescription }}</p>
+        </div>
+
+        <div class="action-bar">
+          <button class="action-btn" @click="fetchProfile" :disabled="loading.ai">刷新分析</button>
+          <button class="action-btn secondary" @click="reanalyze" :disabled="loading.ai">重新分析全部</button>
+        </div>
+
+        <!-- 交互历史 -->
+        <div class="history-section" v-if="!loading.ai">
+          <h4>最近交互</h4>
+          <div v-if="interactions.length === 0" class="empty-hint">暂无交互记录</div>
+          <div
+            v-for="item in interactions"
+            :key="item.conversation_id"
+            class="history-item"
+            @click="viewInteraction(item.conversation_id)"
+          >
+            <div class="history-meta">
+              <span class="history-intent">{{ item.intent_category }}</span>
+              <span class="history-time">{{ formatTime(item.timestamp) }}</span>
+            </div>
+            <div class="history-preview">{{ item.user_message_preview }}</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 手动编辑 Tab（保留原有内容） -->
+    <div v-if="activeTab === 'manual'" class="portrait-layout">
       <section class="editor-panel card-shell">
         <h3>画像编辑</h3>
 
@@ -94,7 +213,8 @@
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref, onMounted } from 'vue'
+import { profileAPI } from '../services/api.js'
 
 const skillOptions = ['Vue', 'Node.js', 'UI 设计', '数据分析', '产品思维', '自动化']
 
@@ -114,7 +234,6 @@ const completion = computed(() => {
     Boolean(form.workStyle),
     form.skills.length > 0
   ]
-
   const done = fields.filter(Boolean).length
   return Math.round((done / fields.length) * 100)
 })
@@ -127,6 +246,135 @@ const toggleSkill = (skill) => {
     form.skills.push(skill)
   }
 }
+
+// tab
+const activeTab = ref('ai')
+
+// AI analysis state
+const loading = reactive({ ai: false })
+const error = reactive({ ai: '' })
+const profile = ref(null)
+const mbtiScores = ref(null)
+const mbtiType = ref('')
+const mbtiConfidence = ref('')
+const mbtiDescription = ref('')
+const interestsList = ref([])
+const analysisSkills = ref([])
+const workPreference = ref('')
+const behaviorPattern = ref('')
+const interactions = ref([])
+
+const dimensionPairs = computed(() => {
+  const s = mbtiScores.value
+  if (!s) return []
+  const ei = s.E_I || {}
+  const sn = s.S_N || {}
+  const tf = s.T_F || {}
+  const jp = s.J_P || {}
+
+  const toPct = (v) => Math.round((v || 0) * 100)
+
+  return [
+    {
+      label: 'E/I · 能量来源',
+      left: { name: '外向 (E)', percent: toPct(ei.E) },
+      right: { name: '内向 (I)', percent: toPct(ei.I) },
+    },
+    {
+      label: 'S/N · 认知方式',
+      left: { name: '实感 (S)', percent: toPct(sn.S) },
+      right: { name: '直觉 (N)', percent: toPct(sn.N) },
+    },
+    {
+      label: 'T/F · 决策依据',
+      left: { name: '理性 (T)', percent: toPct(tf.T) },
+      right: { name: '情感 (F)', percent: toPct(tf.F) },
+    },
+    {
+      label: 'J/P · 生活方式',
+      left: { name: '判断 (J)', percent: toPct(jp.J) },
+      right: { name: '感知 (P)', percent: toPct(jp.P) },
+    },
+  ]
+})
+
+async function fetchProfile() {
+  loading.ai = true
+  error.ai = ''
+  try {
+    const p = await profileAPI.getProfile()
+    profile.value = p
+
+    const mbti = p.mbti_inference || {}
+    const rawScores = mbti.scores || {}
+    if (rawScores.E_I && rawScores.S_N && rawScores.T_F && rawScores.J_P) {
+      mbtiScores.value = rawScores
+    } else {
+      mbtiScores.value = null
+    }
+    mbtiType.value = mbti.mbti_type || ''
+    mbtiConfidence.value = mbti.confidence || ''
+    mbtiDescription.value = mbti.description || ''
+
+    interestsList.value = (p.interests_identified || []).map(i => i.topic).slice(0, 10)
+    analysisSkills.value = (p.skills_demonstrated || []).map(s => s.skill).slice(0, 10)
+
+    const prefs = p.preferences_inferred || {}
+    workPreference.value = `沟通风格: ${prefs.communication_style || 'casual'}, 语言: ${prefs.preferred_language || 'zh'}`
+
+    const patterns = p.study_work_patterns || {}
+    const topicStr = patterns.topic_areas?.length ? patterns.topic_areas.join(', ') : ''
+    behaviorPattern.value = [
+      `工作风格: ${patterns.work_style || 'flexible'}`,
+      topicStr ? `关注领域: ${topicStr}` : ''
+    ].filter(Boolean).join('；')
+
+    const hist = await profileAPI.getInteractions(5, 0)
+    interactions.value = hist.interactions || []
+  } catch (e) {
+    console.error('[Profile] fetch error:', e)
+    error.ai = '加载画像数据失败，请确保已有对话记录'
+  } finally {
+    loading.ai = false
+  }
+}
+
+async function reanalyze() {
+  loading.ai = true
+  error.ai = ''
+  try {
+    await profileAPI.reanalyze()
+    await fetchProfile()
+  } catch (e) {
+    error.ai = '重新分析失败'
+  } finally {
+    loading.ai = false
+  }
+}
+
+async function viewInteraction(conversationId) {
+  try {
+    const detail = await profileAPI.getInteractionDetail(conversationId)
+    console.log('[Profile] Interaction detail:', detail)
+    alert(`用户消息: ${(detail.user_input?.raw_message || '').slice(0, 100)}\n\nAgent 回复: ${(detail.agent_output?.raw_response || '').slice(0, 200)}`)
+  } catch (e) {
+    console.error('[Profile] fetch detail error:', e)
+  }
+}
+
+function formatTime(ts) {
+  if (!ts) return ''
+  try {
+    const d = new Date(ts)
+    return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  } catch {
+    return ts
+  }
+}
+
+onMounted(() => {
+  fetchProfile()
+})
 </script>
 
 <style scoped>
@@ -153,6 +401,30 @@ const toggleSkill = (skill) => {
   margin: 0;
   color: #6b7280;
   font-size: 14px;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tab-btn {
+  padding: 8px 20px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  color: #0284c7;
+  border-bottom-color: #0284c7;
 }
 
 .portrait-layout {
@@ -298,14 +570,14 @@ const toggleSkill = (skill) => {
 
 .identity small {
   font-size: 12px;
-  color: #64748b;
+  color: #6b7280;
 }
 
 .preview-tagline {
-  margin: 0 0 12px;
-  color: #0f172a;
   font-size: 13px;
+  color: #4b5563;
   line-height: 1.5;
+  margin-bottom: 14px;
 }
 
 .preview-block {
@@ -314,13 +586,16 @@ const toggleSkill = (skill) => {
 
 .block-title {
   font-size: 12px;
-  color: #64748b;
-  margin-bottom: 6px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .block-content {
   font-size: 13px;
-  color: #1e293b;
+  color: #111827;
   line-height: 1.5;
 }
 
@@ -331,25 +606,257 @@ const toggleSkill = (skill) => {
 }
 
 .preview-chip {
-  font-size: 11px;
   background: #e0f2fe;
-  color: #0c4a6e;
+  color: #0369a1;
   border-radius: 999px;
-  padding: 4px 9px;
+  padding: 4px 10px;
+  font-size: 12px;
 }
 
 .empty-chip {
-  font-size: 11px;
+  color: #9ca3af;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.loading {
+  text-align: center;
+  color: #9ca3af;
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+.error-banner {
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.info-section {
+  margin-bottom: 16px;
+}
+
+.info-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mbti-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #0f172a, #334155);
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 8px;
+  letter-spacing: 2px;
+}
+
+.mbti-confidence {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 12px;
   color: #6b7280;
 }
 
-@media (max-width: 980px) {
-  .portrait-wrapper {
-    padding: 16px;
-  }
+.preference-text {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.5;
+}
 
-  .portrait-layout {
-    grid-template-columns: 1fr;
-  }
+.mbti-desc {
+  background: #f0f9ff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.mbti-desc strong {
+  font-size: 13px;
+  color: #0369a1;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mbti-desc p {
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.action-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  background: #0284c7;
+  color: #ffffff;
+  transition: background 0.2s;
+}
+
+.action-btn:hover {
+  background: #0369a1;
+}
+
+.action-btn.secondary {
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.action-btn.secondary:hover {
+  background: #e0f2fe;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.history-section {
+  margin-top: 20px;
+}
+
+.history-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: #1d1d1f;
+}
+
+.empty-hint {
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.history-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  margin-bottom: 6px;
+  transition: all 0.15s;
+}
+
+.history-item:hover {
+  background: #f0f9ff;
+  border-color: rgba(14, 165, 233, 0.2);
+}
+
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.history-intent {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 1px 8px;
+  border-radius: 4px;
+}
+
+.history-time {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.history-preview {
+  font-size: 12px;
+  color: #4b5563;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dimension-breakdown {
+  margin-top: 16px;
+}
+
+.dimension-breakdown h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: #1d1d1f;
+}
+
+.dimension-pair {
+  margin-bottom: 14px;
+}
+
+.dimension-pair-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.dimension-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dim-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dim-name {
+  width: 70px;
+  font-size: 12px;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.dim-bar-track {
+  flex: 1;
+  height: 10px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dim-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+  transition: width 0.4s ease;
+}
+
+.dim-bar-fill.right {
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
+
+.dim-value {
+  width: 34px;
+  font-size: 11px;
+  color: #6b7280;
+  text-align: right;
+  flex-shrink: 0;
 }
 </style>

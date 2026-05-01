@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "user_id": "local_test_user@mail.sustech.edu.cn",
+    "session_id": "local_test_user@mail.sustech.edu.cn_default",
+    "platform": "web",
+    "conversation_id": "09b66aa2-da6f-4b22-8640-842f1c939e0c",
+    "timestamp": "2026-04-26T17:44:04.003240"
+  },
+  "user_input": {
+    "raw_message": "你好",
+    "intent_category": "casual_chat",
+    "keywords": [
+      "你好"
+    ],
+    "language": "zh",
+    "sentiment": "neutral",
+    "urgency": "low",
+    "message_length": 2,
+    "contains_file_reference": "false"
+  },
+  "agent_output": {
+    "raw_response": "你好！我是来自 **南方科技大学（SUSTech）** 的智能体助手 👋\n\n有什么可以帮你的吗？无论是文件管理、学习辅助，还是其他实际问题，我都很乐意帮忙！",
+    "response_length": 78,
+    "follow_up_required": false,
+    "suggested_actions": []
+  },
+  "tool_execution": {
+    "tools_invoked": [],
+    "files_accessed": [],
+    "total_execution_time_ms": 0
+  },
+  "user_profile_update": {
+    "interests_identified": [],
+    "skills_demonstrated": [],
+    "preferences_inferred": {
+      "communication_style": "casual",
+      "response_length_preference": "short",
+      "preferred_language": "zh",
+      "preferred_tool_usage": "automatic"
+    },
+    "study_work_patterns": {
+      "topic_areas": [],
+      "typical_task_types": [],
+      "active_hours": [],
+      "work_style": "flexible"
+    },
+    "personality_indicators": {
+      "detail_oriented": 0.5,
+      "proactive": 0.5,
+      "collaborative": 0.5
+    }
+  }
+}

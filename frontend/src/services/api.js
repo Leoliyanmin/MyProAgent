@@ -433,10 +433,43 @@ export const syncAPI = {
   }
 }
 
+// ==================== Profile API (用户画像) ====================
+
+export const profileAPI = {
+  getProfile: async () => {
+    return fetchWithAuth('/agent/profile')
+  },
+
+  getMBTI: async () => {
+    return fetchWithAuth('/agent/profile/mbti')
+  },
+
+  getInteractions: async (limit = 20, offset = 0) => {
+    return fetchWithAuth(`/agent/profile/interactions?limit=${limit}&offset=${offset}`)
+  },
+
+  getInteractionDetail: async (conversationId) => {
+    return fetchWithAuth(`/agent/profile/interactions/${conversationId}`)
+  },
+
+  reanalyze: async () => {
+    return fetchWithAuth('/agent/profile/reanalyze', {
+      method: 'POST'
+    })
+  },
+
+  deleteInteraction: async (conversationId) => {
+    return fetchWithAuth(`/agent/profile/interactions/${conversationId}`, {
+      method: 'DELETE'
+    })
+  }
+}
+
 export default {
   auth: authAPI,
   tasks: tasksAPI,
   schedules: schedulesAPI,
   agent: agentAPI,
-  sync: syncAPI
+  sync: syncAPI,
+  profile: profileAPI
 }

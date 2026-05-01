@@ -70,12 +70,21 @@ class AuthService:
         if password != confirm_password:
             return {'valid': False, 'message': '两次输入的密码不一致'}
 
-        if not verification_code or len(verification_code.strip()) == 0:
-            return {'valid': False, 'message': '验证码不能为空'}
+        if not settings.SKIP_VERIFICATION:
+            if not verification_code or len(verification_code.strip()) == 0:
+                return {'valid': False, 'message': '验证码不能为空'}
 
         return {'valid': True, 'message': '注册数据验证通过'}
 
     async def send_verification_code(self, email: str, purpose: str = "register") -> dict:
+        if settings.TEST_MODE or settings.SKIP_VERIFICATION:
+            return {
+                'success': True,
+                'message': 'TEST MODE: 验证码已发送（任意验证码均可使用）',
+                'test_code': '123456',
+                'expires_in': 300,
+                'retry_after': 60
+            }
         try:
             url = f"{settings.SERVER_BACKEND_URL}/auth/verification/send"
             data = {

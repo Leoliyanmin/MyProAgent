@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "user_id": "local_test_user@mail.sustech.edu.cn",
+    "session_id": "local_test_user@mail.sustech.edu.cn_default",
+    "platform": "web",
+    "conversation_id": "de3d6e1f-6734-471b-b89b-1392d8eb2036",
+    "timestamp": "2026-04-26T19:02:19.063512"
+  },
+  "user_input": {
+    "raw_message": "加油，我们一起进步",
+    "intent_category": "casual_chat",
+    "keywords": [
+      "加油",
+      "我们一起进步"
+    ],
+    "language": "zh",
+    "sentiment": "neutral",
+    "urgency": "low",
+    "message_length": 9,
+    "contains_file_reference": "false"
+  },
+  "agent_output": {
+    "raw_response": "谢谢！💪 一起加油，一起进步！\n\n我是你的南科大智能体助手，随时准备帮你：\n\n- 📁 **整理文件资料** — 学习课件、实验报告、论文文献，统统帮你分类归档\n- 📚 **学习辅助** — 解答学术问题、梳理知识难点、提供学习建议\n- ⏰ **日程管理** — 帮你创建提醒、安排课表、规划时间\n- 🎨 **主题定制** — 如果你需要美化界面配色，我也可以给建议\n\n有什么需要帮忙的，尽管说！😊",
+    "response_length": 198,
+    "follow_up_required": false,
+    "suggested_actions": []
+  },
+  "tool_execution": {
+    "tools_invoked": [],
+    "files_accessed": [],
+    "total_execution_time_ms": 0
+  },
+  "user_profile_update": {
+    "interests_identified": [],
+    "skills_demonstrated": [],
+    "preferences_inferred": {
+      "communication_style": "casual",
+      "response_length_preference": "medium",
+      "preferred_language": "zh",
+      "preferred_tool_usage": "automatic"
+    },
+    "study_work_patterns": {
+      "topic_areas": [],
+      "typical_task_types": [],
+      "active_hours": [],
+      "work_style": "flexible"
+    },
+    "personality_indicators": {
+      "detail_oriented": 0.5,
+      "proactive": 0.5,
+      "collaborative": 0.8
+    }
+  }
+}
