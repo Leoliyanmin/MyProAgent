@@ -1,9 +1,23 @@
 ========================================
 Blackboard 爬取结果
 ========================================
-时间: 2026-04-30 17:00:12
+时间: 2026-05-01 21:08:50
 总课程数: 4
-HTML长度: 4248 字符
+
+========================================
+作业 Due Date 汇总
+========================================
+
+--- Computer Vision Spring 2026 ---
+  诚信承诺书提交: April 19, 2026 11:59 PM
+
+--- Operating Systems Spring 2026 ---
+  Undergraduate Students Declaration Form: March 14, 2025 10:00 AM
+  Assignment3: May 13, 2026 2:00 PM
+
+--- Software Engineering Spring 2026 ---
+  Academic Integrity: 未获取到
+  Open Source PR: May 20, 2026 2:00 PM
 
 ========================================
 原始课程列表页面 HTML
@@ -12,7 +26,7 @@ HTML长度: 4248 字符
 <div class="noItems" style="display:none">您的所有课程均已隐藏。</div>
       
       <h3 class='termHeading-coursefakeclass'>
-       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', '3d45e524-1bab-48b4-be9a-3b375e36c2fb')">
+       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', '0e0fffa5-00a3-4d94-b1ee-82cce534e367')">
         <span class="hideoff">收拢</span>
         2026春（Spring 2026）</a>
        </h3>
@@ -33,7 +47,7 @@ HTML长度: 4248 字符
 <div class="courseDataBlock"><span class="dataBlockLabel">
 公告: 
 </span>
-<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">Project is released</a></li><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">【reminder】Please submit Assignment3 on time【ddl: 5.13 14:00】</a></li><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">Mid term exam information</a></li></ul></div></li>
+<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">Project is released</a></li><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">【reminder】Please submit Assignment3 on time【ddl: 5.13 14:00】</a></li></ul></div></li>
 <li>
 <img alt='' src='/images/ci/icons/bookopen_li.gif' width='12' height='12' />
 <a href=" /webapps/blackboard/execute/launcher?type=Course&id=_8012_1&url=" target="_top">Software Engineering Spring 2026</a>
@@ -1332,7 +1346,8 @@ HTML长度: 4248 字符
                 }
               ]
             }
-          ]
+          ],
+          "due_date": "April 19, 2026 11:59 PM"
         }
       ]
     },
@@ -1355,10 +1370,6 @@ HTML长度: 4248 字符
         },
         {
           "title": "【reminder】Please submit Assignment3 on time【ddl: 5.13 14:00】",
-          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1"
-        },
-        {
-          "title": "Mid term exam information",
           "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1"
         }
       ],
@@ -2377,7 +2388,8 @@ HTML长度: 4248 字符
                 }
               ]
             }
-          ]
+          ],
+          "due_date": "March 14, 2025 10:00 AM"
         },
         {
           "label": "Assignment3",
@@ -2419,7 +2431,8 @@ HTML长度: 4248 字符
                 }
               ]
             }
-          ]
+          ],
+          "due_date": "May 13, 2026 2:00 PM"
         }
       ]
     },
@@ -3720,7 +3733,8 @@ HTML长度: 4248 字符
                 }
               ]
             }
-          ]
+          ],
+          "due_date": "May 20, 2026 2:00 PM"
         }
       ]
     }

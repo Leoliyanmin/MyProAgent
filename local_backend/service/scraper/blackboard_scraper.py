@@ -5,7 +5,7 @@ import json
 import re
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import requests
 from bs4 import BeautifulSoup, NavigableString, XMLParsedAsHTMLWarning
@@ -31,7 +31,53 @@ BB_PARAMS = {
 _SCRAPER_OUTPUT_DIR = Path.home() / ".proagent" / "scraper_output"
 _SCRAPER_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_FILE = _SCRAPER_OUTPUT_DIR / "bb_result.txt"
+TEST_OUTPUT_FILE = Path(__file__).parent / "test_result.txt"
 
+
+def _convert_chinese_date(chinese_date: str) -> str:
+    MONTH_NAMES = ["", "January", "February", "March", "April", "May", "June",
+                   "July", "August", "September", "October", "November", "December"]
+
+    match = re.search(
+        r"(\d{4})年(\d{1,2})月(\d{1,2})日\s*(上午|下午)?(\d{1,2}):(\d{2})?",
+        chinese_date
+    )
+    if not match:
+        match = re.search(r"(\d{4})年(\d{1,2})月(\d{1,2})日", chinese_date)
+        if match:
+            year, month, day = match.groups()
+            return f"{MONTH_NAMES[int(month)]} {int(day)}, {year}"
+        return chinese_date
+
+    year, month, day, ampm, hour, minute = match.groups()
+    month_name = MONTH_NAMES[int(month)]
+    ampm_english = ampm.replace("上午", "AM").replace("下午", "PM") if ampm else ""
+    return f"{month_name} {int(day)}, {year} {hour}:{minute} {ampm_english}".strip()
+
+
+def _extract_due_date_from_html(html: str) -> Optional[str]:
+    """从作业页面 HTML 中提取 Due Date"""
+    soup = BeautifulSoup(html, "html.parser")
+
+    due_label = soup.find("div", class_="metaLabel", id="assignMeta2")
+    if due_label:
+        field = due_label.find_next_sibling("div", class_="metaField")
+        if field:
+            text = field.get_text(" ", strip=True)
+            due_match = re.search(
+                r"((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+                r"[a-z]*\s+\d{1,2},?\s+20\d{2}.*)",
+                text, re.I
+            )
+            if due_match:
+                return due_match.group(1).strip()
+
+    for h3 in soup.find_all("h3"):
+        if "到期日期" in h3.get_text(strip=True):
+            p = h3.find_next_sibling("p")
+            if p:
+                chinese_text = p.get_text(" ", strip=True)
+                return _convert_chinese_date(chinese_text)
 
 def extract_course_id(url: str) -> str | None:
     """从URL中提取课程ID"""
@@ -453,6 +499,45 @@ class BlackboardScraper:
         resp.raise_for_status()
         return _extract_announcements(resp.text)
 
+    def _fetch_assignment_due_date(self, assignment_url: str, referer: str = "", label: str = "") -> str:
+        """获取作业截止日期"""
+        try:
+            headers = {}
+            if referer:
+                headers["Referer"] = referer
+            resp = self.session.get(assignment_url, headers=headers, allow_redirects=True)
+            resp.raise_for_status()
+            html = resp.text
+
+            result = _extract_due_date_from_html(html)
+            if result:
+                return result
+
+            try:
+                with open(TEST_OUTPUT_FILE, "a", encoding="utf-8") as f:
+                    f.write(f"\n{'='*60}\n")
+                    f.write(f"未提取到 Due Date 的作业页面\n")
+                    f.write(f"作业: {label}\n")
+                    f.write(f"URL: {assignment_url}\n")
+                    f.write(f"{'='*60}\n")
+                    f.write(html)
+                    f.write(f"\n{'='*60}\n\n")
+            except Exception:
+                pass
+
+            return ""
+        except Exception as e:
+            try:
+                with open(TEST_OUTPUT_FILE, "a", encoding="utf-8") as f:
+                    f.write(f"\n{'='*60}\n")
+                    f.write(f"请求失败: {label}\n")
+                    f.write(f"URL: {assignment_url}\n")
+                    f.write(f"错误: {e}\n")
+                    f.write(f"{'='*60}\n\n")
+            except Exception:
+                pass
+            return ""
+
     def _get_current_time(self) -> str:
         """获取当前时间字符串"""
         from datetime import datetime
@@ -461,6 +546,11 @@ class BlackboardScraper:
     def scrape_courses(self, term_filter: str = None) -> Dict[str, Any]:
         """爬取所有课程信息"""
         try:
+            try:
+                TEST_OUTPUT_FILE.write_text("", encoding="utf-8")
+            except Exception:
+                pass
+
             html_payload = self._fetch_tab_payload()
             courses = _parse_course_links(html_payload, term_filter)
 
@@ -515,19 +605,26 @@ class BlackboardScraper:
                                 resp.raise_for_status()
                                 content = self._extract_menu_content(resp.text, entry_url)
 
-                                content_blocks = content.get("content_blocks", [])
-                                for block in content_blocks:
-                                    links_in_block = block.get("links", [])
-                                    for link_in_block in links_in_block:
-                                        link_href = link_in_block.get("href", "")
-                                        if link_href and "uploadassignment" in link_href.lower():
-                                            course_info["upload_assignments"].append({
-                                                "label": link_in_block.get("text", entry_label),
-                                                "url": link_href,
-                                                "parent_label": entry_label,
-                                                "parent_url": entry_url,
-                                                "content_blocks": [block]
-                                            })
+                                def _collect_upload_links(blocks, parent_label):
+                                    for block in blocks:
+                                        for link_in_block in block.get("links", []):
+                                            link_href = link_in_block.get("href", "")
+                                            if link_href and "uploadassignment" in link_href.lower():
+                                                existing = any(
+                                                    a["url"] == link_href for a in course_info["upload_assignments"]
+                                                )
+                                                if not existing:
+                                                    course_info["upload_assignments"].append({
+                                                        "label": link_in_block.get("text", parent_label),
+                                                        "url": link_href,
+                                                        "parent_label": parent_label,
+                                                        "parent_url": entry_url,
+                                                        "content_blocks": [block]
+                                                    })
+
+                                _collect_upload_links(content.get("content_blocks", []), entry_label)
+                                for section in content.get("content_section_blocks", []):
+                                    _collect_upload_links(section.get("blocks", []), entry_label)
 
                                 course_info["course_materials"].append({
                                     "label": entry_label,
@@ -540,7 +637,31 @@ class BlackboardScraper:
                                     "error": f"获取页面 '{entry_label}' 失败: {str(e)}"
                                 })
 
+                        if "uploadassignment" in entry_url.lower():
+                            existing = any(
+                                a["url"] == entry_url for a in course_info["upload_assignments"]
+                            )
+                            if not existing:
+                                course_info["upload_assignments"].append({
+                                    "label": entry_label,
+                                    "url": entry_url,
+                                    "parent_label": "",
+                                    "parent_url": "",
+                                    "content_blocks": []
+                                })
+
                     result["courses"].append(course_info)
+
+                    for assignment in course_info["upload_assignments"]:
+                        assignment_url = assignment.get("url", "")
+                        if assignment_url:
+                            due_date = self._fetch_assignment_due_date(
+                                assignment_url,
+                                referer=course_info["url"],
+                                label=assignment.get("label", "")
+                            )
+                            if due_date:
+                                assignment["due_date"] = due_date
 
                 except Exception as exc:
                     result["errors"].append({
@@ -555,12 +676,28 @@ class BlackboardScraper:
                     })
 
             try:
+                due_summary_lines = []
+                for course in result.get("courses", []):
+                    assignments = course.get("upload_assignments", [])
+                    if not assignments:
+                        continue
+                    due_summary_lines.append(f"\n--- {course['name']} ---")
+                    for a in assignments:
+                        due = a.get("due_date", "未获取到")
+                        due_summary_lines.append(f"  {a['label']}: {due}")
+
+                due_section = "\n".join(due_summary_lines) if due_summary_lines else "无作业"
+
                 output_content = f"""========================================
 Blackboard 爬取结果
 ========================================
 时间: {self._get_current_time()}
 总课程数: {len(courses)}
-HTML长度: {len(html_payload)} 字符
+
+========================================
+作业 Due Date 汇总
+========================================
+{due_section}
 
 ========================================
 原始课程列表页面 HTML

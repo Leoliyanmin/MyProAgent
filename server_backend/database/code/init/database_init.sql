@@ -107,6 +107,7 @@ CREATE TABLE IF NOT EXISTS data (
     data_raw_json TEXT,
     data_updated_at TEXT,
     data_created_at TEXT NOT NULL,
+    data_linked_schedule_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (data_category_id) REFERENCES category(category_id)
 );

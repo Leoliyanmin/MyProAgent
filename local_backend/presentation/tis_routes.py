@@ -201,3 +201,12 @@ async def unbind_tis(user_id: str = Depends(get_current_user_id)):
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '解绑失败'))
     return result
+
+
+@router.get("/schedule")
+async def get_tis_schedule(user_id: str = Depends(get_current_user_id)):
+    """获取已同步的TIS课表数据"""
+    result = tis_service.get_tis_schedule(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
+    return result

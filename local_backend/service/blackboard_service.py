@@ -98,7 +98,7 @@ class BlackboardService:
                             'id': assignment.get('label', ''),
                             'name': assignment.get('label', ''),
                             'link': assignment.get('url', ''),
-                            'due_date': '',
+                            'due_date': assignment.get('due_date', ''),
                             'content': assignment.get('content_blocks', [])
                         })
                     for announcement in course.get('announcements', []):
@@ -251,3 +251,38 @@ class BlackboardService:
             logger.error("Cookie解密失败")
             return {}
     
+    def get_bb_courses(self, user_id: str) -> Dict:
+        """获取同步的课程列表"""
+        try:
+            result = self.blackboard_handle.handle_get_courses(user_id)
+            return result
+        except Exception as e:
+            logger.error(f"获取课程失败: {str(e)}")
+            return {'success': False, 'message': str(e)}
+
+    def get_bb_assignments(self, user_id: str) -> Dict:
+        """获取同步的作业列表（含 due_date）"""
+        try:
+            result = self.blackboard_handle.handle_get_assignments(user_id)
+            return result
+        except Exception as e:
+            logger.error(f"获取作业失败: {str(e)}")
+            return {'success': False, 'message': str(e)}
+
+    def get_bb_announcements(self, user_id: str) -> Dict:
+        """获取同步的公告列表"""
+        try:
+            result = self.blackboard_handle.handle_get_announcements(user_id)
+            return result
+        except Exception as e:
+            logger.error(f"获取公告失败: {str(e)}")
+            return {'success': False, 'message': str(e)}
+
+    def get_bb_course_materials(self, user_id: str) -> Dict:
+        """获取同步的课程资料列表"""
+        try:
+            result = self.blackboard_handle.handle_get_course_materials(user_id)
+            return result
+        except Exception as e:
+            logger.error(f"获取课程资料失败: {str(e)}")
+            return {'success': False, 'message': str(e)}

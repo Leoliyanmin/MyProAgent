@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     SKIP_VERIFICATION: bool = True
 
     # Blackboard/TIS 配置
+    
+    # Blackboard配置
     CAS_SERVER_URL: str = "https://cas.sustech.edu.cn/cas"
     CAS_VALIDATE_PATH: str = "/validate"
     CAS_LOGIN_PATH: str = "/login"

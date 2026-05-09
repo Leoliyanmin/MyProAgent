@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Optional
 
 from service.scraper.tis_scraper import TisScraper
+from database.code.handle.database_tis_handle import TisHandle
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,8 +16,6 @@ os.makedirs(_SAVE_DIR, exist_ok=True)
 
 
 class TisService:
-    """TIS教务系统业务服务"""
-    
     def __init__(self):
         self.tis_url = "https://tis.sustech.edu.cn"
         self._bound_users = {}
@@ -75,26 +74,13 @@ class TisService:
             return {'success': False, 'message': f'解绑失败: {str(e)}'}
     
     def _create_session_with_cookies(self, cookies_dict: Dict) -> requests.Session:
-        """创建带有Cookie的Session
-        
-        使用session.cookies.set设置Cookie，确保正确处理跨域Cookie。
-        
-        Args:
-            cookies_dict: Cookie字典（使用JSESSIONID、route和TGC）
-        
-        Returns:
-            配置好的Session对象
-        """
         session = requests.Session()
-        
-        # 设置Cookie：JSESSIONID、route 和 TGC
         if cookies_dict.get('JSESSIONID'):
             session.cookies.set('JSESSIONID', cookies_dict['JSESSIONID'])
         if cookies_dict.get('route'):
             session.cookies.set('route', cookies_dict['route'])
         if cookies_dict.get('TGC'):
             session.cookies.set('TGC', cookies_dict['TGC'])
-        
         session.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "application/json, text/plain, */*",
@@ -105,44 +91,50 @@ class TisService:
             "Origin": "https://tis.sustech.edu.cn",
             "Content-Type": "application/json",
         })
-        
         session.timeout = 10
         session.max_redirects = 10
-        
         return session
-    
+
+    def get_tis_status(self, user_id: str) -> Dict:
+        try:
+            result = self.tis_handle.handle_get_tis_status(user_id)
+            if result['success']:
+                return {
+                    'success': True,
+                    'is_bound': result.get('is_bound', False),
+                    'student_id': result.get('student_id', ''),
+                    'bind_time': result.get('bind_time', ''),
+                    'last_sync_time': result.get('last_sync_time', ''),
+                }
+            else:
+                return {'success': False, 'message': result.get('message', '获取状态失败')}
+        except Exception as e:
+            logger.error(f"获取TIS状态失败: {str(e)}")
+            return {'success': False, 'message': f'获取状态失败: {str(e)}'}
+
+    def unbind_tis(self, user_id: str) -> Dict:
+        try:
+            result = self.tis_handle.handle_unbind_tis(user_id)
+            return result
+        except Exception as e:
+            logger.error(f"TIS解绑失败: {str(e)}")
+            return {'success': False, 'message': f'解绑失败: {str(e)}'}
+
     def bind_with_cookie(self, user_id: str, cookies_str: str) -> Dict:
-        """使用Cookie绑定TIS账号
-        
-        通过Tauri等方式获取TIS的Cookie后，传递给后端完成绑定。
-        
-        Args:
-            user_id: 用户ID
-            cookies_str: TIS的Cookie字符串（JSON格式）
-        
-        Returns:
-            包含success和message的字典
-        """
         try:
             logger.info(f"使用Cookie绑定TIS: user_id={user_id}")
-            
+
             try:
                 cookies_dict = json.loads(cookies_str)
             except json.JSONDecodeError as e:
-                logger.error(f"Cookie格式错误，不是有效的JSON: {str(e)}")
+                logger.error(f"Cookie格式错误: {str(e)}")
                 return {'success': False, 'message': 'Cookie格式错误，不是有效的JSON'}
-            
-            logger.info(f"解析到的Cookie数量: {len(cookies_dict)} 个")
-            logger.info(f"Cookie键: {list(cookies_dict.keys())}")
-            
-            # 验证必需的Cookie
+
             if not cookies_dict.get('JSESSIONID'):
-                logger.error("缺少必需的Cookie: JSESSIONID")
                 return {'success': False, 'message': '缺少必需的Cookie: JSESSIONID'}
             if not cookies_dict.get('TGC'):
-                logger.error("缺少必需的Cookie: TGC")
                 return {'success': False, 'message': '缺少必需的Cookie: TGC'}
-            
+
             session = self._create_session_with_cookies(cookies_dict)
             
             logger.info("验证Cookie有效性...")
@@ -216,60 +208,68 @@ class TisService:
         except Exception as e:
             logger.error(f"绑定TIS时发生异常: {str(e)}")
             return {'success': False, 'message': f'绑定TIS时发生异常: {str(e)}'}
-    
+
     def sync_tis_data(self, user_id: str, week_override: Optional[str] = None) -> Dict:
-        """同步TIS数据
-        
-        Args:
-            user_id: 用户ID
-            week_override: 可选的周次覆盖参数
-        
-        Returns:
-            包含同步结果的字典
-        """
         try:
             logger.info(f"同步TIS数据: user_id={user_id}")
-            
-            # 检查是否已绑定
-            if user_id not in self._bound_users:
+
+            account_info = self.tis_handle.account_ops.get_tis_account(user_id)
+            if not account_info:
                 return {'success': False, 'message': '未绑定TIS账号，请先绑定'}
-            
-            # 从绑定信息中获取cookies
-            cookies_str = self._bound_users[user_id].get('cookies', '')
-            if not cookies_str:
-                return {'success': False, 'message': '绑定信息中没有Cookie'}
-            
-            try:
-                cookies_dict = json.loads(cookies_str)
-            except json.JSONDecodeError as e:
-                logger.error(f"Cookie格式错误: {str(e)}")
-                return {'success': False, 'message': 'Cookie格式错误'}
-            
+
+            encrypted_cookie = account_info.get('content', '')
+            cookies_dict = self._decrypt_cookie(encrypted_cookie)
+
             session = self._create_session_with_cookies(cookies_dict)
-            
             scraper = TisScraper(session=session)
             schedule_result = scraper.scrape_schedule(week_override)
-            
+
             if schedule_result['success']:
                 course_count = schedule_result.get('total_courses', 0)
                 week = schedule_result.get('week', '')
-                
-                logger.info(f"TIS数据同步成功: 用户={schedule_result.get('user')}, 学期={schedule_result.get('term')}, 周次={week}, 课程数={course_count}")
-                
+                term = schedule_result.get('term', '')
+                schedule = schedule_result.get('schedule', {})
+
+                sync_result = self.tis_handle.handle_sync_schedule(
+                    user_id=user_id,
+                    term=term,
+                    week=week,
+                    schedule_data=schedule,
+                )
+
+                logger.info(f"TIS数据同步成功: 用户={schedule_result.get('user')}, 学期={term}, 周次={week}, 课程数={course_count}")
+
                 return {
                     'success': True,
                     'message': f'同步完成，第{week}周共 {course_count} 门课程',
-                    'schedule': schedule_result.get('schedule', {}),
-                    'term': schedule_result.get('term', ''),
+                    'schedule': schedule,
+                    'term': term,
                     'week': week,
-                    'total_courses': course_count
+                    'total_courses': course_count,
+                    'sync_result': sync_result,
                 }
             else:
                 logger.error(f"TIS数据同步失败: {schedule_result.get('message')}")
                 return {'success': False, 'message': schedule_result.get('message', '同步失败')}
-        
+
         except Exception as e:
             logger.error(f"同步TIS数据失败: {str(e)}")
             return {'success': False, 'message': f'同步TIS数据失败: {str(e)}'}
-    
 
+    def _encrypt_cookie(self, cookies: Dict) -> str:
+        return json.dumps(cookies)
+
+    def _decrypt_cookie(self, encrypted_cookie: str) -> Dict:
+        try:
+            return json.loads(encrypted_cookie)
+        except (json.JSONDecodeError, TypeError):
+            return {}
+
+    def get_tis_schedule(self, user_id: str) -> Dict:
+        """获取已同步的TIS课表数据"""
+        try:
+            result = self.tis_handle.handle_get_schedule(user_id)
+            return result
+        except Exception as e:
+            logger.error(f"获取课表失败: {str(e)}")
+            return {'success': False, 'message': str(e)}

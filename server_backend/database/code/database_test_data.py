@@ -40,6 +40,7 @@ TEST_DATA = {
         "user_id": "user-test-001",
         "account_platform_type": "github",
         "account_platform_username": "alice-gh",
+        "content": None,
         "account_mail_password": "mail-pass-test",
         "account_cookie": "cookie-test",
         "account_bind_time": "2026-03-31T10:08:00+00:00",
