@@ -3,10 +3,9 @@ import os
 import time
 import requests
 import logging
-from typing import Dict, Optional
+from typing import Dict
 
 from service.scraper.tis_scraper import TisScraper
-from database.code.handle.database_tis_handle import TisHandle
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -94,31 +93,6 @@ class TisService:
         session.timeout = 10
         session.max_redirects = 10
         return session
-
-    def get_tis_status(self, user_id: str) -> Dict:
-        try:
-            result = self.tis_handle.handle_get_tis_status(user_id)
-            if result['success']:
-                return {
-                    'success': True,
-                    'is_bound': result.get('is_bound', False),
-                    'student_id': result.get('student_id', ''),
-                    'bind_time': result.get('bind_time', ''),
-                    'last_sync_time': result.get('last_sync_time', ''),
-                }
-            else:
-                return {'success': False, 'message': result.get('message', '获取状态失败')}
-        except Exception as e:
-            logger.error(f"获取TIS状态失败: {str(e)}")
-            return {'success': False, 'message': f'获取状态失败: {str(e)}'}
-
-    def unbind_tis(self, user_id: str) -> Dict:
-        try:
-            result = self.tis_handle.handle_unbind_tis(user_id)
-            return result
-        except Exception as e:
-            logger.error(f"TIS解绑失败: {str(e)}")
-            return {'success': False, 'message': f'解绑失败: {str(e)}'}
 
     def bind_with_cookie(self, user_id: str, cookies_str: str) -> Dict:
         try:
@@ -208,68 +182,3 @@ class TisService:
         except Exception as e:
             logger.error(f"绑定TIS时发生异常: {str(e)}")
             return {'success': False, 'message': f'绑定TIS时发生异常: {str(e)}'}
-
-    def sync_tis_data(self, user_id: str, week_override: Optional[str] = None) -> Dict:
-        try:
-            logger.info(f"同步TIS数据: user_id={user_id}")
-
-            account_info = self.tis_handle.account_ops.get_tis_account(user_id)
-            if not account_info:
-                return {'success': False, 'message': '未绑定TIS账号，请先绑定'}
-
-            encrypted_cookie = account_info.get('content', '')
-            cookies_dict = self._decrypt_cookie(encrypted_cookie)
-
-            session = self._create_session_with_cookies(cookies_dict)
-            scraper = TisScraper(session=session)
-            schedule_result = scraper.scrape_schedule(week_override)
-
-            if schedule_result['success']:
-                course_count = schedule_result.get('total_courses', 0)
-                week = schedule_result.get('week', '')
-                term = schedule_result.get('term', '')
-                schedule = schedule_result.get('schedule', {})
-
-                sync_result = self.tis_handle.handle_sync_schedule(
-                    user_id=user_id,
-                    term=term,
-                    week=week,
-                    schedule_data=schedule,
-                )
-
-                logger.info(f"TIS数据同步成功: 用户={schedule_result.get('user')}, 学期={term}, 周次={week}, 课程数={course_count}")
-
-                return {
-                    'success': True,
-                    'message': f'同步完成，第{week}周共 {course_count} 门课程',
-                    'schedule': schedule,
-                    'term': term,
-                    'week': week,
-                    'total_courses': course_count,
-                    'sync_result': sync_result,
-                }
-            else:
-                logger.error(f"TIS数据同步失败: {schedule_result.get('message')}")
-                return {'success': False, 'message': schedule_result.get('message', '同步失败')}
-
-        except Exception as e:
-            logger.error(f"同步TIS数据失败: {str(e)}")
-            return {'success': False, 'message': f'同步TIS数据失败: {str(e)}'}
-
-    def _encrypt_cookie(self, cookies: Dict) -> str:
-        return json.dumps(cookies)
-
-    def _decrypt_cookie(self, encrypted_cookie: str) -> Dict:
-        try:
-            return json.loads(encrypted_cookie)
-        except (json.JSONDecodeError, TypeError):
-            return {}
-
-    def get_tis_schedule(self, user_id: str) -> Dict:
-        """获取已同步的TIS课表数据"""
-        try:
-            result = self.tis_handle.handle_get_schedule(user_id)
-            return result
-        except Exception as e:
-            logger.error(f"获取课表失败: {str(e)}")
-            return {'success': False, 'message': str(e)}

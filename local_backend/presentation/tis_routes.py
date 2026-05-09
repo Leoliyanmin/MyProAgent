@@ -81,15 +81,6 @@ async def bind_with_cookie(request: TisCookieRequest, user_id: str = Depends(get
         raise HTTPException(status_code=500, detail=f"服务器内部错误: {e}")
 
 
-@router.post("/sync")
-async def sync_tis_data(user_id: str = Depends(get_current_user_id)):
-    """同步TIS课表数据"""
-    result = tis_service.sync_tis_data(user_id)
-    if not result.get('success'):
-        raise HTTPException(status_code=400, detail=result.get('message', '同步失败'))
-    return result
-
-
 @router.get("/schedule")
 async def get_tis_schedule(user_id: str = Depends(get_current_user_id)):
     """获取TIS课表数据，转换为日历事件格式返回（整学期展开）"""
@@ -200,13 +191,4 @@ async def unbind_tis(user_id: str = Depends(get_current_user_id)):
     result = tis_service.unbind_tis(user_id)
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '解绑失败'))
-    return result
-
-
-@router.get("/schedule")
-async def get_tis_schedule(user_id: str = Depends(get_current_user_id)):
-    """获取已同步的TIS课表数据"""
-    result = tis_service.get_tis_schedule(user_id)
-    if not result.get('success'):
-        raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
     return result
