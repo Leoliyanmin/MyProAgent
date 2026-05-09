@@ -16,6 +16,12 @@ class EmailBindRequest(BaseModel):
     app_password: str
 
 
+class EmailSendRequest(BaseModel):
+    title: str
+    context: str
+    receiver: str
+
+
 @router.get("/status")
 async def get_email_status(user_id: str = Depends(get_current_user_id)):
     result = email_service.get_email_status(user_id)
@@ -64,4 +70,25 @@ async def get_email_messages(user_id: str = Depends(get_current_user_id)):
     result = email_service.get_email_messages(user_id)
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
+    return result
+
+
+@router.post("/send")
+async def send_email(request: EmailSendRequest, user_id: str = Depends(get_current_user_id)):
+    """发送邮件"""
+    if not request.title.strip():
+        raise HTTPException(status_code=400, detail="邮件标题不能为空")
+    if not request.context.strip():
+        raise HTTPException(status_code=400, detail="邮件内容不能为空")
+    if not request.receiver.strip():
+        raise HTTPException(status_code=400, detail="收件人地址不能为空")
+
+    result = email_service.send_email(
+        user_id=user_id,
+        title=request.title,
+        context=request.context,
+        receiver=request.receiver,
+    )
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '发送失败'))
     return result

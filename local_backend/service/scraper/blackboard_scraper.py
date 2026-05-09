@@ -382,6 +382,7 @@ def _extract_announcements(html: str) -> List[Dict[str, str]]:
         info_block = item.find("div", class_="announcementInfo")
         posted_by = ""
         posted_to = ""
+        posted_date = ""
         if info_block:
             for paragraph in info_block.find_all("p"):
                 text = paragraph.get_text(strip=True)
@@ -389,11 +390,25 @@ def _extract_announcements(html: str) -> List[Dict[str, str]]:
                     posted_by = text.split(":", 1)[1].strip()
                 elif text.startswith("Posted to:") or text.startswith("发布至:"):
                     posted_to = text.split(":", 1)[1].strip()
+                elif text.startswith("Posted:") or text.startswith("发布时间:"):
+                    posted_date = text.split(":", 1)[1].strip()
+            if not posted_date:
+                for paragraph in info_block.find_all("p"):
+                    text = paragraph.get_text(strip=True)
+                    date_match = re.search(
+                        r"((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+                        r"[a-z]*\.?\s+\d{1,2},?\s+20\d{2}.*)",
+                        text, re.I
+                    )
+                    if date_match:
+                        posted_date = date_match.group(0).strip()
+                        break
 
         announcements.append({
             "id": item.get("id", ""),
             "title": title,
             "posted_on": posted_on,
+            "posted_date": posted_date,
             "posted_by": posted_by,
             "posted_to": posted_to,
             "body_text": body_text,
@@ -565,13 +580,14 @@ class BlackboardScraper:
                         "id": course_item["course_id"],
                         "name": course_item["title"],
                         "url": course_item["url"],
-                        "announcements": course_item.get("announcements", []),
+                        "announcements": [],
                         "course_materials": [],
                         "upload_assignments": []
                     }
 
                     _, menu_links = self._fetch_course_menu(course_item["url"])
                     in_course_materials = False
+                    has_announcement_link = False
 
                     for link in menu_links:
                         entry_url = link.get("url", "")
@@ -587,9 +603,11 @@ class BlackboardScraper:
                         if not entry_url:
                             continue
 
-                        if "announcement" in entry_url.lower():
+                        if "announcement" in entry_url.lower() or "Announcements" in entry_label:
+                            has_announcement_link = True
                             try:
-                                announcements = self._fetch_announcements(entry_url)
+                                ann_url = f"{BB_BASE_URL}/webapps/blackboard/execute/announcement?method=search&context=course_entry&course_id={course_item['course_id']}&handle=announcements_entry&mode=view"
+                                announcements = self._fetch_announcements(ann_url)
                                 course_info["announcements"].extend(announcements)
                             except Exception as e:
                                 result["errors"].append({
@@ -649,6 +667,17 @@ class BlackboardScraper:
                                 })
 
                     result["courses"].append(course_info)
+
+                    if not has_announcement_link and course_info.get("id"):
+                        ann_url = f"{BB_BASE_URL}/webapps/blackboard/execute/announcement?method=search&context=course_entry&course_id={course_item['course_id']}&handle=announcements_entry&mode=view"
+                        try:
+                            announcements = self._fetch_announcements(ann_url)
+                            course_info["announcements"].extend(announcements)
+                        except Exception as e:
+                            result["errors"].append({
+                                "course": course_item["title"],
+                                "error": f"通过URL获取公告失败: {str(e)}"
+                            })
 
                     for assignment in course_info["upload_assignments"]:
                         assignment_url = assignment.get("url", "")

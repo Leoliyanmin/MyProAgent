@@ -162,7 +162,29 @@ class TisHandle:
         """获取已同步的TIS课表"""
         try:
             categories = list_categories_by_user(user_id)
-            tis_courses = [c for c in categories if c['category_kind'] == 'course' and c.get('category_source') == 'tis']
+            tis_courses = []
+            for c in categories:
+                if c['category_kind'] == 'course' and c.get('category_source') == 'tis':
+                    content = {}
+                    try:
+                        content = json.loads(c['category_content']) if c.get('category_content') else {}
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+                    meta = {}
+                    try:
+                        meta = json.loads(c['category_meta_json']) if c.get('category_meta_json') else {}
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+                    tis_courses.append({
+                        'category_title': c['category_title'],
+                        'teacher': content.get('teacher', meta.get('teacher', '')),
+                        'weeks': content.get('weeks', ''),
+                        'location': content.get('location', ''),
+                        'periods': content.get('periods', ''),
+                        'start': content.get('start', ''),
+                        'end': content.get('end', ''),
+                        'category_term': c.get('category_term', ''),
+                    })
             tis_terms = [c for c in categories if c['category_kind'] == 'term' and c.get('category_source') == 'tis']
             return {
                 'success': True,

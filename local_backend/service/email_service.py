@@ -1,6 +1,8 @@
 import json
 import logging
+import smtplib
 import traceback
+from email.message import EmailMessage
 from typing import Dict, Optional
 
 from service.scraper.mail_scraper import MailScraper, write_mail_result
@@ -131,3 +133,34 @@ class EmailService:
         except Exception as e:
             logger.error(f"获取邮件列表失败: {str(e)}")
             return {'success': False, 'message': str(e)}
+
+    def send_email(self, user_id: str, title: str, context: str, receiver: str) -> Dict:
+        try:
+            account_info = self.email_handle.account_ops.get_email_account(user_id)
+            if not account_info:
+                return {'success': False, 'message': '未绑定邮箱账号，请先绑定'}
+
+            sender = account_info['account_platform_username']
+            encrypted_password = account_info.get('content', '')
+            app_password = self._decrypt_app_password(encrypted_password)
+
+            msg = EmailMessage()
+            msg['Subject'] = title
+            msg['From'] = sender
+            msg['To'] = receiver
+            msg.set_content(context)
+
+            with smtplib.SMTP_SSL('smtp.exmail.qq.com', 465) as server:
+                server.login(sender, app_password)
+                server.send_message(msg)
+
+            logger.info(f"邮件发送成功: from={sender}, to={receiver}, subject={title}")
+            return {'success': True, 'message': '邮件发送成功'}
+        except smtplib.SMTPAuthenticationError:
+            logger.error(f"SMTP认证失败: user_id={user_id}")
+            return {'success': False, 'message': 'SMTP认证失败，请检查客户端专用密码'}
+        except smtplib.SMTPRecipientsRefused:
+            return {'success': False, 'message': '收件人地址被拒绝'}
+        except Exception as e:
+            logger.error(f"发送邮件失败: {str(e)}")
+            return {'success': False, 'message': f'发送失败: {str(e)}'}

@@ -137,9 +137,9 @@ class BlackboardCourseOperations:
             )
     
     def get_courses(self, user_id: str) -> List[Dict]:
-        """获取用户的所有课程"""
+        """获取用户的所有Blackboard课程"""
         categories = list_categories_by_user(user_id)
-        return [cat for cat in categories if cat['category_kind'] == 'course']
+        return [cat for cat in categories if cat['category_kind'] == 'course' and cat.get('category_source') == 'blackboard']
     
     def delete_course(self, category_id: int) -> None:
         """删除课程"""

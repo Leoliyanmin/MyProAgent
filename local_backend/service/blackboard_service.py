@@ -144,8 +144,8 @@ class BlackboardService:
                             'id': announcement.get('id', '') or announcement.get('label', ''),
                             'title': announcement.get('title', '') or announcement.get('label', ''),
                             'url': announcement.get('url', ''),
-                            'date': announcement.get('date', ''),
-                            'content': announcement.get('content', '') or announcement.get('content_blocks', '')
+                            'date': announcement.get('posted_date', '') or announcement.get('posted_on', '') or announcement.get('date', ''),
+                            'content': announcement.get('body_text', '') or announcement.get('content', '') or announcement.get('content_blocks', '')
                         })
                     # 添加课程资料（适配爬虫返回的结构：label, url, content_blocks）
                     for material in course.get('course_materials', []):
@@ -288,15 +288,6 @@ class BlackboardService:
             logger.error("Cookie解密失败")
             return {}
     
-    def get_bb_courses(self, user_id: str) -> Dict:
-        """获取同步的课程列表"""
-        try:
-            result = self.blackboard_handle.handle_get_courses(user_id)
-            return result
-        except Exception as e:
-            logger.error(f"获取课程失败: {str(e)}")
-            return {'success': False, 'message': str(e)}
-
     def get_bb_assignments(self, user_id: str) -> Dict:
         """获取同步的作业列表（含 due_date）"""
         try:

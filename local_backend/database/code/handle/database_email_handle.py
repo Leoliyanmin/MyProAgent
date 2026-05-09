@@ -135,7 +135,20 @@ class EmailHandle:
 
     def handle_get_messages(self, user_id: str) -> Dict:
         try:
-            messages = self.message_ops.get_messages(user_id)
-            return {'success': True, 'messages': messages}
+            data = self.message_ops.get_messages(user_id)
+            clean = []
+            for m in data:
+                meta = {}
+                try:
+                    meta = json.loads(m.get('data_meta_json', '{}')) if m.get('data_meta_json') else {}
+                except (json.JSONDecodeError, TypeError):
+                    pass
+                clean.append({
+                    'title': m.get('data_title', ''),
+                    'context': m.get('data_content_text', ''),
+                    'release_time': m.get('data_release_time', ''),
+                    'sender': meta.get('sender', ''),
+                })
+            return {'success': True, 'messages': clean}
         except Exception as e:
             return {'success': False, 'message': str(e)}
