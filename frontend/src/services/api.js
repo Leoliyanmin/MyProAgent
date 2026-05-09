@@ -415,6 +415,34 @@ export const agentAPI = {
   }
 }
 
+// ==================== TIS API ====================
+
+export const tisAPI = {
+  getSchedule: async () => {
+    return fetchWithAuth('/api/v1/tis/schedule')
+  },
+  getStatus: async () => {
+    return fetchWithAuth('/api/v1/tis/status')
+  },
+  unbind: async () => {
+    return fetchWithAuth('/api/v1/tis/unbind', { method: 'POST' })
+  }
+}
+
+// ==================== Blackboard API ====================
+
+export const blackboardAPI = {
+  getAssignments: async () => {
+    return fetchWithAuth('/api/v1/blackboard/assignments')
+  },
+  getStatus: async () => {
+    return fetchWithAuth('/api/v1/blackboard/status')
+  },
+  unbind: async () => {
+    return fetchWithAuth('/api/v1/blackboard/unbind', { method: 'POST' })
+  }
+}
+
 // ==================== Sync API (Local ↔ Server) ====================
 
 export const syncAPI = {
@@ -471,5 +499,7 @@ export default {
   schedules: schedulesAPI,
   agent: agentAPI,
   sync: syncAPI,
-  profile: profileAPI
+  profile: profileAPI,
+  tis: tisAPI,
+  blackboard: blackboardAPI
 }

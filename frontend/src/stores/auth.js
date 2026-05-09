@@ -23,7 +23,8 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         await fetchUser()
       } catch (err) {
-        logout()
+        console.warn('Failed to fetch user info, continuing with token:', err.message)
+        user.value = { id: token.value, email: '', full_name: '' }
       }
     }
   }

@@ -301,6 +301,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
     """WebSocket 端点，支持流式 token 推送"""
     user_id = await get_current_user_id_websocket(websocket)
     if not user_id:
+        await websocket.accept()
         await websocket.close(code=4001, reason="Unauthorized")
         return
 

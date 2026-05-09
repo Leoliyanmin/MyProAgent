@@ -42,8 +42,16 @@ export default defineConfig(({ mode }) => {
         '/sync': {
           target: 'http://localhost:8002',
           changeOrigin: true
+        },
+        '/api/v1/tis': {
+          target: 'http://localhost:8002',
+          changeOrigin: true
+        },
+'/api/v1/blackboard': {
+          target: 'http://localhost:8002',
+          changeOrigin: true
         }
-      }
+      },
     },
     envPrefix: ['VITE_', 'TAURI_'],
     build: {

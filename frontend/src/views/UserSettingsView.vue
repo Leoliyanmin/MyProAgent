@@ -84,20 +84,59 @@
       </article>
 
       <article class="panel">
-        <h2 class="panel-title">第三方平台绑定</h2>
+        <h2 class="panel-title">教务平台绑定</h2>
         <ul class="provider-list">
-          <li v-for="provider in providers" :key="provider.key" class="provider-item">
+          <li class="provider-item">
             <div>
-              <p class="binding-title">{{ provider.label }}</p>
-              <p class="binding-meta">
-                {{ provider.connected ? `已绑定账号：${provider.account}` : '未绑定' }}
-              </p>
+              <p class="binding-title">TIS 教务系统</p>
+              <p class="binding-meta" v-if="tis.status === 'loading'">绑定中…</p>
+              <p class="binding-meta" v-else-if="tis.status === 'binding'">请在弹窗中完成登录，然后点击「完成登录」</p>
+              <template v-else-if="tis.status === 'bound'">
+                <p class="binding-meta binding-success">已绑定 · {{ tis.studentName }}（{{ tis.studentId }}）</p>
+                <p class="binding-meta">{{ tis.courseCount }} 门课程 · 绑定时间：{{ tis.bindTime }}</p>
+              </template>
+              <p class="binding-meta" v-else>未绑定</p>
             </div>
-            <button class="action-btn ghost" type="button" @click="toggleProvider(provider.key)">
-              {{ provider.connected ? '解除绑定' : '立即绑定' }}
-            </button>
+            <div class="action-group">
+              <template v-if="tis.status === 'binding'">
+                <button class="action-btn" type="button" @click="completeBinding('tis')">完成登录，开始绑定</button>
+              </template>
+              <template v-else-if="tis.status === 'unbound'">
+                <button v-if="isTauriApp" class="action-btn" type="button" @click="bindTis">绑定 TIS</button>
+                <button v-else class="action-btn ghost" type="button" @click="bindTis">绑定 TIS</button>
+              </template>
+              <button v-else-if="tis.status === 'bound'" class="action-btn ghost" type="button" @click="unbindTis">解绑</button>
+            </div>
+          </li>
+          <li class="provider-item">
+            <div>
+              <p class="binding-title">Blackboard</p>
+              <p class="binding-meta" v-if="bb.status === 'loading'">绑定中…</p>
+              <p class="binding-meta" v-else-if="bb.status === 'binding'">请在弹窗中完成登录，然后点击「完成登录」</p>
+              <template v-else-if="bb.status === 'bound'">
+                <p class="binding-meta binding-success">已绑定 · {{ bb.coursesCount }} 门课程</p>
+                <p class="binding-meta">绑定时间：{{ bb.bindTime }}</p>
+              </template>
+              <p class="binding-meta" v-else>未绑定</p>
+            </div>
+            <div class="action-group">
+              <template v-if="bb.status === 'binding'">
+                <button class="action-btn" type="button" @click="completeBinding('blackboard')">完成登录，开始绑定</button>
+              </template>
+              <template v-else-if="bb.status === 'unbound'">
+                <button v-if="isTauriApp" class="action-btn" type="button" @click="bindBb">绑定 Blackboard</button>
+                <button v-else class="action-btn ghost" type="button" @click="bindBb">绑定 Blackboard</button>
+              </template>
+              <button v-else-if="bb.status === 'bound'" class="action-btn ghost" type="button" @click="unbindBb">解绑</button>
+            </div>
           </li>
         </ul>
+        <p class="binding-meta" v-if="isTauriApp" style="margin-top: 10px;">💡 点击「绑定」打开登录窗口，完成登录后<strong>保持窗口打开</strong>，然后点击「完成登录，开始绑定」。提取 Cookie 后会询问是否关闭窗口。</p>
+        <p v-if="bindingError" class="status-text status-error" style="margin-top: 8px;">{{ bindingError }}</p>
+        <div v-if="bindingProgress.active" class="binding-progress">
+          <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+          <p class="progress-step">{{ bindingProgress.step }}</p>
+        </div>
       </article>
     </div>
 
@@ -168,7 +207,21 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { tisAPI, blackboardAPI } from '../services/api.js'
+import { useCalendarStore } from '../stores/calendar.js'
+
+const isTauriApp = !!window.__TAURI_INTERNALS__
+let invoke = null
+
+if (isTauriApp) {
+  import('@tauri-apps/api/core').then(mod => {
+    invoke = mod.invoke
+    console.log('[UserSettings] Tauri IPC ready')
+  }).catch(e => {
+    console.error('[UserSettings] Tauri IPC import failed:', e)
+  })
+}
 
 const profile = reactive({
   name: 'Yanmin'
@@ -212,11 +265,6 @@ const newRss = ref('')
 const rssSources = ref([
   { id: 1, url: 'https://github.blog/feed/' },
   { id: 2, url: 'https://stackoverflow.blog/feed/' }
-])
-
-const providers = ref([
-  { key: 'github', label: 'GitHub', connected: true, account: 'yanmin-dev' },
-  { key: 'stackoverflow', label: 'Stack Overflow', connected: false, account: '' },
 ])
 
 const saveName = () => {
@@ -354,6 +402,166 @@ const formatDate = (timestamp) => {
   return `${y}-${m}-${d} ${h}:${min}:${s}`
 }
 
+const tis = reactive({
+  status: 'loading',
+  studentName: '',
+  studentId: '',
+  courseCount: 0,
+  bindTime: '',
+})
+
+const bb = reactive({
+  status: 'loading',
+  coursesCount: 0,
+  bindTime: '',
+})
+
+const loadBindingStatus = async () => {
+  try {
+    const tisRes = await tisAPI.getStatus()
+    if (tisRes.is_bound) {
+      tis.status = 'bound'
+      tis.studentName = tisRes.user_info?.name || tisRes.student_name || ''
+      tis.studentId = tisRes.user_info?.student_id || tisRes.student_id || ''
+      tis.courseCount = tisRes.total_courses || 0
+      tis.bindTime = tisRes.bind_time || ''
+    } else {
+      tis.status = 'unbound'
+    }
+  } catch (err) {
+    console.error('[UserSettings] TIS status error:', err)
+    tis.status = 'unbound'
+  }
+  try {
+    const bbRes = await blackboardAPI.getStatus()
+    if (bbRes.is_bound) {
+      bb.status = 'bound'
+      bb.coursesCount = bbRes.courses_count || 0
+      bb.bindTime = bbRes.bind_time || ''
+    } else {
+      bb.status = 'unbound'
+    }
+  } catch (err) {
+    console.error('[UserSettings] BB status error:', err)
+    bb.status = 'unbound'
+  }
+}
+
+const bindTis = async () => {
+  if (!isTauriApp || !invoke) {
+    window.open('https://cas.sustech.edu.cn/cas/login?service=https://tis.sustech.edu.cn', '_blank')
+    return
+  }
+  try {
+    bindingError.value = ''
+    bindingProgress.active = true
+    bindingProgress.step = '正在打开 CAS 登录窗口…'
+    await invoke('open_cas_login', { platform: 'tis' })
+    tis.status = 'binding'
+    bindingProgress.active = false
+  } catch (err) {
+    bindingError.value = err?.message || String(err) || '打开登录窗口失败'
+    tis.status = 'unbound'
+    bindingProgress.active = false
+  }
+}
+
+const bindBb = async () => {
+  if (!isTauriApp || !invoke) {
+    window.open('https://cas.sustech.edu.cn/cas/login?service=https://bb.sustech.edu.cn', '_blank')
+    return
+  }
+  try {
+    bindingError.value = ''
+    bindingProgress.active = true
+    bindingProgress.step = '正在打开 CAS 登录窗口…'
+    await invoke('open_cas_login', { platform: 'blackboard' })
+    bb.status = 'binding'
+    bindingProgress.active = false
+  } catch (err) {
+    bindingError.value = err?.message || String(err) || '打开登录窗口失败'
+    bb.status = 'unbound'
+    bindingProgress.active = false
+  }
+}
+
+const bindingError = ref('')
+const bindingProgress = reactive({ active: false, step: '' })
+
+const completeBinding = async (platform) => {
+  const state = platform === 'tis' ? tis : bb
+  state.status = 'loading'
+  bindingError.value = ''
+  bindingProgress.active = true
+  bindingProgress.step = '正在提取 Cookie…'
+  try {
+    if (!invoke) { state.status = 'unbound'; bindingProgress.active = false; return }
+
+    let cookies
+    try {
+      cookies = await invoke('extract_cookies', { platform })
+    } catch (extractErr) {
+      const msg = typeof extractErr === 'string' ? extractErr : extractErr?.message || ''
+      if (msg.includes('not found')) {
+        bindingError.value = '请保持 CAS 登录窗口打开状态，不要提前关闭窗口，然后重新点击「完成登录，开始绑定」'
+      } else {
+        bindingError.value = msg || '提取 Cookie 失败，请重试'
+      }
+      state.status = 'unbound'
+      bindingProgress.active = false
+      return
+    }
+
+    if (!cookies || (Array.isArray(cookies) && cookies.length === 0)) {
+      bindingError.value = '未检测到登录信息，请确认已在弹出窗口中完成登录'
+      state.status = 'unbound'
+      bindingProgress.active = false
+      return
+    }
+
+    // Ask user whether to close the CAS window before proceeding
+    const shouldClose = confirm('Cookie 已提取完毕，是否关闭登录窗口？')
+    if (shouldClose) {
+      await invoke('close_cas_window', { platform }).catch(() => {})
+    }
+
+    bindingProgress.step = '正在绑定到教务系统，请稍候…'
+    const token = localStorage.getItem('token') || ''
+    const bindFn = platform === 'tis' ? 'bind_tis' : 'bind_blackboard'
+    const result = await invoke(bindFn, { cookies, backendUrl: 'http://127.0.0.1:8002', token })
+    if (result && result.success) {
+      bindingError.value = ''
+      bindingProgress.step = '正在导入数据…'
+      await loadBindingStatus()
+      const calendarStore = useCalendarStore()
+      if (platform === 'tis') {
+        await calendarStore.importTISSchedule()
+      } else {
+        await calendarStore.importBlackboardAssignments()
+      }
+      bindingProgress.active = false
+    } else {
+      bindingError.value = result?.message || '绑定失败，请重试'
+      state.status = 'unbound'
+      bindingProgress.active = false
+    }
+  } catch (err) {
+    bindingError.value = err?.message || String(err) || '绑定异常，请重试'
+    state.status = 'unbound'
+    bindingProgress.active = false
+  }
+}
+
+const unbindTis = async () => {
+  try { await tisAPI.unbind(); await loadBindingStatus() } catch {}
+}
+
+const unbindBb = async () => {
+  try { await blackboardAPI.unbind(); await loadBindingStatus() } catch {}
+}
+
+onMounted(loadBindingStatus)
+
 onBeforeUnmount(() => {
   if (verifyTimerId.value) {
     clearInterval(verifyTimerId.value)
@@ -392,24 +600,6 @@ const addRssSource = () => {
 
 const removeRssSource = (id) => {
   rssSources.value = rssSources.value.filter(item => item.id !== id)
-}
-
-const toggleProvider = (key) => {
-  providers.value = providers.value.map(item => {
-    if (item.key !== key) {
-      return item
-    }
-
-    if (item.connected) {
-      return { ...item, connected: false, account: '' }
-    }
-
-    return {
-      ...item,
-      connected: true,
-      account: `${item.key}_user`
-    }
-  })
 }
 </script>
 
@@ -528,6 +718,12 @@ const toggleProvider = (key) => {
   gap: 8px;
 }
 
+.action-group {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .binding-item,
 .provider-item {
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -556,6 +752,11 @@ const toggleProvider = (key) => {
   margin: 4px 0 0;
   font-size: 12px;
   color: #6b7280;
+}
+
+.binding-success {
+  color: #16a34a;
+  font-weight: 600;
 }
 
 .text-btn {
@@ -634,6 +835,43 @@ const toggleProvider = (key) => {
 
 .status-error {
   color: #dc2626;
+}
+
+.binding-progress {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f0f7ff;
+  border-radius: 8px;
+  border: 1px solid #bdd3f0;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 6px;
+  background: #d0ddf0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(90deg, #007aff, #4a9eff);
+  border-radius: 3px;
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-indeterminate {
+  0% { transform: translateX(-100%); width: 30%; }
+  50% { width: 60%; }
+  100% { transform: translateX(400%); width: 30%; }
+}
+
+.progress-step {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #2563eb;
+  text-align: center;
 }
 
 .strength-empty {

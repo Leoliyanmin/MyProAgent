@@ -205,3 +205,8 @@ local/database/test_db/sync_packet_to_server.json
 
 # mock data
 mock_frontend/
+
+# Standalone CAS demo app (not for production)
+cas-demo/
+*.yaml
+*.spec

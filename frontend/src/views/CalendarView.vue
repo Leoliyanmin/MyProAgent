@@ -18,6 +18,12 @@
       </div>
 
       <div class="toolbar-right">
+        <button class="icon-btn import-btn" @click="handleImportTIS" :class="{ spinning: isImporting }" title="导入课表">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button class="icon-btn import-bb-btn" @click="handleImportBB" :class="{ spinning: isImportingBB }" title="导入作业">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="16" y2="7"/><line x1="9" y1="11" x2="14" y2="11"/></svg>
+        </button>
         <button class="icon-btn refresh-btn" @click="refreshFromBackend" :class="{ spinning: isRefreshing }" title="同步">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
         </button>
@@ -240,6 +246,42 @@ const calendarStore = useCalendarStore()
 const dashboardStore = useDashboardStore()
 
 const isRefreshing = ref(false)
+const isImporting = ref(false)
+const isImportingBB = ref(false)
+
+const handleImportTIS = async () => {
+  if (isImporting.value) return
+  isImporting.value = true
+  try {
+    const result = await calendarStore.importTISSchedule()
+    if (result.success && result.added > 0) {
+      console.log(`导入课表成功: ${result.added} 门课程`)
+    } else if (result.message) {
+      console.warn('导入课表失败:', result.message)
+    }
+  } catch (err) {
+    console.error('导入课表异常:', err)
+  } finally {
+    isImporting.value = false
+  }
+}
+
+const handleImportBB = async () => {
+  if (isImportingBB.value) return
+  isImportingBB.value = true
+  try {
+    const result = await calendarStore.importBlackboardAssignments()
+    if (result.success) {
+      console.log(`导入作业成功: ${result.eventsAdded} 个日历事件, ${result.todosAdded} 个待办`)
+    } else if (result.message) {
+      console.warn('导入作业失败:', result.message)
+    }
+  } catch (err) {
+    console.error('导入作业异常:', err)
+  } finally {
+    isImportingBB.value = false
+  }
+}
 
 const refreshFromBackend = async () => {
   if (isRefreshing.value) return
@@ -879,6 +921,9 @@ const onResizeStart = (e, event) => {
 
 .refresh-btn { transition: transform 0.3s ease; }
 .refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
+.import-btn { margin-right: 4px; }
+.import-bb-btn { margin-right: 4px; }
+.import-btn.spinning svg, .import-bb-btn.spinning svg { animation: spin 0.8s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .segmented-control { display: flex; background: rgba(0, 0, 0, 0.05); padding: 2px; border-radius: 8px; }

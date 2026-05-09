@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useDashboardStore } from './dashboard.js'
-import { schedulesAPI } from '../services/api.js'
+import { schedulesAPI, tisAPI, blackboardAPI } from '../services/api.js'
 
 export const useCalendarStore = defineStore('calendar', () => {
   const dashboardStore = useDashboardStore()
@@ -226,6 +226,93 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
   }
 
+  const importTISSchedule = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const result = await tisAPI.getSchedule()
+      const tisEvents = result.events || []
+      const existingIds = new Set(basicEvents.value.map(e => e.id))
+
+      let added = 0
+      const newEvents = tisEvents.filter(e => !existingIds.has(e.id)).map(e => ({
+        ...e,
+        id: `tis_${e.title}_${e.start}_${e.startTime}`.replace(/\s+/g, '_'),
+        priority: 0,
+        color: '#ff3b30',
+        source: 'tis',
+        isTodo: false,
+      }))
+
+      for (const ev of newEvents) {
+        basicEvents.value.push(ev)
+        added++
+      }
+
+      return { success: true, added, total: newEvents.length }
+    } catch (err) {
+      error.value = err.message
+      console.error('Failed to import TIS schedule:', err)
+      return { success: false, added: 0, total: 0, message: err.message }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const importBlackboardAssignments = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const result = await blackboardAPI.getAssignments()
+      const bbEvents = result.events || []
+      const bbTodos = result.todos || []
+
+      const existingIds = new Set(basicEvents.value.map(e => e.id))
+
+      let eventsAdded = 0
+      let todosAdded = 0
+
+      for (const ev of bbEvents) {
+        const id = `bb_${ev.title}`.replace(/\s+/g, '_').slice(0, 80)
+        if (existingIds.has(id)) continue
+        const event = {
+          ...ev,
+          id,
+          source: 'blackboard',
+          isTodo: true,
+          completed: false,
+        }
+        if (!event.start && !event.startTime) {
+          const today = new Date().toISOString().split('T')[0]
+          event.start = today
+          event.end = today
+        }
+        basicEvents.value.push(event)
+        existingIds.add(id)
+        eventsAdded++
+      }
+
+      const existingTodoTitles = new Set(dashboardStore.todos.map(t => t.title))
+      for (const todo of bbTodos) {
+        if (existingTodoTitles.has(todo.title)) continue
+        dashboardStore.addTodo({
+          ...todo,
+          linkedScheduleId: null,
+        })
+        existingTodoTitles.add(todo.title)
+        todosAdded++
+      }
+
+      return { success: true, eventsAdded, todosAdded, total: bbEvents.length }
+    } catch (err) {
+      error.value = err.message
+      console.error('Failed to import Blackboard assignments:', err)
+      return { success: false, eventsAdded: 0, todosAdded: 0, total: 0, message: err.message }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return { 
     basicEvents,
     allEvents, 
@@ -237,6 +324,8 @@ export const useCalendarStore = defineStore('calendar', () => {
     loadSchedules,
     createScheduleOnBackend,
     updateScheduleOnBackend,
+    importTISSchedule,
+    importBlackboardAssignments,
     currentDate,
     viewType
   }

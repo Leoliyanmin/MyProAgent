@@ -30,9 +30,11 @@ if not logger.handlers:
 TIS_BASE_URL = "https://tis.sustech.edu.cn/"
 TIS_API_BASE = "https://tis.sustech.edu.cn/"
 
-# 输出文件路径
-OUTPUT_FILE = os.path.join(os.path.dirname(__file__), 'tis_result.txt')
-TEST_OUTPUT_FILE = os.path.join(os.path.dirname(__file__), 'test_tis_result.txt')
+# 输出文件路径 — 写入项目外临时目录，避免 uvicorn --reload 误触文件变更导致 502
+_SCRAPER_OUTPUT_DIR = os.path.join(os.path.expanduser('~'), '.proagent', 'scraper_output')
+os.makedirs(_SCRAPER_OUTPUT_DIR, exist_ok=True)
+OUTPUT_FILE = os.path.join(_SCRAPER_OUTPUT_DIR, 'tis_result.txt')
+TEST_OUTPUT_FILE = os.path.join(_SCRAPER_OUTPUT_DIR, 'test_tis_result.txt')
 
 WEEKDAY_LABELS = {
     1: ("Monday", "星期一"),

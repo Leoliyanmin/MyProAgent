@@ -28,7 +28,9 @@ BB_PARAMS = {
     "tab_tab_group_id": "_1_1"
 }
 
-OUTPUT_FILE = Path(__file__).parent / "bb_result.txt"
+_SCRAPER_OUTPUT_DIR = Path.home() / ".proagent" / "scraper_output"
+_SCRAPER_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_FILE = _SCRAPER_OUTPUT_DIR / "bb_result.txt"
 
 
 def extract_course_id(url: str) -> str | None:

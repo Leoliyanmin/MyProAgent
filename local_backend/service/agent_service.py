@@ -18,7 +18,7 @@ from localagent.agent import LocalAgent
 from localagent.session import SessionManager
 from localagent.memory import MemoryStore
 
-personal_path = Path(__file__).parent.parent.parent / "personal"
+personal_path = Path(__file__).parent.parent.parent / "personality"
 if str(personal_path) not in sys.path:
     sys.path.insert(0, str(personal_path))
 from personality import InteractionLogger, ProfileExtractor, MBTIInferencer, UserProfileStore

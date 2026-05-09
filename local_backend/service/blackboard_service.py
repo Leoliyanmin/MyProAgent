@@ -1,41 +1,33 @@
 import json
+import os
+import time
 import requests
 import logging
 from typing import Dict, Optional
 
 from service.scraper.blackboard_scraper import BlackboardScraper
-from database.code.handle.database_blackboard_handle import BlackboardHandle
 
-# 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 BB_SSO_URL = "https://bb.sustech.edu.cn/webapps/bb-sso-BBLEARN/index.jsp"
+
+_SAVE_DIR = os.path.join(os.path.expanduser('~'), '.proagent', 'bind_data')
+os.makedirs(_SAVE_DIR, exist_ok=True)
+
 
 class BlackboardService:
     """Blackboard业务服务"""
     
     def __init__(self):
         self.blackboard_url = "https://bb.sustech.edu.cn"
-        self.blackboard_handle = BlackboardHandle()
+        self._bound_users = {}
     
     def _create_session_with_cookies(self, cookies_dict: Dict) -> requests.Session:
-        """创建带有Cookie的Session
-        
-        使用直接在Header中设置Cookie的方式，避免CookieJar处理问题。
-        
-        Args:
-            cookies_dict: Cookie字典
-        
-        Returns:
-            配置好的Session对象
-        """
         session = requests.Session()
         
-        # 构建Cookie字符串
         cookie_string = "; ".join([f"{k}={v}" for k, v in cookies_dict.items()])
         
-        # 设置请求头，包括直接在Header中设置Cookie
         session.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
@@ -45,7 +37,7 @@ class BlackboardService:
             "Upgrade-Insecure-Requests": "1",
             "Referer": "https://bb.sustech.edu.cn/",
             "Origin": "https://bb.sustech.edu.cn",
-            "Cookie": cookie_string  # 直接在Header中设置Cookie，避免CookieJar处理问题
+            "Cookie": cookie_string
         })
         
         session.timeout = 10
@@ -53,21 +45,9 @@ class BlackboardService:
         return session
     
     def bind_with_cookie(self, user_id: str, cookies_str: str) -> Dict:
-        """使用Cookie绑定Blackboard账号
-        
-        通过Tauri等方式获取Blackboard的Cookie后，传递给后端完成绑定。
-        
-        Args:
-            user_id: 用户ID
-            cookies_str: Blackboard的Cookie字符串（JSON格式）
-        
-        Returns:
-            包含success和message的字典
-        """
         try:
             logger.info(f"使用Cookie绑定: user_id={user_id}")
             
-            # 解析Cookie字符串
             try:
                 cookies_dict = json.loads(cookies_str)
             except json.JSONDecodeError as e:
@@ -77,47 +57,31 @@ class BlackboardService:
             logger.info(f"解析到的Cookie数量: {len(cookies_dict)} 个")
             logger.info(f"Cookie键: {list(cookies_dict.keys())}")
             
-            # 验证必需的Cookie（JSESSIONID和s_session_id都是必需的）
             required_cookies = ['JSESSIONID', 's_session_id']
             missing_required = [c for c in required_cookies if c not in cookies_dict]
             
             if missing_required:
                 logger.error(f"Cookie中缺少必需的字段: {missing_required}")
                 return {'success': False, 'message': f'Cookie中缺少必需的字段: {", ".join(missing_required)}'}
-            '''
-            # 可选Cookie列表
-            optional_cookies = ['BBSESSION', 'COOKIE_CONSENT_ACCEPTED', '_ga', '_ga_0KD226TRZ5', 
-                               'CdnSignedValidation', 'BbClientCalenderTimeZone', 
-                               'BbClientDownloadExecuting', 'web_client_cache_guid']
             
-            # 记录可选Cookie的缺失情况
-            missing_optional = [c for c in optional_cookies if c not in cookies_dict]
-            if missing_optional:
-                logger.info(f"缺少可选Cookie: {missing_optional}")
-            '''
-            # 创建Session并设置Cookie（使用改进的方法）
             session = self._create_session_with_cookies(cookies_dict)
             
             logger.info(f"成功设置 {len(cookies_dict)} 个Cookie到Session")
             logger.info(f"Cookie详情: {[(k, v[:20] + '...' if len(v) > 20 else v) for k, v in cookies_dict.items()]}")
             
-            # 验证Cookie有效性
             logger.info("验证Cookie有效性...")
             test_response = session.get(self.blackboard_url, allow_redirects=True)
             logger.info(f"验证响应状态码: {test_response.status_code}")
             logger.info(f"验证后URL: {test_response.url}")
             
-            # 检查是否被重定向到CAS登录页
             if 'cas.sustech.edu.cn' in test_response.url:
                 logger.error("Cookie无效，被重定向到CAS登录页")
                 return {'success': False, 'message': 'Cookie已失效，请重新登录Blackboard'}
             
-            # 爬取课程数据
             logger.info("爬取Blackboard课程数据...")
             scraper = BlackboardScraper(session=session)
             scrape_result = scraper.scrape_courses()
             
-            # 同步数据到数据库
             if scrape_result['success']:
                 courses_data = []
                 for course in scrape_result['courses']:
@@ -129,7 +93,6 @@ class BlackboardService:
                         'announcements': [],
                         'course_materials': []
                     }
-                    # 适配爬虫返回的 upload_assignments 结构
                     for assignment in course.get('upload_assignments', []):
                         course_data['assignments'].append({
                             'id': assignment.get('label', ''),
@@ -138,7 +101,6 @@ class BlackboardService:
                             'due_date': '',
                             'content': assignment.get('content_blocks', [])
                         })
-                    # 添加公告（适配爬虫返回的结构）
                     for announcement in course.get('announcements', []):
                         course_data['announcements'].append({
                             'id': announcement.get('id', '') or announcement.get('label', ''),
@@ -147,7 +109,6 @@ class BlackboardService:
                             'date': announcement.get('date', ''),
                             'content': announcement.get('content', '') or announcement.get('content_blocks', '')
                         })
-                    # 添加课程资料（适配爬虫返回的结构：label, url, content_blocks）
                     for material in course.get('course_materials', []):
                         course_data['course_materials'].append({
                             'id': material.get('id', '') or material.get('label', ''),
@@ -158,87 +119,72 @@ class BlackboardService:
                         })
                     courses_data.append(course_data)
                 
-                sync_result = self.blackboard_handle.handle_full_sync(
-                    user_id=user_id,
-                    sync_data={'courses': courses_data}
-                )
+                json_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_courses.json')
+                with open(json_path, 'w', encoding='utf-8') as f:
+                    json.dump({
+                        'user_id': user_id,
+                        'bind_time': time.strftime('%Y-%m-%d %H:%M:%S'),
+                        'courses': courses_data
+                    }, f, ensure_ascii=False, indent=2)
+                logger.info(f"Blackboard课程数据已保存到: {json_path}")
                 
-                if not sync_result['success']:
-                    logger.error(f"数据同步失败: {sync_result.get('message', '未知错误')}")
-                    return {'success': False, 'message': f"数据同步失败: {sync_result.get('message', '未知错误')}"}
-                
-                total_announcements = len(sync_result.get('synced_announcements', []))
-                total_course_materials = len(sync_result.get('synced_course_materials', []))
-                total_upload_assignments = len(sync_result.get('synced_assignments', []))
-                course_names = [course.get('name', '') for course in scrape_result.get('courses', [])]
-                
-                logger.info(f"数据同步结果: 课程数={len(sync_result.get('synced_courses', []))}, 公告数={total_announcements}, 课程资料数={total_course_materials}, 作业数={total_upload_assignments}, 课程名={course_names}")
+                course_names = [c.get('name', '') for c in courses_data]
+                total_assignments = sum(len(c.get('assignments', [])) for c in courses_data)
+                total_announcements = sum(len(c.get('announcements', [])) for c in courses_data)
+                total_materials = sum(len(c.get('course_materials', [])) for c in courses_data)
+                logger.info(f"爬取结果: 课程数={len(courses_data)}, 作业数={total_assignments}, 公告数={total_announcements}, 课程资料数={total_materials}, 课程名={course_names}")
             
-            # 存储账号信息
-            username = user_id.split('@')[0] if '@' in user_id else user_id
-            encrypted_cookie = self.encrypt_cookie(cookies_dict)
+            self._bound_users[user_id] = {
+                'cookies': cookies_str,
+                'bind_time': time.strftime('%Y-%m-%d %H:%M:%S'),
+                'courses_count': len(scrape_result.get('courses', []))
+            }
             
-            bind_result = self.blackboard_handle.handle_bind_blackboard(
-                user_id=user_id,
-                username=username,
-                encrypted_cookie=encrypted_cookie
-            )
-            
-            if bind_result['success']:
-                logger.info("绑定成功")
-                return {'success': True, 'message': 'Blackboard账号绑定成功'}
-            else:
-                return {'success': False, 'message': f"账号存储失败: {bind_result.get('message', '未知错误')}"}
+            return {
+                'success': True,
+                'message': f"Blackboard账号绑定成功，爬取到 {len(scrape_result.get('courses', []))} 门课程"
+            }
             
         except Exception as e:
             logger.error(f"使用Cookie绑定失败: {str(e)}")
+            import traceback
+            logger.error(f"错误堆栈: {traceback.format_exc()}")
             return {'success': False, 'message': f'绑定失败: {str(e)}'}
     
     def sync_blackboard_data(self, user_id: str) -> Dict:
-        """同步Blackboard数据"""
         try:
             logger.info(f"同步Blackboard数据: user_id={user_id}")
             
-            # 获取存储的Cookie（从AccountOperations直接获取）
-            account_info = self.blackboard_handle.account_ops.get_blackboard_account(user_id)
-            if not account_info or not account_info.get('account_encrypted_cookie'):
-                return {'success': False, 'message': '未找到绑定的Blackboard账号'}
+            if user_id not in self._bound_users:
+                return {'success': False, 'message': '未绑定Blackboard账号，请先绑定'}
             
-            # 解密Cookie
-            cookies_dict = self.decrypt_cookie(account_info['account_encrypted_cookie'])
+            cookies_str = self._bound_users[user_id].get('cookies', '')
+            if not cookies_str:
+                return {'success': False, 'message': '绑定信息中没有Cookie'}
             
-            # 创建session并设置Cookie（使用改进的方法）
+            try:
+                cookies_dict = json.loads(cookies_str)
+            except json.JSONDecodeError:
+                return {'success': False, 'message': 'Cookie格式错误'}
+            
             session = self._create_session_with_cookies(cookies_dict)
-            
-            # 爬取课程数据
             scraper = BlackboardScraper(session=session)
             scrape_result = scraper.scrape_courses()
             
             if scrape_result['success']:
-                courses_data = []
-                for course in scrape_result['courses']:
-                    course_data = {
-                        'id': course.get('id', ''),
-                        'name': course.get('name', ''),
-                        'link': course.get('url', ''),
-                        'assignments': []
-                    }
-                    for assignment in course.get('assignments', []):
-                        course_data['assignments'].append({
-                            'id': assignment.get('id', ''),
-                            'name': assignment.get('title', ''),
-                            'link': assignment.get('url', ''),
-                            'due_date': assignment.get('due_date', ''),
-                            'status': assignment.get('status', '未提交')
-                        })
-                    courses_data.append(course_data)
+                json_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_sync.json')
+                with open(json_path, 'w', encoding='utf-8') as f:
+                    json.dump({
+                        'user_id': user_id,
+                        'sync_time': time.strftime('%Y-%m-%d %H:%M:%S'),
+                        'courses': scrape_result.get('courses', [])
+                    }, f, ensure_ascii=False, indent=2)
                 
-                sync_result = self.blackboard_handle.handle_full_sync(
-                    user_id=user_id,
-                    sync_data={'courses': courses_data}
-                )
-                
-                return {'success': True, 'message': '同步成功', 'data': sync_result}
+                return {
+                    'success': True,
+                    'message': f"同步成功，共 {len(scrape_result.get('courses', []))} 门课程",
+                    'data': scrape_result
+                }
             else:
                 return {'success': False, 'message': scrape_result.get('message', '爬取失败')}
         
@@ -247,41 +193,58 @@ class BlackboardService:
             return {'success': False, 'message': f'同步失败: {str(e)}'}
     
     def get_blackboard_status(self, user_id: str) -> Dict:
-        """获取Blackboard绑定状态"""
         try:
-            # 使用正确的方法名 handle_get_blackboard_status
-            result = self.blackboard_handle.handle_get_blackboard_status(user_id)
-            
-            if result['success']:
+            if user_id in self._bound_users:
+                bound_info = self._bound_users[user_id]
                 return {
                     'success': True,
-                    'is_bound': result.get('is_bound', False),
-                    'username': result.get('username', ''),
-                    'bind_time': result.get('bind_time', ''),
-                    'last_sync_time': result.get('last_sync_time', '')
+                    'is_bound': True,
+                    'username': user_id.split('@')[0] if '@' in user_id else user_id,
+                    'bind_time': bound_info.get('bind_time', ''),
+                    'last_sync_time': ''
                 }
-            else:
-                return {'success': False, 'message': result.get('message', '获取状态失败')}
-        
+            json_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_courses.json')
+            if os.path.exists(json_path):
+                import json as _json
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    data = _json.load(f)
+                return {
+                    'success': True,
+                    'is_bound': True,
+                    'username': user_id.split('@')[0] if '@' in user_id else user_id,
+                    'bind_time': data.get('bind_time', ''),
+                    'last_sync_time': '',
+                    'courses_count': len(data.get('courses', [])),
+                }
+            return {'success': True, 'is_bound': False, 'message': '未绑定Blackboard账号'}
         except Exception as e:
             logger.error(f"获取Blackboard状态失败: {str(e)}")
             return {'success': False, 'message': str(e)}
     
     def unbind_blackboard(self, user_id: str) -> Dict:
-        """解绑Blackboard账号"""
         try:
-            result = self.blackboard_handle.handle_unbind_blackboard(user_id)
-            return result
+            if user_id in self._bound_users:
+                del self._bound_users[user_id]
+            json_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_courses.json')
+            if os.path.exists(json_path):
+                os.remove(json_path)
+                sync_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_sync.json')
+                if os.path.exists(sync_path):
+                    os.remove(sync_path)
+                logger.info(f"Blackboard解绑成功，已删除数据文件: user_id={user_id}")
+                return {'success': True, 'message': 'Blackboard账号解绑成功'}
+            if user_id not in self._bound_users:
+                return {'success': False, 'message': '未绑定Blackboard账号'}
+            logger.info(f"Blackboard解绑成功: user_id={user_id}")
+            return {'success': True, 'message': 'Blackboard账号解绑成功'}
         except Exception as e:
             logger.error(f"解绑Blackboard失败: {str(e)}")
             return {'success': False, 'message': str(e)}
     
     def encrypt_cookie(self, cookies: Dict) -> str:
-        """加密Cookie"""
         return json.dumps(cookies)
     
     def decrypt_cookie(self, encrypted_cookie: str) -> Dict:
-        """解密Cookie"""
         try:
             return json.loads(encrypted_cookie)
         except json.JSONDecodeError:
