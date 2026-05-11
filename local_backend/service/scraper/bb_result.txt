@@ -1,7 +1,7 @@
 ========================================
 Blackboard 爬取结果
 ========================================
-时间: 2026-05-01 21:08:50
+时间: 2026-05-09 21:45:38
 总课程数: 4
 
 ========================================
@@ -14,6 +14,7 @@ Blackboard 爬取结果
 --- Operating Systems Spring 2026 ---
   Undergraduate Students Declaration Form: March 14, 2025 10:00 AM
   Assignment3: May 13, 2026 2:00 PM
+  Assignment4: May 25, 2026 4:00 PM
 
 --- Software Engineering Spring 2026 ---
   Academic Integrity: 未获取到
@@ -26,7 +27,7 @@ Blackboard 爬取结果
 <div class="noItems" style="display:none">您的所有课程均已隐藏。</div>
       
       <h3 class='termHeading-coursefakeclass'>
-       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', '0e0fffa5-00a3-4d94-b1ee-82cce534e367')">
+       <a id="afor_3_1termCourses__57_1" title="收拢" href="#" class="termToggleLink itemHead itemHeadOpen" onClick="toggleTermLink('_3_1','termCourses__57_1', 'fa0c5c67-e27e-4877-a56b-49e71f1e3ba0')">
         <span class="hideoff">收拢</span>
         2026春（Spring 2026）</a>
        </h3>
@@ -47,11 +48,14 @@ Blackboard 爬取结果
 <div class="courseDataBlock"><span class="dataBlockLabel">
 公告: 
 </span>
-<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">Project is released</a></li><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">【reminder】Please submit Assignment3 on time【ddl: 5.13 14:00】</a></li></ul></div></li>
+<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1">【reminder】Please submit Assignment4 on time【ddl: 5.25 16:00】</a></li></ul></div></li>
 <li>
 <img alt='' src='/images/ci/icons/bookopen_li.gif' width='12' height='12' />
 <a href=" /webapps/blackboard/execute/launcher?type=Course&id=_8012_1&url=" target="_top">Software Engineering Spring 2026</a>
-</li>
+<div class="courseDataBlock"><span class="dataBlockLabel">
+公告: 
+</span>
+<ul><li><a href="/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8012_1">Sprint 2 requirement released</a></li></ul></div></li>
 </ul>
         </div>
       
@@ -1222,6 +1226,74 @@ Blackboard 爬取结果
           ]
         },
         {
+          "label": "--Week 11",
+          "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598933_1&mode=reset",
+          "content_blocks": [
+            {
+              "type": "paragraph",
+              "text": "--Week 11 Content Lecture Materials Attached Files: Lecture 11-deep learning based object detection.pdf ( 2.279 MB ) Lab 11 Attached Files: lab11.zip ( 607.228 MB )",
+              "links": [
+                {
+                  "text": "Lecture 11-deep learning based object detection.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-598955-dt-content-rid-19101255_1/xid-19101255_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598933_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598933_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598933_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598933_1&mode=reset#close"
+                },
+                {
+                  "text": "lab11.zip",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-598956-dt-content-rid-19101256_1/xid-19101256_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598933_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598933_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598933_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598933_1&mode=reset#close"
+                }
+              ]
+            }
+          ],
+          "content_section_blocks": [
+            {
+              "title": "Lecture Materials",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Attached Files: Lecture 11-deep learning based object detection.pdf ( 2.279 MB )",
+                  "links": [
+                    {
+                      "text": "Lecture 11-deep learning based object detection.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-598955-dt-content-rid-19101255_1/xid-19101255_1"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Lab 11",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Attached Files: lab11.zip ( 607.228 MB )",
+                  "links": [
+                    {
+                      "text": "lab11.zip",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-598956-dt-content-rid-19101256_1/xid-19101256_1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
           "label": "-- Book",
           "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8165_1&content_id=_598938_1&mode=reset",
           "content_blocks": [
@@ -1355,7 +1427,53 @@ Blackboard 爬取结果
       "id": "_8444_1",
       "name": "Frontier Seminars in Computer Science and Technology III Spring 2026",
       "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/launcher?type=Course&id=_8444_1&url=",
-      "announcements": [],
+      "announcements": [
+        {
+          "id": "_43756_1",
+          "title": "4/24 第四次讲座",
+          "posted_on": "Posted on: Wednesday, April 22, 2026 11:09:02 PM CST",
+          "posted_date": "",
+          "posted_by": "徐炀 计算机科学与工程系",
+          "posted_to": "Frontier Seminars in Computer Science and Technology III Spring 2026",
+          "body_text": ""
+        },
+        {
+          "id": "_43673_1",
+          "title": "4/17 第三次讲座",
+          "posted_on": "Posted on: Friday, April 17, 2026 10:10:25 AM CST",
+          "posted_date": "",
+          "posted_by": "徐炀 计算机科学与工程系",
+          "posted_to": "Frontier Seminars in Computer Science and Technology III Spring 2026",
+          "body_text": ""
+        },
+        {
+          "id": "_43675_1",
+          "title": "4/10 第二次讲座",
+          "posted_on": "Posted on: Friday, April 17, 2026 10:06:56 AM CST",
+          "posted_date": "",
+          "posted_by": "徐炀 计算机科学与工程系",
+          "posted_to": "Frontier Seminars in Computer Science and Technology III Spring 2026",
+          "body_text": ""
+        },
+        {
+          "id": "_43676_1",
+          "title": "3/20 第一次讲座",
+          "posted_on": "Posted on: Friday, April 17, 2026 10:08:13 AM CST",
+          "posted_date": "",
+          "posted_by": "徐炀 计算机科学与工程系",
+          "posted_to": "Frontier Seminars in Computer Science and Technology III Spring 2026",
+          "body_text": ""
+        },
+        {
+          "id": "_43674_1",
+          "title": "课程QQ群",
+          "posted_on": "Posted on: Friday, April 17, 2026 10:04:02 AM CST",
+          "posted_date": "",
+          "posted_by": "徐炀 计算机科学与工程系",
+          "posted_to": "Frontier Seminars in Computer Science and Technology III Spring 2026",
+          "body_text": ""
+        }
+      ],
       "course_materials": [],
       "upload_assignments": []
     },
@@ -1365,12 +1483,76 @@ Blackboard 爬取结果
       "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/launcher?type=Course&id=_8205_1&url=",
       "announcements": [
         {
-          "title": "Project is released",
-          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1"
+          "id": "_43844_1",
+          "title": "【reminder】Please submit Assignment4 on time【ddl: 5.25 16:00】",
+          "posted_on": "发布时间: 2026年5月6日 星期三 上午10时30分14秒 CST",
+          "posted_date": "",
+          "posted_by": "计算机科学与工程系 沈昀",
+          "posted_to": "Operating Systems Spring 2026",
+          "body_text": "Dear students,\nAssignment4 is released. Please remember to submit Assignment4 on Time.【ddl: 5.25 16:00】\nYun"
         },
         {
+          "id": "_43802_1",
+          "title": "Project is released",
+          "posted_on": "发布时间: 2026年4月29日 星期三 上午11时25分41秒 CST",
+          "posted_date": "",
+          "posted_by": "计算机科学与工程系 沈昀",
+          "posted_to": "Operating Systems Spring 2026",
+          "body_text": "Dear students,\nProject is released on bb, please read guides carefully and complete team formation before May 11.\nYun"
+        },
+        {
+          "id": "_43800_1",
           "title": "【reminder】Please submit Assignment3 on time【ddl: 5.13 14:00】",
-          "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&searchSelect=_8205_1"
+          "posted_on": "发布时间: 2026年4月29日 星期三 上午10时31分45秒 CST",
+          "posted_date": "",
+          "posted_by": "计算机科学与工程系 沈昀",
+          "posted_to": "Operating Systems Spring 2026",
+          "body_text": "Dear students,\nAssignment3 is released. Please remember to submit Assignment3 on Time.【ddl: 5.13 14:00】\nYun"
+        },
+        {
+          "id": "_43764_1",
+          "title": "Mid term exam information",
+          "posted_on": "发布时间: 2026年4月24日 星期五 下午02时49分08秒 CST",
+          "posted_date": "",
+          "posted_by": "计算机科学与工程系 沈昀",
+          "posted_to": "Operating Systems Spring 2026",
+          "body_text": "Dear students,\nMidterm exam time: Apr 25, Saturday, 14:00 – 16:00\nMidterm exam seatingarrangements are in\nCS302_Mid_Term_Seating_Arrangement.pdf\n.\nCheck your exam room and seat number in advance.\nArrive 15 mins early with your student ID card, sit in your assigned seat and follow exam rules.\nGood luck!\n邮件无法打开链接，请登录bb站点公告处打开\n邮件无法打开链接，请登录bb站点公告处打开\n邮件无法打开链接，请登录bb站点公告处打开"
+        },
+        {
+          "id": "_43588_1",
+          "title": "【 Reminder】Please Submit Assignment2 on Time【4.26 23:00】",
+          "posted_on": "发布时间: 2026年4月8日 星期三 下午03时25分48秒 CST",
+          "posted_date": "",
+          "posted_by": "计算机科学与工程系 沈昀",
+          "posted_to": "Operating Systems Spring 2026",
+          "body_text": "Dear students,\nAssignment1 is released. Please remember to submit Assignment2 on Time.【4.26 23:00】\nYun"
+        },
+        {
+          "id": "_43470_1",
+          "title": "【 Reminder】Please Submit Assignment1 on Time",
+          "posted_on": "发布时间: 2026年3月25日 星期三 下午04时06分17秒 CST",
+          "posted_date": "",
+          "posted_by": "计算机科学与工程系 沈昀",
+          "posted_to": "Operating Systems Spring 2026",
+          "body_text": "Dear students,\nAssignment1 is released. Please remember to submit Assignment1 on Time.\nYun"
+        },
+        {
+          "id": "_43233_1",
+          "title": "Submit the Undergraduate Students Declaration Form",
+          "posted_on": "发布时间: 2026年3月4日 星期三 上午10时38分30秒 CST",
+          "posted_date": "",
+          "posted_by": "计算机科学与工程系 沈昀",
+          "posted_to": "Operating Systems Spring 2026",
+          "body_text": "Dear students,\nPlease go to the bb site - Declaration Form submission link to submit the Undergraduate Students Declaration Form. Sign the attached form and submit to bb, and electronic signature is allowed.\nThe assignment commitment signature cannot be typed, it must be handwritten or handwritten electronic signature. Date must be signed.\nThe assignment commitment signature cannot be typed, it must be handwritten or handwritten electronic signature. Date must be signed.\nThe assignment commitment signature cannot be typed, it must be handwritten or handwritten electronic signature. Date must be signed."
+        },
+        {
+          "id": "_42567_1",
+          "title": "【CS302】Operating System Environment Configuration and Course Group",
+          "posted_on": "发布时间: 2026年2月24日 星期二 下午05时41分40秒 CST",
+          "posted_date": "",
+          "posted_by": "计算机科学与工程系 沈昀",
+          "posted_to": "Operating Systems Spring 2026",
+          "body_text": "Dear students,\nWelcome to the Computer Operating Systems course. Please log in to Blackboard and navigate to the Week 1 folder to download the \"Experimental Environment Setup (Windows).pdf(实验环境搭建（Windows）.pdf)\" document. Make sure to follow the instructions within to complete the environment configuration before the lab session if possible.\n实验环境搭建（Windows）.pdf\n此文件登陆bb站点后才能打开，邮件里面点不开。\n此文件登陆bb站点后才能打开，邮件里面点不开。\n此文件登陆bb站点后才能打开，邮件里面点不开。\nAdditionally, please scan the QR code to join the course's enterprise WeChat group.\nShen Yun"
         }
       ],
       "course_materials": [
@@ -2197,12 +2379,69 @@ Blackboard 爬取结果
           ]
         },
         {
+          "label": "--Lab 11",
+          "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601809_1&mode=reset",
+          "content_blocks": [
+            {
+              "type": "paragraph",
+              "text": "--Lab 11 内容 Lab 已附加文件: lab11.pdf ( 88.287 KB ) lab11-en.pdf ( 50.49 KB )",
+              "links": [
+                {
+                  "text": "lab11.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-601849-dt-content-rid-19104445_1/xid-19104445_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601809_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601809_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601809_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601809_1&mode=reset#close"
+                },
+                {
+                  "text": "lab11-en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-601849-dt-content-rid-19104446_1/xid-19104446_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601809_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601809_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601809_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601809_1&mode=reset#close"
+                }
+              ]
+            }
+          ],
+          "content_section_blocks": [
+            {
+              "title": "Lab",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "已附加文件: lab11.pdf ( 88.287 KB ) lab11-en.pdf ( 50.49 KB )",
+                  "links": [
+                    {
+                      "text": "lab11.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-601849-dt-content-rid-19104445_1/xid-19104445_1"
+                    },
+                    {
+                      "text": "lab11-en.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-601849-dt-content-rid-19104446_1/xid-19104446_1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
           "label": "--Assignment",
           "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset",
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "--Assignment 内容 Assignment3 已附加文件: assignment3-cow.zip ( 383.324 KB ) assignment3-en.pdf ( 171.68 KB )",
+              "text": "--Assignment 内容 Assignment3 已附加文件: assignment3-cow.zip ( 383.324 KB ) assignment3-en.pdf ( 171.68 KB ) Assignment4 已附加文件: assignment4-en.pdf ( 84.01 KB ) assignment4-sched_250507_V2.zip ( 308.484 KB )",
               "links": [
                 {
                   "text": "Assignment3",
@@ -2231,6 +2470,34 @@ Blackboard 爬取结果
                 {
                   "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
                   "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
+                },
+                {
+                  "text": "Assignment4",
+                  "href": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_624465_1&course_id=_8205_1&group_id=&mode=view"
+                },
+                {
+                  "text": "assignment4-en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624465-dt-content-rid-19550731_1/xid-19550731_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
+                },
+                {
+                  "text": "assignment4-sched_250507_V2.zip",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624465-dt-content-rid-19550732_1/xid-19550732_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
                 }
               ]
             }
@@ -2250,6 +2517,25 @@ Blackboard 爬取结果
                     {
                       "text": "assignment3-en.pdf",
                       "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624074-dt-content-rid-19521197_1/xid-19521197_1"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Assignment4",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "已附加文件: assignment4-en.pdf ( 84.01 KB ) assignment4-sched_250507_V2.zip ( 308.484 KB )",
+                  "links": [
+                    {
+                      "text": "assignment4-en.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624465-dt-content-rid-19550731_1/xid-19550731_1"
+                    },
+                    {
+                      "text": "assignment4-sched_250507_V2.zip",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624465-dt-content-rid-19550732_1/xid-19550732_1"
                     }
                   ]
                 }
@@ -2399,7 +2685,7 @@ Blackboard 爬取结果
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "--Assignment 内容 Assignment3 已附加文件: assignment3-cow.zip ( 383.324 KB ) assignment3-en.pdf ( 171.68 KB )",
+              "text": "--Assignment 内容 Assignment3 已附加文件: assignment3-cow.zip ( 383.324 KB ) assignment3-en.pdf ( 171.68 KB ) Assignment4 已附加文件: assignment4-en.pdf ( 84.01 KB ) assignment4-sched_250507_V2.zip ( 308.484 KB )",
               "links": [
                 {
                   "text": "Assignment3",
@@ -2428,11 +2714,110 @@ Blackboard 爬取结果
                 {
                   "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
                   "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
+                },
+                {
+                  "text": "Assignment4",
+                  "href": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_624465_1&course_id=_8205_1&group_id=&mode=view"
+                },
+                {
+                  "text": "assignment4-en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624465-dt-content-rid-19550731_1/xid-19550731_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
+                },
+                {
+                  "text": "assignment4-sched_250507_V2.zip",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624465-dt-content-rid-19550732_1/xid-19550732_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
                 }
               ]
             }
           ],
           "due_date": "May 13, 2026 2:00 PM"
+        },
+        {
+          "label": "Assignment4",
+          "url": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_624465_1&course_id=_8205_1&group_id=&mode=view",
+          "parent_label": "--Assignment",
+          "parent_url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset",
+          "content_blocks": [
+            {
+              "type": "paragraph",
+              "text": "--Assignment 内容 Assignment3 已附加文件: assignment3-cow.zip ( 383.324 KB ) assignment3-en.pdf ( 171.68 KB ) Assignment4 已附加文件: assignment4-en.pdf ( 84.01 KB ) assignment4-sched_250507_V2.zip ( 308.484 KB )",
+              "links": [
+                {
+                  "text": "Assignment3",
+                  "href": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_624074_1&course_id=_8205_1&group_id=&mode=view"
+                },
+                {
+                  "text": "assignment3-cow.zip",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624074-dt-content-rid-19521196_1/xid-19521196_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
+                },
+                {
+                  "text": "assignment3-en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624074-dt-content-rid-19521197_1/xid-19521197_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
+                },
+                {
+                  "text": "Assignment4",
+                  "href": "https://bb.sustech.edu.cn/webapps/assignment/uploadAssignment?content_id=_624465_1&course_id=_8205_1&group_id=&mode=view"
+                },
+                {
+                  "text": "assignment4-en.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624465-dt-content-rid-19550731_1/xid-19550731_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
+                },
+                {
+                  "text": "assignment4-sched_250507_V2.zip",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-624465-dt-content-rid-19550732_1/xid-19550732_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8205_1&content_id=_601814_1&mode=reset#close"
+                }
+              ]
+            }
+          ],
+          "due_date": "May 25, 2026 4:00 PM"
         }
       ]
     },
@@ -2440,7 +2825,80 @@ Blackboard 爬取结果
       "id": "_8012_1",
       "name": "Software Engineering Spring 2026",
       "url": "https://bb.sustech.edu.cn/webapps/blackboard/execute/launcher?type=Course&id=_8012_1&url=",
-      "announcements": [],
+      "announcements": [
+        {
+          "id": "_43869_1",
+          "title": "Sprint 2 requirement released",
+          "posted_on": "Posted on: Friday, May 8, 2026 1:14:08 PM CST",
+          "posted_date": "",
+          "posted_by": "陶伊达 计算机科学与工程系",
+          "posted_to": "Software Engineering Spring 2026",
+          "body_text": "Please check Project -> Sprint 2 for details."
+        },
+        {
+          "id": "_43704_1",
+          "title": "Week 9 Sprint 1 Review (项目答辩通知)",
+          "posted_on": "Posted on: Sunday, April 19, 2026 7:00:13 PM CST",
+          "posted_date": "",
+          "posted_by": "陶伊达 计算机科学与工程系",
+          "posted_to": "Software Engineering Spring 2026",
+          "body_text": "The first sprint review will take place during the lab in Week 9, following the schedule below. Each team should\ndemonstrate the features currently implemented\n. Please also submit your team report and AI usage survey before the sprint review.\n【Tencent Docs】26S-CS304-Teams-Week9\nhttps://docs.qq.com/sheet/DTmxoUURCTGZVYnpE?tab=zm2peg"
+        },
+        {
+          "id": "_43464_1",
+          "title": "Sprint 1 requirement released",
+          "posted_on": "Posted on: Wednesday, March 25, 2026 2:57:54 PM CST",
+          "posted_date": "",
+          "posted_by": "陶伊达 计算机科学与工程系",
+          "posted_to": "Software Engineering Spring 2026",
+          "body_text": "Please check Project -> Sprint 1 for details."
+        },
+        {
+          "id": "_43431_1",
+          "title": "Week 5 project proposal (项目答辩通知)",
+          "posted_on": "Posted on: Monday, March 23, 2026 8:49:39 AM CST",
+          "posted_date": "",
+          "posted_by": "陶伊达 计算机科学与工程系",
+          "posted_to": "Software Engineering Spring 2026",
+          "body_text": "1. The project proposal will be held during the Week 5 lab session. Each group should attend the defense following the form below.\n2. There will be no tutorials or practice in Week 5. You may check previous practices once all defenses are completed.\n3. Students who are not scheduled for the defense in a lab session do not need to attend. Groups that have finished their defense may leave early. No additional sign-in is required.\n1. 第五周实验课进行项目proposal。请各组按照下表安排前往相应的教室答辩。\n2. 第五周实验课没有其它tutorial和practice。同学们可以在所有答辩结束后检查之前的practice。\n3. 非该节课答辩的同学无需到场；答辩结束的小组也可以提前离开。不另行签到。\n【Tencent Docs】26S-CS304-Teams-Week5\nhttps://docs.qq.com/sheet/DTmZERWZaRnRXYVF1?tab=zm2peg"
+        },
+        {
+          "id": "_43398_1",
+          "title": "Assignment 1 (open source PR) released",
+          "posted_on": "Posted on: Thursday, March 19, 2026 9:38:32 AM CST",
+          "posted_date": "",
+          "posted_by": "陶伊达 计算机科学与工程系",
+          "posted_to": "Software Engineering Spring 2026",
+          "body_text": "Check Assignments -> A1 for details."
+        },
+        {
+          "id": "_43284_1",
+          "title": "Milestone 1 released",
+          "posted_on": "Posted on: Monday, March 9, 2026 1:53:17 PM CST",
+          "posted_date": "",
+          "posted_by": "陶伊达 计算机科学与工程系",
+          "posted_to": "Software Engineering Spring 2026",
+          "body_text": "Please check Project -> Proposal for details."
+        },
+        {
+          "id": "_43068_1",
+          "title": "Lab location change (机房地点变更)",
+          "posted_on": "Posted on: Monday, March 2, 2026 9:15:58 AM CST",
+          "posted_date": "",
+          "posted_by": "陶伊达 计算机科学与工程系",
+          "posted_to": "Software Engineering Spring 2026",
+          "body_text": "The location for Monday 5-6 session (Class 02, Group 1) has been changed to Zhihua Building, Room 508. Please go to Room 508 for class this afternoon."
+        },
+        {
+          "id": "_41875_1",
+          "title": "Course group",
+          "posted_on": "Posted on: Tuesday, February 24, 2026 3:09:17 PM CST",
+          "posted_date": "",
+          "posted_by": "陶伊达 计算机科学与工程系",
+          "posted_to": "Software Engineering Spring 2026",
+          "body_text": "Welcome to CS304! Feel free to explore the course via the sidebar menu on the left.\nYou may also join the course group using WeCom (企业微信), by scanning the barcode below."
+        }
+      ],
       "course_materials": [
         {
           "label": "Lectures",
@@ -2775,7 +3233,7 @@ Blackboard 爬取结果
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "Labs Content Lab introduction Lab Structure Tutorial – A guided session introducing key concepts and techniques. Practice – Hands-on exercises to apply the learned concepts. Practice Rules Each practice is allocated one week for completion . You may submit and have it checked during the current or next week's lab session . On-site verification only – No offline or remote submissions will be accepted. Late Submission Penalty – If checked after the deadline, the score will be multiplied by 0.8. Grading Practice – Evaluated based on completed exercises. Attendance – Recorded separately from practice scores. Week 1 Attached Files: github-classroom.pdf ( 213.183 KB ) Tutorial 1. Read project requirement in Project - Description and Project - Team Formation. 2. Read \" Academic Integrity \" (in \"about the course\") carefully. Practice 1. Team up and set up GitHub classroom (see attached). 2. HarmonyOS App 101: Build \"Hello World\" in DevEco Studio. Chapter 1: https://developer.huawei.com/consumer/cn/codelabsPortal/getstarted/101718800110527001 Week 2 Attached Files: Tutorial2-Teedy Setup.pdf ( 9.433 MB ) Practice2-Teedy Setup.pdf ( 4.999 MB ) GitHub Authentication & Git Remote Access.pdf ( 1.909 MB ) Week 3 Attached Files: Tutorial3-GitHub Project Management.pdf ( 1.841 MB ) Practice3-Requirement Analysis for Teedy.pdf ( 4.005 MB ) Week 4 Attached Files: Tutorial 4 - Introduction of Git.pdf ( 2.068 MB ) Practice 4 - Branching and Pull Request.pdf ( 3.778 MB ) GitHub Authentication & Git Remote Access.pdf ( 1.909 MB ) Week 6 Attached Files: Tutorial6-Maven.pdf ( 5.002 MB ) Practice6-Maven.pdf ( 394.233 KB ) Week 8 Attached Files: Tutorial7-CodeReview.pdf ( 6.975 MB ) Tutorial7-Linters.pdf ( 1.297 MB ) Practice7-PMD.pdf ( 219.299 KB ) Week 10 Attached Files: Practice8-Coverage.pdf ( 50.556 KB ) Tutorial8-Testing.pdf ( 706.348 KB )",
+              "text": "Labs Content Lab introduction Lab Structure Tutorial – A guided session introducing key concepts and techniques. Practice – Hands-on exercises to apply the learned concepts. Practice Rules Each practice is allocated one week for completion . You may submit and have it checked during the current or next week's lab session . On-site verification only – No offline or remote submissions will be accepted. Late Submission Penalty – If checked after the deadline, the score will be multiplied by 0.8. Grading Practice – Evaluated based on completed exercises. Attendance – Recorded separately from practice scores. Week 1 Attached Files: github-classroom.pdf ( 213.183 KB ) Tutorial 1. Read project requirement in Project - Description and Project - Team Formation. 2. Read \" Academic Integrity \" (in \"about the course\") carefully. Practice 1. Team up and set up GitHub classroom (see attached). 2. HarmonyOS App 101: Build \"Hello World\" in DevEco Studio. Chapter 1: https://developer.huawei.com/consumer/cn/codelabsPortal/getstarted/101718800110527001 Week 2 Attached Files: Tutorial2-Teedy Setup.pdf ( 9.433 MB ) Practice2-Teedy Setup.pdf ( 4.999 MB ) GitHub Authentication & Git Remote Access.pdf ( 1.909 MB ) Week 3 Attached Files: Tutorial3-GitHub Project Management.pdf ( 1.841 MB ) Practice3-Requirement Analysis for Teedy.pdf ( 4.005 MB ) Week 4 Attached Files: Tutorial 4 - Introduction of Git.pdf ( 2.068 MB ) Practice 4 - Branching and Pull Request.pdf ( 3.778 MB ) GitHub Authentication & Git Remote Access.pdf ( 1.909 MB ) Week 6 Attached Files: Tutorial6-Maven.pdf ( 5.002 MB ) Practice6-Maven.pdf ( 394.233 KB ) Week 8 Attached Files: Tutorial7-CodeReview.pdf ( 6.975 MB ) Tutorial7-Linters.pdf ( 1.297 MB ) Practice7-PMD.pdf ( 219.299 KB ) Week 10 Attached Files: Practice8-Coverage.pdf ( 50.556 KB ) Tutorial8-Testing.pdf ( 706.348 KB ) Week 11 Attached Files: Practice9-Jenkins.pdf ( 2.033 MB ) Tutorial9-CICD tools.pdf ( 5.926 MB )",
               "links": [
                 {
                   "text": "github-classroom.pdf",
@@ -2980,6 +3438,30 @@ Blackboard 爬取结果
                 {
                   "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close",
                   "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close"
+                },
+                {
+                  "text": "Practice9-Jenkins.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588379-dt-content-rid-19548716_1/xid-19548716_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close"
+                },
+                {
+                  "text": "Tutorial9-CICD tools.pdf",
+                  "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588379-dt-content-rid-19548717_1/xid-19548717_1"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#contextMenu",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#contextMenu"
+                },
+                {
+                  "text": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close",
+                  "href": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588341_1&mode=reset#close"
                 }
               ]
             }
@@ -3134,6 +3616,25 @@ Blackboard 爬取结果
                     {
                       "text": "Tutorial8-Testing.pdf",
                       "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588377-dt-content-rid-19081301_1/xid-19081301_1"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Week 11",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Attached Files: Practice9-Jenkins.pdf ( 2.033 MB ) Tutorial9-CICD tools.pdf ( 5.926 MB )",
+                  "links": [
+                    {
+                      "text": "Practice9-Jenkins.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588379-dt-content-rid-19548716_1/xid-19548716_1"
+                    },
+                    {
+                      "text": "Tutorial9-CICD tools.pdf",
+                      "href": "https://bb.sustech.edu.cn/bbcswebdav/pid-588379-dt-content-rid-19548717_1/xid-19548717_1"
                     }
                   ]
                 }
@@ -3637,12 +4138,45 @@ Blackboard 爬取结果
           ]
         },
         {
+          "label": "Sprint 2",
+          "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/listContent.jsp?course_id=_8012_1&content_id=_588349_1&mode=reset",
+          "content_blocks": [
+            {
+              "type": "paragraph",
+              "text": "Sprint 2 Content Sprint 2 (20 points) Part I. README and CI/CD Pipeline (5 points) 1. README (2 points) Your project must include a README.md at the root of the repo that clearly describes the software and how to use it. Specifically, the README should outline key features, provide clear instructions for installation, setup, and how to run the system, along with simple usage examples to help users get started. Including screenshots or snapshots is recommended to illustrate the system in use. The README may also mention known issues or limitations, and provide links to additional resources ( such as API documentation or a project wiki ) if applicable. 2. CI/CD Pipeline (3 points) Your project must have a working CI/CD pipeline that automatically builds and possibly deploys your software. Required steps in the pipeline : compile the source code run tests package the application into a runnable artifact Optional steps to enhance your pipeline : running linters generating test reports generating documentation building a Docker image pushing the image to a container registry (e.g., Docker Hub) deploying to a Kubernetes cluster running the application in docker containers The CI/CD pipeline should be triggered by commits to the main branch, and it should provide feedback or logs on the build status ( e.g., success or failure ) through GitHub Actions or other CI/CD tools. Heads up : our sustech-cs304 github organization account has hit some usage limits, and due to regional payment restrictions, a few GitHub features ( like storage operations or GitHub Actions on private repos ) might not work reliably for everyone. Yet, you still have a couple of easy ways to complete this requirement : Use another CI/CD tool (e.g., Jenkins) and run your pipeline locally. If you want to stick with GitHub Actions for CI/CD, you can: Make your repository public, or Fork the repo to your personal GitHub account and continue there. GitHub Free accounts come with a monthly quota of CI/CD minutes, which should be enough for this sprint. If you use this option, you need to explicitly provide the forked repo's URL in the team report. Part II. Team Report (4 points) You are required to write a team report, which includes the following information. 1. Metrics (2 points) We could use metrics to describe the complexity of your project. Please compute and report the following metrics ( you could use whatever tools or libraries for computing the metrics ): Lines of Code Number of source files Cyclomatic complexity Number of dependencies 2. CI/CD Pipeline Description (2 points) Describe the CI/CD pipeline of your project, including the following information : Steps in the pipeline Tools/technologies/frameworks used for implementing each step of the pipeline (e.g., JUnit and JaCoCo for testing and test coverage report generation) In the report, you should also provide : Access to the pipeline configuration (e.g., workflow files, scripts) via URL links or snapshots A proof that the pipeline executes successfully (you may provide screenshots or logs). Part III. AI Usages (1 point) Complete this survey to report your AI usages for documentation, tests, computing metrics, and CI/CD. One submission per team is enough. Also, same as the previous sprint, you should use git properly for version control and collaborations. Failures to do so will incur score penalties. Part IV. Sprint Review (10 points) In this final presentation, your team should demonstrate the entire running system, focusing on features and usability. Imagine that this demo will be presented to end users, clients, and potential investors. Your team should demonstrate all notable features of the system, with the purpose of attracting users/investors to use/invest the software system. During the demo Start you application by the executable or from the container. Functional features : Your project must include at least five distinct and meaningful features, and you should clearly introduce them one by one (e.g., “Feature 1 is…”, “Feature 2 is…”, etc.). You may also record a video beforehand, if some features depend on external factors (e.g., user input, network conditions, non-deterministic LLM outputs, etc.) that are hard to control during the demo. Non-functional features : if applicable, briefly demonstrate your efforts on improving the non-functional features of your system, such as performance, security, or user experience. Basic requirements ( up to 50% points will be deducted for failing these requirements ): Each team will give a presentation in the lab session of week 14 (+0.3 bonus) or 15 . Every team member needs to show up during the presentation. Submissions We will check your team repo for the code, scripts, other artifacts, and the commit history of your project. You should also submit the team report as final-report-teamID.md to the team repo.",
+              "links": [
+                {
+                  "text": "survey",
+                  "href": "https://wj.qq.com/s2/26420852/rjn4/"
+                }
+              ]
+            }
+          ],
+          "content_section_blocks": [
+            {
+              "title": "Sprint 2 (20 points)",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "Part I. README and CI/CD Pipeline (5 points) 1. README (2 points) Your project must include a README.md at the root of the repo that clearly describes the software and how to use it. Specifically, the README should outline key features, provide clear instructions for installation, setup, and how to run the system, along with simple usage examples to help users get started. Including screenshots or snapshots is recommended to illustrate the system in use. The README may also mention known issues or limitations, and provide links to additional resources ( such as API documentation or a project wiki ) if applicable. 2. CI/CD Pipeline (3 points) Your project must have a working CI/CD pipeline that automatically builds and possibly deploys your software. Required steps in the pipeline : compile the source code run tests package the application into a runnable artifact Optional steps to enhance your pipeline : running linters generating test reports generating documentation building a Docker image pushing the image to a container registry (e.g., Docker Hub) deploying to a Kubernetes cluster running the application in docker containers The CI/CD pipeline should be triggered by commits to the main branch, and it should provide feedback or logs on the build status ( e.g., success or failure ) through GitHub Actions or other CI/CD tools. Heads up : our sustech-cs304 github organization account has hit some usage limits, and due to regional payment restrictions, a few GitHub features ( like storage operations or GitHub Actions on private repos ) might not work reliably for everyone. Yet, you still have a couple of easy ways to complete this requirement : Use another CI/CD tool (e.g., Jenkins) and run your pipeline locally. If you want to stick with GitHub Actions for CI/CD, you can: Make your repository public, or Fork the repo to your personal GitHub account and continue there. GitHub Free accounts come with a monthly quota of CI/CD minutes, which should be enough for this sprint. If you use this option, you need to explicitly provide the forked repo's URL in the team report. Part II. Team Report (4 points) You are required to write a team report, which includes the following information. 1. Metrics (2 points) We could use metrics to describe the complexity of your project. Please compute and report the following metrics ( you could use whatever tools or libraries for computing the metrics ): Lines of Code Number of source files Cyclomatic complexity Number of dependencies 2. CI/CD Pipeline Description (2 points) Describe the CI/CD pipeline of your project, including the following information : Steps in the pipeline Tools/technologies/frameworks used for implementing each step of the pipeline (e.g., JUnit and JaCoCo for testing and test coverage report generation) In the report, you should also provide : Access to the pipeline configuration (e.g., workflow files, scripts) via URL links or snapshots A proof that the pipeline executes successfully (you may provide screenshots or logs). Part III. AI Usages (1 point) Complete this survey to report your AI usages for documentation, tests, computing metrics, and CI/CD. One submission per team is enough. Also, same as the previous sprint, you should use git properly for version control and collaborations. Failures to do so will incur score penalties. Part IV. Sprint Review (10 points) In this final presentation, your team should demonstrate the entire running system, focusing on features and usability. Imagine that this demo will be presented to end users, clients, and potential investors. Your team should demonstrate all notable features of the system, with the purpose of attracting users/investors to use/invest the software system. During the demo Start you application by the executable or from the container. Functional features : Your project must include at least five distinct and meaningful features, and you should clearly introduce them one by one (e.g., “Feature 1 is…”, “Feature 2 is…”, etc.). You may also record a video beforehand, if some features depend on external factors (e.g., user input, network conditions, non-deterministic LLM outputs, etc.) that are hard to control during the demo. Non-functional features : if applicable, briefly demonstrate your efforts on improving the non-functional features of your system, such as performance, security, or user experience. Basic requirements ( up to 50% points will be deducted for failing these requirements ): Each team will give a presentation in the lab session of week 14 (+0.3 bonus) or 15 . Every team member needs to show up during the presentation. Submissions We will check your team repo for the code, scripts, other artifacts, and the commit history of your project. You should also submit the team report as final-report-teamID.md to the team repo.",
+                  "links": [
+                    {
+                      "text": "survey",
+                      "href": "https://wj.qq.com/s2/26420852/rjn4/"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
           "label": "My Grades",
           "url": "https://bb.sustech.edu.cn/webapps/blackboard/content/launchLink.jsp?course_id=_8012_1&tool_id=_156_1&tool_type=TOOL&mode=view&mode=reset",
           "content_blocks": [
             {
               "type": "paragraph",
-              "text": "My Grades Content Order by: Course Order Last Activity Due Date (Latest First) Due Date (Oldest First) All Graded Upcoming Submitted Item Last Activity Grade Status Quiz 8 Due: Apr 28, 2026 Test Apr 28, 2026 12:10 PM Graded 30.00 /30 Quiz 7 Due: Apr 21, 2026 Test Apr 21, 2026 12:09 PM Graded 50.00 /50 Quiz 6 Due: Apr 14, 2026 Test Apr 14, 2026 12:10 PM Graded 60.00 /60 Quiz 5 Due: Apr 7, 2026 Test Apr 7, 2026 12:15 PM Graded 8.00 /10 Selected topic Apr 7, 2026 11:14 AM Graded 3 milestone1 Apr 7, 2026 11:01 AM Graded 4.50 /5 Quiz 4 Due: Mar 31, 2026 Test Mar 31, 2026 12:12 PM Graded 60.00 /60 Quiz 3 Due: Mar 24, 2026 Test Mar 24, 2026 12:11 PM Graded 10.00 /10 Quiz 2 Due: Mar 17, 2026 Test Mar 17, 2026 12:09 PM Graded 30.00 /30 Quiz 1 Due: Mar 10, 2026 Test Mar 10, 2026 12:10 PM Graded 30.00 /30 AI as a Silver Bullet? Due: Mar 22, 2026 Survey Mar 3, 2026 10:59 AM Graded Completed Academic Integrity Due: Mar 22, 2026 Assignment Mar 5, 2026 8:13 PM Submitted - Needs Grading Final Exam Upcoming - Lab Upcoming - /15 Lecture Upcoming - /10 Open Source PR Due: May 20, 2026 Assignment Upcoming - /6 Overall Upcoming - Participation Bonus Upcoming - /1 Project Bonus Upcoming - /10,000 SPRINT2 Upcoming - /10,000 Total 292.50 /295 Weighted Total - Submission Receipts 1",
+              "text": "My Grades Content Order by: Course Order Last Activity Due Date (Latest First) Due Date (Oldest First) All Graded Upcoming Submitted Item Last Activity Grade Status Sprint1 Apr 28, 2026 9:51 PM Graded 10.00 /10 Quiz 8 Due: Apr 28, 2026 Test Apr 28, 2026 12:10 PM Graded 30.00 /30 Quiz 7 Due: Apr 21, 2026 Test Apr 21, 2026 12:09 PM Graded 50.00 /50 Quiz 6 Due: Apr 14, 2026 Test Apr 14, 2026 12:10 PM Graded 60.00 /60 Quiz 5 Due: Apr 7, 2026 Test Apr 7, 2026 12:15 PM Graded 8.00 /10 Selected topic Apr 7, 2026 11:14 AM Graded 3 milestone1 Apr 7, 2026 11:01 AM Graded 4.50 /5 Quiz 4 Due: Mar 31, 2026 Test Mar 31, 2026 12:12 PM Graded 60.00 /60 Quiz 3 Due: Mar 24, 2026 Test Mar 24, 2026 12:11 PM Graded 10.00 /10 Quiz 2 Due: Mar 17, 2026 Test Mar 17, 2026 12:09 PM Graded 30.00 /30 Quiz 1 Due: Mar 10, 2026 Test Mar 10, 2026 12:10 PM Graded 30.00 /30 AI as a Silver Bullet? Due: Mar 22, 2026 Survey Mar 3, 2026 10:59 AM Graded Completed Academic Integrity Due: Mar 22, 2026 Assignment Mar 5, 2026 8:13 PM Submitted - Needs Grading Final Exam Upcoming - Lab Upcoming - /15 Lecture Upcoming - /10 Open Source PR Due: May 20, 2026 Assignment Upcoming - /6 Overall Upcoming - Participation Bonus Upcoming - /1 Project Bonus Upcoming - /10,000 SPRINT2 Upcoming - /10,000 Total 292.50 /295 Weighted Total - Submission Receipts 1",
               "links": [
                 {
                   "text": "1",
@@ -3651,7 +4185,7 @@ Blackboard 爬取结果
               ]
             }
           ],
-          "content_text": "My Grades Content Order by: Course Order Last Activity Due Date (Latest First) Due Date (Oldest First) All Graded Upcoming Submitted Item Last Activity Grade Status Quiz 8 Due: Apr 28, 2026 Test Apr 28, 2026 12:10 PM Graded 30.00 /30 Quiz 7 Due: Apr 21, 2026 Test Apr 21, 2026 12:09 PM Graded 50.00 /50 Quiz 6 Due: Apr 14, 2026 Test Apr 14, 2026 12:10 PM Graded 60.00 /60 Quiz 5 Due: Apr 7, 2026 Test Apr 7, 2026 12:15 PM Graded 8.00 /10 Selected topic Apr 7, 2026 11:14 AM Graded 3 milestone1 Apr 7, 2026 11:01 AM Graded 4.50 /5 Quiz 4 Due: Mar 31, 2026 Test Mar 31, 2026 12:12 PM Graded 60.00 /60 Quiz 3 Due: Mar 24, 2026 Test Mar 24, 2026 12:11 PM Graded 10.00 /10 Quiz 2 Due: Mar 17, 2026 Test Mar 17, 2026 12:09 PM Graded 30.00 /30 Quiz 1 Due: Mar 10, 2026 Test Mar 10, 2026 12:10 PM Graded 30.00 /30 AI as a Silver Bullet? Due: Mar 22, 2026 Survey Mar 3, 2026 10:59 AM Graded Completed Academic Integrity Due: Mar 22, 2026 Assignment Mar 5, 2026 8:13 PM Submitted - Needs Grading Final Exam Upcoming - Lab Upcoming - /15 Lecture Upcoming - /10 Open Source PR Due: May 20, 2026 Assignment Upcoming - /6 Overall Upcoming - Participation Bonus Upcoming - /1 Project Bonus Upcoming - /10,000 SPRINT2 Upcoming - /10,000 Total 292.50 /295 Weighted Total - Submission Receipts 1"
+          "content_text": "My Grades Content Order by: Course Order Last Activity Due Date (Latest First) Due Date (Oldest First) All Graded Upcoming Submitted Item Last Activity Grade Status Sprint1 Apr 28, 2026 9:51 PM Graded 10.00 /10 Quiz 8 Due: Apr 28, 2026 Test Apr 28, 2026 12:10 PM Graded 30.00 /30 Quiz 7 Due: Apr 21, 2026 Test Apr 21, 2026 12:09 PM Graded 50.00 /50 Quiz 6 Due: Apr 14, 2026 Test Apr 14, 2026 12:10 PM Graded 60.00 /60 Quiz 5 Due: Apr 7, 2026 Test Apr 7, 2026 12:15 PM Graded 8.00 /10 Selected topic Apr 7, 2026 11:14 AM Graded 3 milestone1 Apr 7, 2026 11:01 AM Graded 4.50 /5 Quiz 4 Due: Mar 31, 2026 Test Mar 31, 2026 12:12 PM Graded 60.00 /60 Quiz 3 Due: Mar 24, 2026 Test Mar 24, 2026 12:11 PM Graded 10.00 /10 Quiz 2 Due: Mar 17, 2026 Test Mar 17, 2026 12:09 PM Graded 30.00 /30 Quiz 1 Due: Mar 10, 2026 Test Mar 10, 2026 12:10 PM Graded 30.00 /30 AI as a Silver Bullet? Due: Mar 22, 2026 Survey Mar 3, 2026 10:59 AM Graded Completed Academic Integrity Due: Mar 22, 2026 Assignment Mar 5, 2026 8:13 PM Submitted - Needs Grading Final Exam Upcoming - Lab Upcoming - /15 Lecture Upcoming - /10 Open Source PR Due: May 20, 2026 Assignment Upcoming - /6 Overall Upcoming - Participation Bonus Upcoming - /1 Project Bonus Upcoming - /10,000 SPRINT2 Upcoming - /10,000 Total 292.50 /295 Weighted Total - Submission Receipts 1"
         }
       ],
       "upload_assignments": [

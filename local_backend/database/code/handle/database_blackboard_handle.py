@@ -5,6 +5,7 @@ from local_backend.database.code.operations.database_blackboard_operations impor
     BlackboardAnnouncementOperations,
     BlackboardCourseMaterialOperations
 )
+from local_backend.database.code.command.database_command import list_categories_by_user
 from typing import Optional, Dict, List, Tuple
 import json
 import logging
@@ -332,19 +333,21 @@ class BlackboardHandle:
                 'message': f'解绑失败: {str(e)}'
             }
     
-    def handle_get_courses(self, user_id: str) -> Dict:
-        """获取同步的课程列表"""
-        try:
-            courses = self.course_ops.get_courses(user_id)
-            return {'success': True, 'courses': courses}
-        except Exception as e:
-            return {'success': False, 'message': str(e)}
-
     def handle_get_assignments(self, user_id: str) -> Dict:
         """获取同步的作业列表（含 due_date）"""
         try:
             data = self.assignment_ops.get_assignments(user_id)
-            return {'success': True, 'assignments': data}
+            categories = list_categories_by_user(user_id)
+            course_map = {c['category_id']: c['category_title'] for c in categories}
+            clean = []
+            for a in data:
+                clean.append({
+                    'title': a.get('data_title', ''),
+                    'context': a.get('data_content_text', ''),
+                    'ddl': a.get('data_ddl_time', ''),
+                    'course': course_map.get(a.get('data_category_id'), ''),
+                })
+            return {'success': True, 'assignments': clean}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
@@ -352,7 +355,17 @@ class BlackboardHandle:
         """获取同步的公告列表"""
         try:
             data = self.announcement_ops.get_announcements(user_id)
-            return {'success': True, 'announcements': data}
+            categories = list_categories_by_user(user_id)
+            course_map = {c['category_id']: c['category_title'] for c in categories}
+            clean = []
+            for a in data:
+                clean.append({
+                    'title': a.get('data_title', ''),
+                    'context': a.get('data_content_text', ''),
+                    'release_time': a.get('data_release_time', ''),
+                    'course': course_map.get(a.get('data_category_id'), ''),
+                })
+            return {'success': True, 'announcements': clean}
         except Exception as e:
             return {'success': False, 'message': str(e)}
 
@@ -360,6 +373,16 @@ class BlackboardHandle:
         """获取同步的课程资料列表"""
         try:
             data = self.course_material_ops.get_course_materials(user_id)
-            return {'success': True, 'course_materials': data}
+            categories = list_categories_by_user(user_id)
+            course_map = {c['category_id']: c['category_title'] for c in categories}
+            clean = []
+            for m in data:
+                clean.append({
+                    'title': m.get('data_title', ''),
+                    'context': m.get('data_content_text', ''),
+                    'link_url': m.get('data_link_url', ''),
+                    'course': course_map.get(m.get('data_category_id'), ''),
+                })
+            return {'success': True, 'course_materials': clean}
         except Exception as e:
             return {'success': False, 'message': str(e)}

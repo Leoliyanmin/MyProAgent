@@ -12,6 +12,7 @@ from presentation.blackboard_routes import router as blackboard_router
 from presentation.tis_routes import router as tis_router
 from presentation.scheduler_routes import router as scheduler_router
 from presentation.email_routes import router as email_router
+from presentation.courses_routes import router as courses_router
 from logging_config import setup_logging
 from service.scheduler_service import scheduler_service
 
@@ -73,6 +74,7 @@ app.include_router(blackboard_router)
 app.include_router(tis_router)
 app.include_router(scheduler_router)
 app.include_router(email_router)
+app.include_router(courses_router)
 
 
 @app.get("/")

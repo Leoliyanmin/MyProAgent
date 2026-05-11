@@ -6,7 +6,33 @@
 
 ---
 
-## 一、Blackboard 接口
+## 一、课程查询（通用）
+
+### GET /api/v1/courses
+**描述**：获取已同步的 TIS 课程列表（含上课时间、地点、教师等信息）
+
+**成功响应**：
+```json
+{
+    "success": true,
+    "courses": [
+        {
+            "category_title": "计算机视觉",
+            "teacher": "郑锋",
+            "weeks": "1-15周",
+            "location": "智华楼509机房",
+            "periods": "9-10节",
+            "start": "19:00",
+            "end": "20:50",
+            "category_term": "2026春季"
+        }
+    ],
+}
+```
+
+---
+
+## 二、Blackboard 接口
 
 ### GET /api/v1/blackboard/status
 **描述**：获取 Blackboard 绑定状态
@@ -77,30 +103,8 @@
 
 ---
 
-### GET /api/v1/blackboard/courses
-**描述**：获取已同步的课程列表
-
-**成功响应**：
-```json
-{
-    "success": true,
-    "courses": [
-        {
-            "category_id": 1,
-            "category_kind": "course",
-            "category_title": "Computer Vision Spring 2026",
-            "category_link": "https://bb.sustech.edu.cn/...",
-            "category_source": "blackboard",
-            ...
-        }
-    ]
-}
-```
-
----
-
 ### GET /api/v1/blackboard/assignments
-**描述**：获取已同步的作业列表（含 `data_ddl_time` 字段 = due_date）
+**描述**：获取已同步的 BB 作业列表（含截止日期和所属课程）
 
 **成功响应**：
 ```json
@@ -108,12 +112,10 @@
     "success": true,
     "assignments": [
         {
-            "data_id": 1,
-            "data_title": "Assignment3",
-            "data_ddl_time": "May 13, 2026 2:00 PM",
-            "data_link_url": "https://bb.sustech.edu.cn/webapps/assignment/...",
-            "data_content_type": "assignment",
-            ...
+            "title": "Assignment3",
+            "context": "作业描述内容...",
+            "ddl": "May 13, 2026 2:00 PM",
+            "course": "Operating Systems Spring 2026"
         }
     ]
 }
@@ -122,16 +124,46 @@
 ---
 
 ### GET /api/v1/blackboard/announcements
-**描述**：获取已同步的公告列表
+**描述**：获取已同步的 BB 公告列表
+
+**成功响应**：
+```json
+{
+    "success": true,
+    "announcements": [
+        {
+            "title": "通知标题",
+            "context": "通知正文...",
+            "release_time": "Apr 28, 2026 12:10 PM",
+            "course": "Software Engineering Spring 2026"
+        }
+    ]
+}
+```
 
 ---
 
 ### GET /api/v1/blackboard/materials
-**描述**：获取已同步的课程资料列表
+**描述**：获取已同步的 BB 课程资料列表
+
+**成功响应**：
+```json
+{
+    "success": true,
+    "course_materials": [
+        {
+            "title": "Lecture 10.pdf",
+            "context": "附件描述...",
+            "link_url": "https://bb.sustech.edu.cn/bbcswebdav/...",
+            "course": "Computer Vision Spring 2026"
+        }
+    ]
+}
+```
 
 ---
 
-## 二、TIS 教务系统接口
+## 三、TIS 教务系统接口
 
 ### GET /api/v1/tis/status
 **描述**：获取 TIS 绑定状态
@@ -201,38 +233,17 @@
 ### POST /api/v1/tis/unbind
 **描述**：解绑 TIS 账号
 
----
-
-### GET /api/v1/tis/schedule
-**描述**：获取已同步的 TIS 课表数据（从数据库读取）
-
 **成功响应**：
 ```json
 {
     "success": true,
-    "courses": [
-        {
-            "category_id": 2,
-            "category_kind": "course",
-            "category_title": "Computer Vision",
-            "category_source": "tis",
-            "category_content": "{\"day\":1,\"title\":\"Computer Vision\",\"teacher\":\"...\",\"weeks\":\"1-16周\",\"location\":\"...\",\"start\":\"08:00\",\"end\":\"09:50\"}",
-            ...
-        }
-    ],
-    "terms": [
-        {
-            "category_kind": "term",
-            "category_title": "TIS课表 - 2024-2025-2",
-            ...
-        }
-    ]
+    "message": "TIS账号解绑成功"
 }
 ```
 
 ---
 
-## 三、邮箱（Mail）接口
+## 四、邮箱（Mail）接口
 
 ### GET /api/v1/email/status
 **描述**：获取邮箱绑定状态
@@ -297,6 +308,14 @@
 ### POST /api/v1/email/unbind
 **描述**：解绑邮箱账号
 
+**成功响应**：
+```json
+{
+    "success": true,
+    "message": "邮箱账号解绑成功"
+}
+```
+
 ---
 
 ### GET /api/v1/email/messages
@@ -308,13 +327,10 @@
     "success": true,
     "messages": [
         {
-            "data_id": 10,
-            "data_title": "关于课程安排的通知",
-            "data_content_type": "mail",
-            "data_content_text": "各位同学好...",
-            "data_release_time": "2026-04-29 10:15:00",
-            "data_meta_json": "{\"sender\":\"老师 <teacher@sustech.edu.cn>\"}",
-            ...
+            "title": "关于课程安排的通知",
+            "context": "各位同学好...",
+            "release_time": "2026-04-29 10:15:00",
+            "sender": "老师 <teacher@sustech.edu.cn>"
         }
     ]
 }
@@ -322,7 +338,37 @@
 
 ---
 
-## 四、数据库存储说明
+### POST /api/v1/email/send
+**描述**：通过已绑定的邮箱发送邮件（SMTP，smtp.exmail.qq.com:465）
+
+**请求体**：
+```json
+{
+    "title": "邮件主题",
+    "context": "邮件正文内容",
+    "receiver": "recipient@sustech.edu.cn"
+}
+```
+
+**成功响应**：
+```json
+{
+    "success": true,
+    "message": "邮件发送成功"
+}
+```
+
+**错误响应示例**：
+```json
+{
+    "success": false,
+    "message": "SMTP认证失败，请检查客户端专用密码"
+}
+```
+
+---
+
+## 五、数据库存储说明
 
 | 数据源 | 表 | 说明 |
 |---|---|---|
@@ -331,13 +377,13 @@
 | **BB** | `data` | `data_content_type='assignment'/'announcement'/'material'`，`data_ddl_time` 存作业截止日期 |
 | **TIS** | `account` | `account_platform_type='tis'` |
 | **TIS** | `category` | `category_kind='term'`（学期）和 `category_kind='course'`（课程） |
-| **Mail** | `account` | `account_platform_type='email'` |
+| **Mail** | `account` | `account_platform_type='email'`，`content` 存加密密码 |
 | **Mail** | `category` | `category_kind='mail'`，自动创建 |
 | **Mail** | `data` | `data_content_type='mail'`，`data_classification_code=4`，`data_release_time` 存收件时间 |
 
 ---
 
-## 五、通用响应格式
+## 六、通用响应格式
 
 **成功响应**：
 ```json

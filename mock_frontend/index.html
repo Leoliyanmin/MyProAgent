@@ -284,12 +284,12 @@
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
                 <h3 style="margin-bottom: 15px; color: #333;">查询已同步数据</h3>
                 
-                <button class="btn btn-info" @click="getBbCourses()">课程列表</button>
+                <button class="btn btn-info" @click="getCourses()">课程列表</button>
                 <button class="btn btn-info" @click="getBbAssignments()">作业列表</button>
                 <button class="btn btn-info" @click="getBbAnnouncements()">公告列表</button>
                 <button class="btn btn-info" @click="getBbMaterials()">课程资料</button>
                 
-                <div class="api-url">API: GET /api/v1/blackboard/courses | /assignments | /announcements | /materials</div>
+                <div class="api-url">API: GET /api/v1/courses | /assignments | /announcements | /materials</div>
             </div>
             
             <div :class="['status-box', 'status-' + bbStatus.type, { hidden: !bbStatus.show }]">
@@ -354,15 +354,6 @@
                 <button class="btn btn-primary" @click="syncTisSchedule()">同步课表数据</button>
                 
                 <div class="api-url">API: POST /api/v1/tis/sync</div>
-            </div>
-            
-            <!-- 查询已同步课表区域 -->
-            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd;">
-                <h3 style="margin-bottom: 15px; color: #333;">查询已同步课表</h3>
-                
-                <button class="btn btn-info" @click="getTisSchedule()">查看课表</button>
-                
-                <div class="api-url">API: GET /api/v1/tis/schedule</div>
             </div>
             
             <div :class="['status-box', 'status-' + tisStatus.type, { hidden: !tisStatus.show }]">
@@ -446,6 +437,30 @@
                 <button class="btn btn-info" @click="getEmailMessages()">查看邮件列表</button>
                 
                 <div class="api-url">API: GET /api/v1/email/messages</div>
+            </div>
+            
+            <!-- 发送邮件区域 -->
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd;">
+                <h3 style="margin-bottom: 15px; color: #333;">发送邮件</h3>
+                
+                <div class="form-group">
+                    <label for="emailReceiver"><span style="color: #dc3545;">*</span> 收件人</label>
+                    <input type="email" id="emailReceiver" v-model="emailForm.receiver" placeholder="收件人邮箱地址">
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailSendTitle"><span style="color: #dc3545;">*</span> 主题</label>
+                    <input type="text" id="emailSendTitle" v-model="emailForm.sendTitle" placeholder="邮件主题">
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailSendContext"><span style="color: #dc3545;">*</span> 内容</label>
+                    <textarea id="emailSendContext" v-model="emailForm.sendContext" rows="5" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:10px;font-size:1rem;resize:vertical;" placeholder="邮件正文内容"></textarea>
+                </div>
+                
+                <button class="btn btn-success" @click="sendEmail()">发送邮件</button>
+                
+                <div class="api-url">API: POST /api/v1/email/send</div>
             </div>
             
             <div :class="['status-box', 'status-' + emailStatus.type, { hidden: !emailStatus.show }]">
@@ -550,7 +565,10 @@
                 const emailForm = reactive({
                     address: '',
                     appPassword: '',
-                    maxMessages: 50
+                    maxMessages: 50,
+                    sendTitle: '',
+                    sendContext: '',
+                    receiver: ''
                 });
                 
                 // 显示状态
@@ -733,8 +751,8 @@
                 
                 // ==================== BB 数据查询 ====================
                 
-                const getBbCourses = async () => {
-                    const result = await sendRequest(`${backendUrl}/api/v1/blackboard/courses`);
+                const getCourses = async () => {
+                    const result = await sendRequest(`${backendUrl}/api/v1/courses`);
                     if (result.status === 200) {
                         showStatus(bbStatus, 'success', `✓ 课程列表\n\n${JSON.stringify(result.data, null, 2)}`);
                     } else {
@@ -936,7 +954,7 @@
                 
                 // TIS 查询已同步课表
                 const getTisSchedule = async () => {
-                    const result = await sendRequest(`${backendUrl}/api/v1/tis/schedule`);
+                    const result = await sendRequest(`${backendUrl}/api/v1/courses`);
                     if (result.status === 200) {
                         showStatus(tisStatus, 'success', `✓ 课表数据\n\n${JSON.stringify(result.data, null, 2)}`);
                     } else {
@@ -1021,6 +1039,39 @@
                     }
                 };
                 
+                // 发送邮件
+                const sendEmail = async () => {
+                    if (!emailForm.sendTitle.trim()) {
+                        showStatus(emailStatus, 'error', '✗ 请输入邮件主题');
+                        return;
+                    }
+                    if (!emailForm.sendContext.trim()) {
+                        showStatus(emailStatus, 'error', '✗ 请输入邮件内容');
+                        return;
+                    }
+                    if (!emailForm.receiver.trim()) {
+                        showStatus(emailStatus, 'error', '✗ 请输入收件人地址');
+                        return;
+                    }
+                    
+                    showStatus(emailStatus, 'info', '正在发送邮件...');
+                    
+                    const result = await sendRequest(`${backendUrl}/api/v1/email/send`, 'POST', {
+                        title: emailForm.sendTitle.trim(),
+                        context: emailForm.sendContext.trim(),
+                        receiver: emailForm.receiver.trim()
+                    });
+                    
+                    if (result.status === 200) {
+                        showStatus(emailStatus, 'success', `✓ 发送成功\n\n${JSON.stringify(result.data, null, 2)}`);
+                        emailForm.sendTitle = '';
+                        emailForm.sendContext = '';
+                        emailForm.receiver = '';
+                    } else {
+                        showStatus(emailStatus, 'error', `✗ 发送失败\n\n状态码: ${result.status}\n${JSON.stringify(result.data, null, 2)}`);
+                    }
+                };
+                
                 // 同步BB数据
                 const syncBbData = async () => {
                     const result = await sendRequest(`${backendUrl}/api/v1/blackboard/sync`, 'POST');
@@ -1087,7 +1138,7 @@
                     startBbBinding,
                     unbindBb,
                     bindWithManualCookie,
-                    getBbCourses,
+                    getCourses,
                     getBbAssignments,
                     getBbAnnouncements,
                     getBbMaterials,
@@ -1104,6 +1155,7 @@
                     syncEmailData,
                     unbindEmail,
                     getEmailMessages,
+                    sendEmail,
                     clearSession,
                     testConnection
                 };
