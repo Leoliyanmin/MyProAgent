@@ -443,6 +443,31 @@ export const blackboardAPI = {
   }
 }
 
+// ==================== Email API ====================
+
+export const emailAPI = {
+  getStatus: async () => {
+    return fetchWithAuth('/api/v1/email/status')
+  },
+  bind: async (emailAddress, appPassword) => {
+    return fetchWithAuth('/api/v1/email/bind', {
+      method: 'POST',
+      body: JSON.stringify({ email_address: emailAddress, app_password: appPassword })
+    })
+  },
+  sync: async (maxMessages = 50) => {
+    return fetchWithAuth(`/api/v1/email/sync?max_messages=${maxMessages}`, {
+      method: 'POST'
+    })
+  },
+  unbind: async () => {
+    return fetchWithAuth('/api/v1/email/unbind', { method: 'POST' })
+  },
+  getMessages: async () => {
+    return fetchWithAuth('/api/v1/email/messages')
+  }
+}
+
 // ==================== Sync API (Local ↔ Server) ====================
 
 export const syncAPI = {
@@ -501,5 +526,6 @@ export default {
   sync: syncAPI,
   profile: profileAPI,
   tis: tisAPI,
-  blackboard: blackboardAPI
+  blackboard: blackboardAPI,
+  email: emailAPI,
 }

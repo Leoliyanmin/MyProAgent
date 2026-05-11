@@ -130,6 +130,31 @@
               <button v-else-if="bb.status === 'bound'" class="action-btn ghost" type="button" @click="unbindBb">解绑</button>
             </div>
           </li>
+          <li class="provider-item">
+            <div>
+              <p class="binding-title">邮箱</p>
+              <p class="binding-meta" v-if="email.status === 'loading'">加载中…</p>
+              <template v-else-if="email.status === 'bound'">
+                <p class="binding-meta binding-success">已绑定 · {{ email.emailAddress }}</p>
+                <p class="binding-meta">绑定时间：{{ email.bindTime }}</p>
+                <p v-if="email.lastSyncTime" class="binding-meta">上次同步：{{ email.lastSyncTime }}</p>
+              </template>
+              <p class="binding-meta" v-else>未绑定</p>
+            </div>
+            <div class="action-group">
+              <template v-if="email.status === 'unbound'">
+                <div class="email-bind-form">
+                  <input v-model="emailForm.email" class="text-input" type="email" placeholder="邮箱地址" />
+                  <input v-model="emailForm.password" class="text-input" type="password" placeholder="客户端专用密码" />
+                  <button class="action-btn" type="button" @click="bindEmail">绑定邮箱</button>
+                </div>
+              </template>
+              <template v-else-if="email.status === 'bound'">
+                <button class="action-btn ghost" type="button" @click="syncEmail">同步</button>
+                <button class="action-btn ghost" type="button" @click="unbindEmail">解绑</button>
+              </template>
+            </div>
+          </li>
         </ul>
         <p class="binding-meta" v-if="isTauriApp" style="margin-top: 10px;">💡 点击「绑定」打开登录窗口，完成登录后<strong>保持窗口打开</strong>，然后点击「完成登录，开始绑定」。提取 Cookie 后会询问是否关闭窗口。</p>
         <p v-if="bindingError" class="status-text status-error" style="margin-top: 8px;">{{ bindingError }}</p>
@@ -208,7 +233,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-import { tisAPI, blackboardAPI } from '../services/api.js'
+import { tisAPI, blackboardAPI, emailAPI } from '../services/api.js'
 import { useCalendarStore } from '../stores/calendar.js'
 
 const isTauriApp = !!window.__TAURI_INTERNALS__
@@ -416,6 +441,18 @@ const bb = reactive({
   bindTime: '',
 })
 
+const email = reactive({
+  status: 'loading',
+  emailAddress: '',
+  bindTime: '',
+  lastSyncTime: '',
+})
+
+const emailForm = reactive({
+  email: '',
+  password: '',
+})
+
 const loadBindingStatus = async () => {
   try {
     const tisRes = await tisAPI.getStatus()
@@ -444,6 +481,64 @@ const loadBindingStatus = async () => {
   } catch (err) {
     console.error('[UserSettings] BB status error:', err)
     bb.status = 'unbound'
+  }
+}
+
+const loadEmailStatus = async () => {
+  try {
+    const res = await emailAPI.getStatus()
+    if (res.is_bound) {
+      email.status = 'bound'
+      email.emailAddress = res.email_address || ''
+      email.bindTime = res.bind_time || ''
+      email.lastSyncTime = res.last_sync_time || ''
+    } else {
+      email.status = 'unbound'
+    }
+  } catch (err) {
+    console.error('[UserSettings] email status error:', err)
+    email.status = 'unbound'
+  }
+}
+
+const bindEmail = async () => {
+  if (!emailForm.email || !emailForm.password) {
+    bindingError.value = '请填写邮箱地址和客户端专用密码'
+    return
+  }
+  email.status = 'loading'
+  bindingError.value = ''
+  try {
+    const result = await emailAPI.bind(emailForm.email, emailForm.password)
+    if (result.success) {
+      emailForm.email = ''
+      emailForm.password = ''
+      await loadEmailStatus()
+    } else {
+      bindingError.value = result.message || '绑定失败'
+      email.status = 'unbound'
+    }
+  } catch (err) {
+    bindingError.value = err?.message || '绑定失败'
+    email.status = 'unbound'
+  }
+}
+
+const syncEmail = async () => {
+  try {
+    await emailAPI.sync()
+    await loadEmailStatus()
+  } catch (err) {
+    bindingError.value = err?.message || '同步失败'
+  }
+}
+
+const unbindEmail = async () => {
+  try {
+    await emailAPI.unbind()
+    await loadEmailStatus()
+  } catch (err) {
+    bindingError.value = err?.message || '解绑失败'
   }
 }
 
@@ -560,7 +655,10 @@ const unbindBb = async () => {
   try { await blackboardAPI.unbind(); await loadBindingStatus() } catch {}
 }
 
-onMounted(loadBindingStatus)
+onMounted(() => {
+  loadBindingStatus()
+  loadEmailStatus()
+})
 
 onBeforeUnmount(() => {
   if (verifyTimerId.value) {
@@ -901,5 +999,21 @@ const removeRssSource = (id) => {
   .settings-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.email-bind-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+}
+
+.email-bind-form .text-input {
+  min-width: 0;
+  flex: 1;
+}
+
+.email-bind-form .action-btn {
+  align-self: flex-end;
 }
 </style>
