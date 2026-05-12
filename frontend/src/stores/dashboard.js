@@ -236,7 +236,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
       // Keep local-only draft todos while syncing remote-backed items.
       const localOnlyTodos = todos.value.filter((todo) => {
-        if (todo?.source === 'local') return true
+        if (todo?.source === 'local' || todo?.source === 'blackboard') return true
         return isLocalGeneratedId(todo?.id)
       })
 

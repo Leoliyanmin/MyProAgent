@@ -293,10 +293,18 @@ export const useCalendarStore = defineStore('calendar', () => {
       }
 
       const existingTodoTitles = new Set(dashboardStore.todos.map(t => t.title))
+      const now = new Date()
+      now.setHours(0, 0, 0, 0)
       for (const todo of bbTodos) {
         if (existingTodoTitles.has(todo.title)) continue
+        const dueDate = todo.start || ''
+        if (!dueDate) continue
+        const dueDateObj = new Date(dueDate)
+        if (isNaN(dueDateObj.getTime()) || dueDateObj < now) continue
         dashboardStore.addTodo({
           ...todo,
+          priority: 0,
+          color: '#ff3b30',
           linkedScheduleId: null,
         })
         existingTodoTitles.add(todo.title)
