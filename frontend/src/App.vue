@@ -103,7 +103,7 @@ const appMode = ref('main')
 
 // Update currentView based on route
 watch(() => route.name, (newName) => {
-  if (['dashboard', 'calendar', 'files', 'self-portrait', 'user-settings'].includes(newName)) {
+  if (['dashboard', 'calendar', 'files', 'self-portrait', 'email', 'user-settings'].includes(newName)) {
     if (newName === 'user-settings') {
       appMode.value = 'settings'
     } else {
@@ -121,7 +121,8 @@ watch(currentView, (newView) => {
     'dashboard': 'dashboard',
     'calendar': 'calendar',
     'fileManager': 'files',
-    'selfPortrait': 'self-portrait'
+    'selfPortrait': 'self-portrait',
+    'email': 'email'
   }
   if (nameMap[newView] && route.name !== nameMap[newView]) {
     router.push({ name: nameMap[newView] })

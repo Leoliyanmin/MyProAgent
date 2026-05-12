@@ -465,6 +465,12 @@ export const emailAPI = {
   },
   getMessages: async () => {
     return fetchWithAuth('/api/v1/email/messages')
+  },
+  send: async (title, context, receiver) => {
+    return fetchWithAuth('/api/v1/email/send', {
+      method: 'POST',
+      body: JSON.stringify({ title, context, receiver })
+    })
   }
 }
 

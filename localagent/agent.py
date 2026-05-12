@@ -27,6 +27,11 @@ from .tools import (
     UpdateScheduleEventTimeTool,
     DeleteScheduleEventTool,
 )
+from .tools.email_tools import (
+    CheckEmailStatusTool,
+    GetEmailsTool,
+    SendEmailTool,
+)
 from .config import (
     LocalAgentConfig,
     load_config,
@@ -160,6 +165,18 @@ class LocalAgent:
         self.tools.register(UpdateScheduleEventTool(lambda: self._runtime_context.get("user_id")))
         self.tools.register(UpdateScheduleEventTimeTool(lambda: self._runtime_context.get("user_id")))
         self.tools.register(DeleteScheduleEventTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(CheckEmailStatusTool(
+            lambda: self._runtime_context.get("user_id"),
+            lambda: self._runtime_context.get("token"),
+        ))
+        self.tools.register(GetEmailsTool(
+            lambda: self._runtime_context.get("user_id"),
+            lambda: self._runtime_context.get("token"),
+        ))
+        self.tools.register(SendEmailTool(
+            lambda: self._runtime_context.get("user_id"),
+            lambda: self._runtime_context.get("token"),
+        ))
 
     def set_runtime_context(self, **context: Any) -> None:
         self._runtime_context.update(context)

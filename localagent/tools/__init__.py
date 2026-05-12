@@ -12,6 +12,11 @@ from .calendar_tools import (
     UpdateScheduleEventTimeTool,
     DeleteScheduleEventTool,
 )
+from .email_tools import (
+    CheckEmailStatusTool,
+    GetEmailsTool,
+    SendEmailTool,
+)
 
 __all__ = [
     "BaseTool",
@@ -31,4 +36,7 @@ __all__ = [
     "UpdateScheduleEventTool",
     "UpdateScheduleEventTimeTool",
     "DeleteScheduleEventTool",
+    "CheckEmailStatusTool",
+    "GetEmailsTool",
+    "SendEmailTool",
 ]
