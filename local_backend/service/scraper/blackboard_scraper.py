@@ -375,6 +375,10 @@ def _extract_announcements(html: str) -> List[Dict[str, str]]:
             posted_span = details_block.find("span")
             if posted_span:
                 posted_on = posted_span.get_text(strip=True)
+                for prefix in ("发布时间: ", "Posted on: ", "Posted: "):
+                    if posted_on.startswith(prefix):
+                        posted_on = posted_on[len(prefix):]
+                        break
             content_div = details_block.find("div", class_="vtbegenerated")
             if content_div:
                 body_text = content_div.get_text("\n", strip=True)
@@ -670,7 +674,7 @@ class BlackboardScraper:
 
                     result["courses"].append(course_info)
 
-                    if not has_announcement_link and course_info.get("id"):
+                    if course_info.get("id"):
                         ann_url = f"{BB_BASE_URL}/webapps/blackboard/execute/announcement?method=search&context=course_entry&course_id={course_item['course_id']}&handle=announcements_entry&mode=view"
                         try:
                             announcements = self._fetch_announcements(ann_url)
