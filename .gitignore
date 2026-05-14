@@ -203,3 +203,8 @@ local/database/test_db/sync_packet_from_server.json
 
 # mock data
 mock_frontend/
+
+# metrics tool generated report
+metrics_tool/metrics_report.md
+
+.claude
