@@ -104,7 +104,7 @@ class EmailMessageOperations:
                 data_classification_code=4,
                 data_title=subject,
                 data_content_text=body,
-                data_link_url=None,
+                data_link_url=f'mail:{mail_id}',
                 data_release_time=message_time,
                 data_ddl_time=None,
                 data_is_previewable=1,
