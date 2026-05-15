@@ -140,12 +140,14 @@
                 <p v-if="email.lastSyncTime" class="binding-meta">上次同步：{{ email.lastSyncTime }}</p>
               </template>
               <p class="binding-meta" v-else>未绑定</p>
+              <p class="binding-meta binding-hint" style="margin-top: 4px;">仅支持腾讯企业邮箱（如 @mail.sustech.edu.cn）</p>
             </div>
             <div class="action-group">
               <template v-if="email.status === 'unbound'">
                 <div class="email-bind-form">
-                  <input v-model="emailForm.email" class="text-input" type="email" placeholder="邮箱地址" />
-                  <input v-model="emailForm.password" class="text-input" type="password" placeholder="客户端专用密码" />
+                  <input v-model="emailForm.email" class="text-input" type="email" placeholder="企业邮箱地址（如 xxx@mail.sustech.edu.cn）" />
+                  <input v-model="emailForm.password" class="text-input" type="password" placeholder="客户端专用密码（非登录密码）" />
+                  <p class="binding-meta binding-hint">获取方式：登录邮箱网页版 → 设置 → 客户端专用密码 → 生成</p>
                   <button class="action-btn" type="button" @click="bindEmail">绑定邮箱</button>
                 </div>
               </template>
@@ -855,6 +857,11 @@ const removeRssSource = (id) => {
 .binding-success {
   color: #16a34a;
   font-weight: 600;
+}
+
+.binding-hint {
+  color: #9ca3af;
+  font-style: italic;
 }
 
 .text-btn {
