@@ -47,7 +47,11 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:8002',
           changeOrigin: true
         },
-'/api/v1/blackboard': {
+        '/api/v1/blackboard': {
+          target: 'http://localhost:8002',
+          changeOrigin: true
+        },
+        '/api/v1/email': {
           target: 'http://localhost:8002',
           changeOrigin: true
         }
