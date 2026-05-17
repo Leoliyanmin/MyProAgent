@@ -328,9 +328,9 @@
     "messages": [
         {
             "title": "关于课程安排的通知",
-            "context": "各位同学好...",
             "release_time": "2026-04-29 10:15:00",
-            "sender": "老师 <teacher@sustech.edu.cn>"
+            "sender": "老师 <teacher@sustech.edu.cn>",
+            "raw_html": "<html><body>各位同学好...</body></html>"
         }
     ]
 }

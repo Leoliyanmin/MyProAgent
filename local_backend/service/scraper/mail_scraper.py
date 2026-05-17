@@ -81,54 +81,59 @@ def _decode_mime_header(header_value: Optional[str]) -> str:
 
 
 def _extract_email_body(msg: Message, max_size: int = 10240) -> str:
-    body = ""
+    body = _extract_raw_html(msg)
+    cleaned = re.sub(r"<[^>]+>", "", body)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    if len(cleaned) > max_size:
+        cleaned = cleaned[:max_size] + "...(truncated)"
+    return cleaned
+
+
+def _extract_raw_html(msg: Message, max_size: int = 10240) -> str:
+    raw = ""
     if msg.is_multipart():
         for part in msg.walk():
             content_type = part.get_content_type()
             content_disposition = str(part.get("Content-Disposition", ""))
             if "attachment" in content_disposition:
                 continue
-            if content_type == "text/plain":
-                payload = part.get_payload(decode=True)
-                if payload:
-                    charset = part.get_content_charset() or "utf-8"
-                    try:
-                        body = payload.decode(charset, errors="replace")
-                    except (LookupError, UnicodeDecodeError):
-                        body = payload.decode("utf-8", errors="replace")
-                    break
-            elif content_type == "text/html" and not body:
-                payload = part.get_payload(decode=True)
-                if payload:
-                    charset = part.get_content_charset() or "utf-8"
-                    try:
-                        body = payload.decode(charset, errors="replace")
-                    except (LookupError, UnicodeDecodeError):
-                        body = payload.decode("utf-8", errors="replace")
-        if not body:
+            payload = part.get_payload(decode=True)
+            if not payload:
+                continue
+            charset = part.get_content_charset() or "utf-8"
+            try:
+                decoded = payload.decode(charset, errors="replace")
+            except (LookupError, UnicodeDecodeError):
+                decoded = payload.decode("utf-8", errors="replace")
+            if content_type == "text/html":
+                raw = decoded
+                break
+            elif content_type == "text/plain" and not raw:
+                raw = decoded
+        if not raw:
             for part in msg.walk():
+                payload = part.get_payload(decode=True)
+                if not payload:
+                    continue
+                charset = part.get_content_charset() or "utf-8"
+                try:
+                    decoded = payload.decode(charset, errors="replace")
+                except (LookupError, UnicodeDecodeError):
+                    decoded = payload.decode("utf-8", errors="replace")
                 if part.get_content_type() == "text/html":
-                    payload = part.get_payload(decode=True)
-                    if payload:
-                        charset = part.get_content_charset() or "utf-8"
-                        try:
-                            body = payload.decode(charset, errors="replace")
-                        except (LookupError, UnicodeDecodeError):
-                            body = payload.decode("utf-8", errors="replace")
-                        break
+                    raw = decoded
+                    break
     else:
         payload = msg.get_payload(decode=True)
         if payload:
             charset = msg.get_content_charset() or "utf-8"
             try:
-                body = payload.decode(charset, errors="replace")
+                raw = payload.decode(charset, errors="replace")
             except (LookupError, UnicodeDecodeError):
-                body = payload.decode("utf-8", errors="replace")
-    cleaned = re.sub(r"<[^>]+>", "", body)
-    cleaned = re.sub(r"\s+", " ", cleaned).strip()
-    if len(cleaned) > max_size:
-        cleaned = cleaned[:max_size] + "...(truncated)"
-    return cleaned
+                raw = payload.decode("utf-8", errors="replace")
+    if len(raw) > max_size:
+        raw = raw[:max_size] + "...(truncated)"
+    return raw
 
 
 def _parse_email_date(date_str: Optional[str]) -> str:
@@ -247,12 +252,14 @@ class MailScraper:
             subject = _decode_mime_header(msg.get("Subject", ""))
             date_str = _parse_email_date(msg.get("Date", ""))
             body = _extract_email_body(msg)
+            raw_html = _extract_raw_html(msg)
             messages.append({
                 "mail_id": msg_id.decode() if isinstance(msg_id, bytes) else str(msg_id),
                 "subject": subject,
                 "sender": sender,
                 "time": date_str,
                 "body": body,
+                "raw_html": raw_html,
             })
 
         conn.close()
@@ -281,12 +288,14 @@ class MailScraper:
             subject = _decode_mime_header(msg.get("Subject", ""))
             date_str = _parse_email_date(msg.get("Date", ""))
             body = _extract_email_body(msg)
+            raw_html = _extract_raw_html(msg)
             messages.append({
                 "mail_id": msg_id.decode() if isinstance(msg_id, bytes) else str(msg_id),
                 "subject": subject,
                 "sender": sender,
                 "time": date_str,
                 "body": body,
+                "raw_html": raw_html,
             })
 
         conn.close()
