@@ -58,6 +58,11 @@ export default defineConfig(({ mode }) => {
       },
     },
     envPrefix: ['VITE_', 'TAURI_'],
+    test: {
+      environment: 'happy-dom',
+      include: ['src/__tests__/**/*.test.js'],
+      setupFiles: ['src/__tests__/setup.js'],
+    },
     build: {
       target: process.env.TAURI_ENV_PLATFORM === 'windows' ? 'chrome105' : 'safari13',
       outDir: 'dist',
