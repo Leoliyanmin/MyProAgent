@@ -193,7 +193,7 @@ async function handleSend() {
 }
 
 async function handleDelete(msgId, idx) {
-  if (!confirm('确认删除该邮件？')) return
+  console.log('[EmailView] delete clicked, id:', msgId)
   expandedIndex.value = null
   await store.deleteMessage(msgId)
 }
