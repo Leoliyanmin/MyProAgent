@@ -38,6 +38,10 @@ jobs:
           # Install bcrypt compatible version for passlib
           pip install "bcrypt==4.0.1"
 
-      - name: Run tests
+      - name: Run local_backend tests
         run: |
-          python -m pytest local_backend/tests/ server_backend/tests/ -v --tb=short
+          python -m pytest local_backend/tests/ -v --tb=short
+
+      - name: Run server_backend tests
+        run: |
+          python -m pytest server_backend/tests/ -v --tb=short
