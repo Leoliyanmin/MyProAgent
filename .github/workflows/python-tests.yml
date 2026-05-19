@@ -33,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-cov httpx
           pip install pydantic-settings "passlib[bcrypt]==1.7.4" python-jose cryptography
-          pip install beautifulsoup4 apscheduler jieba
+          pip install beautifulsoup4 apscheduler jieba requests websockets
           pip install fastapi uvicorn sqlalchemy email-validator
           # Install bcrypt compatible version for passlib
           pip install "bcrypt==4.0.1"
