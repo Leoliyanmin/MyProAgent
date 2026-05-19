@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proagent-config
+  namespace: proagent
+data:
+  LOCAL_BACKEND_URL: "http://proagent-local:8002"
+  SERVER_BACKEND_URL: "http://proagent-server:8001"

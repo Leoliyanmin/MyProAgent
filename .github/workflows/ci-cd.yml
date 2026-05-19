@@ -1,0 +1,539 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, integration]
+  pull_request:
+    branches: [main, integration]
+
+jobs:
+  # ============================================================
+  # 阶段一：编译 (Compile)
+  # ============================================================
+
+  compile-local:
+    name: Compile Local Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r local_backend/requirements.txt
+
+      - name: Compile check (syntax)
+        run: python -m compileall local_backend/
+
+  compile-server:
+    name: Compile Server Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r server_backend/requirements.txt
+
+      - name: Compile check (syntax)
+        run: python -m compileall server_backend/
+
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Upload frontend dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 7
+
+  # ============================================================
+  # 阶段二：测试 (Test)
+  # ============================================================
+
+  lint:
+    name: Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Run flake8
+        run: flake8 local_backend/ server_backend/ --count --max-line-length=120 --statistics
+
+  test-local:
+    name: Test Local Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov httpx
+          pip install pydantic-settings "passlib[bcrypt]==1.7.4" python-jose cryptography
+          pip install beautifulsoup4 apscheduler jieba requests websockets
+          pip install fastapi uvicorn sqlalchemy email-validator
+          pip install "bcrypt==4.0.1"
+
+      - name: Run tests with coverage
+        run: |
+          python -m pytest local_backend/tests/ -v --tb=short \
+            --cov=local_backend \
+            --cov-report=xml:coverage-local.xml \
+            --cov-report=html:coverage-local-html
+
+      - name: Upload coverage XML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-local
+          path: coverage-local.xml
+          retention-days: 7
+
+      - name: Upload coverage HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-local-html
+          path: coverage-local-html/
+          retention-days: 7
+
+  test-server:
+    name: Test Server Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov httpx
+          pip install pydantic-settings "passlib[bcrypt]==1.7.4" python-jose cryptography
+          pip install fastapi uvicorn sqlalchemy email-validator
+          pip install redis aiosmtplib
+          pip install "bcrypt==4.0.1"
+
+      - name: Run tests with coverage
+        run: |
+          python -m pytest server_backend/tests/ -v --tb=short \
+            --cov=server_backend \
+            --cov-report=xml:coverage-server.xml \
+            --cov-report=html:coverage-server-html
+
+      - name: Upload coverage XML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-server
+          path: coverage-server.xml
+          retention-days: 7
+
+      - name: Upload coverage HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-server-html
+          path: coverage-server-html/
+          retention-days: 7
+
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd frontend
+          npm run test
+
+  # ============================================================
+  # 阶段三：打包 (Package)
+  # ============================================================
+
+  package-local:
+    name: Package Local (Frontend + Local Backend)
+    runs-on: ubuntu-latest
+    needs: [compile-local, build-frontend, test-local, test-frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frontend dist
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+
+      - name: Set version
+        id: version
+        run: echo "VERSION=$(date +'%Y%m%d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Create package directory
+        run: |
+          mkdir -p pkg/proagent-local-${{ steps.version.outputs.VERSION }}
+          cp -r local_backend pkg/proagent-local-${{ steps.version.outputs.VERSION }}/
+          cp -r frontend/dist pkg/proagent-local-${{ steps.version.outputs.VERSION }}/frontend-dist
+          cp scripts/start-local.sh pkg/proagent-local-${{ steps.version.outputs.VERSION }}/start.sh
+          cp scripts/start-local.bat pkg/proagent-local-${{ steps.version.outputs.VERSION }}/start.bat
+          cp local_backend/requirements.txt pkg/proagent-local-${{ steps.version.outputs.VERSION }}/
+
+      - name: Create zip artifact
+        run: |
+          cd pkg
+          zip -r proagent-local-${{ steps.version.outputs.VERSION }}.zip proagent-local-${{ steps.version.outputs.VERSION }}/
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: proagent-local-${{ steps.version.outputs.VERSION }}
+          path: pkg/proagent-local-${{ steps.version.outputs.VERSION }}.zip
+          retention-days: 30
+
+  package-server:
+    name: Package Server Backend
+    runs-on: ubuntu-latest
+    needs: [compile-server, test-server]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: echo "VERSION=$(date +'%Y%m%d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Create package directory
+        run: |
+          mkdir -p pkg/proagent-server-${{ steps.version.outputs.VERSION }}
+          cp -r server_backend pkg/proagent-server-${{ steps.version.outputs.VERSION }}/
+          cp scripts/start-server.sh pkg/proagent-server-${{ steps.version.outputs.VERSION }}/start.sh
+          cp server_backend/requirements.txt pkg/proagent-server-${{ steps.version.outputs.VERSION }}/
+
+      - name: Create zip artifact
+        run: |
+          cd pkg
+          zip -r proagent-server-${{ steps.version.outputs.VERSION }}.zip proagent-server-${{ steps.version.outputs.VERSION }}/
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: proagent-server-${{ steps.version.outputs.VERSION }}
+          path: pkg/proagent-server-${{ steps.version.outputs.VERSION }}.zip
+          retention-days: 30
+
+  # ============================================================
+  # 阶段四：生成文档 (Generate Docs)
+  # ============================================================
+
+  gen-docs:
+    name: Generate API Documentation
+    runs-on: ubuntu-latest
+    needs: [compile-local, compile-server]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r local_backend/requirements.txt
+          pip install -r server_backend/requirements.txt
+          pip install pdoc3
+
+      - name: Generate docs for local_backend
+        run: pdoc --html --output-dir docs/api/local local_backend --force
+
+      - name: Generate docs for server_backend
+        run: pdoc --html --output-dir docs/api/server server_backend --force
+
+      - name: Upload documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs
+          path: docs/api/
+          retention-days: 30
+
+  # ============================================================
+  # 阶段五：Docker 构建与测试
+  # ============================================================
+
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [test-local, test-server, test-frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build local backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.local
+          load: true
+          tags: proagent-local:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build server backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.server
+          load: true
+          tags: proagent-server:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.frontend
+          load: true
+          tags: proagent-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  docker-test:
+    name: Test Docker Compose
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and start services
+        run: |
+          docker compose -f docker-compose.yml build
+          docker compose -f docker-compose.yml up -d
+          echo "Waiting for services to start..."
+          sleep 15
+
+      - name: Health check - Server Backend
+        run: |
+          for i in 1 2 3 4 5; do
+            curl -sf http://localhost:8001/health && echo "Server OK" && exit 0
+            echo "Retry $i/5..."
+            sleep 5
+          done
+          echo "Server health check failed"
+          docker compose -f docker-compose.yml logs
+          exit 1
+
+      - name: Health check - Local Backend
+        run: |
+          curl -sf http://localhost:8002/ && echo "Local OK"
+
+      - name: Health check - Frontend
+        run: |
+          curl -sf http://localhost/ && echo "Frontend OK"
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.yml logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml down
+
+  docker-push:
+    name: Push Docker Images to GHCR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [docker-build]
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Push local backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.local
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/proagent-local:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Push server backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.server
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/proagent-server:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.frontend
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================
+  # 阶段六：Kubernetes
+  # ============================================================
+
+  k8s-validate:
+    name: Validate K8s Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Validate manifests
+        run: |
+          kubeconform -summary -strict k8s/
+
+  k8s-test:
+    name: Test on Kubernetes (kind)
+    runs-on: ubuntu-latest
+    needs: [k8s-validate]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubectl
+        run: |
+          curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Install kind
+        run: |
+          curl -sLo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/
+
+      - name: Create kind cluster
+        run: kind create cluster --name proagent-test
+
+      - name: Rebuild images for kind
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-server:latest -f docker/Dockerfile.server .
+          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-local:latest -f docker/Dockerfile.local .
+          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest -f docker/Dockerfile.frontend .
+
+      - name: Load images into kind
+        run: |
+          kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-server:latest --name proagent-test
+          kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-local:latest --name proagent-test
+          kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest --name proagent-test
+
+      - name: Deploy to kind
+        run: |
+          kubectl apply -k k8s/
+          kubectl get all -n proagent
+
+      - name: Wait for deployments
+        run: |
+          kubectl wait --for=condition=available --timeout=120s \
+            deployment/proagent-server deployment/proagent-local deployment/proagent-frontend \
+            -n proagent
+
+      - name: Health check
+        run: |
+          kubectl port-forward -n proagent svc/proagent-server 8001:8001 &
+          kubectl port-forward -n proagent svc/proagent-local 8002:8002 &
+          kubectl port-forward -n proagent svc/proagent-frontend 8080:80 &
+          sleep 5
+
+          curl -sf http://localhost:8001/health && echo "Server OK"
+          curl -sf http://localhost:8002/health && echo "Local OK"
+          curl -sf http://localhost:8080/ && echo "Frontend OK"
+
+      - name: Show pod logs on failure
+        if: failure()
+        run: |
+          kubectl describe pods -n proagent
+          kubectl logs -n proagent -l app=proagent-server --tail=50
+          kubectl logs -n proagent -l app=proagent-local --tail=50
+
+      - name: Delete kind cluster
+        if: always()
+        run: kind delete cluster --name proagent-test

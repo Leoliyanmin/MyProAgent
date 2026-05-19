@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proagent-server
+  namespace: proagent
+  labels:
+    app: proagent-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proagent-server
+  template:
+    metadata:
+      labels:
+        app: proagent-server
+    spec:
+      containers:
+        - name: server
+          image: ghcr.io/lsz-asd/proagent-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001
+          env:
+            - name: DATABASE_URL
+              value: "sqlite:///./database/db/server.db"
+            - name: TEST_MODE
+              value: "true"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proagent-server
+  namespace: proagent
+spec:
+  selector:
+    app: proagent-server
+  ports:
+    - port: 8001
+      targetPort: 8001
+  type: ClusterIP

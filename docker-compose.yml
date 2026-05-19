@@ -1,0 +1,43 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    container_name: proagent-server
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=sqlite:///./database/db/server.db
+    volumes:
+      - server_data:/app/database/db
+    restart: unless-stopped
+
+  local:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.local
+    container_name: proagent-local
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=sqlite:///./local_app.db
+      - SERVER_BACKEND_URL=http://server:8001
+    volumes:
+      - local_data:/app
+    restart: unless-stopped
+    depends_on:
+      - server
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: proagent-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - local
+
+volumes:
+  server_data:
+  local_data:

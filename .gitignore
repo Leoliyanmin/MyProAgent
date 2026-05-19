@@ -209,4 +209,5 @@ mock_frontend/
 # Standalone CAS demo app (not for production)
 cas-demo/
 *.yaml
+!k8s/*.yaml
 *.spec

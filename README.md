@@ -270,6 +270,46 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8001
 | ORM | SQLAlchemy | 2.0+ |
 | 认证 | JWT | - |
 
+## CI/CD
+
+[![CI/CD Pipeline](https://github.com/lsz-asd/team-project-26spring-26s-27/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/lsz-asd/team-project-26spring-26s-27/actions/workflows/ci-cd.yml)
+
+流水线在 push 到 `main` 或 `integration` 分支时自动触发，包含五个阶段：
+
+| 阶段 | 说明 | 工具 |
+|------|------|------|
+| **Compile** | Python 语法检查 + 前端 Vite 构建 | compileall, Vite |
+| **Test** | 后端 pytest (含覆盖率) + 前端 vitest + flake8 代码检查 | pytest-cov, vitest, flake8 |
+| **Package** | 分别打包 Local 制品和 Server 制品 | GitHub Actions Artifacts |
+| **Docs** | 从源码生成 API HTML 文档 | pdoc3 |
+| **Docker** | 构建镜像、docker-compose 运行测试、推送到 GHCR | Docker Buildx, GHCR |
+| **Kubernetes** | 清单验证 (kubeconform) + kind 集群部署测试 | kubectl, kind |
+
+制品下载：在 [Actions](https://github.com/lsz-asd/team-project-26spring-26s-27/actions) 页面选择最新一次运行：
+- `proagent-local-*` — 本地桌面版（含前端 + local_backend）
+- `proagent-server-*` — 服务器部署版（server_backend）
+- `api-docs` — API HTML 文档
+
+### Docker 快速启动
+
+```bash
+docker compose up -d
+```
+
+- 前端: http://localhost
+- Local API 文档: http://localhost:8002/docs
+- Server API 文档: http://localhost:8001/docs
+
+### Kubernetes 部署
+
+```bash
+kubectl apply -k k8s/
+kubectl get all -n proagent
+```
+
+- 前端通过 LoadBalancer 对外暴露
+- Local/Server 后端通过 ClusterIP 内部通信
+
 ## 开发团队
 
 Made with ❤️ by Team 26S-27
