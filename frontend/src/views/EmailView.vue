@@ -97,7 +97,15 @@
 
       <!-- Right column: Messages list -->
       <div class="email-messages-panel mac-panel">
-        <h3 class="panel-title">收件箱</h3>
+        <div class="panel-header-row">
+          <h3 class="panel-title">收件箱</h3>
+          <select v-model="sortBy" class="sort-select">
+            <option value="time-desc">时间 ↓</option>
+            <option value="time-asc">时间 ↑</option>
+            <option value="sender">发件人</option>
+            <option value="title">标题</option>
+          </select>
+        </div>
         <div v-if="loading" class="loading-state">加载中...</div>
         <div v-else-if="messages.length === 0" class="empty-state">
           <p>暂无邮件</p>
@@ -105,8 +113,8 @@
         </div>
         <div v-else class="messages-list">
           <div
-            v-for="(msg, idx) in messages"
-            :key="idx"
+            v-for="(msg, idx) in sortedMessages"
+            :key="msg.id || idx"
             class="message-item"
             :class="{ expanded: expandedIndex === idx }"
             @click="toggleExpand(idx)"
@@ -142,6 +150,23 @@ const sending = computed(() => store.sending)
 const expandedIndex = ref(null)
 const syncResult = ref(null)
 const sendSuccess = ref(false)
+const sortBy = ref('time-desc')
+
+const sortedMessages = computed(() => {
+  const list = [...store.messages]
+  switch (sortBy.value) {
+    case 'time-asc':
+      return list.sort((a, b) => (a.release_time || '').localeCompare(b.release_time || ''))
+    case 'time-desc':
+      return list.sort((a, b) => (b.release_time || '').localeCompare(a.release_time || ''))
+    case 'sender':
+      return list.sort((a, b) => (a.sender || '').localeCompare(b.sender || ''))
+    case 'title':
+      return list.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+    default:
+      return list
+  }
+})
 
 const composeForm = reactive({
   to: '',
@@ -351,10 +376,31 @@ onMounted(() => {
 }
 
 .panel-title {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 15px;
   font-weight: 600;
   color: #111827;
+}
+
+.panel-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sort-select {
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #4b5563;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+.sort-select:focus {
+  border-color: #007aff;
 }
 
 /* Compose panel */
