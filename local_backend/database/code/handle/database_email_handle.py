@@ -147,6 +147,7 @@ class EmailHandle:
                 clean.append({
                     'id': m.get('data_id'),
                     'title': m.get('data_title', ''),
+                    'context': m.get('data_content_text', ''),
                     'release_time': m.get('data_release_time', ''),
                     'sender': meta.get('sender', ''),
                     'raw_html': m.get('data_raw_json', ''),
