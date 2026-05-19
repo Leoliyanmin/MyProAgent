@@ -145,11 +145,19 @@ class EmailHandle:
                 except (json.JSONDecodeError, TypeError):
                     pass
                 clean.append({
+                    'id': m.get('data_id'),
                     'title': m.get('data_title', ''),
                     'release_time': m.get('data_release_time', ''),
                     'sender': meta.get('sender', ''),
                     'raw_html': m.get('data_raw_json', ''),
                 })
             return {'success': True, 'messages': clean}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}
+
+    def handle_delete_message(self, user_id: str, message_id: int) -> Dict:
+        try:
+            self.message_ops.delete_message(message_id)
+            return {'success': True, 'message': '邮件已删除'}
         except Exception as e:
             return {'success': False, 'message': str(e)}

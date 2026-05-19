@@ -471,6 +471,11 @@ export const emailAPI = {
       method: 'POST',
       body: JSON.stringify({ title, context, receiver })
     })
+  },
+  deleteMessage: async (messageId) => {
+    return fetchWithAuth(`/api/v1/email/messages/${messageId}`, {
+      method: 'DELETE'
+    })
   }
 }
 

@@ -107,9 +107,10 @@
               <span class="msg-title">{{ msg.title || '(无主题)' }}</span>
               <span class="msg-sender">{{ msg.sender || '' }}</span>
               <span class="msg-time">{{ formatTime(msg.release_time) }}</span>
+              <button class="delete-msg-btn" @click.stop="handleDelete(msg.id, idx)" title="删除">×</button>
             </div>
             <div v-if="expandedIndex === idx" class="message-body">
-              <div class="body-content">{{ msg.context || '(无正文内容)' }}</div>
+              <div class="body-content" v-html="msg.raw_html || msg.context || '(无正文内容)'"></div>
             </div>
           </div>
         </div>
@@ -169,6 +170,12 @@ async function handleSend() {
     sendSuccess.value = true
     setTimeout(() => { sendSuccess.value = false }, 3000)
   }
+}
+
+async function handleDelete(msgId, idx) {
+  if (!confirm('确认删除该邮件？')) return
+  expandedIndex.value = null
+  await store.deleteMessage(msgId)
 }
 
 onMounted(() => {
@@ -467,6 +474,21 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
+.delete-msg-btn {
+  opacity: 0;
+  background: none;
+  border: none;
+  color: #ff3b30;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+.message-item:hover .delete-msg-btn {
+  opacity: 1;
+}
+
 .message-body {
   margin-top: 8px;
   padding-top: 8px;
@@ -477,7 +499,6 @@ onMounted(() => {
   font-size: 13px;
   color: #374151;
   line-height: 1.6;
-  white-space: pre-wrap;
   word-break: break-word;
 }
 </style>

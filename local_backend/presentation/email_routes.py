@@ -92,3 +92,11 @@ async def send_email(request: EmailSendRequest, user_id: str = Depends(get_curre
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '发送失败'))
     return result
+
+
+@router.delete("/messages/{message_id}")
+async def delete_email_message(message_id: int, user_id: str = Depends(get_current_user_id)):
+    result = email_service.delete_email_message(user_id, message_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '删除失败'))
+    return result

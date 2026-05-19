@@ -86,6 +86,19 @@ export const useEmailStore = defineStore('email', () => {
     }
   }
 
+  async function deleteMessage(messageId) {
+    try {
+      const res = await emailAPI.deleteMessage(messageId)
+      if (res.success) {
+        messages.value = messages.value.filter(m => m.id !== messageId)
+      } else {
+        error.value = res.message || '删除失败'
+      }
+    } catch (err) {
+      error.value = err?.message || '删除失败'
+    }
+  }
+
   return {
     bindStatus,
     messages,
@@ -97,5 +110,6 @@ export const useEmailStore = defineStore('email', () => {
     fetchMessages,
     sync,
     send,
+    deleteMessage,
   }
 })
