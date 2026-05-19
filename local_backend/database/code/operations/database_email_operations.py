@@ -74,6 +74,7 @@ class EmailMessageOperations:
         sender: str,
         message_time: str,
         body: Optional[str] = None,
+        raw_html: Optional[str] = None,
     ) -> int:
         existing_data = list_data_by_user(user_id)
         existing_message = None
@@ -92,6 +93,7 @@ class EmailMessageOperations:
                 data_content_text=body,
                 data_release_time=message_time,
                 data_meta_json=json.dumps({"sender": sender}, ensure_ascii=False),
+                data_raw_json=raw_html,
                 data_updated_at=time.strftime('%Y-%m-%d %H:%M:%S'),
             )
             return existing_message['data_id']
@@ -111,7 +113,7 @@ class EmailMessageOperations:
                 data_source='email',
                 data_external_id=mail_id,
                 data_meta_json=json.dumps({"sender": sender}, ensure_ascii=False),
-                data_raw_json=None,
+                data_raw_json=raw_html,
                 data_updated_at=created_at,
                 data_created_at=created_at,
             )

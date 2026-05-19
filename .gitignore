@@ -210,3 +210,8 @@ mock_frontend/
 cas-demo/
 *.yaml
 *.spec
+
+# metrics tool generated report
+metrics_tool/metrics_report.md
+
+.claude

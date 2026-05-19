@@ -99,6 +99,7 @@ class EmailHandle:
                     sender=msg.get('sender', ''),
                     message_time=msg.get('time', ''),
                     body=msg.get('body', ''),
+                    raw_html=msg.get('raw_html', ''),
                 )
                 synced_messages.append({
                     'id': msg_id,
@@ -145,9 +146,9 @@ class EmailHandle:
                     pass
                 clean.append({
                     'title': m.get('data_title', ''),
-                    'context': m.get('data_content_text', ''),
                     'release_time': m.get('data_release_time', ''),
                     'sender': meta.get('sender', ''),
+                    'raw_html': m.get('data_raw_json', ''),
                 })
             return {'success': True, 'messages': clean}
         except Exception as e:
