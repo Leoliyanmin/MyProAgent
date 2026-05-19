@@ -161,8 +161,10 @@ function formatTime(time) {
 
 function sanitizeHtml(html) {
   if (!html) return ''
-  // Strip <style> tags and their content to prevent global CSS leaks
-  return html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+  return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/[a-z]\\\:[^;]+;?/gi, '')
 }
 
 async function handleSync() {
