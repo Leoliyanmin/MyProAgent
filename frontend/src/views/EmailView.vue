@@ -19,6 +19,14 @@
         >
           {{ syncing ? '同步中...' : '同步邮件' }}
         </button>
+        <button
+          class="mac-btn-secondary"
+          :disabled="!bindStatus.is_bound || loading"
+          :class="{ 'is-loading': loading }"
+          @click="handleRefresh"
+        >
+          {{ loading ? '加载中...' : '刷新' }}
+        </button>
       </div>
     </div>
 
@@ -166,6 +174,10 @@ async function handleSync() {
   }
 }
 
+async function handleRefresh() {
+  await store.fetchMessages()
+}
+
 async function handleSend() {
   sendSuccess.value = false
   const result = await store.send(composeForm.subject, composeForm.body, composeForm.to)
@@ -266,6 +278,25 @@ onMounted(() => {
 }
 
 .mac-btn-primary.is-loading {
+  opacity: 0.7;
+}
+
+.mac-btn-secondary {
+  border: 1px solid rgba(0,0,0,0.15);
+  background: #fff;
+  color: #1d1d1f;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.mac-btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.mac-btn-secondary.is-loading {
   opacity: 0.7;
 }
 
