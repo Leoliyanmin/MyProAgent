@@ -21,6 +21,7 @@ dist
 dist-ssr
 coverage
 *.local
+!Dockerfile.local
 
 # ----------------------------------------
 # Python / Backend

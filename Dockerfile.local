@@ -1,0 +1,17 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+COPY local_backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY local_backend/ .
+
+RUN mkdir -p /app/logs
+
+EXPOSE 8002
+
+CMD ["sh", "-c", "python database/code/database_init.py && uvicorn main:app --host 0.0.0.0 --port 8002"]
