@@ -110,7 +110,7 @@
               <button class="delete-msg-btn" @click.stop="handleDelete(msg.id, idx)" title="删除">×</button>
             </div>
             <div v-if="expandedIndex === idx" class="message-body">
-              <div class="body-content" v-html="msg.raw_html || msg.context || '(无正文内容)'"></div>
+              <div class="body-content" v-html="sanitizeHtml(msg.raw_html || msg.context) || '(无正文内容)'"></div>
             </div>
           </div>
         </div>
@@ -149,6 +149,12 @@ function formatTime(time) {
   if (!time) return ''
   const raw = String(time)
   return raw.slice(0, 16).replace('T', ' ')
+}
+
+function sanitizeHtml(html) {
+  if (!html) return ''
+  // Strip <style> tags and their content to prevent global CSS leaks
+  return html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
 }
 
 async function handleSync() {
