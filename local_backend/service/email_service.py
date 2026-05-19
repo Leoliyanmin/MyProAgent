@@ -164,3 +164,6 @@ class EmailService:
         except Exception as e:
             logger.error(f"发送邮件失败: {str(e)}")
             return {'success': False, 'message': f'发送失败: {str(e)}'}
+
+    def delete_email_message(self, user_id: str, message_id: int) -> Dict:
+        return self.email_handle.handle_delete_message(user_id, message_id)

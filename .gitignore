@@ -211,3 +211,8 @@ cas-demo/
 *.yaml
 !k8s/*.yaml
 *.spec
+
+# metrics tool generated report
+metrics_tool/metrics_report.md
+
+.claude

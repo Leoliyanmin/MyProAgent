@@ -99,6 +99,7 @@ class EmailHandle:
                     sender=msg.get('sender', ''),
                     message_time=msg.get('time', ''),
                     body=msg.get('body', ''),
+                    raw_html=msg.get('raw_html', ''),
                 )
                 synced_messages.append({
                     'id': msg_id,
@@ -144,11 +145,20 @@ class EmailHandle:
                 except (json.JSONDecodeError, TypeError):
                     pass
                 clean.append({
+                    'id': m.get('data_id'),
                     'title': m.get('data_title', ''),
                     'context': m.get('data_content_text', ''),
                     'release_time': m.get('data_release_time', ''),
                     'sender': meta.get('sender', ''),
+                    'raw_html': m.get('data_raw_json', ''),
                 })
             return {'success': True, 'messages': clean}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}
+
+    def handle_delete_message(self, user_id: str, message_id: int) -> Dict:
+        try:
+            self.message_ops.delete_message(message_id)
+            return {'success': True, 'message': '邮件已删除'}
         except Exception as e:
             return {'success': False, 'message': str(e)}
