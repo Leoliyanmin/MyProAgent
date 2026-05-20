@@ -480,8 +480,11 @@ jobs:
 
       - name: Wait for deployments
         run: |
-          kubectl wait --for=condition=available --timeout=90s \
-            deployment/proagent-server deployment/proagent-local deployment/proagent-frontend \
+          kubectl wait --for=condition=available --timeout=120s \
+            deployment/proagent-server deployment/proagent-local \
+            -n proagent
+          kubectl wait --for=condition=available --timeout=120s \
+            deployment/proagent-frontend \
             -n proagent
 
       - name: Health check
