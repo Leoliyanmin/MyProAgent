@@ -172,6 +172,72 @@ def delete_task(task_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM task WHERE task_id = ?", (task_id,), db_path)
 
 
+# email_account
+
+def create_email_account(
+    user_id: str,
+    email_address: str,
+    encrypted_password: str,
+    bind_time: str | None = None,
+    last_sync_time: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> int:
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    return _execute(
+        """INSERT INTO email_account (user_id, email_address, encrypted_password,
+           bind_time, last_sync_time)
+           VALUES (?, ?, ?, ?, ?)""",
+        (user_id, email_address, encrypted_password, bind_time or now, last_sync_time),
+        db_path,
+    )
+
+
+def get_email_account(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    return _fetch_one("SELECT * FROM email_account WHERE user_id = ?", (user_id,), db_path)
+
+
+def update_email_account_sync_time(account_id: int, sync_time: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("UPDATE email_account SET last_sync_time = ? WHERE account_id = ?", (sync_time, account_id), db_path)
+
+
+def delete_email_account(account_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM email_account WHERE account_id = ?", (account_id,), db_path)
+
+
+# email_message
+
+def create_email_message(
+    user_id: str,
+    account_id: int,
+    mail_uid: str,
+    subject: str,
+    sender: str,
+    recipients: str | None = None,
+    body_text: str | None = None,
+    body_html: str | None = None,
+    received_at: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> int:
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    return _execute(
+        """INSERT INTO email_message (user_id, account_id, mail_uid, subject,
+           sender, recipients, body_text, body_html, received_at, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, account_id, mail_uid, subject, sender, recipients, body_text, body_html, received_at, now),
+        db_path,
+    )
+
+
+def list_email_messages_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all("SELECT * FROM email_message WHERE user_id = ? ORDER BY received_at DESC", (user_id,), db_path)
+
+
+def delete_email_message(message_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM email_message WHERE message_id = ?", (message_id,), db_path)
+
+
 # user_match_profile
 
 def upsert_user_match_profile(

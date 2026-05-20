@@ -6,7 +6,7 @@ from email.message import EmailMessage
 from typing import Dict, Optional
 
 from service.scraper.mail_scraper import MailScraper, write_mail_result
-from database.code.handle.database_email_handle import EmailHandle
+from database.code.handle.database_email_v2_handle import EmailV2Handle
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class EmailService:
     def __init__(self):
-        self.email_handle = EmailHandle()
+        self.email_handle = EmailV2Handle()
 
     def get_email_status(self, user_id: str) -> Dict:
         try:
@@ -50,7 +50,7 @@ class EmailService:
 
             encrypted_password = self._encrypt_app_password(app_password)
 
-            account = self.email_handle.account_ops.get_email_account(user_id)
+            account = self.email_handle.account_ops.get(user_id)
             if account:
                 self.email_handle.handle_unbind_email(user_id)
 
@@ -74,12 +74,12 @@ class EmailService:
         try:
             logger.info(f"同步邮件数据: user_id={user_id}")
 
-            account_info = self.email_handle.account_ops.get_email_account(user_id)
+            account_info = self.email_handle.account_ops.get(user_id)
             if not account_info:
                 return {'success': False, 'message': '未绑定邮箱账号，请先绑定'}
 
-            email_address = account_info['account_platform_username']
-            encrypted_password = account_info.get('content', '')
+            email_address = account_info['email_address']
+            encrypted_password = account_info.get('encrypted_password', '')
             app_password = self._decrypt_app_password(encrypted_password)
 
             scraper = MailScraper(email_address, app_password)
@@ -136,12 +136,12 @@ class EmailService:
 
     def send_email(self, user_id: str, title: str, context: str, receiver: str) -> Dict:
         try:
-            account_info = self.email_handle.account_ops.get_email_account(user_id)
+            account_info = self.email_handle.account_ops.get(user_id)
             if not account_info:
                 return {'success': False, 'message': '未绑定邮箱账号，请先绑定'}
 
-            sender = account_info['account_platform_username']
-            encrypted_password = account_info.get('content', '')
+            sender = account_info['email_address']
+            encrypted_password = account_info.get('encrypted_password', '')
             app_password = self._decrypt_app_password(encrypted_password)
 
             msg = EmailMessage()
