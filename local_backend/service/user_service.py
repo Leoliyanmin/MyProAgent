@@ -146,8 +146,8 @@ class UserService:
                 create_result = self.user_handle.create_user(email, username)
                 if create_result['ok']:
                     logger.info(f"服务器登录成功并同步用户到本地: email={email}")
-                else:
-                    logger.warning(f"用户同步失败（可能已存在）: {create_result.get('message')}, email={email}")
+                elif create_result.get('status') != 409:
+                    logger.warning(f"用户同步失败: {create_result.get('message')}, email={email}")
                 
                 # 使用本地生成的token
                 access_token = self.auth_service.create_access_token(
