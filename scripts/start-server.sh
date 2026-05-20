@@ -31,7 +31,7 @@ pip install -r requirements.txt -q
 # 初始化数据库
 echo "[3/4] 初始化数据库..."
 cd server_backend
-python database/code/database_init.py
+python database/code/init/database_init.py
 cd ..
 
 # 启动服务

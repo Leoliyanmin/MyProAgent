@@ -14,4 +14,4 @@ RUN mkdir -p /app/logs /app/database/db
 
 EXPOSE 8001
 
-CMD ["sh", "-c", "python database/code/database_init.py && uvicorn main:app --host 0.0.0.0 --port 8001"]
+CMD ["sh", "-c", "python database/code/init/database_init.py && uvicorn main:app --host 0.0.0.0 --port 8001"]

@@ -302,7 +302,7 @@ jobs:
 
       - name: Generate docs for local_backend
         run: |
-          PYTHONPATH=local_backend:local_backend/service/scraper:$PYTHONPATH \
+          PYTHONPATH=local_backend:local_backend/service/scraper:localagent:$PYTHONPATH \
             pdoc --html --output-dir docs/api/local local_backend --force --skip-errors
 
       - name: Generate docs for server_backend
@@ -463,6 +463,10 @@ jobs:
           kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-server:latest --name proagent-test
           kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-local:latest --name proagent-test
           kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest --name proagent-test
+
+      - name: Fix image registry in manifests
+        run: |
+          sed -i "s|ghcr.io/lsz-asd/|ghcr.io/${{ github.repository_owner }}/|g" k8s/deployment-*.yaml
 
       - name: Deploy to kind
         run: |
