@@ -42,7 +42,9 @@ class UserService:
 
         if settings.TEST_MODE or settings.SKIP_VERIFICATION:
             logger.info(f"TEST MODE: 直接注册用户 email={email}")
-            result = self.user_handle.create_user(email, full_name or email.split('@')[0])
+            username = full_name or email.split('@')[0]
+            password_hash = self.auth_service.get_password_hash(password)
+            result = self.user_handle.create_user(email, username, password_hash)
             if not result['ok']:
                 logger.error(f"本地用户创建失败: {result['message']}, email={email}")
                 return {'success': False, 'message': result['message']}
@@ -83,9 +85,9 @@ class UserService:
             return {'success': False, 'message': '服务器注册失败，请稍后重试'}
         
         # 服务器注册成功后，本地注册
-        # 使用 email 前缀作为用户名（如果没有提供 full_name）
         username = full_name if full_name else email.split('@')[0]
-        result = self.user_handle.create_user(email, username)
+        password_hash = self.auth_service.get_password_hash(password)
+        result = self.user_handle.create_user(email, username, password_hash)
         if not result['ok']:
             logger.error(f"本地用户创建失败: {result['message']}, email={email}")
             return {'success': False, 'message': result['message']}

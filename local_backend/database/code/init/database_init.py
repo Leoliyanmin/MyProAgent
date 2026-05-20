@@ -6,6 +6,13 @@ DEFAULT_DB_PATH = BASE_DIR.parent.parent / "db" / "local.db"
 DEFAULT_SCHEMA_PATH = BASE_DIR / "database_init.sql"
 DEFAULT_SCHEMA_V2_PATH = BASE_DIR / "database_init_v2.sql"
 
+V2_MIGRATIONS = [
+    {
+        "check": "SELECT COUNT(*) FROM pragma_table_info('users') WHERE name='password_hash'",
+        "sql": "ALTER TABLE users ADD COLUMN password_hash TEXT",
+    },
+]
+
 MIGRATIONS = [
     {
         "check": "SELECT COUNT(*) FROM pragma_table_info('data') WHERE name='data_linked_schedule_id'",
@@ -76,6 +83,13 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
         conn.execute("PRAGMA foreign_keys = ON;")
 
 
+def _run_migrations_v2(conn: sqlite3.Connection) -> None:
+    for migration in V2_MIGRATIONS:
+        check_result = conn.execute(migration["check"]).fetchone()
+        if check_result[0] == 0:
+            conn.execute(migration["sql"])
+
+
 def init_database(db_path: str | Path = DEFAULT_DB_PATH, schema_path: str | Path = DEFAULT_SCHEMA_PATH) -> None:
     if not schema_path.exists():
         raise FileNotFoundError(f"Schema file not found: {schema_path}")
@@ -96,6 +110,7 @@ def init_database(db_path: str | Path = DEFAULT_DB_PATH, schema_path: str | Path
         with sqlite3.connect(db_path) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
             conn.executescript(v2_script)
+            _run_migrations_v2(conn)
             conn.commit()
 
 

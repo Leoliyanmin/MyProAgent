@@ -3,6 +3,7 @@ from local_backend.database.code.command.database_command import (
     get_user,
     list_users,
     delete_user,
+    set_user_password,
     upsert_sync_state,
     get_sync_state,
 )
@@ -13,7 +14,7 @@ class UserOperations:
     """用户相关数据库操作封装"""
 
     @staticmethod
-    def create_user(user_id: str, email: str, username: str) -> None:
+    def create_user(user_id: str, email: str, username: str, password_hash: str = None) -> None:
         """创建用户"""
         now = datetime.utcnow().isoformat()
         upsert_user(
@@ -25,6 +26,8 @@ class UserOperations:
             user_last_login=None,
             user_source_device_id=None,
         )
+        if password_hash is not None:
+            set_user_password(user_id, password_hash)
         # 初始化同步状态
         upsert_sync_state(
             user_id=user_id,

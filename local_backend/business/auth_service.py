@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from config import settings
 import httpx
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 _client: httpx.AsyncClient | None = None
 

@@ -115,6 +115,14 @@ def delete_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM users WHERE user_id = ?", (user_id,), db_path)
 
 
+def set_user_password(user_id: str, password_hash: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute(
+        "UPDATE users SET password_hash = ? WHERE user_id = ?",
+        (password_hash, user_id),
+        db_path,
+    )
+
+
 # user_match_profile
 
 def upsert_user_match_profile(

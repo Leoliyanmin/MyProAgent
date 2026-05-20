@@ -7,7 +7,7 @@ class UserHandle:
     def __init__(self):
         self.operations = UserOperations()
 
-    def create_user(self, email: str, username: str) -> dict:
+    def create_user(self, email: str, username: str, password_hash: str = None) -> dict:
         """创建用户入口"""
         # 验证输入
         if not email or not username:
@@ -20,7 +20,7 @@ class UserHandle:
         
         try:
             # 使用邮箱作为 user_id
-            self.operations.create_user(user_id=email, email=email, username=username)
+            self.operations.create_user(user_id=email, email=email, username=username, password_hash=password_hash)
             return {'ok': True, 'status': 201, 'message': '用户创建成功'}
         except Exception as e:
             return {'ok': False, 'status': 500, 'message': f'创建用户失败: {str(e)}'}
