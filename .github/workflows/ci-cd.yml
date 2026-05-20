@@ -381,7 +381,7 @@ jobs:
   docker-push:
     name: Push Docker Images to GHCR
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
     needs: [docker-build]
     permissions:
       packages: write
