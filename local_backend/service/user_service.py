@@ -88,11 +88,11 @@ class UserService:
         username = full_name if full_name else email.split('@')[0]
         password_hash = self.auth_service.get_password_hash(password)
         result = self.user_handle.create_user(email, username, password_hash)
-        if not result['ok']:
+        if not result['ok'] and result.get('status') != 409:
             logger.error(f"本地用户创建失败: {result['message']}, email={email}")
             return {'success': False, 'message': result['message']}
 
-        logger.info(f"本地用户创建成功: email={email}")
+        logger.info(f"本地用户就绪: email={email}")
 
         access_token = self.auth_service.create_access_token(
             data={"sub": email, "user_id": email}
