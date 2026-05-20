@@ -1,16 +1,18 @@
 FROM python:3.10-slim
 
-WORKDIR /app
-
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app
+
+WORKDIR /app/local_backend
 
 COPY local_backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY local_backend/ .
+COPY localagent/ /app/localagent/
 
-RUN mkdir -p /app/logs
+RUN mkdir -p logs
 
 EXPOSE 8002
 
