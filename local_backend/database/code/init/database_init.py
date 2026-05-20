@@ -11,6 +11,14 @@ V2_MIGRATIONS = [
         "check": "SELECT COUNT(*) FROM pragma_table_info('users') WHERE name='password_hash'",
         "sql": "ALTER TABLE users ADD COLUMN password_hash TEXT",
     },
+    {
+        "check": "SELECT COUNT(*) FROM pragma_table_info('schedule') WHERE name='source'",
+        "sql": "ALTER TABLE schedule ADD COLUMN source TEXT DEFAULT 'manual'",
+    },
+    {
+        "check": "SELECT COUNT(*) FROM pragma_table_info('schedule') WHERE name='source_id'",
+        "sql": "ALTER TABLE schedule ADD COLUMN source_id TEXT",
+    },
 ]
 
 MIGRATIONS = [
