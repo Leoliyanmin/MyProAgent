@@ -4,6 +4,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_DB_PATH = BASE_DIR.parent.parent / "db" / "local.db"
 DEFAULT_SCHEMA_PATH = BASE_DIR / "database_init.sql"
+DEFAULT_SCHEMA_V2_PATH = BASE_DIR / "database_init_v2.sql"
 
 MIGRATIONS = [
     {
@@ -88,6 +89,14 @@ def init_database(db_path: str | Path = DEFAULT_DB_PATH, schema_path: str | Path
         conn.executescript(sql_script)
         _run_migrations(conn)
         conn.commit()
+
+    v2_path = Path(DEFAULT_SCHEMA_V2_PATH)
+    if v2_path.exists():
+        v2_script = v2_path.read_text(encoding="utf-8")
+        with sqlite3.connect(db_path) as conn:
+            conn.execute("PRAGMA foreign_keys = ON;")
+            conn.executescript(v2_script)
+            conn.commit()
 
 
 if __name__ == "__main__":
