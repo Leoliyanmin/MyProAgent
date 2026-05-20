@@ -123,8 +123,7 @@ CREATE TABLE IF NOT EXISTS email_account (
     encrypted_password  TEXT NOT NULL,
     bind_time           TEXT,
     last_sync_time      TEXT,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    UNIQUE(user_id, email_address)
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 CREATE TABLE IF NOT EXISTS email_message (
@@ -141,8 +140,7 @@ CREATE TABLE IF NOT EXISTS email_message (
     is_read        INTEGER DEFAULT 0,
     created_at     TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (account_id) REFERENCES email_account(account_id),
-    UNIQUE(user_id, account_id, mail_uid)
+    FOREIGN KEY (account_id) REFERENCES email_account(account_id)
 );
 
 COMMIT;
