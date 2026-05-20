@@ -29,6 +29,7 @@ class TaskV2Handle:
 
     def update_task(self, user_id: str, task_id: int, title: str = None,
                     description: str = None, due_date: str = None,
+                    priority: str = None, status: str = None,
                     linked_schedule_id: int | None | object = None) -> dict:
         if not task_id:
             return {"ok": False, "status": 400, "message": "task_id 不能为空"}
@@ -36,6 +37,7 @@ class TaskV2Handle:
             self.operations.update(
                 user_id=user_id, task_id=task_id, title=title,
                 description=description, due_date=due_date,
+                priority=priority, status=status,
                 linked_schedule_id=linked_schedule_id,
             )
             return {"ok": True, "status": 200, "message": "任务更新成功"}

@@ -57,11 +57,13 @@ class TaskService:
         title = task_data.get('title')
         description = task_data.get('description')
         due_date = task_data.get('due_date')
+        priority = task_data.get('priority')
+        status = task_data.get('status')
         linked_schedule_id = task_data.get('linked_schedule_id')
         
         logger.info(f"更新任务: user_id={user_id}, task_id={task_id}")
         
-        result = self.task_handle.update_task(user_id, task_id, title=title, description=description, due_date=due_date, linked_schedule_id=linked_schedule_id)
+        result = self.task_handle.update_task(user_id, task_id, title=title, description=description, due_date=due_date, priority=priority, status=status, linked_schedule_id=linked_schedule_id)
         if not result['ok']:
             logger.error(f"更新任务失败: {result['message']}, user_id={user_id}, task_id={task_id}")
             return {'success': False, 'message': result['message']}
