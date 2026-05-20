@@ -11,6 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY local_backend/ .
 COPY localagent/ /app/localagent/
+COPY personality/ /app/personality/
+COPY logging_config.py /app/
 
 RUN mkdir -p logs
 
