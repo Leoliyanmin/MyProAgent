@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from presentation.schemas import UserCreate, UserRegisterWithCode, UserLogin, UserResponse, VerificationCodeRequest, VerificationCodeResponse
 from presentation.dependencies import get_current_user_id
 from service.user_service import UserService
 from business.auth_service import AuthService
+from database.code.handle.database_user_setting_handle import UserSettingHandle
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 user_service = UserService()
 auth_service = AuthService()
+setting_handle = UserSettingHandle()
 
 
 @router.post("/verification/send", response_model=VerificationCodeResponse)
@@ -61,3 +63,19 @@ async def get_current_user(user_id: str = Depends(get_current_user_id)):
         "is_active": bool(user.get("user_is_active", user.get("is_active", True))),
         "created_at": user.get("user_created_at", user.get("created_at", ""))
     }
+
+
+@router.get("/settings")
+async def get_settings(user_id: str = Depends(get_current_user_id)):
+    result = setting_handle.get_settings(user_id)
+    if not result["ok"]:
+        raise HTTPException(status_code=500, detail=result["message"])
+    return result["data"]
+
+
+@router.put("/settings")
+async def update_settings(fields: dict = Body(...), user_id: str = Depends(get_current_user_id)):
+    result = setting_handle.update_settings(user_id, fields)
+    if not result["ok"]:
+        raise HTTPException(status_code=400, detail=result["message"])
+    return {"success": True, "message": result["message"]}

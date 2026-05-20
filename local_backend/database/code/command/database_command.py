@@ -172,6 +172,40 @@ def delete_task(task_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM task WHERE task_id = ?", (task_id,), db_path)
 
 
+# user_setting
+
+def get_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    return _fetch_one("SELECT * FROM user_setting WHERE user_id = ?", (user_id,), db_path)
+
+
+def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **kwargs) -> None:
+    existing = get_user_setting(user_id, db_path)
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    if existing:
+        allowed = {"avatar_url", "bio", "current_focus", "work_preference",
+                   "skills", "theme_config", "notification_enabled", "privacy_share_data"}
+        fields = {k: v for k, v in kwargs.items() if k in allowed and v is not None}
+        if not fields:
+            return
+        fields["updated_at"] = now
+        set_clause = ", ".join(f"{k} = ?" for k in fields)
+        values = list(fields.values()) + [user_id]
+        _execute(f"UPDATE user_setting SET {set_clause} WHERE user_id = ?", tuple(values), db_path)
+    else:
+        _execute(
+            """INSERT INTO user_setting (user_id, avatar_url, bio, current_focus,
+               work_preference, skills, theme_config, notification_enabled,
+               privacy_share_data, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (user_id, kwargs.get("avatar_url"), kwargs.get("bio"),
+             kwargs.get("current_focus"), kwargs.get("work_preference"),
+             kwargs.get("skills"), kwargs.get("theme_config"),
+             kwargs.get("notification_enabled", 1), kwargs.get("privacy_share_data", 0), now),
+            db_path,
+        )
+
+
 # email_account
 
 def create_email_account(

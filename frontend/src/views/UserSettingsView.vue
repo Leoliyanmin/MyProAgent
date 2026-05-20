@@ -23,9 +23,6 @@
             <!-- <button class="action-btn ghost" type="button" @click="openPasswordModal">修改密码</button> -->
           </div>
           <p v-if="nameNotice" class="status-text" :class="`status-${nameNoticeType}`">{{ nameNotice }}</p>
-          <p class="binding-meta">
-            最近姓名修改时间：{{ formatDate(mockProfileBackend.lastNameUpdatedAt) }}
-          </p>
         </div>
       </article>
 
@@ -235,8 +232,9 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-import { tisAPI, blackboardAPI, emailAPI } from '../services/api.js'
+import { tisAPI, blackboardAPI, emailAPI, settingsAPI } from '../services/api.js'
 import { useCalendarStore } from '../stores/calendar.js'
+import { useAuthStore } from '../stores/auth.js'
 
 const isTauriApp = !!window.__TAURI_INTERNALS__
 let invoke = null
@@ -250,9 +248,13 @@ if (isTauriApp) {
   })
 }
 
+const authStore = useAuthStore()
+
 const profile = reactive({
-  name: 'Yanmin'
+  name: authStore.user?.full_name || ''
 })
+
+const settingsData = ref({})
 
 const isPasswordModalOpen = ref(false)
 const passwordNotice = ref('')
@@ -268,10 +270,6 @@ const verifyTimerId = ref(null)
 
 const nameNotice = ref('')
 const nameNoticeType = ref('info')
-const mockProfileBackend = reactive({
-  lastNameUpdatedAt: Date.now() - 2 * 60 * 60 * 1000,
-  minIntervalMs: 60 * 1000
-})
 
 const mockPasswordBackend = reactive({
   currentPassword: 'OldPass#2026',
@@ -294,26 +292,22 @@ const rssSources = ref([
   { id: 2, url: 'https://stackoverflow.blog/feed/' }
 ])
 
-const saveName = () => {
+const saveName = async () => {
   if (!profile.name) {
     profile.name = '未命名用户'
     nameNotice.value = '姓名不能为空，已回退为默认值。'
     nameNoticeType.value = 'warn'
     return
   }
-
-  const now = Date.now()
-  const elapsed = now - mockProfileBackend.lastNameUpdatedAt
-  if (elapsed < mockProfileBackend.minIntervalMs) {
-    const waitSeconds = Math.ceil((mockProfileBackend.minIntervalMs - elapsed) / 1000)
-    nameNotice.value = `后端限制：请在 ${waitSeconds}s 后再次修改姓名。`
+  try {
+    await settingsAPI.update({ full_name: profile.name })
+    if (authStore.user) authStore.user.full_name = profile.name
+    nameNotice.value = '保存成功'
+    nameNoticeType.value = 'success'
+  } catch (e) {
+    nameNotice.value = '保存失败: ' + e.message
     nameNoticeType.value = 'error'
-    return
   }
-
-  mockProfileBackend.lastNameUpdatedAt = now
-  nameNotice.value = `后端保存成功，修改时间键已更新为 ${formatDate(now)}。`
-  nameNoticeType.value = 'success'
 }
 
 const resetPasswordForm = () => {
@@ -657,9 +651,17 @@ const unbindBb = async () => {
   try { await blackboardAPI.unbind(); await loadBindingStatus() } catch {}
 }
 
+const loadSettings = async () => {
+  try {
+    const data = await settingsAPI.get()
+    settingsData.value = data
+  } catch {}
+}
+
 onMounted(() => {
   loadBindingStatus()
   loadEmailStatus()
+  loadSettings()
 })
 
 onBeforeUnmount(() => {

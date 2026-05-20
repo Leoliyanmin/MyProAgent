@@ -497,6 +497,20 @@ export const syncAPI = {
   }
 }
 
+// ==================== Settings API (用户设置) ====================
+
+export const settingsAPI = {
+  get: async () => {
+    return fetchWithAuth('/auth/settings')
+  },
+  update: async (fields) => {
+    return fetchWithAuth('/auth/settings', {
+      method: 'PUT',
+      body: JSON.stringify(fields)
+    })
+  }
+}
+
 // ==================== Profile API (用户画像) ====================
 
 export const profileAPI = {
