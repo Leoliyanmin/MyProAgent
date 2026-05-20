@@ -18,7 +18,7 @@ spec:
       containers:
         - name: local
           image: ghcr.io/lsz-asd/proagent-local:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           ports:
             - containerPort: 8002
           env:

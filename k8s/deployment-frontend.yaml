@@ -18,7 +18,7 @@ spec:
       containers:
         - name: frontend
           image: ghcr.io/lsz-asd/proagent-frontend:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           ports:
             - containerPort: 80
           readinessProbe:

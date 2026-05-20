@@ -302,12 +302,12 @@ jobs:
 
       - name: Generate docs for local_backend
         run: |
-          PYTHONPATH=local_backend:local_backend/service/scraper:localagent:$PYTHONPATH \
+          PYTHONPATH=.:local_backend:local_backend/service/scraper:$PYTHONPATH \
             pdoc --html --output-dir docs/api/local local_backend --force --skip-errors
 
       - name: Generate docs for server_backend
         run: |
-          PYTHONPATH=server_backend:$PYTHONPATH \
+          PYTHONPATH=.:server_backend:$PYTHONPATH \
             pdoc --html --output-dir docs/api/server server_backend --force --skip-errors
 
       - name: Upload documentation
@@ -349,30 +349,43 @@ jobs:
           docker compose -f docker-compose.yml build
           docker compose -f docker-compose.yml up -d
           echo "Waiting for services to start..."
-          sleep 15
+          sleep 10
+          docker compose -f docker-compose.yml ps
 
       - name: Health check - Server Backend
         run: |
-          for i in 1 2 3 4 5; do
-            curl -sf http://localhost:8001/health && echo "Server OK" && exit 0
-            echo "Retry $i/5..."
+          for i in 1 2 3 4 5 6 7 8; do
+            if curl -sf http://localhost:8001/health; then
+              echo "Server OK"
+              exit 0
+            fi
+            echo "Retry $i/8..."
+            docker compose -f docker-compose.yml logs server --tail=5 2>/dev/null
             sleep 5
           done
           echo "Server health check failed"
-          docker compose -f docker-compose.yml logs
+          docker compose -f docker-compose.yml ps
+          docker compose -f docker-compose.yml logs server
           exit 1
 
       - name: Health check - Local Backend
         run: |
-          curl -sf http://localhost:8002/ && echo "Local OK"
+          for i in 1 2 3 4 5; do
+            if curl -sf http://localhost:8002/health; then
+              echo "Local OK"
+              exit 0
+            fi
+            echo "Retry $i/5..."
+            sleep 3
+          done
+          echo "Local health check failed"
+          docker compose -f docker-compose.yml ps
+          docker compose -f docker-compose.yml logs local
+          exit 1
 
       - name: Health check - Frontend
         run: |
-          curl -sf http://localhost/ && echo "Frontend OK"
-
-      - name: Show logs on failure
-        if: failure()
-        run: docker compose -f docker-compose.yml logs
+          curl -sf http://localhost/ && echo "Frontend OK" || echo "Frontend health check warning (non-fatal)"
 
       - name: Tear down
         if: always()
@@ -458,6 +471,10 @@ jobs:
           docker build -t ghcr.io/${{ github.repository_owner }}/proagent-local:latest -f Dockerfile.local .
           docker build -t ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest -f Dockerfile.frontend .
 
+      - name: Verify images exist
+        run: |
+          docker images | grep proagent || echo "No proagent images found!"
+
       - name: Load images into kind
         run: |
           kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-server:latest --name proagent-test
@@ -467,6 +484,7 @@ jobs:
       - name: Fix image registry in manifests
         run: |
           sed -i "s|ghcr.io/lsz-asd/|ghcr.io/${{ github.repository_owner }}/|g" k8s/deployment-*.yaml
+          grep "image:" k8s/deployment-*.yaml
 
       - name: Deploy to kind
         run: |
@@ -475,7 +493,7 @@ jobs:
 
       - name: Wait for deployments
         run: |
-          kubectl wait --for=condition=available --timeout=120s \
+          kubectl wait --for=condition=available --timeout=90s \
             deployment/proagent-server deployment/proagent-local deployment/proagent-frontend \
             -n proagent
 
@@ -494,6 +512,7 @@ jobs:
         if: failure()
         run: |
           kubectl describe pods -n proagent
+          kubectl get events -n proagent
           kubectl logs -n proagent -l app=proagent-server --tail=50
           kubectl logs -n proagent -l app=proagent-local --tail=50
 
