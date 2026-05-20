@@ -115,18 +115,22 @@ class UserService:
 
         if settings.TEST_MODE or settings.SKIP_VERIFICATION:
             user = self.get_user_by_email(email)
-            if user:
-                logger.info(f"TEST MODE: 本地登录成功 email={email}")
-                access_token = self.auth_service.create_access_token(
-                    data={"sub": email, "user_id": email}
-                )
-                return {
-                    'success': True,
-                    'access_token': access_token,
-                    'token_type': 'bearer'
-                }
-            logger.warning(f"TEST MODE: 本地用户不存在 email={email}")
-            return {'success': False, 'message': '用户不存在，请先注册'}
+            if not user:
+                logger.warning(f"TEST MODE: 本地用户不存在 email={email}")
+                return {'success': False, 'message': '用户不存在，请先注册'}
+            stored_hash = user.get('password_hash')
+            if stored_hash and not self.auth_service.verify_password(password, stored_hash):
+                logger.warning(f"TEST MODE: 密码错误 email={email}")
+                return {'success': False, 'message': '邮箱或密码错误'}
+            logger.info(f"TEST MODE: 本地登录成功 email={email}")
+            access_token = self.auth_service.create_access_token(
+                data={"sub": email, "user_id": email}
+            )
+            return {
+                'success': True,
+                'access_token': access_token,
+                'token_type': 'bearer'
+            }
 
         try:
             response = requests.post(
