@@ -52,6 +52,7 @@ class AgentService:
         self.agent_logic = AgentLogic()
         self.chat_handle = ChatHandle()
         self.nanobot_ws_url = nanobot_ws_url
+        self._db_session_map: dict[str, int] = {}
 
         self.workspace = Path(__file__).parent.parent.parent
         self.session_manager = SessionManager(self.workspace)
@@ -202,6 +203,16 @@ class AgentService:
             f"用户请求:\n{user_message}"
         )
 
+    def _ensure_db_session(self, user_id: str, string_session_id: str) -> int:
+        key = f"{user_id}:{string_session_id}"
+        if key not in self._db_session_map:
+            result = self.chat_handle.create_session(user_id)
+            if result["ok"]:
+                self._db_session_map[key] = result["data"]["session_id"]
+            else:
+                raise RuntimeError("创建会话失败: {}".format(result.get("message")))
+        return self._db_session_map[key]
+
     async def process_with_local_agent(
         self,
         user_id: str,
@@ -252,6 +263,17 @@ class AgentService:
         pending_deletions = self._extract_pending_deletions(result.content)
 
         await self._log_interaction(user_id, message, result, session_id)
+
+        try:
+            db_sid = self._ensure_db_session(user_id, session_id)
+            self.chat_handle.create_chat_message(db_sid, "user", message)
+            if result.content:
+                self.chat_handle.create_chat_message(
+                    db_sid, "assistant", result.content,
+                    tool_calls=str(result.tools_used),
+                )
+        except Exception:
+            pass
 
         return {
             'response': result.content,
