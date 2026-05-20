@@ -62,9 +62,9 @@
         title="用户设置"
         @click="toggleSettings"
       >
-        <span class="avatar">YM</span>
+        <span class="avatar">{{ avatarLetters }}</span>
         <span class="user-meta">
-          <span class="user-name">Yanmin</span>
+          <span class="user-name">{{ displayName }}</span>
           <span class="user-role">用户设置</span>
         </span>
       </button>
@@ -82,10 +82,22 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
 
 const router = useRouter()
 const auth = useAuthStore()
+
+const displayName = computed(() => {
+  const name = auth.user?.full_name || auth.user?.email?.split('@')[0] || ''
+  return name || 'User'
+})
+
+const avatarLetters = computed(() => {
+  const name = displayName.value
+  if (name.length >= 2) return name.slice(0, 2).toUpperCase()
+  return name.slice(0, 1).toUpperCase() || 'U'
+})
 
 const handleLogout = () => {
   auth.logout()
