@@ -123,6 +123,55 @@ def set_user_password(user_id: str, password_hash: str, db_path: str | Path = DE
     )
 
 
+# task
+
+def create_task(
+    user_id: str,
+    title: str,
+    description: str | None = None,
+    priority: int = 2,
+    status: str = "pending",
+    due_date: str | None = None,
+    linked_schedule_id: int | None = None,
+    source: str = "manual",
+    created_at: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> int:
+    import datetime
+    now = created_at or datetime.datetime.utcnow().isoformat()
+    return _execute(
+        """INSERT INTO task (user_id, title, description, priority, status,
+           due_date, linked_schedule_id, source, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, title, description, priority, status, due_date, linked_schedule_id, source, now),
+        db_path,
+    )
+
+
+def get_task(task_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    return _fetch_one("SELECT * FROM task WHERE task_id = ?", (task_id,), db_path)
+
+
+def list_tasks_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all("SELECT * FROM task WHERE user_id = ? ORDER BY created_at DESC", (user_id,), db_path)
+
+
+def update_task(task_id: int, db_path: str | Path = DEFAULT_DB_PATH, **kwargs) -> None:
+    if not kwargs:
+        return
+    allowed = {"title", "description", "priority", "status", "due_date", "linked_schedule_id", "updated_at"}
+    fields = {k: v for k, v in kwargs.items() if k in allowed and v is not None}
+    if not fields:
+        return
+    set_clause = ", ".join(f"{k} = ?" for k in fields)
+    values = list(fields.values()) + [task_id]
+    _execute(f"UPDATE task SET {set_clause} WHERE task_id = ?", tuple(values), db_path)
+
+
+def delete_task(task_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM task WHERE task_id = ?", (task_id,), db_path)
+
+
 # user_match_profile
 
 def upsert_user_match_profile(

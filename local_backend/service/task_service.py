@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from business.task_logic import TaskLogic
-from database.code.handle.database_task_handle import TaskHandle
+from database.code.handle.database_task_v2_handle import TaskV2Handle
 from logging_config import get_logger
 
 # 创建日志器
@@ -13,7 +13,7 @@ logger = get_logger("task_service")
 class TaskService:
     def __init__(self):
         self.task_logic = TaskLogic()
-        self.task_handle = TaskHandle()
+        self.task_handle = TaskV2Handle()
         logger.info("TaskService 初始化完成")
 
     def create_task(self, user_id: str, task_data: dict):
