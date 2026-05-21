@@ -20,13 +20,12 @@ class SchedulerService:
         self.scheduler = AsyncIOScheduler(timezone="Asia/Shanghai")
         self.is_running = False
     
-    def start(self, sync_interval_minutes: int = 60):
+    def start(self, sync_interval_minutes: int = 60, email_sync_interval_minutes: int = 30):
         """启动定时任务调度器"""
         if self.is_running:
             logger.warning("调度器已在运行中")
             return
-        
-        # 添加本地到服务器的定时同步任务
+
         self.scheduler.add_job(
             self.sync_local_to_server,
             trigger=IntervalTrigger(minutes=sync_interval_minutes),
@@ -34,10 +33,22 @@ class SchedulerService:
             name="本地到服务器数据同步",
             replace_existing=True
         )
-        
+
+        self.scheduler.add_job(
+            self.sync_emails_for_all_users,
+            trigger=IntervalTrigger(minutes=email_sync_interval_minutes),
+            id="email_sync",
+            name="邮件定时同步",
+            replace_existing=True
+        )
+
         self.scheduler.start()
         self.is_running = True
-        logger.info(f"定时任务调度器已启动，同步间隔: {sync_interval_minutes} 分钟")
+        logger.info(
+            f"定时任务调度器已启动: "
+            f"本地同步间隔={sync_interval_minutes}分钟, "
+            f"邮件同步间隔={email_sync_interval_minutes}分钟"
+        )
     
     def stop(self):
         """停止定时任务调度器"""
@@ -110,6 +121,58 @@ class SchedulerService:
         except Exception as e:
             logger.error(f"同步任务执行异常: {str(e)}")
     
+    def sync_emails_for_all_users(self):
+        """定时同步所有已绑定邮箱用户的邮件"""
+        logger.info("开始执行邮件定时同步任务")
+
+        try:
+            users = list_users()
+
+            if not users:
+                logger.info("没有找到用户，跳过邮件同步")
+                return
+
+            total_synced = 0
+            total_skipped = 0
+            total_failed = 0
+
+            for user in users:
+                user_id = user.get('user_id')
+                if not user_id:
+                    continue
+
+                try:
+                    from service.email_service import EmailService
+                    email_service = EmailService()
+
+                    result = email_service.sync_email_data(user_id, max_messages=50)
+
+                    if result.get('success'):
+                        total_synced += 1
+                        data = result.get('data', {})
+                        logger.info(f"用户 {user_id} 邮件同步成功: {data.get('synced', 0)} 封")
+                    else:
+                        msg = result.get('message', '')
+                        if '未绑定邮箱' in msg:
+                            total_skipped += 1
+                        else:
+                            total_failed += 1
+                            logger.error(f"用户 {user_id} 邮件同步失败: {msg}")
+
+                except Exception as e:
+                    total_failed += 1
+                    logger.error(f"用户 {user_id} 邮件同步异常: {str(e)}")
+
+            logger.info(
+                f"邮件定时同步完成: "
+                f"成功 {total_synced} 人, "
+                f"跳过(未绑定) {total_skipped} 人, "
+                f"失败 {total_failed} 人"
+            )
+
+        except Exception as e:
+            logger.error(f"邮件同步任务执行异常: {str(e)}")
+
     def get_jobs(self):
         """获取当前所有定时任务"""
         if not self.is_running:
