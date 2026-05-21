@@ -127,6 +127,14 @@ class BlackboardService:
                         'courses': courses_data
                     }, f, ensure_ascii=False, indent=2)
                 logger.info(f"Blackboard课程数据已保存到: {json_path}")
+
+                try:
+                    from database.code.handle.database_bb_v2_handle import BbV2Handle
+                    bb_handle = BbV2Handle()
+                    result = bb_handle.save_courses(user_id, courses_data)
+                    logger.info(f"BB v2入库: {result}")
+                except Exception as e:
+                    logger.error(f"BB v2入库失败: {e}")
                 
                 course_names = [c.get('name', '') for c in courses_data]
                 total_assignments = sum(len(c.get('assignments', [])) for c in courses_data)
@@ -252,28 +260,10 @@ class BlackboardService:
             return {}
     
     def get_bb_assignments(self, user_id: str) -> Dict:
-        """获取同步的作业列表（含 due_date）"""
-        try:
-            result = self.blackboard_handle.handle_get_assignments(user_id)
-            return result
-        except Exception as e:
-            logger.error(f"获取作业失败: {str(e)}")
-            return {'success': False, 'message': str(e)}
+        return {"success": True, "message": "use /api/v1/blackboard/assignments instead", "assignments": []}
 
     def get_bb_announcements(self, user_id: str) -> Dict:
-        """获取同步的公告列表"""
-        try:
-            result = self.blackboard_handle.handle_get_announcements(user_id)
-            return result
-        except Exception as e:
-            logger.error(f"获取公告失败: {str(e)}")
-            return {'success': False, 'message': str(e)}
+        return {"success": True, "message": "use /api/v1/blackboard/status instead", "announcements": []}
 
     def get_bb_course_materials(self, user_id: str) -> Dict:
-        """获取同步的课程资料列表"""
-        try:
-            result = self.blackboard_handle.handle_get_course_materials(user_id)
-            return result
-        except Exception as e:
-            logger.error(f"获取课程资料失败: {str(e)}")
-            return {'success': False, 'message': str(e)}
+        return {"success": True, "message": "use /api/v1/blackboard/status instead", "course_materials": []}

@@ -1,7 +1,7 @@
 from local_backend.database.code.command.database_command import (
     create_category, update_category, list_categories_by_user,
 )
-from local_backend.database.code.operations.database_tis_operations import TisAccountOperations
+from local_backend.database.code.operations.database_tis_operations import TisAccountOperations, TisCourseOperations
 from typing import Optional, Dict, List
 import json
 import logging
@@ -20,6 +20,7 @@ WEEKDAY_LABELS = {
 class TisHandle:
     def __init__(self):
         self.account_ops = TisAccountOperations()
+        self.course_ops = TisCourseOperations()
 
     def handle_bind_tis(
         self,
@@ -193,3 +194,6 @@ class TisHandle:
             }
         except Exception as e:
             return {'success': False, 'message': str(e)}
+
+    def save_schedule_v2(self, user_id: str, schedule_data: dict) -> dict:
+        return self.course_ops.save_all(user_id, schedule_data)

@@ -153,6 +153,14 @@ class TisService:
                                 'total_courses': schedule_result.get('total_courses', 0)
                             }, f, ensure_ascii=False, indent=2)
                         logger.info(f"TIS课程数据已保存到: {json_path}")
+
+                        try:
+                            from database.code.handle.database_tis_handle import TisHandle
+                            tis_handle = TisHandle()
+                            result = tis_handle.save_schedule_v2(user_id, schedule_result)
+                            logger.info(f"TIS v2入库: {result}")
+                        except Exception as e:
+                            logger.error(f"TIS v2入库失败: {e}")
                     else:
                         logger.warning(f"课程表爬取失败: {schedule_result.get('message')}")
                 except Exception as e:
