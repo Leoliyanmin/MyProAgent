@@ -47,6 +47,7 @@ class EmailV2Handle:
             if not account:
                 return {"success": False, "message": "未绑定邮箱"}
             account_id = account["account_id"]
+            recipient = account.get("email_address", "")
             synced = 0
             for msg in messages:
                 self.message_ops.upsert(
@@ -54,9 +55,10 @@ class EmailV2Handle:
                     mail_id=msg.get("mail_id", ""),
                     subject=msg.get("subject", ""),
                     sender=msg.get("sender", ""),
-                    message_time=msg.get("message_time", ""),
+                    message_time=msg.get("time", ""),
+                    recipient_email=recipient,
                     body=msg.get("body"),
-                    raw_data=msg.get("raw_data"),
+                    raw_html=msg.get("raw_html"),
                 )
                 synced += 1
             self.account_ops.update_sync_time(account_id)

@@ -187,7 +187,7 @@ class SchedulerService:
                     from service.email_service import EmailService
                     email_service = EmailService()
 
-                    result = email_service.sync_email_data(user_id, max_messages=50)
+                    result = email_service.sync_email_data(user_id, max_messages=settings.EMAIL_SYNC_MAX_MESSAGES)
 
                     if result.get('success'):
                         total_synced += 1

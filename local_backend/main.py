@@ -93,16 +93,16 @@ async def health_check():
 
 @app.on_event("startup")
 async def startup_event():
-    sync_interval = getattr(settings, 'SYNC_INTERVAL_MINUTES', 60)
-    email_sync_interval = getattr(settings, 'EMAIL_SYNC_INTERVAL_MINUTES', 30)
+    sync_interval = getattr(settings, 'SYNC_INTERVAL_SECONDS', 3600)
+    email_sync_interval = getattr(settings, 'EMAIL_SYNC_INTERVAL_SECONDS', 1800)
     scheduler_service.start(
-        sync_interval_minutes=sync_interval,
-        email_sync_interval_minutes=email_sync_interval,
+        sync_interval_seconds=sync_interval,
+        email_sync_interval_seconds=email_sync_interval,
     )
     logger.info(
         f"定时任务调度器已启动，"
-        f"同步间隔: {sync_interval} 分钟, "
-        f"邮件同步间隔: {email_sync_interval} 分钟"
+        f"同步间隔: {sync_interval} 秒, "
+        f"邮件同步间隔: {email_sync_interval} 秒"
     )
 
 

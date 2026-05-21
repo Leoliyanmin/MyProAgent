@@ -18,13 +18,13 @@ async def get_scheduler_status():
     }
 
 @router.post("/start")
-async def start_scheduler(interval_minutes: int = 60):
+async def start_scheduler(interval_seconds: int = 3600):
     """启动定时任务调度器"""
-    scheduler_service.start(sync_interval_minutes=interval_minutes)
-    
+    scheduler_service.start(sync_interval_seconds=interval_seconds)
+
     return {
         "success": True,
-        "message": f"定时任务调度器已启动，同步间隔: {interval_minutes} 分钟"
+        "message": f"定时任务调度器已启动，同步间隔: {interval_seconds} 秒"
     }
 
 @router.post("/stop")

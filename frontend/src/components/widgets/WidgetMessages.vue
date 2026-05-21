@@ -15,12 +15,16 @@
     </div>
     <div class="panel-body">
       <ul class="message-list">
-        <li v-for="msg in filteredMessages" :key="msg.id" class="message-item">
+        <li v-if="activeSource === 'email' && pinnedItems.length === 0" class="message-item empty-hint">
+          暂无置顶邮件，去「邮件管理」添加
+        </li>
+        <li v-for="item in displayItems" :key="item.id" class="message-item"
+          :class="{ 'is-pinned': item.pinnedAt }">
           <div class="msg-meta">
-            <span class="msg-time">{{ msg.time }}</span>
-            <span v-if="msg.unread" class="unread-dot"></span>
+            <span class="msg-time">{{ formatItemTime(item) }}</span>
+            <button v-if="item.pinnedAt" class="unpin-btn" @click="handleUnpin(item.id)" title="取消置顶">✕</button>
           </div>
-          <div class="msg-content">{{ msg.content }}</div>
+          <div class="msg-content">{{ item.title || item.content }}</div>
         </li>
       </ul>
     </div>
@@ -29,6 +33,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useDashboardStore } from '../../stores/dashboard.js'
+
+const dashboardStore = useDashboardStore()
+const pinnedItems = computed(() => dashboardStore.pinnedEmails)
 
 const sources = [
   { id: 'email', name: 'Email' },
@@ -38,16 +46,31 @@ const sources = [
 
 const activeSource = ref('blackboard')
 
-const messages = ref([
-  { id: 1, source: 'blackboard', time: '10:30 AM', content: 'CS310: Midterm grades have been posted.', unread: true },
-  { id: 2, source: 'blackboard', time: 'Yesterday', content: 'CS305: New reading assignment available.', unread: false },
-  { id: 3, source: 'github', time: '2 hours ago', content: 'PR merged: Fix inverse kinematics bug in simulation.', unread: true },
-  { id: 4, source: 'email', time: '09:00 AM', content: 'Weekly lab meeting rescheduled to Friday.', unread: false }
+const staticMessages = ref([
+  { id: 1001, source: 'blackboard', time: '10:30 AM', content: 'CS310: Midterm grades have been posted.', unread: true },
+  { id: 1002, source: 'blackboard', time: 'Yesterday', content: 'CS305: New reading assignment available.', unread: false },
+  { id: 1003, source: 'github', time: '2 hours ago', content: 'PR merged: Fix inverse kinematics bug in simulation.', unread: true },
+  { id: 1004, source: 'email', time: '09:00 AM', content: 'Weekly lab meeting rescheduled to Friday.', unread: false }
 ])
 
-const filteredMessages = computed(() => {
-  return messages.value.filter(m => m.source === activeSource.value)
+const displayItems = computed(() => {
+  if (activeSource.value === 'email') {
+    return pinnedItems.value
+  }
+  return staticMessages.value.filter(m => m.source === activeSource.value)
 })
+
+function formatItemTime(item) {
+  if (item.pinnedAt) {
+    const d = new Date(item.pinnedAt)
+    return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
+  return item.time || ''
+}
+
+function handleUnpin(id) {
+  dashboardStore.unpinEmail(id)
+}
 </script>
 
 <style scoped>
@@ -64,4 +87,32 @@ const filteredMessages = computed(() => {
 .msg-time { font-size: 11px; color: #86868b; }
 .unread-dot { width: 6px; height: 6px; background-color: #007aff; border-radius: 50%; }
 .msg-content { font-size: 13px; color: #1d1d1f; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.empty-hint {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 12px;
+  padding: 20px !important;
+  cursor: default !important;
+  border: none !important;
+}
+
+.is-pinned {
+  background: rgba(0, 122, 255, 0.03);
+  border-left: 3px solid #007aff;
+  padding-left: 13px !important;
+}
+
+.unpin-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 4px;
+}
+
+.unpin-btn:hover {
+  color: #ff3b30;
+}
 </style>

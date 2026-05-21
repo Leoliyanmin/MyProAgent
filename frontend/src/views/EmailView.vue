@@ -116,8 +116,7 @@
             v-for="(msg, idx) in sortedMessages"
             :key="msg.id || idx"
             class="message-item"
-            :class="{ expanded: expandedIndex === idx }"
-            @click="toggleExpand(idx)"
+            @click="openEmail(idx)"
           >
             <div class="message-header">
               <span class="msg-title">{{ msg.title || '(无主题)' }}</span>
@@ -125,21 +124,45 @@
               <span class="msg-time">{{ formatTime(msg.release_time) }}</span>
               <button class="delete-msg-btn" @click.stop="handleDelete(msg.id, idx)" title="删除">×</button>
             </div>
-            <div v-if="expandedIndex === idx" class="message-body">
-              <div class="body-content" v-html="sanitizeHtml(msg.raw_html || msg.context) || '(无正文内容)'"></div>
-            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Email detail modal -->
+  <Teleport to="body">
+    <div v-if="selectedIndex !== null" class="email-modal-overlay" @click.self="closeModal">
+      <div class="email-modal" @click.stop>
+        <div class="modal-nav">
+          <button class="nav-btn" :disabled="selectedIndex <= 0" @click="prevEmail">&lsaquo; 上一封</button>
+          <span class="nav-counter">{{ selectedIndex + 1 }} / {{ sortedMessages.length }}</span>
+          <button class="nav-btn" :disabled="selectedIndex >= sortedMessages.length - 1" @click="nextEmail">下一封 &rsaquo;</button>
+          <div class="modal-actions">
+            <button class="nav-btn pin-btn" @click="addToHome" :disabled="pinned">📌 {{ pinned ? '已添加' : '添加到主页' }}</button>
+            <button class="nav-btn close-btn" @click="closeModal">✕ 关闭</button>
+          </div>
+        </div>
+        <div class="modal-body" v-if="selectedEmail">
+          <h2 class="modal-subject">{{ selectedEmail.title || '(无主题)' }}</h2>
+          <div class="modal-meta">
+            <span>发件人：{{ selectedEmail.sender || '未知' }}</span>
+            <span>时间：{{ formatTime(selectedEmail.release_time) }}</span>
+          </div>
+          <div class="modal-content" v-html="sanitizeHtml(selectedEmail.raw_html || selectedEmail.context) || '(无正文内容)'"></div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useEmailStore } from '../stores/email.js'
+import { useDashboardStore } from '../stores/dashboard.js'
 
 const store = useEmailStore()
+const dashboardStore = useDashboardStore()
 
 const bindStatus = computed(() => store.bindStatus)
 const messages = computed(() => store.messages)
@@ -147,10 +170,16 @@ const loading = computed(() => store.loading)
 const syncing = computed(() => store.syncing)
 const sending = computed(() => store.sending)
 
-const expandedIndex = ref(null)
+const selectedIndex = ref(null)
+const pinned = ref(false)
 const syncResult = ref(null)
 const sendSuccess = ref(false)
 const sortBy = ref('time-desc')
+
+const selectedEmail = computed(() => {
+  if (selectedIndex.value === null) return null
+  return sortedMessages.value[selectedIndex.value] || null
+})
 
 const sortedMessages = computed(() => {
   const list = [...store.messages]
@@ -174,8 +203,41 @@ const composeForm = reactive({
   body: '',
 })
 
-function toggleExpand(idx) {
-  expandedIndex.value = expandedIndex.value === idx ? null : idx
+function openEmail(idx) {
+  selectedIndex.value = idx
+  pinned.value = false
+}
+
+function closeModal() {
+  selectedIndex.value = null
+  pinned.value = false
+}
+
+function prevEmail() {
+  if (selectedIndex.value > 0) {
+    selectedIndex.value--
+    pinned.value = false
+  }
+}
+
+function nextEmail() {
+  if (selectedIndex.value < sortedMessages.value.length - 1) {
+    selectedIndex.value++
+    pinned.value = false
+  }
+}
+
+function addToHome() {
+  const email = selectedEmail.value
+  if (!email || pinned.value) return
+  dashboardStore.pinEmail({
+    id: email.id,
+    title: email.title || '(无主题)',
+    content: `${email.sender || '未知'} - ${email.context ? email.context.slice(0, 100) : ''}`,
+    sender: email.sender,
+    release_time: email.release_time,
+  })
+  pinned.value = true
 }
 
 function formatTime(time) {
@@ -187,9 +249,14 @@ function formatTime(time) {
 function sanitizeHtml(html) {
   if (!html) return ''
   return html
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<!--\[if[\s\S]*?<!\[endif\]-->/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/[a-z]\\\:[^;]+;?/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<\/?o:p[^>]*>/gi, '')
+    .replace(/<\/?(mso|w|st\d):[^>]*>/gi, '')
+    .replace(/class="Mso[^"]*"/gi, '')
+    .replace(/style="[^"]*mso-[^"]*"/gi, '')
+    .replace(/\n\s*\n/g, '\n')
 }
 
 async function handleSync() {
@@ -218,13 +285,12 @@ async function handleSend() {
 }
 
 async function handleDelete(msgId, idx) {
-  console.log('[EmailView] delete clicked, id:', msgId)
-  expandedIndex.value = null
+  if (selectedIndex.value === idx) closeModal()
   await store.deleteMessage(msgId)
 }
 
-onMounted(() => {
-  store.fetchStatus()
+onMounted(async () => {
+  await store.fetchStatus()
   if (store.bindStatus.is_bound) {
     store.fetchMessages()
   }
@@ -521,11 +587,6 @@ onMounted(() => {
   background: rgba(0, 0, 0, 0.03);
 }
 
-.message-item.expanded {
-  background: rgba(0, 122, 255, 0.04);
-  border-color: rgba(0, 122, 255, 0.15);
-}
-
 .message-header {
   display: flex;
   align-items: center;
@@ -574,16 +635,131 @@ onMounted(() => {
   opacity: 1;
 }
 
-.message-body {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+/* ========== Email Detail Modal ========== */
+.email-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
 }
 
-.body-content {
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.email-modal {
+  background: #fff;
+  border-radius: 14px;
+  width: min(780px, 92vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+.nav-btn {
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  border-radius: 6px;
+  padding: 6px 14px;
   font-size: 13px;
+  font-weight: 500;
   color: #374151;
-  line-height: 1.6;
-  word-break: break-word;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: rgba(0,0,0,0.2);
+}
+
+.nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.nav-counter {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0 8px;
+  flex-shrink: 0;
+}
+
+.modal-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+.pin-btn {
+  color: #007aff;
+  border-color: rgba(0,122,255,0.2);
+}
+
+.pin-btn:disabled {
+  color: #34c759;
+  border-color: rgba(52,199,89,0.2);
+  background: #f0fdf4;
+}
+
+.close-btn {
+  color: #6b7280;
+}
+
+.modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-subject {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.modal-meta {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.modal-content {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.7;
+  user-select: text;
+}
+
+.modal-content :deep(img) {
+  max-width: 100%;
+  height: auto;
 }
 </style>

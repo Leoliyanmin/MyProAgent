@@ -57,7 +57,7 @@ class EmailService:
             bind_result = self.email_handle.handle_bind_email(
                 user_id=user_id,
                 email_address=email_address,
-                encrypted_app_password=encrypted_password,
+                encrypted_password=encrypted_password,
             )
 
             if bind_result['success']:
@@ -129,6 +129,18 @@ class EmailService:
     def get_email_messages(self, user_id: str) -> Dict:
         try:
             result = self.email_handle.handle_get_messages(user_id)
+            if result.get('success') and result.get('messages'):
+                result['messages'] = [
+                    {
+                        'id': msg.get('message_id', ''),
+                        'title': msg.get('subject', ''),
+                        'sender': msg.get('sender', ''),
+                        'release_time': msg.get('received_at', ''),
+                        'context': msg.get('body_text', ''),
+                        'raw_html': msg.get('body_html', ''),
+                    }
+                    for msg in result['messages']
+                ]
             return result
         except Exception as e:
             logger.error(f"获取邮件列表失败: {str(e)}")

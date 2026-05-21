@@ -2,7 +2,7 @@
 // Uses Vite proxy in development, direct URL in production
 // Note: Local Backend (8000) or Server Backend (8001)
 
-import { getTokenSync } from './auth-storage.js'
+import { getTokenSync, clearAuth } from './auth-storage.js'
 
 const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8001'
 

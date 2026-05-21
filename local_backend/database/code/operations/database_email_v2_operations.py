@@ -46,17 +46,19 @@ class EmailAccountV2Operations:
 class EmailMessageV2Operations:
     def upsert(self, user_id: str, account_id: int, mail_id: str,
                subject: str, sender: str, message_time: str,
-               body: str = None, raw_data: Dict = None) -> int:
+               recipient_email: str = None, body: str = None,
+               raw_html: str = None) -> int:
         existing = list_email_messages_by_user(user_id)
         for msg in existing:
             if msg.get("mail_uid") == mail_id:
                 return msg["message_id"]
+        recipients = json.dumps([recipient_email], ensure_ascii=False) if recipient_email else None
         return create_email_message(
             user_id=user_id, account_id=account_id, mail_uid=mail_id,
             subject=subject, sender=sender,
-            recipients=json.dumps([sender], ensure_ascii=False),
+            recipients=recipients,
             body_text=body,
-            body_html=json.dumps(raw_data, ensure_ascii=False) if raw_data else None,
+            body_html=raw_html,
             received_at=message_time,
         )
 
