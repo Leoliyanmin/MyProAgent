@@ -28,49 +28,9 @@
       <div class="divider dashed"></div>
 
       <div class="nav-group">
-        <div class="nav-title">
-          {{ currentView === 'dashboard' ? '主界面特有' : currentView === 'calendar' ? '日程特有' : currentView === 'fileManager' ? '文件管理特有' : currentView === 'selfPortrait' ? '自我画像特有' : '功能' }}
-        </div>
+        <div class="nav-title">通知</div>
 
-        <template v-if="currentView === 'dashboard'">
-          <div class="nav-item">工作流配置</div>
-          <div class="nav-item">消息源管理</div>
-        </template>
-
-        <template v-else-if="currentView === 'calendar'">
-          <div class="nav-item">日历订阅</div>
-          <div class="nav-item">时区设置</div>
-        </template>
-
-        <template v-else-if="currentView === 'fileManager'">
-          <div class="nav-item">本地挂载点</div>
-          <div class="nav-item">云存储同步</div>
-        </template>
-
-        <template v-else-if="currentView === 'selfPortrait'">
-          <div class="nav-item">画像维度</div>
-          <div class="nav-item">展示预览</div>
-        </template>
-      </div>
-
-      <!-- 新邮件通知 -->
-      <div v-if="emailStore.notifications.length > 0" class="divider dashed"></div>
-      <div v-if="emailStore.notifications.length > 0" class="notif-group">
-        <div
-          v-for="n in emailStore.notifications"
-          :key="n.id"
-          class="notif-card"
-          @click="goToEmail"
-        >
-          <span class="notif-badge">📧</span>
-          <span class="notif-title">{{ n.title }}</span>
-          <button class="notif-dismiss" @click.stop="emailStore.dismissNotification(n.id)">✕</button>
-        </div>
-      </div>
-    </div>
-
-      <div v-if="emailStore.notifications.length > 0" class="divider dashed"></div>
-      <div v-if="emailStore.notifications.length > 0" class="notif-group">
+        <!-- 新邮件通知 -->
         <div
           v-for="n in emailStore.notifications"
           :key="n.id"

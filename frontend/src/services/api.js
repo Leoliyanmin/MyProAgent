@@ -457,8 +457,9 @@ export const emailAPI = {
       body: JSON.stringify({ email_address: emailAddress, app_password: appPassword })
     })
   },
-  sync: async (maxMessages = 50) => {
-    return fetchWithAuth(`/api/v1/email/sync?max_messages=${maxMessages}`, {
+  sync: async (maxMessages) => {
+    const qs = maxMessages != null ? `?max_messages=${maxMessages}` : ''
+    return fetchWithAuth(`/api/v1/email/sync${qs}`, {
       method: 'POST'
     })
   },

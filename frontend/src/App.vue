@@ -57,8 +57,10 @@ import AgentSidebar from './components/layout/AgentSidebar.vue'
 import ThemeOverlayEditor from './components/layout/ThemeOverlayEditor.vue'
 import AgentSettingsView from './views/AgentSettingsView.vue'
 import { useThemeStore } from './stores/theme.js'
+import { useEmailStore } from './stores/email.js'
 
 const themeStore = useThemeStore()
+const emailStore = useEmailStore()
 const authStore = useAuthStore()
 const calendarStore = useCalendarStore()
 const dashboardStore = useDashboardStore()
@@ -83,6 +85,7 @@ onMounted(() => {
   themeStore.applyToRoot()
   if (authStore.isAuthenticated) {
     loadInitialData()
+    emailStore.fetchStatus()
   }
 
   window.addEventListener('auth:required', () => {

@@ -31,6 +31,8 @@ export const useEmailStore = defineStore('email', () => {
   const notifications = ref([])
   const _knownIds = new Set()
   let _uid = 0
+  let _firstRun = true
+  let _pollTimer = null
 
   function dismissNotification(id) {
     notifications.value = notifications.value.filter(n => n.id !== id)
@@ -43,7 +45,7 @@ export const useEmailStore = defineStore('email', () => {
       if (!res.success || !res.messages) return
       const current = res.messages
       const fresh = current.filter(m => !_knownIds.has(m.id))
-      if (fresh.length > 0) {
+      if (!_firstRun && fresh.length > 0) {
         for (const m of fresh.slice(0, 3)) {
           const id = ++_uid
           notifications.value.unshift({
@@ -54,35 +56,15 @@ export const useEmailStore = defineStore('email', () => {
       }
       _knownIds.clear()
       current.forEach(m => _knownIds.add(m.id))
-      messages.value = current
-    } catch { /* silent */ }
-  }
-
-  async function checkNewEmails() {
-    if (!bindStatus.value.is_bound) return
-    try {
-      const res = await emailAPI.getMessages()
-      if (!res.success || !res.messages) return
-      const current = res.messages
-      const fresh = current.filter(m => !_knownIds.has(m.id))
-      if (fresh.length > 0) {
-        for (const m of fresh.slice(0, 3)) {
-          const id = ++_uid
-          notifications.value.unshift({
-            id, title: m.title || '(无主题)', sender: m.sender || '', release_time: m.release_time,
-          })
-          setTimeout(() => dismissNotification(id), 5000)
-        }
-      }
-      _knownIds.clear()
-      current.forEach(m => _knownIds.add(m.id))
+      _firstRun = false
       messages.value = current
     } catch { /* silent */ }
   }
 
   function startPolling() {
     if (_pollTimer) return
-    _pollTimer = setInterval(checkNewEmails, 30000)
+    fetchStatus()
+    _pollTimer = setInterval(checkNewEmails, 10000)
   }
 
   function stopPolling() {
@@ -90,7 +72,6 @@ export const useEmailStore = defineStore('email', () => {
   }
 
   // store 创建时自动启动
-  startPolling()
 
   // ---- 原有方法 ----
   async function fetchStatus() {

@@ -200,7 +200,7 @@ class MailScraper:
         if status != "OK":
             raise RuntimeError(f"Failed to select folder: {folder}")
 
-        _, search_data = conn.search(None, "ALL")
+        _, search_data = conn.uid('search', None, "ALL")
         message_ids = search_data[0].split() if search_data[0] else []
         total = len(message_ids)
         logger.info(f"Total messages in {folder}: {total}")
@@ -210,7 +210,7 @@ class MailScraper:
 
         messages = []
         for msg_id in message_ids:
-            _, msg_data = conn.fetch(msg_id, "(FLAGS BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE)])")
+            _, msg_data = conn.uid('fetch', msg_id, "(FLAGS BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE)])")
             raw_header = msg_data[0][1] if msg_data and len(msg_data[0]) > 1 else b""
             msg = message_from_bytes(raw_header)
             sender = _decode_mime_header(msg.get("From", ""))
@@ -236,7 +236,7 @@ class MailScraper:
         if status != "OK":
             raise RuntimeError(f"Failed to select folder: {folder}")
 
-        _, search_data = conn.search(None, "ALL")
+        _, search_data = conn.uid('search', None, "ALL")
         message_ids = search_data[0].split() if search_data[0] else []
         total = len(message_ids)
 
@@ -245,7 +245,7 @@ class MailScraper:
 
         messages = []
         for msg_id in message_ids:
-            _, msg_data = conn.fetch(msg_id, "(FLAGS BODY.PEEK[])")
+            _, msg_data = conn.uid('fetch', msg_id, "(FLAGS BODY.PEEK[])")
             raw_email = msg_data[0][1] if msg_data and len(msg_data[0]) > 1 else b""
             msg = message_from_bytes(raw_email)
             sender = _decode_mime_header(msg.get("From", ""))
@@ -276,12 +276,12 @@ class MailScraper:
             raise RuntimeError(f"Failed to select folder: {folder}")
 
         since_date = (datetime.now() - timedelta(days=days)).strftime("%d-%b-%Y")
-        _, search_data = conn.search(None, f"SINCE {since_date}")
+        _, search_data = conn.uid('search', None, f"SINCE {since_date}")
         message_ids = search_data[0].split() if search_data[0] else []
 
         messages = []
         for msg_id in message_ids:
-            _, msg_data = conn.fetch(msg_id, "(FLAGS BODY.PEEK[])")
+            _, msg_data = conn.uid('fetch', msg_id, "(FLAGS BODY.PEEK[])")
             raw_email = msg_data[0][1] if msg_data and len(msg_data[0]) > 1 else b""
             msg = message_from_bytes(raw_email)
             sender = _decode_mime_header(msg.get("From", ""))
