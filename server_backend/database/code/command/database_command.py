@@ -125,6 +125,51 @@ def delete_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM users WHERE user_id = ?", (user_id,), db_path)
 
 
+def create_server_task(user_id: str, title: str, description: str = None,
+                       priority: int = 2, status: str = "pending",
+                       due_date: str = None, created_at: str = None,
+                       db_path: str | Path = DEFAULT_DB_PATH) -> int:
+    import datetime
+    now = created_at or datetime.datetime.utcnow().isoformat()
+    return _execute(
+        "INSERT INTO task (user_id, title, description, priority, status, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (user_id, title, description, priority, status, due_date, now, now),
+        db_path,
+    )
+
+
+def list_server_tasks_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all("SELECT * FROM task WHERE user_id = ?", (user_id,), db_path)
+
+
+def delete_server_tasks_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM task WHERE user_id = ?", (user_id,), db_path)
+
+
+def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **kwargs) -> None:
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    existing = _fetch_one("SELECT * FROM user_setting WHERE user_id = ?", (user_id,), db_path)
+    if existing:
+        allowed = {"bio", "current_focus", "work_preference", "skills", "theme_config",
+                   "notification_enabled", "privacy_share_data"}
+        fields = {k: v for k, v in kwargs.items() if k in allowed and v is not None}
+        if not fields:
+            return
+        fields["updated_at"] = now
+        set_clause = ", ".join(f"{k} = ?" for k in fields)
+        values = list(fields.values()) + [user_id]
+        _execute(f"UPDATE user_setting SET {set_clause} WHERE user_id = ?", tuple(values), db_path)
+    else:
+        _execute(
+            "INSERT INTO user_setting (user_id, bio, current_focus, work_preference, skills, theme_config, notification_enabled, privacy_share_data, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, kwargs.get("bio"), kwargs.get("current_focus"), kwargs.get("work_preference"),
+             kwargs.get("skills"), kwargs.get("theme_config"),
+             kwargs.get("notification_enabled", 1), kwargs.get("privacy_share_data", 0), now),
+            db_path,
+        )
+
+
 # user_match_profile
 
 def upsert_user_match_profile(

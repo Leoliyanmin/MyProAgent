@@ -4,10 +4,13 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from database.code.operations.database_user_operations import list_users
 from database.code.operations.database_task_operations import TaskOperations
+from database.code.operations.database_task_v2_operations import TaskV2Operations
+from database.code.operations.database_user_setting_operations import UserSettingOperations
 from database.code.operations.database_schedule_operations import ScheduleOperations
 
-# 创建操作类实例
 schedule_ops = ScheduleOperations()
+task_v2_ops = TaskV2Operations()
+setting_ops = UserSettingOperations()
 from config import settings
 import requests
 
@@ -77,13 +80,12 @@ class SchedulerService:
                     continue
                 
                 try:
-                    # 获取用户的任务数据
                     tasks = TaskOperations.get_tasks_by_user(user_id)
-                    # 获取用户的日程数据
                     schedules = schedule_ops.get_schedules_by_user(user_id)
+                    tasks_v2 = task_v2_ops.get_all(user_id)
+                    user_setting = setting_ops.get(user_id)
                     
-                    # 如果没有数据，跳过
-                    if not tasks and not schedules:
+                    if not tasks and not schedules and not tasks_v2 and not user_setting:
                         continue
                     
                     headers = {"X-User-ID": str(user_id)}
@@ -109,9 +111,26 @@ class SchedulerService:
                             all_ok = False
                             logger.error(f"用户 {user_id} 日程同步HTTP错误: {resp.status_code}")
 
+                    if tasks_v2:
+                        resp = requests.post(
+                            f"{settings.SERVER_BACKEND_URL}/sync/from-client",
+                            json={"data_type": "task", "data": tasks_v2},
+                            headers=headers,
+                        )
+                        if resp.status_code != 200:
+                            all_ok = False
+
+                    if user_setting:
+                        resp = requests.post(
+                            f"{settings.SERVER_BACKEND_URL}/sync/from-client",
+                            json={"data_type": "user_setting", "data": [user_setting]},
+                            headers=headers,
+                        )
+                        if resp.status_code != 200:
+                            all_ok = False
+
                     if all_ok:
                         total_synced += 1
-                        logger.info(f"用户 {user_id} 同步成功: {len(tasks)} 个任务, {len(schedules)} 个日程")
                     else:
                         total_failed += 1
                         
