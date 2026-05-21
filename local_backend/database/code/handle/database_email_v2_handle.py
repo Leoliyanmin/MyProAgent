@@ -76,6 +76,34 @@ class EmailV2Handle:
     def handle_delete_message(self, user_id: str, message_id: int) -> dict:
         try:
             self.message_ops.delete(message_id)
-            return {"success": True, "message": "删除成功"}
+            return {"success": True, "message": "已移入回收站"}
         except Exception as e:
             return {"success": False, "message": "删除失败: {}".format(e)}
+
+    def handle_get_trash(self, user_id: str) -> dict:
+        try:
+            messages = self.message_ops.list_trash(user_id)
+            return {"success": True, "messages": messages}
+        except Exception as e:
+            return {"success": False, "message": "获取失败: {}".format(e)}
+
+    def handle_restore_message(self, user_id: str, message_id: int) -> dict:
+        try:
+            self.message_ops.restore(message_id)
+            return {"success": True, "message": "已恢复"}
+        except Exception as e:
+            return {"success": False, "message": "恢复失败: {}".format(e)}
+
+    def handle_permanent_delete(self, user_id: str, message_id: int) -> dict:
+        try:
+            self.message_ops.permanent_delete(message_id)
+            return {"success": True, "message": "已彻底删除"}
+        except Exception as e:
+            return {"success": False, "message": "删除失败: {}".format(e)}
+
+    def handle_empty_trash(self, user_id: str) -> dict:
+        try:
+            self.message_ops.empty_trash(user_id)
+            return {"success": True, "message": "回收站已清空"}
+        except Exception as e:
+            return {"success": False, "message": "清空失败: {}".format(e)}

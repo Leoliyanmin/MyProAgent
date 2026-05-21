@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS email_message (
     body_html      TEXT,
     received_at    TEXT,
     is_read        INTEGER DEFAULT 0,
+    status         INTEGER DEFAULT 0,
     created_at     TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (account_id) REFERENCES email_account(account_id)

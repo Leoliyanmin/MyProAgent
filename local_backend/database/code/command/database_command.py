@@ -309,12 +309,23 @@ def create_email_message(
     )
 
 
-def list_email_messages_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
-    return _fetch_all("SELECT * FROM email_message WHERE user_id = ? ORDER BY received_at DESC", (user_id,), db_path)
+def list_email_messages_by_user(user_id: str, status: int = 0, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all(
+        "SELECT * FROM email_message WHERE user_id = ? AND status = ? ORDER BY received_at DESC",
+        (user_id, status), db_path,
+    )
 
 
 def delete_email_message(message_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
-    _execute("DELETE FROM email_message WHERE message_id = ?", (message_id,), db_path)
+    _execute("UPDATE email_message SET status = 1 WHERE message_id = ?", (message_id,), db_path)
+
+
+def restore_email_message(message_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("UPDATE email_message SET status = 0 WHERE message_id = ?", (message_id,), db_path)
+
+
+def permanent_delete_email_message(message_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("UPDATE email_message SET status = 2 WHERE message_id = ?", (message_id,), db_path)
 
 
 # user_match_profile

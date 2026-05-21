@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     ENCRYPTION_KEY: str = "your-encryption-key-here-123456789012345678901234"
     SYNC_INTERVAL_SECONDS: int = 3600  # 本地到服务器定时同步间隔（秒）
     EMAIL_SYNC_INTERVAL_SECONDS: int = 30  # 邮件定时同步间隔（秒）
-    EMAIL_SYNC_MAX_MESSAGES: int = 50  # 每次最多同步邮件数
+    EMAIL_SYNC_MAX_MESSAGES: int = 5  # 每次最多同步邮件数
     
     model_config = {"env_file": ".env", "extra": "allow"}
 

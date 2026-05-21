@@ -35,6 +35,8 @@ class SchedulerService:
             trigger=IntervalTrigger(seconds=sync_interval_seconds),
             id="local_to_server_sync",
             name="本地到服务器数据同步",
+            max_instances=2,
+            misfire_grace_time=120,
             replace_existing=True
         )
 
@@ -43,6 +45,8 @@ class SchedulerService:
             trigger=IntervalTrigger(seconds=email_sync_interval_seconds),
             id="email_sync",
             name="邮件定时同步",
+            max_instances=2,
+            misfire_grace_time=120,
             replace_existing=True
         )
 
@@ -187,7 +191,7 @@ class SchedulerService:
                     from service.email_service import EmailService
                     email_service = EmailService()
 
-                    result = email_service.sync_email_data(user_id, max_messages=settings.EMAIL_SYNC_MAX_MESSAGES)
+                    result = email_service.sync_email_data(user_id, max_messages=0)
 
                     if result.get('success'):
                         total_synced += 1

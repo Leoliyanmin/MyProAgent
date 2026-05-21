@@ -103,3 +103,35 @@ async def delete_email_message(message_id: int, user_id: str = Depends(get_curre
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '删除失败'))
     return result
+
+
+@router.get("/trash")
+async def get_trash(user_id: str = Depends(get_current_user_id)):
+    result = email_service.get_trash_messages(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
+    return result
+
+
+@router.post("/messages/{message_id}/restore")
+async def restore_message(message_id: int, user_id: str = Depends(get_current_user_id)):
+    result = email_service.restore_email_message(user_id, message_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '恢复失败'))
+    return result
+
+
+@router.delete("/messages/{message_id}/permanent")
+async def permanent_delete_message(message_id: int, user_id: str = Depends(get_current_user_id)):
+    result = email_service.permanent_delete_email(user_id, message_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '删除失败'))
+    return result
+
+
+@router.delete("/trash")
+async def empty_trash(user_id: str = Depends(get_current_user_id)):
+    result = email_service.empty_trash(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '清空失败'))
+    return result

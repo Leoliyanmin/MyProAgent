@@ -478,6 +478,24 @@ export const emailAPI = {
     return fetchWithAuth(`/api/v1/email/messages/${messageId}`, {
       method: 'DELETE'
     })
+  },
+  getTrash: async () => {
+    return fetchWithAuth('/api/v1/email/trash')
+  },
+  restoreMessage: async (messageId) => {
+    return fetchWithAuth(`/api/v1/email/messages/${messageId}/restore`, {
+      method: 'POST'
+    })
+  },
+  permanentDelete: async (messageId) => {
+    return fetchWithAuth(`/api/v1/email/messages/${messageId}/permanent`, {
+      method: 'DELETE'
+    })
+  },
+  emptyTrash: async () => {
+    return fetchWithAuth('/api/v1/email/trash', {
+      method: 'DELETE'
+    })
   }
 }
 

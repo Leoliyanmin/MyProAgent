@@ -27,6 +27,13 @@
         >
           {{ loading ? '加载中...' : '刷新' }}
         </button>
+        <button
+          class="mac-btn-secondary trash-btn"
+          :disabled="!bindStatus.is_bound"
+          @click="openTrash"
+        >
+          🗑 {{ trashCount > 0 ? trashCount : '' }}
+        </button>
       </div>
     </div>
 
@@ -154,10 +161,42 @@
       </div>
     </div>
   </Teleport>
+
+  <!-- Trash modal -->
+  <Teleport to="body">
+    <div v-if="showTrash" class="email-modal-overlay" @click.self="showTrash = false">
+      <div class="email-modal trash-modal" @click.stop>
+        <div class="modal-nav">
+          <span class="nav-counter">回收站 ({{ trashCount }})</span>
+          <div class="modal-actions">
+            <button class="nav-btn" @click="handleEmptyTrash" :disabled="trashCount === 0">清空</button>
+            <button class="nav-btn close-btn" @click="showTrash = false">✕ 关闭</button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div v-if="trashLoading" class="loading-state">加载中...</div>
+          <div v-else-if="trashCount === 0" class="empty-state">回收站为空</div>
+          <div v-else class="messages-list">
+            <div v-for="msg in trashMessages" :key="msg.id" class="message-item trash-item">
+              <div class="message-header">
+                <span class="msg-title">{{ msg.title || '(无主题)' }}</span>
+                <span class="msg-sender">{{ msg.sender || '' }}</span>
+                <span class="msg-time">{{ formatTime(msg.release_time) }}</span>
+              </div>
+              <div class="trash-item-actions">
+                <button class="nav-btn" @click="handleRestore(msg.id)">恢复</button>
+                <button class="nav-btn" @click="handlePermanentDelete(msg.id)" style="color:#ff3b30">彻底删除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useEmailStore } from '../stores/email.js'
 import { useDashboardStore } from '../stores/dashboard.js'
 
@@ -175,6 +214,12 @@ const pinned = ref(false)
 const syncResult = ref(null)
 const sendSuccess = ref(false)
 const sortBy = ref('time-desc')
+const showTrash = ref(false)
+let autoRefreshTimer = null
+
+const trashCount = computed(() => store.trashMessages.length)
+const trashMessages = computed(() => store.trashMessages)
+const trashLoading = computed(() => store.trashLoading)
 
 const selectedEmail = computed(() => {
   if (selectedIndex.value === null) return null
@@ -261,7 +306,7 @@ function sanitizeHtml(html) {
 
 async function handleSync() {
   syncResult.value = null
-  const result = await store.sync(50)
+  const result = await store.sync()
   if (result?.success) {
     syncResult.value = result
     setTimeout(() => { syncResult.value = null }, 5000)
@@ -270,6 +315,25 @@ async function handleSync() {
 
 async function handleRefresh() {
   await store.fetchMessages()
+}
+
+async function openTrash() {
+  showTrash.value = true
+  await store.fetchTrash()
+}
+
+async function handleRestore(msgId) {
+  await store.restoreMessage(msgId)
+}
+
+async function handlePermanentDelete(msgId) {
+  await store.permanentDelete(msgId)
+}
+
+async function handleEmptyTrash() {
+  if (confirm('确定清空回收站？此操作不可恢复')) {
+    await store.emptyTrash()
+  }
 }
 
 async function handleSend() {
@@ -294,6 +358,13 @@ onMounted(async () => {
   if (store.bindStatus.is_bound) {
     store.fetchMessages()
   }
+  autoRefreshTimer = setInterval(() => {
+    if (store.bindStatus.is_bound) store.fetchMessages()
+  }, 10000)
+})
+
+onUnmounted(() => {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer)
 })
 </script>
 
@@ -391,6 +462,27 @@ onMounted(async () => {
 }
 .mac-btn-secondary.is-loading {
   opacity: 0.7;
+}
+
+.trash-btn {
+  font-size: 14px;
+}
+
+/* Trash modal */
+.trash-modal {
+  max-width: 560px;
+}
+
+.trash-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trash-item-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .error-banner {

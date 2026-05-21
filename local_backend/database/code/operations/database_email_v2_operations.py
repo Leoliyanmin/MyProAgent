@@ -10,6 +10,8 @@ from local_backend.database.code.command.database_command import (
     create_email_message,
     list_email_messages_by_user,
     delete_email_message,
+    restore_email_message,
+    permanent_delete_email_message,
 )
 
 
@@ -48,8 +50,11 @@ class EmailMessageV2Operations:
                subject: str, sender: str, message_time: str,
                recipient_email: str = None, body: str = None,
                raw_html: str = None) -> int:
-        existing = list_email_messages_by_user(user_id)
-        for msg in existing:
+        # 检查所有状态的邮件（包括回收站和已删除），避免重复插入
+        all_existing = list_email_messages_by_user(user_id, status=0) \
+                     + list_email_messages_by_user(user_id, status=1) \
+                     + list_email_messages_by_user(user_id, status=2)
+        for msg in all_existing:
             if msg.get("mail_uid") == mail_id:
                 return msg["message_id"]
         recipients = json.dumps([recipient_email], ensure_ascii=False) if recipient_email else None
@@ -63,7 +68,20 @@ class EmailMessageV2Operations:
         )
 
     def list_all(self, user_id: str) -> List[Dict]:
-        return list_email_messages_by_user(user_id)
+        return list_email_messages_by_user(user_id, status=0)
+
+    def list_trash(self, user_id: str) -> List[Dict]:
+        return list_email_messages_by_user(user_id, status=1)
 
     def delete(self, message_id: int) -> None:
         delete_email_message(message_id)
+
+    def restore(self, message_id: int) -> None:
+        restore_email_message(message_id)
+
+    def permanent_delete(self, message_id: int) -> None:
+        permanent_delete_email_message(message_id)
+
+    def empty_trash(self, user_id: str) -> None:
+        for msg in self.list_trash(user_id):
+            permanent_delete_email_message(msg["message_id"])

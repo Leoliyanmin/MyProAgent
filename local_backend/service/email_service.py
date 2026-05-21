@@ -2,11 +2,16 @@ import json
 import logging
 import smtplib
 import traceback
+import hashlib
+import base64
 from email.message import EmailMessage
 from typing import Dict, Optional
 
+from cryptography.fernet import Fernet, InvalidToken
+
 from service.scraper.mail_scraper import MailScraper, write_mail_result
 from database.code.handle.database_email_v2_handle import EmailV2Handle
+from config import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -83,7 +88,10 @@ class EmailService:
             app_password = self._decrypt_app_password(encrypted_password)
 
             scraper = MailScraper(email_address, app_password)
-            scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
+            if max_messages:
+                scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
+            else:
+                scrape_result = scraper.scrape_recent_mails(days=1)
 
             write_mail_result(scrape_result)
 
@@ -116,14 +124,28 @@ class EmailService:
             logger.error(f"解绑邮箱失败: {str(e)}")
             return {'success': False, 'message': f'解绑失败: {str(e)}'}
 
+    def _get_fernet(self) -> Fernet:
+        key = settings.ENCRYPTION_KEY.encode("utf-8")
+        derived = base64.urlsafe_b64encode(hashlib.sha256(key).digest())
+        return Fernet(derived)
+
     def _encrypt_app_password(self, app_password: str) -> str:
-        return json.dumps({"password": app_password})
+        fernet = self._get_fernet()
+        return fernet.encrypt(app_password.encode("utf-8")).decode("utf-8")
 
     def _decrypt_app_password(self, encrypted: str) -> str:
+        # 兼容旧 JSON 格式 {"password": "..."}
+        if encrypted.startswith('{'):
+            try:
+                data = json.loads(encrypted)
+                return data.get('password', '')
+            except (json.JSONDecodeError, TypeError):
+                pass
+        # Fernet 解密
         try:
-            data = json.loads(encrypted)
-            return data.get('password', '')
-        except (json.JSONDecodeError, TypeError):
+            fernet = self._get_fernet()
+            return fernet.decrypt(encrypted.encode("utf-8")).decode("utf-8")
+        except (InvalidToken, Exception):
             return encrypted
 
     def get_email_messages(self, user_id: str) -> Dict:
@@ -179,3 +201,32 @@ class EmailService:
 
     def delete_email_message(self, user_id: str, message_id: int) -> Dict:
         return self.email_handle.handle_delete_message(user_id, message_id)
+
+    def get_trash_messages(self, user_id: str) -> Dict:
+        try:
+            result = self.email_handle.handle_get_trash(user_id)
+            if result.get('success') and result.get('messages'):
+                result['messages'] = [
+                    {
+                        'id': msg.get('message_id', ''),
+                        'title': msg.get('subject', ''),
+                        'sender': msg.get('sender', ''),
+                        'release_time': msg.get('received_at', ''),
+                        'context': msg.get('body_text', ''),
+                        'raw_html': msg.get('body_html', ''),
+                    }
+                    for msg in result['messages']
+                ]
+            return result
+        except Exception as e:
+            logger.error(f"获取回收站失败: {str(e)}")
+            return {'success': False, 'message': str(e)}
+
+    def restore_email_message(self, user_id: str, message_id: int) -> Dict:
+        return self.email_handle.handle_restore_message(user_id, message_id)
+
+    def permanent_delete_email(self, user_id: str, message_id: int) -> Dict:
+        return self.email_handle.handle_permanent_delete(user_id, message_id)
+
+    def empty_trash(self, user_id: str) -> Dict:
+        return self.email_handle.handle_empty_trash(user_id)

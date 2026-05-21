@@ -52,6 +52,36 @@
           <div class="nav-item">展示预览</div>
         </template>
       </div>
+
+      <!-- 新邮件通知 -->
+      <div v-if="emailStore.notifications.length > 0" class="divider dashed"></div>
+      <div v-if="emailStore.notifications.length > 0" class="notif-group">
+        <div
+          v-for="n in emailStore.notifications"
+          :key="n.id"
+          class="notif-card"
+          @click="goToEmail"
+        >
+          <span class="notif-badge">📧</span>
+          <span class="notif-title">{{ n.title }}</span>
+          <button class="notif-dismiss" @click.stop="emailStore.dismissNotification(n.id)">✕</button>
+        </div>
+      </div>
+    </div>
+
+      <div v-if="emailStore.notifications.length > 0" class="divider dashed"></div>
+      <div v-if="emailStore.notifications.length > 0" class="notif-group">
+        <div
+          v-for="n in emailStore.notifications"
+          :key="n.id"
+          class="notif-card"
+          @click="goToEmail"
+        >
+          <span class="notif-badge">📧</span>
+          <span class="notif-title">{{ n.title }}</span>
+          <button class="notif-dismiss" @click.stop="emailStore.dismissNotification(n.id)">✕</button>
+        </div>
+      </div>
     </div>
 
     <div class="sidebar-footer">
@@ -84,9 +114,11 @@
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useAuthStore } from '../../stores/auth.js'
+import { useEmailStore } from '../../stores/email.js'
 
 const router = useRouter()
 const auth = useAuthStore()
+const emailStore = useEmailStore()
 
 const displayName = computed(() => {
   const name = auth.user?.full_name || auth.user?.email?.split('@')[0] || ''
@@ -123,12 +155,16 @@ const goHome = () => {
 }
 
 const toggleSettings = () => {
-  // 如果已在设置页面，点击返回 main；否则进入设置页面
   if (props.appMode === 'settings') {
     emit('setAppMode', 'main')
   } else {
     emit('setAppMode', 'settings')
   }
+}
+
+const goToEmail = () => {
+  emit('setAppMode', 'main')
+  emit('update:currentView', 'email')
 }
 </script>
 
@@ -306,6 +342,54 @@ const toggleSettings = () => {
 }
 .divider.dashed {
   border-top: 1px dashed rgba(0, 0, 0, 0.15);
-  background-color: transparent;
+}
+
+/* 新邮件通知 */
+.notif-group {
+  padding: 4px 8px;
+}
+
+.notif-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  margin: 2px 0;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  background: rgba(0, 122, 255, 0.06);
+  border: 1px solid rgba(0, 122, 255, 0.12);
+  transition: background 0.15s;
+}
+.notif-card:hover {
+  background: rgba(0, 122, 255, 0.12);
+}
+
+.notif-badge {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+.notif-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #1d1d1f;
+}
+
+.notif-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+.notif-dismiss:hover {
+  color: #ff3b30;
 }
 </style>
