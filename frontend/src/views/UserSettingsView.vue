@@ -2,7 +2,7 @@
   <section class="settings-shell">
     <header class="settings-header">
       <h1 class="settings-title">用户设置</h1>
-      <p class="settings-subtitle">管理个人资料、邮箱绑定、RSS 与外部账号</p>
+      <p class="settings-subtitle">管理个人资料、邮箱绑定、API Key 与外部账号</p>
     </header>
 
     <div class="settings-grid">
@@ -58,26 +58,91 @@
       </article>
 
       <article class="panel">
-        <h2 class="panel-title">个人 RSS</h2>
-        <form class="add-form" @submit.prevent="addRssSource">
+        <h2 class="panel-title">AI 服务 API Key</h2>
+        
+        <!-- 添加按钮 / 展开表单 -->
+        <div v-if="!showAddKeyForm" style="margin-bottom:12px;">
+          <button class="action-btn ghost" type="button" @click="showAddKeyForm = true">+ 添加 API Key</button>
+        </div>
+        <div v-else class="add-form">
+          <select v-model="newKey.provider" class="text-input" style="flex:0 0 auto;width:140px;">
+            <option value="">选择服务商</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="zhipu">Zhipu (智谱)</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="groq">Groq</option>
+            <option value="moonshot">Moonshot</option>
+            <option value="gemini">Gemini</option>
+            <option value="custom">自定义</option>
+          </select>
           <input
-            v-model.trim="newRss"
+            v-if="newKey.provider === 'custom'"
+            v-model.trim="newKey.customProvider"
             class="text-input"
-            type="url"
-            placeholder="https://example.com/feed.xml"
-            required
+            type="text"
+            placeholder="自定义服务商名称"
+            style="flex:0 0 auto;width:160px;"
           />
-          <button class="action-btn" type="submit">添加 RSS</button>
-        </form>
+          <input
+            v-model.trim="newKey.api_key"
+            class="text-input"
+            type="password"
+            placeholder="API Key (sk-...)"
+          />
+          <input
+            v-model.trim="newKey.api_base"
+            class="text-input"
+            type="text"
+            :placeholder="defaultBaseFor(newKey.provider)"
+          />
+          <button class="action-btn" type="button" :disabled="saving" @click="addApiKey">{{ saving ? '保存中...' : '保存并测试' }}</button>
+          <button class="action-btn ghost" type="button" @click="cancelAddKey">取消</button>
+        </div>
 
+        <!-- 空态 -->
+        <p v-if="apiKeys.length === 0 && !showAddKeyForm && !loadingKeys" class="binding-meta">暂无已配置的 API Key</p>
+        <p v-if="loadingKeys" class="binding-meta">加载中...</p>
+
+        <!-- 已绑定列表 -->
         <ul class="binding-list">
-          <li v-for="source in rssSources" :key="source.id" class="binding-item">
+          <li v-for="item in apiKeys" :key="item.provider" class="binding-item">
             <div class="binding-main">
-              <p class="binding-title">{{ source.url }}</p>
+              <p class="binding-title">{{ item.provider }}</p>
+              <p class="binding-meta" :class="item.last_test_success === true ? 'binding-success' : item.last_test_success === false ? 'status-error' : ''">
+                {{ item.last_test_success === true ? '● 已连接' : item.last_test_success === false ? '✕ 连接失败' : '○ 未测试' }}
+              </p>
+              <p class="binding-meta">{{ item.api_key_masked }}</p>
+              <p class="binding-meta" style="font-size:11px;color:#9ca3af;">{{ item.api_base }}</p>
             </div>
-            <button class="text-btn" type="button" @click="removeRssSource(source.id)">移除</button>
+            <div class="action-group">
+              <button class="text-btn" type="button" @click="startEditKey(item)">编辑</button>
+              <button class="text-btn" type="button" @click="unbindApiKey(item.provider)">解绑</button>
+            </div>
           </li>
         </ul>
+
+        <!-- 编辑弹窗 -->
+        <Teleport to="body">
+          <div v-if="editingKey" class="password-modal-mask" @click.self="cancelEditKey">
+            <div class="password-modal" role="dialog" aria-modal="true" aria-label="编辑 API Key">
+              <h3 class="password-modal-title">编辑 {{ editingKey.provider }}</h3>
+              <div class="password-form">
+                <label class="field-label">API Key</label>
+                <input v-model.trim="editForm.api_key" class="text-input" type="password" placeholder="sk-..." />
+                <label class="field-label">API Base URL</label>
+                <input v-model.trim="editForm.api_base" class="text-input" type="text" placeholder="https://..." />
+                <p v-if="editNotice" class="password-notice" :class="'status-' + editNoticeType">{{ editNotice }}</p>
+                <div class="password-actions">
+                  <button class="action-btn" type="button" :disabled="saving" @click="saveEditKey">{{ saving ? '保存中...' : '保存' }}</button>
+                  <button class="action-btn ghost" type="button" @click="testEditKey">测试连接</button>
+                  <button class="action-btn ghost" type="button" @click="cancelEditKey">取消</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Teleport>
       </article>
 
       <article class="panel">
@@ -235,6 +300,8 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { tisAPI, blackboardAPI, emailAPI, settingsAPI } from '../services/api.js'
 import { useCalendarStore } from '../stores/calendar.js'
 import { useAuthStore } from '../stores/auth.js'
+import { useEmailStore } from '../stores/email.js'
+import { getTokenSync } from '../services/auth-storage.js'
 
 const isTauriApp = !!window.__TAURI_INTERNALS__
 let invoke = null
@@ -286,11 +353,149 @@ const emailBindings = ref([
   { id: 2, email: 'yanmin.alert@example.com', code: 'MAIL-3PT7' }
 ])
 
-const newRss = ref('')
-const rssSources = ref([
-  { id: 1, url: 'https://github.blog/feed/' },
-  { id: 2, url: 'https://stackoverflow.blog/feed/' }
+const newEmail = reactive({
+  email: '',
+  password: ''
+})
+
+const emailBindings = ref([
+  { id: 1, email: 'yanmin.work@example.com', code: 'MAIL-9KD2' },
+  { id: 2, email: 'yanmin.alert@example.com', code: 'MAIL-3PT7' }
 ])
+
+// API Key management
+const apiKeys = ref([])
+const loadingKeys = ref(false)
+const saving = ref(false)
+const showAddKeyForm = ref(false)
+const newKey = reactive({
+  provider: '',
+  customProvider: '',
+  api_key: '',
+  api_base: ''
+})
+const editingKey = ref(null)
+const editForm = reactive({
+  api_key: '',
+  api_base: ''
+})
+const editNotice = ref('')
+const editNoticeType = ref('info')
+
+const defaultBases = {
+  deepseek: 'https://api.deepseek.com/v1',
+  openai: 'https://api.openai.com/v1',
+  anthropic: 'https://api.anthropic.com',
+  zhipu: 'https://open.bigmodel.cn/api/paas/v4',
+  openrouter: 'https://openrouter.ai/api/v1',
+  groq: 'https://api.groq.com/openai/v1',
+  moonshot: 'https://api.moonshot.cn/v1',
+  gemini: 'https://generativelanguage.googleapis.com/v1beta',
+  custom: 'https://'
+}
+
+const defaultBaseFor = (provider) => {
+  return defaultBases[provider] || 'https://api.openai.com/v1'
+}
+
+const loadApiKeys = async () => {
+  loadingKeys.value = true
+  try {
+    const data = await settingsAPI.getApiKeys()
+    apiKeys.value = data.providers || []
+  } catch (e) {
+    console.error('[UserSettings] Failed to load API keys:', e)
+  } finally {
+    loadingKeys.value = false
+  }
+}
+
+const cancelAddKey = () => {
+  showAddKeyForm.value = false
+  newKey.provider = ''
+  newKey.customProvider = ''
+  newKey.api_key = ''
+  newKey.api_base = ''
+}
+
+const addApiKey = async () => {
+  const provider = newKey.provider === 'custom' ? newKey.customProvider : newKey.provider
+  if (!provider || !newKey.api_key) return
+  saving.value = true
+  try {
+    const apiBase = newKey.api_base || defaultBaseFor(newKey.provider)
+    await settingsAPI.saveApiKey(provider, newKey.api_key, apiBase)
+    cancelAddKey()
+    await loadApiKeys()
+  } catch (e) {
+    console.error('[UserSettings] Failed to save API key:', e)
+  } finally {
+    saving.value = false
+  }
+}
+
+const startEditKey = (item) => {
+  editingKey.value = item
+  editForm.api_key = ''
+  editForm.api_base = item.api_base || ''
+  editNotice.value = ''
+  editNoticeType.value = 'info'
+}
+
+const cancelEditKey = () => {
+  editingKey.value = null
+  editNotice.value = ''
+  editNoticeType.value = 'info'
+}
+
+const saveEditKey = async () => {
+  if (!editingKey.value) return
+  saving.value = true
+  editNotice.value = ''
+  try {
+    const apiBase = editForm.api_base || editingKey.value.api_base
+    await settingsAPI.saveApiKey(editingKey.value.provider, editForm.api_key, apiBase)
+    editNotice.value = '保存成功'
+    editNoticeType.value = 'success'
+    await loadApiKeys()
+    setTimeout(() => cancelEditKey(), 800)
+  } catch (e) {
+    editNotice.value = '保存失败: ' + e.message
+    editNoticeType.value = 'error'
+  } finally {
+    saving.value = false
+  }
+}
+
+const testEditKey = async () => {
+  if (!editingKey.value) return
+  editNotice.value = '正在测试连接...'
+  editNoticeType.value = 'info'
+  try {
+    const apiBase = editForm.api_base || editingKey.value.api_base
+    const apiKey = editForm.api_key || ''
+    const result = await settingsAPI.testApiKey(editingKey.value.provider, apiKey, apiBase)
+    if (result.success) {
+      editNotice.value = '连接成功！'
+      editNoticeType.value = 'success'
+    } else {
+      editNotice.value = '连接失败: ' + (result.message || '未知错误')
+      editNoticeType.value = 'error'
+    }
+  } catch (e) {
+    editNotice.value = '测试失败: ' + e.message
+    editNoticeType.value = 'error'
+  }
+}
+
+const unbindApiKey = async (provider) => {
+  try {
+    await settingsAPI.deleteApiKey(provider)
+    await loadApiKeys()
+  } catch (e) {
+    console.error('[UserSettings] Failed to delete API key:', e)
+  }
+}
 
 const saveName = async () => {
   if (!profile.name) {
@@ -510,6 +715,8 @@ const bindEmail = async () => {
       emailForm.email = ''
       emailForm.password = ''
       await loadEmailStatus()
+      const emailStore = useEmailStore()
+      await emailStore.fetchStatus()
     } else {
       bindingError.value = result.message || '绑定失败'
       email.status = 'unbound'
@@ -533,6 +740,8 @@ const unbindEmail = async () => {
   try {
     await emailAPI.unbind()
     await loadEmailStatus()
+    const emailStore = useEmailStore()
+    await emailStore.fetchStatus()
   } catch (err) {
     bindingError.value = err?.message || '解绑失败'
   }
@@ -617,7 +826,7 @@ const completeBinding = async (platform) => {
     }
 
     bindingProgress.step = '正在绑定到教务系统，请稍候…'
-    const token = localStorage.getItem('token') || ''
+    const token = getTokenSync() || ''
     const bindFn = platform === 'tis' ? 'bind_tis' : 'bind_blackboard'
     const result = await invoke(bindFn, { cookies, backendUrl: 'http://127.0.0.1:8002', token })
     if (result && result.success) {
@@ -662,6 +871,7 @@ onMounted(() => {
   loadBindingStatus()
   loadEmailStatus()
   loadSettings()
+  loadApiKeys()
 })
 
 onBeforeUnmount(() => {
@@ -694,15 +904,7 @@ const removeEmailBinding = (id) => {
   emailBindings.value = emailBindings.value.filter(item => item.id !== id)
 }
 
-const addRssSource = () => {
-  const nextId = Date.now()
-  rssSources.value.unshift({ id: nextId, url: newRss.value })
-  newRss.value = ''
-}
 
-const removeRssSource = (id) => {
-  rssSources.value = rssSources.value.filter(item => item.id !== id)
-}
 </script>
 
 <style scoped>

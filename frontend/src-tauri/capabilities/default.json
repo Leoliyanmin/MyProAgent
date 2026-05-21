@@ -5,6 +5,7 @@
   "windows": ["main", "cas-login", "cas-login-bb"],
   "permissions": [
     "core:default",
+    "store:default",
     "core:window:allow-create",
     "core:window:allow-close",
     "core:window:allow-set-focus",

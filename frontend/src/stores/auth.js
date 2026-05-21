@@ -1,51 +1,51 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI } from '../services/api.js'
+import { saveAuth, loadAuth, clearAuth, refreshSessionTTL } from '../services/auth-storage.js'
 
 export const useAuthStore = defineStore('auth', () => {
-  // State
   const user = ref(null)
-  const token = ref(localStorage.getItem('token') || null)
+  const token = ref(null)
   const loading = ref(false)
   const error = ref(null)
+  const sessionExpired = ref(false)
 
-  // Getters
   const isAuthenticated = computed(() => !!token.value)
   const isLoggedIn = computed(() => !!user.value)
 
-  // Actions
-  
-  // Initialize auth state from localStorage
   const initAuth = async () => {
-    const storedToken = localStorage.getItem('token')
-    if (storedToken) {
-      token.value = storedToken
-      try {
-        await fetchUser()
-      } catch (err) {
-        console.warn('Failed to fetch user info, continuing with token:', err.message)
-        user.value = { id: token.value, email: '', full_name: '' }
-      }
+    const result = await loadAuth()
+    if (!result) return
+    if (result.expired) {
+      sessionExpired.value = true
+      return
+    }
+    token.value = result.token
+    try {
+      await fetchUser()
+    } catch (err) {
+      console.warn('Failed to fetch user info, continuing with cached token:', err.message)
+      user.value = { email: result.user_email || '', full_name: '' }
     }
   }
 
-  // Login
   const login = async (email, password) => {
     loading.value = true
     error.value = null
+    sessionExpired.value = false
 
     try {
       const result = await authAPI.login(email, password)
 
       if (result.success && result.access_token) {
         token.value = result.access_token
-        localStorage.setItem('token', result.access_token)
+        await saveAuth({ token: result.access_token, user_email: email })
 
         try {
           await fetchUser()
         } catch (userErr) {
           console.warn('Failed to fetch user info, but login succeeded:', userErr)
-          user.value = { email, id: email }
+          user.value = { email, full_name: '' }
         }
 
         return { success: true }
@@ -61,14 +61,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Register
   const register = async (email, password, full_name, verification_code) => {
     loading.value = true
     error.value = null
-    
+
     try {
       const result = await authAPI.register(email, password, full_name, verification_code)
-      
       if (result.success) {
         return { success: true, message: result.message }
       } else {
@@ -83,14 +81,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Send verification code
   const sendVerificationCode = async (email, purpose = 'register') => {
     loading.value = true
     error.value = null
-    
     try {
-      const result = await authAPI.sendVerificationCode(email, purpose)
-      return result
+      return await authAPI.sendVerificationCode(email, purpose)
     } catch (err) {
       error.value = err.message
       return { success: false, message: err.message }
@@ -99,10 +94,8 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Fetch current user info
   const fetchUser = async () => {
     if (!token.value) return
-    
     try {
       const userData = await authAPI.getCurrentUser()
       user.value = userData
@@ -112,38 +105,43 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Logout
-  const logout = () => {
+  const logout = async () => {
     user.value = null
     token.value = null
-    localStorage.removeItem('token')
+    sessionExpired.value = false
+    await clearAuth()
   }
 
-  // Update user profile (local only, will sync to backend)
   const updateProfile = (profileData) => {
     if (user.value) {
       user.value = { ...user.value, ...profileData }
     }
   }
 
+  const touchSession = async () => {
+    await refreshSessionTTL()
+  }
+
+  const dismissExpiredNotice = () => {
+    sessionExpired.value = false
+  }
+
   return {
-    // State
     user,
     token,
     loading,
     error,
-    
-    // Getters
+    sessionExpired,
     isAuthenticated,
     isLoggedIn,
-    
-    // Actions
     initAuth,
     login,
     register,
     sendVerificationCode,
     fetchUser,
     logout,
-    updateProfile
+    updateProfile,
+    touchSession,
+    dismissExpiredNotice,
   }
 })

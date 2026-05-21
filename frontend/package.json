@@ -20,6 +20,7 @@
   "dependencies": {
     "@tauri-apps/plugin-opener": "^2.5.3",
     "@tauri-apps/plugin-shell": "^2.3.5",
+    "@tauri-apps/plugin-store": "^2.4.3",
     "echarts": "^6.0.0",
     "marked": "^18.0.2",
     "pinia": "^3.0.4",

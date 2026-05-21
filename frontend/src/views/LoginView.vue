@@ -6,6 +6,12 @@
         <p class="mac-subtitle">Sign in to your account</p>
       </div>
 
+      <div v-if="auth.sessionExpired" class="expired-banner">
+        <span class="expired-icon">⏰</span>
+        <span>Your session has expired. Please sign in again.</span>
+        <button class="expired-dismiss" @click="auth.dismissExpiredNotice()">✕</button>
+      </div>
+
       <form @submit.prevent="handleLogin" class="auth-form">
         <div class="form-group">
           <label for="email" class="mac-label">Email</label>
@@ -89,6 +95,7 @@ const validateEmail = (email) => {
 }
 
 watch(() => form.email, (newVal) => {
+  if (newVal) auth.dismissExpiredNotice()
   if (newVal && !validateEmail(newVal)) {
     errors.email = 'Invalid email format'
   } else {
@@ -319,5 +326,35 @@ const handleLogin = async () => {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.expired-banner {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #856404;
+}
+.expired-icon {
+  font-size: 16px;
+}
+.expired-dismiss {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #856404;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.expired-dismiss:hover {
+  opacity: 1;
 }
 </style>
