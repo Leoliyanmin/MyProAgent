@@ -353,16 +353,6 @@ const emailBindings = ref([
   { id: 2, email: 'yanmin.alert@example.com', code: 'MAIL-3PT7' }
 ])
 
-const newEmail = reactive({
-  email: '',
-  password: ''
-})
-
-const emailBindings = ref([
-  { id: 1, email: 'yanmin.work@example.com', code: 'MAIL-9KD2' },
-  { id: 2, email: 'yanmin.alert@example.com', code: 'MAIL-3PT7' }
-])
-
 // API Key management
 const apiKeys = ref([])
 const loadingKeys = ref(false)
