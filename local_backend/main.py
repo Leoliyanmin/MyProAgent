@@ -93,11 +93,17 @@ async def health_check():
 
 @app.on_event("startup")
 async def startup_event():
-    """启动时初始化定时任务调度器"""
-    # 从配置获取同步间隔（分钟），默认60分钟
     sync_interval = getattr(settings, 'SYNC_INTERVAL_MINUTES', 60)
-    scheduler_service.start(sync_interval_minutes=sync_interval)
-    logger.info(f"定时任务调度器已启动，同步间隔: {sync_interval} 分钟")
+    email_sync_interval = getattr(settings, 'EMAIL_SYNC_INTERVAL_MINUTES', 30)
+    scheduler_service.start(
+        sync_interval_minutes=sync_interval,
+        email_sync_interval_minutes=email_sync_interval,
+    )
+    logger.info(
+        f"定时任务调度器已启动，"
+        f"同步间隔: {sync_interval} 分钟, "
+        f"邮件同步间隔: {email_sync_interval} 分钟"
+    )
 
 
 @app.on_event("shutdown")
