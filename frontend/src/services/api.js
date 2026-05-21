@@ -2,10 +2,12 @@
 // Uses Vite proxy in development, direct URL in production
 // Note: Local Backend (8000) or Server Backend (8001)
 
+import { getTokenSync } from './auth-storage.js'
+
 const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8001'
 
-// Helper to get token from localStorage
-const getToken = () => localStorage.getItem('token')
+// Helper to get token from auth-storage (supports both localStorage and Tauri store)
+const getToken = () => getTokenSync()
 
 // Helper to make requests without authentication
 const fetchWithoutAuth = async (url, options = {}) => {
@@ -507,6 +509,28 @@ export const settingsAPI = {
     return fetchWithAuth('/auth/settings', {
       method: 'PUT',
       body: JSON.stringify(fields)
+    })
+  },
+
+  // API Key management
+  getApiKeys: async () => {
+    return fetchWithAuth('/auth/settings/api-keys')
+  },
+  saveApiKey: async (provider, api_key, api_base) => {
+    return fetchWithAuth('/auth/settings/api-keys', {
+      method: 'PUT',
+      body: JSON.stringify({ provider, api_key, api_base })
+    })
+  },
+  deleteApiKey: async (provider) => {
+    return fetchWithAuth(`/auth/settings/api-keys/${encodeURIComponent(provider)}`, {
+      method: 'DELETE'
+    })
+  },
+  testApiKey: async (provider, api_key, api_base) => {
+    return fetchWithAuth('/auth/settings/api-keys/test', {
+      method: 'POST',
+      body: JSON.stringify({ provider, api_key, api_base })
     })
   }
 }
