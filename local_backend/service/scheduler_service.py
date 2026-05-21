@@ -20,7 +20,7 @@ class SchedulerService:
         self.scheduler = AsyncIOScheduler(timezone="Asia/Shanghai")
         self.is_running = False
     
-    def start(self, sync_interval_minutes: int = 60, email_sync_interval_minutes: int = 30):
+    def start(self, sync_interval_seconds: int = 3600, email_sync_interval_seconds: int = 1800):
         """启动定时任务调度器"""
         if self.is_running:
             logger.warning("调度器已在运行中")
@@ -28,7 +28,7 @@ class SchedulerService:
 
         self.scheduler.add_job(
             self.sync_local_to_server,
-            trigger=IntervalTrigger(minutes=sync_interval_minutes),
+            trigger=IntervalTrigger(seconds=sync_interval_seconds),
             id="local_to_server_sync",
             name="本地到服务器数据同步",
             replace_existing=True
@@ -36,7 +36,7 @@ class SchedulerService:
 
         self.scheduler.add_job(
             self.sync_emails_for_all_users,
-            trigger=IntervalTrigger(minutes=email_sync_interval_minutes),
+            trigger=IntervalTrigger(seconds=email_sync_interval_seconds),
             id="email_sync",
             name="邮件定时同步",
             replace_existing=True
@@ -46,8 +46,8 @@ class SchedulerService:
         self.is_running = True
         logger.info(
             f"定时任务调度器已启动: "
-            f"本地同步间隔={sync_interval_minutes}分钟, "
-            f"邮件同步间隔={email_sync_interval_minutes}分钟"
+            f"本地同步间隔={sync_interval_seconds}秒, "
+            f"邮件同步间隔={email_sync_interval_seconds}秒"
         )
     
     def stop(self):
@@ -86,31 +86,34 @@ class SchedulerService:
                     if not tasks and not schedules:
                         continue
                     
-                    sync_data = {
-                        'user_id': user_id,
-                        'tasks': tasks,
-                        'schedules': schedules,
-                        'sync_time': datetime.now().isoformat()
-                    }
-                    
-                    # 发送到服务器
-                    response = requests.post(
-                        f"{settings.SERVER_BACKEND_URL}/sync/from-client",
-                        json=sync_data,
-                        headers={"X-User-ID": str(user_id)}
-                    )
-                    
-                    if response.status_code == 200:
-                        result = response.json()
-                        if result.get('success'):
-                            total_synced += 1
-                            logger.info(f"用户 {user_id} 同步成功: {len(tasks)} 个任务, {len(schedules)} 个日程")
-                        else:
-                            total_failed += 1
-                            logger.error(f"用户 {user_id} 同步失败: {result.get('message')}")
+                    headers = {"X-User-ID": str(user_id)}
+                    all_ok = True
+
+                    if tasks:
+                        resp = requests.post(
+                            f"{settings.SERVER_BACKEND_URL}/sync/from-client",
+                            json={"data_type": "tasks", "data": tasks},
+                            headers=headers,
+                        )
+                        if resp.status_code != 200:
+                            all_ok = False
+                            logger.error(f"用户 {user_id} 任务同步HTTP错误: {resp.status_code}")
+
+                    if schedules:
+                        resp = requests.post(
+                            f"{settings.SERVER_BACKEND_URL}/sync/from-client",
+                            json={"data_type": "schedules", "data": schedules},
+                            headers=headers,
+                        )
+                        if resp.status_code != 200:
+                            all_ok = False
+                            logger.error(f"用户 {user_id} 日程同步HTTP错误: {resp.status_code}")
+
+                    if all_ok:
+                        total_synced += 1
+                        logger.info(f"用户 {user_id} 同步成功: {len(tasks)} 个任务, {len(schedules)} 个日程")
                     else:
                         total_failed += 1
-                        logger.error(f"用户 {user_id} 同步HTTP错误: {response.status_code}")
                         
                 except Exception as e:
                     total_failed += 1
