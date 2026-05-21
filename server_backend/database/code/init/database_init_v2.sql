@@ -31,4 +31,31 @@ CREATE TABLE IF NOT EXISTS user_setting (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+CREATE TABLE IF NOT EXISTS tis_course (
+    course_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id        TEXT NOT NULL,
+    course_name    TEXT NOT NULL,
+    teacher        TEXT,
+    location       TEXT,
+    weeks          TEXT,
+    term           TEXT,
+    raw_data       TEXT,
+    created_at     TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS tis_schedule_event (
+    event_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id      INTEGER NOT NULL,
+    user_id        TEXT NOT NULL,
+    day_of_week    INTEGER NOT NULL,
+    week_num       INTEGER NOT NULL,
+    period_start   INTEGER NOT NULL,
+    period_end     INTEGER NOT NULL,
+    start_time     TEXT,
+    end_time       TEXT,
+    FOREIGN KEY (course_id) REFERENCES tis_course(course_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
 COMMIT;

@@ -170,6 +170,35 @@ def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **k
         )
 
 
+def delete_server_tis_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM tis_schedule_event WHERE user_id = ?", (user_id,), db_path)
+    _execute("DELETE FROM tis_course WHERE user_id = ?", (user_id,), db_path)
+
+
+def create_server_tis_course(user_id: str, course_name: str, teacher: str = None,
+                             location: str = None, weeks: str = None,
+                             term: str = None, raw_data: str = None,
+                             db_path: str | Path = DEFAULT_DB_PATH) -> int:
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    return _execute(
+        "INSERT INTO tis_course (user_id, course_name, teacher, location, weeks, term, raw_data, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (user_id, course_name, teacher, location, weeks, term, raw_data, now),
+        db_path,
+    )
+
+
+def create_server_tis_event(course_id: int, user_id: str, day_of_week: int,
+                            week_num: int, period_start: int, period_end: int,
+                            start_time: str = None, end_time: str = None,
+                            db_path: str | Path = DEFAULT_DB_PATH) -> int:
+    return _execute(
+        "INSERT INTO tis_schedule_event (course_id, user_id, day_of_week, week_num, period_start, period_end, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (course_id, user_id, day_of_week, week_num, period_start, period_end, start_time, end_time),
+        db_path,
+    )
+
+
 # user_match_profile
 
 def upsert_user_match_profile(

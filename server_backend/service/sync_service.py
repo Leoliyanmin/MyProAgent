@@ -46,6 +46,34 @@ class SyncService:
                 db.upsert_user_setting(user_id, **sync_data)
             return {"success": True, "message": "Synced", "synced_count": 1}
 
+        if data_type == "tis":
+            db.delete_server_tis_by_user(user_id)
+            courses = sync_data if isinstance(sync_data, list) else []
+            synced = 0
+            for row in courses:
+                if not isinstance(row, dict):
+                    continue
+                cid = db.create_server_tis_course(
+                    user_id=user_id, course_name=row.get("course_name", ""),
+                    teacher=row.get("teacher"), location=row.get("location"),
+                    weeks=row.get("weeks"), term=row.get("term"),
+                    raw_data=row.get("raw_data"),
+                )
+                events = row.get("events", [])
+                if isinstance(events, list):
+                    for ev in events:
+                        db.create_server_tis_event(
+                            course_id=cid, user_id=user_id,
+                            day_of_week=ev.get("day_of_week", 0),
+                            week_num=ev.get("week_num", 1),
+                            period_start=ev.get("period_start", 1),
+                            period_end=ev.get("period_end", 1),
+                            start_time=ev.get("start_time"),
+                            end_time=ev.get("end_time"),
+                        )
+                synced += 1
+            return {"success": True, "message": "Synced", "synced_count": synced}
+
         push_payload = {
             "user": {
                 "user_id": user_id,

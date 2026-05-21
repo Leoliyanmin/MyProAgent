@@ -7,6 +7,7 @@ from database.code.operations.database_task_operations import TaskOperations
 from database.code.operations.database_task_v2_operations import TaskV2Operations
 from database.code.operations.database_user_setting_operations import UserSettingOperations
 from database.code.operations.database_schedule_operations import ScheduleOperations
+from database.code.command.database_command import list_tis_courses_by_user, list_tis_events_by_user
 
 schedule_ops = ScheduleOperations()
 task_v2_ops = TaskV2Operations()
@@ -124,6 +125,25 @@ class SchedulerService:
                         resp = requests.post(
                             f"{settings.SERVER_BACKEND_URL}/sync/from-client",
                             json={"data_type": "user_setting", "data": [user_setting]},
+                            headers=headers,
+                        )
+                        if resp.status_code != 200:
+                            all_ok = False
+
+                    tis_courses = list_tis_courses_by_user(user_id)
+                    if tis_courses:
+                        tis_events = list_tis_events_by_user(user_id)
+                        event_map = {}
+                        for ev in tis_events:
+                            cid = ev.get("course_id")
+                            if cid not in event_map:
+                                event_map[cid] = []
+                            event_map[cid].append(ev)
+                        for c in tis_courses:
+                            c["events"] = event_map.get(c["course_id"], [])
+                        resp = requests.post(
+                            f"{settings.SERVER_BACKEND_URL}/sync/from-client",
+                            json={"data_type": "tis", "data": tis_courses},
                             headers=headers,
                         )
                         if resp.status_code != 200:
