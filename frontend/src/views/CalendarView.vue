@@ -642,7 +642,7 @@ const onDragLeave = () => {
   dragOverCellIndex.value = null
 }
 
-const onDrop = (e, day) => {
+const onDrop = async (e, day) => {
   e.preventDefault()
   dragOverCellIndex.value = null
   if (!draggingEvent.value) return
@@ -655,12 +655,43 @@ const onDrop = (e, day) => {
   if (diffDays !== 0) {
     const newEnd = new Date(event.end)
     newEnd.setDate(newEnd.getDate() + diffDays)
+    const newEndDate = newEnd.toISOString().split('T')[0]
 
-    calendarStore.updateEvent({
-      ...event,
+    // Only pass core data properties — NOT view-layer flags (isAllDay, isStart, etc.)
+    const updatedData = {
+      id: event.id,
+      title: event.title,
       start: day.date,
-      end: newEnd.toISOString().split('T')[0]
-    })
+      end: newEndDate,
+      // Explicitly preserve the same time period (startTime / endTime unchanged)
+      startTime: event.startTime || '',
+      endTime: event.endTime || '',
+      color: event.color,
+      priority: event.priority,
+      description: event.description,
+      source: event.source,
+      isTodo: event.isTodo || false,
+      completed: event.completed || false,
+      linkedScheduleId: event.linkedScheduleId
+    }
+
+    // Standalone todos live in dashboardStore.todos, NOT in basicEvents
+    const isStandaloneTodo = event.isTodo && !event.linkedScheduleId
+    if (isStandaloneTodo) {
+      dashboardStore.updateTodo(updatedData)
+    } else {
+      calendarStore.updateEvent(updatedData)
+
+      // Sync to backend after drag (was missing — changes were local-only)
+      const existingInBasic = calendarStore.basicEvents.find(e => e.id === event.id)
+      if (existingInBasic) {
+        try {
+          await calendarStore.updateScheduleOnBackend(event.id, updatedData)
+        } catch (err) {
+          console.error('Failed to sync dragged schedule to backend:', err)
+        }
+      }
+    }
   }
   draggingEvent.value = null
 }
