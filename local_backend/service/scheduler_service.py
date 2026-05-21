@@ -92,7 +92,7 @@ class SchedulerService:
                     if tasks:
                         resp = requests.post(
                             f"{settings.SERVER_BACKEND_URL}/sync/from-client",
-                            json={"data_type": "tasks", "data": tasks},
+                            json={"data_type": "data", "data": tasks},
                             headers=headers,
                         )
                         if resp.status_code != 200:
@@ -102,7 +102,7 @@ class SchedulerService:
                     if schedules:
                         resp = requests.post(
                             f"{settings.SERVER_BACKEND_URL}/sync/from-client",
-                            json={"data_type": "schedules", "data": schedules},
+                            json={"data_type": "schedule", "data": schedules},
                             headers=headers,
                         )
                         if resp.status_code != 200:
