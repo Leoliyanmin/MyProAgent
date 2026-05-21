@@ -21,6 +21,7 @@ dist
 dist-ssr
 coverage
 *.local
+!Dockerfile.local
 
 # ----------------------------------------
 # Python / Backend
@@ -209,6 +210,7 @@ mock_frontend/
 # Standalone CAS demo app (not for production)
 cas-demo/
 *.yaml
+!k8s/*.yaml
 *.spec
 
 # metrics tool generated report

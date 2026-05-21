@@ -27,19 +27,19 @@ except ImportError as e:
 # 直接导入模块，避免通过 __init__.py 导入 api
 try:
     # Import agent module directly
-    agent_spec = importlib.util.spec_from_file_location("agent", localagent_path / "agent.py")
+    agent_spec = importlib.util.spec_from_file_location("localagent.agent", localagent_path / "agent.py")
     agent_module = importlib.util.module_from_spec(agent_spec)
     agent_spec.loader.exec_module(agent_module)
     LocalAgent = agent_module.LocalAgent
 
     # Import session module
-    session_spec = importlib.util.spec_from_file_location("session", localagent_path / "session.py")
+    session_spec = importlib.util.spec_from_file_location("localagent.session", localagent_path / "session.py")
     session_module = importlib.util.module_from_spec(session_spec)
     session_spec.loader.exec_module(session_module)
     SessionManager = session_module.SessionManager
 
     # Import memory module
-    memory_spec = importlib.util.spec_from_file_location("memory", localagent_path / "memory.py")
+    memory_spec = importlib.util.spec_from_file_location("localagent.memory", localagent_path / "memory.py")
     memory_module = importlib.util.module_from_spec(memory_spec)
     memory_spec.loader.exec_module(memory_module)
     MemoryStore = memory_module.MemoryStore
