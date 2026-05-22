@@ -51,7 +51,7 @@ export const useEmailStore = defineStore('email', () => {
           notifications.value.unshift({
             id, title: m.title || '(无主题)', sender: m.sender || '',
           })
-          setTimeout(() => dismissNotification(id), 5000)
+          setTimeout(() => dismissNotification(id), 30000)
         }
       }
       _knownIds.clear()
@@ -64,7 +64,7 @@ export const useEmailStore = defineStore('email', () => {
   function startPolling() {
     if (_pollTimer) return
     fetchStatus()
-    _pollTimer = setInterval(checkNewEmails, 10000)
+    _pollTimer = setInterval(checkNewEmails, 5000)
   }
 
   function stopPolling() {

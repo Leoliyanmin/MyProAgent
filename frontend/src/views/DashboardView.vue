@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import VueGridLayout from 'vue3-grid-layout'
 import { useDashboardStore } from '../stores/dashboard'
 
@@ -35,10 +35,12 @@ const { GridLayout, GridItem } = VueGridLayout
 
 import WidgetTodo from '../components/widgets/WidgetTodo.vue'
 import WidgetMessages from '../components/widgets/WidgetMessages.vue'
+import WidgetMarkdownEditor from '../components/widgets/WidgetMarkdownEditor.vue'
 
 const componentMap = {
   'todo': WidgetTodo,
-  'messages': WidgetMessages
+  'messages': WidgetMessages,
+  'markdown': WidgetMarkdownEditor
 }
 
 const getComponentByType = (type) => componentMap[type]
@@ -53,6 +55,18 @@ const toggleEditMode = () => {
     dashboardStore.saveLayout()
   }
 }
+
+// Ensure markdown widget is present in layout (Pinia auto-unwraps refs)
+onMounted(() => {
+  const cfg = dashboardStore.layoutConfig
+  const hasMarkdown = cfg.some(item => item.type === 'markdown')
+  if (!hasMarkdown) {
+    cfg.push({
+      x: 0, y: 5, w: 12, h: 8, i: '5', type: 'markdown', minW: 6, minH: 4
+    })
+    dashboardStore.saveLayout()
+  }
+})
 </script>
 
 <style scoped>
