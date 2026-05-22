@@ -92,6 +92,17 @@ export const useFileManagerStore = defineStore('fileManager', () => {
     return res
   }
 
+  async function createFolder(dirname) {
+    if (!dirname.trim()) throw new Error('目录名不能为空')
+    const res = await agentAPI.createDirectory(
+      workingDirectory.value,
+      dirname.trim(),
+      currentRelativePath.value,
+    )
+    await listFiles()
+    return res
+  }
+
   async function renameFile(oldName, newName) {
     if (!oldName.trim() || !newName.trim()) throw new Error('文件名不能为空')
     const res = await agentAPI.renameFileByName(
@@ -177,6 +188,7 @@ export const useFileManagerStore = defineStore('fileManager', () => {
     navigateToFolder,
     navigateUp,
     createFile,
+    createFolder,
     renameFile,
     deleteFile,
     updateFile,

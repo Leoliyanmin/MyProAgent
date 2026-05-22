@@ -287,6 +287,13 @@ export const agentAPI = {
     }, 2)
   },
 
+  createDirectory: async (working_directory, dirname, relative_path = '') => {
+    return fetchWithAuthRetry('/agent/file-manager/dir/create', {
+      method: 'POST',
+      body: JSON.stringify({ working_directory, relative_path, dirname })
+    }, 2)
+  },
+
   renameFileByName: async (working_directory, old_filename, new_filename, relative_path = '') => {
     return fetchWithAuthRetry('/agent/file-manager/file/rename', {
       method: 'POST',
