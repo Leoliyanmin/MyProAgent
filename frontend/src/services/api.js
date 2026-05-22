@@ -535,10 +535,10 @@ export const settingsAPI = {
   getApiKeys: async () => {
     return fetchWithAuth('/auth/settings/api-keys')
   },
-  saveApiKey: async (provider, api_key, api_base) => {
+  saveApiKey: async (provider, api_key, api_base, model = '') => {
     return fetchWithAuth('/auth/settings/api-keys', {
       method: 'PUT',
-      body: JSON.stringify({ provider, api_key, api_base })
+      body: JSON.stringify({ provider, api_key, api_base, model })
     })
   },
   deleteApiKey: async (provider) => {
@@ -550,6 +550,11 @@ export const settingsAPI = {
     return fetchWithAuth('/auth/settings/api-keys/test', {
       method: 'POST',
       body: JSON.stringify({ provider, api_key, api_base })
+    })
+  },
+  toggleApiKey: async (provider) => {
+    return fetchWithAuth(`/auth/settings/api-keys/${encodeURIComponent(provider)}/toggle`, {
+      method: 'POST'
     })
   }
 }

@@ -28,81 +28,46 @@
 
       <article class="panel">
         <h2 class="panel-title">邮箱绑定</h2>
-        <form class="add-form" @submit.prevent="addEmailBinding">
-          <input
-            v-model.trim="newEmail.email"
-            class="text-input"
-            type="email"
-            placeholder="新增绑定邮箱"
-            required
-          />
-          <input
-            v-model="newEmail.password"
-            class="text-input"
-            type="password"
-            placeholder="邮箱密码"
-            required
-          />
-          <button class="action-btn" type="submit">添加绑定</button>
-        </form>
+        <p class="binding-meta binding-hint" style="margin-bottom: 8px;">仅支持腾讯企业邮箱（如 @mail.sustech.edu.cn）</p>
 
-        <ul class="binding-list">
-          <li v-for="item in emailBindings" :key="item.id" class="binding-item">
-            <div class="binding-main">
-              <p class="binding-title">{{ item.email }}</p>
-              <p class="binding-meta">绑定代码：{{ item.code }}</p>
-            </div>
-            <button class="text-btn" type="button" @click="removeEmailBinding(item.id)">移除</button>
-          </li>
-        </ul>
+        <template v-if="email.status === 'loading'">
+          <p class="binding-meta">加载中…</p>
+        </template>
+        <template v-else-if="email.status === 'bound'">
+          <ul class="binding-list">
+            <li class="binding-item">
+              <div class="binding-main">
+                <p class="binding-title">{{ email.emailAddress }}</p>
+                <p class="binding-meta" v-if="email.bindTime">绑定时间：{{ email.bindTime }}</p>
+                <p class="binding-meta" v-if="email.lastSyncTime">上次同步：{{ email.lastSyncTime }}</p>
+              </div>
+              <div class="action-group">
+                <button class="action-btn ghost" type="button" @click="syncEmail">同步</button>
+                <button class="text-btn" type="button" @click="unbindEmail">解绑</button>
+              </div>
+            </li>
+          </ul>
+        </template>
+        <template v-else>
+          <div class="email-bind-form">
+            <input v-model="emailForm.email" class="text-input" type="email" placeholder="企业邮箱地址（如 xxx@mail.sustech.edu.cn）" />
+            <input v-model="emailForm.password" class="text-input" type="password" placeholder="客户端专用密码（非登录密码）" />
+            <p class="binding-meta binding-hint">获取方式：登录邮箱网页版 → 设置 → 客户端专用密码 → 生成</p>
+            <button class="action-btn" type="button" @click="bindEmail">绑定邮箱</button>
+          </div>
+        </template>
       </article>
 
       <article class="panel">
         <h2 class="panel-title">AI 服务 API Key</h2>
         
-        <!-- 添加按钮 / 展开表单 -->
-        <div v-if="!showAddKeyForm" style="margin-bottom:12px;">
-          <button class="action-btn ghost" type="button" @click="showAddKeyForm = true">+ 添加 API Key</button>
-        </div>
-        <div v-else class="add-form">
-          <select v-model="newKey.provider" class="text-input" style="flex:0 0 auto;width:140px;">
-            <option value="">选择服务商</option>
-            <option value="deepseek">DeepSeek</option>
-            <option value="openai">OpenAI</option>
-            <option value="anthropic">Anthropic</option>
-            <option value="zhipu">Zhipu (智谱)</option>
-            <option value="openrouter">OpenRouter</option>
-            <option value="groq">Groq</option>
-            <option value="moonshot">Moonshot</option>
-            <option value="gemini">Gemini</option>
-            <option value="custom">自定义</option>
-          </select>
-          <input
-            v-if="newKey.provider === 'custom'"
-            v-model.trim="newKey.customProvider"
-            class="text-input"
-            type="text"
-            placeholder="自定义服务商名称"
-            style="flex:0 0 auto;width:160px;"
-          />
-          <input
-            v-model.trim="newKey.api_key"
-            class="text-input"
-            type="password"
-            placeholder="API Key (sk-...)"
-          />
-          <input
-            v-model.trim="newKey.api_base"
-            class="text-input"
-            type="text"
-            :placeholder="defaultBaseFor(newKey.provider)"
-          />
-          <button class="action-btn" type="button" :disabled="saving" @click="addApiKey">{{ saving ? '保存中...' : '保存并测试' }}</button>
-          <button class="action-btn ghost" type="button" @click="cancelAddKey">取消</button>
+        <!-- 添加按钮 -->
+        <div style="margin-bottom:12px;">
+          <button class="action-btn ghost" type="button" @click="showAddKeyModal = true">+ 添加 API Key</button>
         </div>
 
         <!-- 空态 -->
-        <p v-if="apiKeys.length === 0 && !showAddKeyForm && !loadingKeys" class="binding-meta">暂无已配置的 API Key</p>
+        <p v-if="apiKeys.length === 0 && !loadingKeys" class="binding-meta">暂无已配置的 API Key</p>
         <p v-if="loadingKeys" class="binding-meta">加载中...</p>
 
         <!-- 已绑定列表 -->
@@ -110,6 +75,7 @@
           <li v-for="item in apiKeys" :key="item.provider" class="binding-item">
             <div class="binding-main">
               <p class="binding-title">{{ item.provider }}</p>
+              <p v-if="item.model" class="binding-meta" style="font-size:11px;color:#6b7280;">模型: {{ item.model }}</p>
               <p class="binding-meta" :class="item.last_test_success === true ? 'binding-success' : item.last_test_success === false ? 'status-error' : ''">
                 {{ item.last_test_success === true ? '● 已连接' : item.last_test_success === false ? '✕ 连接失败' : '○ 未测试' }}
               </p>
@@ -117,11 +83,58 @@
               <p class="binding-meta" style="font-size:11px;color:#9ca3af;">{{ item.api_base }}</p>
             </div>
             <div class="action-group">
+              <label class="toggle-label" :title="item.is_active ? '点击停用' : '点击激活'" style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+                <span style="font-size:11px;color:#6b7280;">{{ item.is_active ? '已激活' : '未激活' }}</span>
+                <div class="toggle-switch" :class="{ active: item.is_active }" @click="toggleApiKey(item.provider)">
+                  <div class="toggle-knob"></div>
+                </div>
+              </label>
               <button class="text-btn" type="button" @click="startEditKey(item)">编辑</button>
               <button class="text-btn" type="button" @click="unbindApiKey(item.provider)">解绑</button>
             </div>
           </li>
         </ul>
+
+        <!-- 添加 API Key 弹窗 -->
+        <Teleport to="body">
+          <div v-if="showAddKeyModal" class="password-modal-mask" @click.self="closeAddKeyModal">
+            <div class="password-modal" role="dialog" aria-modal="true" aria-label="添加 API Key">
+              <h3 class="password-modal-title">添加 API Key</h3>
+              <div class="password-form">
+                <label class="field-label">服务商</label>
+                <select v-model="addForm.provider" class="text-input">
+                  <option value="">选择服务商</option>
+                  <option value="deepseek">DeepSeek</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="anthropic">Anthropic</option>
+                  <option value="zhipu">Zhipu (智谱)</option>
+                  <option value="openrouter">OpenRouter</option>
+                  <option value="groq">Groq</option>
+                  <option value="moonshot">Moonshot</option>
+                  <option value="gemini">Gemini</option>
+                  <option value="custom">自定义</option>
+                </select>
+
+                <label class="field-label">模型名称</label>
+                <input v-model.trim="addForm.model" class="text-input" type="text" placeholder="例如: gpt-4o, claude-3-5-sonnet, deepseek-chat" />
+
+                <label class="field-label">API Key</label>
+                <input v-model.trim="addForm.api_key" class="text-input" type="password" placeholder="sk-..." />
+
+                <label class="field-label">API Base URL</label>
+                <input v-model.trim="addForm.api_base" class="text-input" type="text" :placeholder="defaultBaseFor(addForm.provider)" />
+
+                <p v-if="addNotice" class="password-notice" :class="'status-' + addNoticeType">{{ addNotice }}</p>
+
+                <div class="password-actions">
+                  <button class="action-btn" type="button" :disabled="saving" @click="submitAddKey">{{ saving ? '保存中...' : '保存' }}</button>
+                  <button class="action-btn ghost" type="button" :disabled="saving" @click="testAddKey">测试连接</button>
+                  <button class="action-btn ghost" type="button" @click="closeAddKeyModal">取消</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Teleport>
 
         <!-- 编辑弹窗 -->
         <Teleport to="body">
@@ -129,6 +142,8 @@
             <div class="password-modal" role="dialog" aria-modal="true" aria-label="编辑 API Key">
               <h3 class="password-modal-title">编辑 {{ editingKey.provider }}</h3>
               <div class="password-form">
+                <label class="field-label">模型名称</label>
+                <input v-model.trim="editForm.model" class="text-input" type="text" placeholder="例如: gpt-4o, claude-3-5-sonnet" />
                 <label class="field-label">API Key</label>
                 <input v-model.trim="editForm.api_key" class="text-input" type="password" placeholder="sk-..." />
                 <label class="field-label">API Base URL</label>
@@ -192,33 +207,7 @@
               <button v-else-if="bb.status === 'bound'" class="action-btn ghost" type="button" @click="unbindBb">解绑</button>
             </div>
           </li>
-          <li class="provider-item">
-            <div>
-              <p class="binding-title">邮箱</p>
-              <p class="binding-meta" v-if="email.status === 'loading'">加载中…</p>
-              <template v-else-if="email.status === 'bound'">
-                <p class="binding-meta binding-success">已绑定 · {{ email.emailAddress }}</p>
-                <p class="binding-meta">绑定时间：{{ email.bindTime }}</p>
-                <p v-if="email.lastSyncTime" class="binding-meta">上次同步：{{ email.lastSyncTime }}</p>
-              </template>
-              <p class="binding-meta" v-else>未绑定</p>
-              <p class="binding-meta binding-hint" style="margin-top: 4px;">仅支持腾讯企业邮箱（如 @mail.sustech.edu.cn）</p>
-            </div>
-            <div class="action-group">
-              <template v-if="email.status === 'unbound'">
-                <div class="email-bind-form">
-                  <input v-model="emailForm.email" class="text-input" type="email" placeholder="企业邮箱地址（如 xxx@mail.sustech.edu.cn）" />
-                  <input v-model="emailForm.password" class="text-input" type="password" placeholder="客户端专用密码（非登录密码）" />
-                  <p class="binding-meta binding-hint">获取方式：登录邮箱网页版 → 设置 → 客户端专用密码 → 生成</p>
-                  <button class="action-btn" type="button" @click="bindEmail">绑定邮箱</button>
-                </div>
-              </template>
-              <template v-else-if="email.status === 'bound'">
-                <button class="action-btn ghost" type="button" @click="syncEmail">同步</button>
-                <button class="action-btn ghost" type="button" @click="unbindEmail">解绑</button>
-              </template>
-            </div>
-          </li>
+
         </ul>
         <p class="binding-meta" v-if="isTauriApp" style="margin-top: 10px;">💡 点击「绑定」打开登录窗口，完成登录后<strong>保持窗口打开</strong>，然后点击「完成登录，开始绑定」。提取 Cookie 后会询问是否关闭窗口。</p>
         <p v-if="bindingError" class="status-text status-error" style="margin-top: 8px;">{{ bindingError }}</p>
@@ -343,29 +332,24 @@ const mockPasswordBackend = reactive({
   latestVerifyCode: ''
 })
 
-const newEmail = reactive({
-  email: '',
-  password: ''
-})
-
-const emailBindings = ref([
-  { id: 1, email: 'yanmin.work@example.com', code: 'MAIL-9KD2' },
-  { id: 2, email: 'yanmin.alert@example.com', code: 'MAIL-3PT7' }
-])
-
 // API Key management
 const apiKeys = ref([])
 const loadingKeys = ref(false)
 const saving = ref(false)
-const showAddKeyForm = ref(false)
-const newKey = reactive({
+
+const showAddKeyModal = ref(false)
+const addForm = reactive({
   provider: '',
-  customProvider: '',
+  model: '',
   api_key: '',
   api_base: ''
 })
+const addNotice = ref('')
+const addNoticeType = ref('info')
+
 const editingKey = ref(null)
 const editForm = reactive({
+  model: '',
   api_key: '',
   api_base: ''
 })
@@ -400,32 +384,61 @@ const loadApiKeys = async () => {
   }
 }
 
-const cancelAddKey = () => {
-  showAddKeyForm.value = false
-  newKey.provider = ''
-  newKey.customProvider = ''
-  newKey.api_key = ''
-  newKey.api_base = ''
+const closeAddKeyModal = () => {
+  showAddKeyModal.value = false
+  addForm.provider = ''
+  addForm.model = ''
+  addForm.api_key = ''
+  addForm.api_base = ''
+  addNotice.value = ''
+  addNoticeType.value = 'info'
 }
 
-const addApiKey = async () => {
-  const provider = newKey.provider === 'custom' ? newKey.customProvider : newKey.provider
-  if (!provider || !newKey.api_key) return
+const submitAddKey = async () => {
+  const provider = addForm.provider
+  if (!provider || !addForm.api_key) return
   saving.value = true
+  addNotice.value = ''
   try {
-    const apiBase = newKey.api_base || defaultBaseFor(newKey.provider)
-    await settingsAPI.saveApiKey(provider, newKey.api_key, apiBase)
-    cancelAddKey()
+    const apiBase = addForm.api_base || defaultBaseFor(addForm.provider)
+    await settingsAPI.saveApiKey(provider, addForm.api_key, apiBase, addForm.model)
+    closeAddKeyModal()
     await loadApiKeys()
   } catch (e) {
-    console.error('[UserSettings] Failed to save API key:', e)
+    addNotice.value = '保存失败: ' + e.message
+    addNoticeType.value = 'error'
   } finally {
     saving.value = false
   }
 }
 
+const testAddKey = async () => {
+  if (!addForm.provider || !addForm.api_key) {
+    addNotice.value = '请先选择服务商并填写 API Key'
+    addNoticeType.value = 'warn'
+    return
+  }
+  addNotice.value = '正在测试连接...'
+  addNoticeType.value = 'info'
+  try {
+    const apiBase = addForm.api_base || defaultBaseFor(addForm.provider)
+    const result = await settingsAPI.testApiKey(addForm.provider, addForm.api_key, apiBase)
+    if (result.success) {
+      addNotice.value = '连接成功！'
+      addNoticeType.value = 'success'
+    } else {
+      addNotice.value = '连接失败: ' + (result.message || '未知错误')
+      addNoticeType.value = 'error'
+    }
+  } catch (e) {
+    addNotice.value = '测试失败: ' + e.message
+    addNoticeType.value = 'error'
+  }
+}
+
 const startEditKey = (item) => {
   editingKey.value = item
+  editForm.model = item.model || ''
   editForm.api_key = ''
   editForm.api_base = item.api_base || ''
   editNotice.value = ''
@@ -444,7 +457,8 @@ const saveEditKey = async () => {
   editNotice.value = ''
   try {
     const apiBase = editForm.api_base || editingKey.value.api_base
-    await settingsAPI.saveApiKey(editingKey.value.provider, editForm.api_key, apiBase)
+    const model = editForm.model || editingKey.value.model || ''
+    await settingsAPI.saveApiKey(editingKey.value.provider, editForm.api_key, apiBase, model)
     editNotice.value = '保存成功'
     editNoticeType.value = 'success'
     await loadApiKeys()
@@ -475,6 +489,21 @@ const testEditKey = async () => {
   } catch (e) {
     editNotice.value = '测试失败: ' + e.message
     editNoticeType.value = 'error'
+  }
+}
+
+const toggleApiKey = async (provider) => {
+  try {
+    const result = await settingsAPI.toggleApiKey(provider)
+    if (result.success) {
+      // Update local state immediately so UI is responsive
+      apiKeys.value = apiKeys.value.map(k => ({
+        ...k,
+        is_active: k.provider === provider ? result.is_active : false
+      }))
+    }
+  } catch (e) {
+    console.error('[UserSettings] Failed to toggle API key:', e)
   }
 }
 
@@ -870,30 +899,6 @@ onBeforeUnmount(() => {
   }
 })
 
-const createCode = () => {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let token = 'MAIL-'
-  for (let i = 0; i < 4; i += 1) {
-    token += alphabet[Math.floor(Math.random() * alphabet.length)]
-  }
-  return token
-}
-
-const addEmailBinding = () => {
-  const nextId = Date.now()
-  emailBindings.value.unshift({
-    id: nextId,
-    email: newEmail.email,
-    code: createCode()
-  })
-  newEmail.email = ''
-  newEmail.password = ''
-}
-
-const removeEmailBinding = (id) => {
-  emailBindings.value = emailBindings.value.filter(item => item.id !== id)
-}
-
 
 </script>
 
@@ -1216,5 +1221,37 @@ const removeEmailBinding = (id) => {
 
 .email-bind-form .action-btn {
   align-self: flex-end;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: #d1d5db;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-switch.active {
+  background: #16a34a;
+}
+
+.toggle-knob {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle-switch.active .toggle-knob {
+  transform: translateX(16px);
 }
 </style>
