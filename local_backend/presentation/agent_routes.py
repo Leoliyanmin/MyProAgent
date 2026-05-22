@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List
 from presentation.schemas import (
     AgentChatMessage,
+    AgentFileManagerDirectoryCreateRequest,
     AgentFileManagerFileCreateRequest,
     AgentFileManagerFileDeleteRequest,
     AgentFileManagerFileReadRequest,
@@ -98,6 +99,24 @@ async def create_file_by_name(
             working_directory=request.working_directory,
             relative_path=request.relative_path or "",
             filename=request.filename,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return AgentFileManagerOperationResponse(**result)
+
+
+@router.post("/file-manager/dir/create", response_model=AgentFileManagerOperationResponse)
+async def create_directory(
+    request: AgentFileManagerDirectoryCreateRequest,
+    _: str = Depends(get_current_user_id),
+):
+    """创建目录：在指定目录下新建文件夹。"""
+    try:
+        result = agent_service.create_directory(
+            working_directory=request.working_directory,
+            relative_path=request.relative_path or "",
+            dirname=request.dirname,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
