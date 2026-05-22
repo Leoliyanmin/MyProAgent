@@ -74,7 +74,7 @@
                   @blur="confirmRename(entry)"
                 />
               </span>
-              <span v-else class="file-name">{{ entry.name }}</span>
+              <span v-else class="file-name">{{ entry.is_directory ? entry.name : entry.name.replace(/\.md$/, '') }}</span>
               <div class="file-actions">
                 <button class="file-action-btn" @click.stop="startRename(entry)" title="重命名">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 16.5 3 18l1.5-4.5L17 3z"/></svg>
@@ -110,7 +110,7 @@
             :class="{ editable: !!currentFile }"
             @click="currentFile && startTitleEdit()"
             :title="currentFile ? '点击编辑文件名' : ''"
-          >{{ currentFile ? currentFile.name : '选择文件' }}</span>
+          >{{ currentFile ? currentFile.name.replace(/\.md$/, '') : '选择文件' }}</span>
           <div v-if="currentFile" class="mode-tabs">
             <button class="mode-tab" :class="{ active: editorMode === 'edit' }" @click="editorMode = 'edit'">Edit</button>
             <button class="mode-tab" :class="{ active: editorMode === 'preview' }" @click="editorMode = 'preview'">Preview</button>
@@ -176,8 +176,8 @@ let saveTimer = null
 
 const sidebarEntries = computed(() => {
   const dirs = fileManagerStore.directories || []
-  const visibleFiles = (fileManagerStore.files || []).filter(f => !f.name.startsWith('.'))
-  return [...dirs, ...visibleFiles]
+  const mdFiles = (fileManagerStore.files || []).filter(f => f.name.endsWith('.md'))
+  return [...dirs, ...mdFiles]
 })
 
 const renderedMarkdown = computed(() => {
@@ -288,7 +288,7 @@ function handleDoubleClick(entry) {
 
 function startRename(entry) {
   renamingEntry.value = entry
-  renameValue.value = entry.name
+  renameValue.value = entry.is_directory ? entry.name : entry.name.replace(/\.md$/, '')
   nextTick(() => {
     const inputs = document.querySelectorAll('.rename-input')
     if (inputs.length > 0) inputs[0].focus()
@@ -296,14 +296,18 @@ function startRename(entry) {
 }
 
 async function confirmRename(entry) {
-  if (!renameValue.value.trim() || renameValue.value.trim() === entry.name) {
+  let newName = renameValue.value.trim()
+  if (!entry.is_directory && !newName.endsWith('.md')) {
+    newName = newName + '.md'
+  }
+  if (!newName || newName === entry.name) {
     cancelRename()
     return
   }
   try {
-    await fileManagerStore.renameFile(entry.name, renameValue.value.trim())
+    await fileManagerStore.renameFile(entry.name, newName)
     if (currentFile.value && currentFile.value.name === entry.name) {
-      currentFile.value = { ...currentFile.value, name: renameValue.value.trim() }
+      currentFile.value = { ...currentFile.value, name: newName }
     }
   } catch (e) {
     console.error('重命名失败:', e)
@@ -344,7 +348,7 @@ async function handleDelete(entry) {
 function startTitleEdit() {
   if (!currentFile.value) return
   editingTitle.value = true
-  titleValue.value = currentFile.value.name
+  titleValue.value = currentFile.value.name.replace(/\.md$/, '')
   nextTick(() => {
     titleInputRef.value?.focus()
   })
@@ -355,7 +359,11 @@ async function confirmTitleEdit() {
     cancelTitleEdit()
     return
   }
-  const newName = titleValue.value.trim()
+  let newName = titleValue.value.trim()
+  // Force .md extension
+  if (!newName.endsWith('.md')) {
+    newName = newName + '.md'
+  }
   const oldName = currentFile.value.name
   if (newName === oldName) {
     cancelTitleEdit()

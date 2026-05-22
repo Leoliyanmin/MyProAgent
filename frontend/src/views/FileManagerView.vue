@@ -129,7 +129,7 @@
                   <template v-if="entry.is_directory"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></template>
                   <template v-else><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></template>
                 </svg>
-                <span class="fm-filename">{{ entry.name }}</span>
+                <span class="fm-filename">{{ entry.is_directory ? entry.name : entry.name.replace(/\.md$/, '') }}</span>
               </div>
               <span class="fm-col-size">{{ entry.is_directory ? '—' : formatSize(entry.size) }}</span>
               <span class="fm-col-date">{{ formatDate(entry.modified_at) }}</span>
@@ -170,7 +170,7 @@
           <div class="fm-preview-header">
             <div class="fm-preview-title">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              <span>{{ fmStore.previewFile.name }}</span>
+              <span>{{ fmStore.previewFile.name.replace(/\.md$/, '') }}</span>
             </div>
             <div class="fm-preview-actions">
               <template v-if="!isEditing">
@@ -278,12 +278,13 @@ const startCreate = (type) => {
 }
 
 const confirmCreate = async () => {
-  const name = createName.value.trim()
+  let name = createName.value.trim()
   if (!name) return
   try {
     if (createType.value === 'folder') {
       await fmStore.createFolder(name)
     } else {
+      if (!name.endsWith('.md')) name = name + '.md'
       await fmStore.createFile(name)
     }
     creating.value = false
@@ -300,14 +301,17 @@ const cancelCreate = () => {
 
 const startRename = (entry) => {
   renamingEntry.value = entry.name
-  renameValue.value = entry.name
+  renameValue.value = entry.is_directory ? entry.name : entry.name.replace(/\.md$/, '')
   nextTick(() => {
     renameInputRef.value?.[0]?.focus()
   })
 }
 
 const confirmRename = async (entry) => {
-  const newName = renameValue.value.trim()
+  let newName = renameValue.value.trim()
+  if (!entry.is_directory && !newName.endsWith('.md')) {
+    newName = newName + '.md'
+  }
   if (!newName || newName === entry.name) {
     cancelRename()
     return
