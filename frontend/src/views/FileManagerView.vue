@@ -281,7 +281,11 @@ const confirmCreate = async () => {
   const name = createName.value.trim()
   if (!name) return
   try {
-    await fmStore.createFile(name)
+    if (createType.value === 'folder') {
+      await fmStore.createFolder(name)
+    } else {
+      await fmStore.createFile(name)
+    }
     creating.value = false
     createName.value = ''
   } catch (err) {
