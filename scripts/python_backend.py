@@ -124,7 +124,7 @@ def init_database():
         db_path1 = Path(db_cmd.DEFAULT_DB_PATH)
         db_path1.parent.mkdir(parents=True, exist_ok=True)
         print(f"[sidecar] DB (local_backend): {db_path1}", flush=True)
-        run_init(db_path=str(db_path1), schema_path=str(schema_path))
+        run_init(db_path=str(db_path1), schema_path=schema_path)
 
         # database.xxx 路径 —— scheduler/email service 走这个
         import database.code.command.database_command as db_cmd2
@@ -132,7 +132,7 @@ def init_database():
         if db_path2 != db_path1:
             db_path2.parent.mkdir(parents=True, exist_ok=True)
             print(f"[sidecar] DB (database): {db_path2}", flush=True)
-            run_init(db_path=str(db_path2), schema_path=str(schema_path))
+            run_init(db_path=str(db_path2), schema_path=schema_path)
 
         print("[sidecar] Database initialized", flush=True)
     except Exception as e:

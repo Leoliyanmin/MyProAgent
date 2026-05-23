@@ -96,14 +96,14 @@ def init_database():
         db_path1 = Path(db_cmd.DEFAULT_DB_PATH)
         db_path1.parent.mkdir(parents=True, exist_ok=True)
         print(f"[server] DB (server_backend): {db_path1}", flush=True)
-        run_init(db_path=str(db_path1), schema_path=str(schema_path))
+        run_init(db_path=str(db_path1), schema_path=schema_path)
 
         import database.code.command.database_command as db_cmd2
         db_path2 = Path(db_cmd2.DEFAULT_DB_PATH)
         if db_path2 != db_path1:
             db_path2.parent.mkdir(parents=True, exist_ok=True)
             print(f"[server] DB (database): {db_path2}", flush=True)
-            run_init(db_path=str(db_path2), schema_path=str(schema_path))
+            run_init(db_path=str(db_path2), schema_path=schema_path)
 
         print("[server] Database initialized", flush=True)
     except Exception as e:

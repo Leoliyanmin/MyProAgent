@@ -38,15 +38,17 @@ BACKENDS = [
     {
         "script": "python_backend.py",
         "name": "python-backend",
+        "data_dirs": ["local_backend", "localagent", "personality"],
     },
     {
         "script": "server_backend.py",
         "name": "server-backend",
+        "data_dirs": ["server_backend"],
     },
 ]
 
 
-def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, script_dir: Path):
+def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, script_dir: Path, data_dirs: list):
     output_name = f"{name}-{target_triple}"
     if sys.platform == "win32":
         output_name += ".exe"
@@ -67,13 +69,16 @@ def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, s
         "--distpath", str(binaries_dir),
         "--workpath", str(script_dir / "build"),
         "--specpath", str(script_dir),
-        "--paths", str(project_root / "local_backend"),
-        "--paths", str(project_root / "localagent"),
-        "--paths", str(project_root / "personality"),
         "--paths", str(project_root),
-        "--add-data", f"{project_root / 'local_backend'}{sep}local_backend",
-        "--add-data", f"{project_root / 'localagent'}{sep}localagent",
-        "--add-data", f"{project_root / 'personality'}{sep}personality",
+    ]
+    # 按后端类型分别添加数据和路径
+    for d in data_dirs:
+        cmd += [
+            "--paths", str(project_root / d),
+            "--add-data", f"{project_root / d}{sep}{d}",
+        ]
+
+    cmd += [
         "--add-data", f"{project_root / 'logging_config.py'}{sep}.",
         "--hidden-import", "passlib.handlers.bcrypt",
         "--hidden-import", "passlib.handlers.sha2_crypt",
@@ -121,7 +126,7 @@ def build_sidecar():
         if not script.exists():
             print(f"Error: Script not found: {script}")
             sys.exit(1)
-        build_one(backend["name"], script, binaries_dir, target_triple, script_dir)
+        build_one(backend["name"], script, binaries_dir, target_triple, script_dir, backend["data_dirs"])
 
     print("\nAll sidecars built successfully!")
 
