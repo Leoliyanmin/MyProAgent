@@ -135,7 +135,6 @@ export async function refreshSessionTTL() {
 /** Synchronous token read for api.js — relies on cache populated by loadAuth()/saveAuth(). */
 export function getTokenSync() {
   if (_cachedToken) return _cachedToken
-  if (isTauriEnv) return null
   try {
     const raw = JSON.parse(localStorage.getItem(STORE_KEY))
     if (raw && raw.token && (!raw.expires_at || Date.now() <= raw.expires_at)) {

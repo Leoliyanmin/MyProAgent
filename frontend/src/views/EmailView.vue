@@ -360,7 +360,7 @@ onMounted(async () => {
   }
   autoRefreshTimer = setInterval(() => {
     if (store.bindStatus.is_bound) store.fetchMessages()
-  }, 10000)
+  }, 5000)
 })
 
 onUnmounted(() => {

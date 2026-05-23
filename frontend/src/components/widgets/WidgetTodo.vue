@@ -158,13 +158,8 @@ const newTaskEndMinute = computed({
   set: (v) => { const h = (newTaskEndTime.value || '').split(':')[0] || '00'; newTaskEndTime.value = v !== '' ? `${h}:${v}` : '' }
 })
 
-const deleteTodo = (task) => {
-  const linkedId = Number(task.linkedScheduleId)
-  if (Number.isFinite(linkedId) && linkedId > 0) {
-    calendarStore.removeEvent(linkedId)
-  } else {
-    store.removeTodo(task.id)
-  }
+const deleteTodo = async (task) => {
+  await store.removeTodo(task.id)
 }
 
 

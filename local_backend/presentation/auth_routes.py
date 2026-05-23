@@ -79,3 +79,70 @@ async def update_settings(fields: dict = Body(...), user_id: str = Depends(get_c
     if not result["ok"]:
         raise HTTPException(status_code=400, detail=result["message"])
     return {"success": True, "message": result["message"]}
+
+
+# ==================== API Key Management ====================
+
+
+@router.get("/settings/api-keys")
+async def get_api_keys(user_id: str = Depends(get_current_user_id)):
+    """List all API keys for the current user (masked)."""
+    from database.code.operations.api_key_storage import list_api_keys
+    keys = list_api_keys(user_id)
+    return {"providers": keys}
+
+
+@router.put("/settings/api-keys")
+async def save_api_key(
+    body: dict = Body(...),
+    user_id: str = Depends(get_current_user_id),
+):
+    """Save or update an API key."""
+    from database.code.operations.api_key_storage import save_api_key
+    save_api_key(
+        user_id,
+        body["provider"],
+        body.get("api_key", ""),
+        body.get("api_base", ""),
+        model=body.get("model", ""),
+    )
+    return {"success": True}
+
+
+@router.delete("/settings/api-keys/{provider}")
+async def delete_api_key(
+    provider: str,
+    user_id: str = Depends(get_current_user_id),
+):
+    """Delete an API key."""
+    from database.code.operations.api_key_storage import delete_api_key
+    delete_api_key(user_id, provider)
+    return {"success": True}
+
+
+@router.post("/settings/api-keys/test")
+async def test_api_key_connection(
+    body: dict = Body(...),
+    user_id: str = Depends(get_current_user_id),
+):
+    """Test an API key connection."""
+    from database.code.operations.api_key_storage import test_api_key
+    result = test_api_key(
+        body.get("provider", ""),
+        body.get("api_key", ""),
+        body.get("api_base", ""),
+    )
+    return result
+
+
+@router.post("/settings/api-keys/{provider}/toggle")
+async def toggle_api_key(
+    provider: str,
+    user_id: str = Depends(get_current_user_id),
+):
+    """Toggle API key active state (only one active at a time)."""
+    from database.code.operations.api_key_storage import toggle_api_key
+    result = toggle_api_key(user_id, provider)
+    if not result["success"]:
+        raise HTTPException(status_code=404, detail="API key not found")
+    return result

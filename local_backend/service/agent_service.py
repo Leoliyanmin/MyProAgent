@@ -8,6 +8,7 @@ from typing import Any, Awaitable, Callable, Optional
 import websockets
 from pathlib import Path
 from datetime import datetime
+import shutil
 import sys
 
 localagent_path = Path(__file__).parent.parent.parent / "localagent"
@@ -411,6 +412,23 @@ class AgentService:
             "filename": name,
         }
 
+    def create_directory(self, working_directory: str, dirname: str, relative_path: str = ""):
+        root, target_dir, relative = self._resolve_target_directory(working_directory, relative_path)
+        name = self._validate_filename(dirname)
+        dir_path = target_dir / name
+
+        if dir_path.exists():
+            raise ValueError(f"目录已存在: {name}")
+
+        dir_path.mkdir(parents=False)
+        return {
+            "success": True,
+            "message": f"创建成功: {name}",
+            "working_directory": str(root),
+            "relative_path": relative,
+            "filename": name,
+        }
+
     def update_file_name(self, working_directory: str, filename: str, content: str, relative_path: str = ""):
         root, target_dir, relative = self._resolve_target_directory(working_directory, relative_path)
         name = self._validate_filename(filename)
@@ -439,7 +457,7 @@ class AgentService:
         old_path = target_dir / old_name
         new_path = target_dir / new_name
 
-        if not old_path.exists() or not old_path.is_file():
+        if not old_path.exists() or not (old_path.is_file() or old_path.is_dir()):
             raise ValueError(f"文件不存在: {old_name}")
         if new_path.exists():
             raise ValueError(f"目标文件名已存在: {new_name}")
@@ -481,10 +499,13 @@ class AgentService:
         name = self._validate_filename(filename)
         file_path = target_dir / name
 
-        if not file_path.exists() or not file_path.is_file():
+        if not file_path.exists() or not (file_path.is_file() or file_path.is_dir()):
             raise ValueError(f"文件不存在: {name}")
 
-        file_path.unlink()
+        if file_path.is_dir():
+            shutil.rmtree(file_path)
+        else:
+            file_path.unlink()
         return {
             "success": True,
             "message": f"删除成功: {name}",

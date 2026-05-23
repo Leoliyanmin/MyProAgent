@@ -147,6 +147,12 @@ class AgentFileManagerFileCreateRequest(BaseModel):
     filename: str = Field(..., min_length=1, description="仅文件名，不含路径")
 
 
+class AgentFileManagerDirectoryCreateRequest(BaseModel):
+    working_directory: str = Field(..., min_length=1, description="用户输入的文件工作目录")
+    relative_path: Optional[str] = Field(default="", description="相对于工作目录的子目录")
+    dirname: str = Field(..., min_length=1, description="仅目录名，不含路径")
+
+
 class AgentFileManagerFileRenameRequest(BaseModel):
     working_directory: str = Field(..., min_length=1, description="用户输入的文件工作目录")
     relative_path: Optional[str] = Field(default="", description="相对于工作目录的子目录")

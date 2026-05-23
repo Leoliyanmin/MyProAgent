@@ -35,6 +35,15 @@
 
         <button 
           class="segment" 
+          :class="{ active: currentView === 'email' }"
+          @click="emit('update:currentView', 'email')"
+        >
+          <svg class="segment-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>邮件管理</span>
+        </button>
+
+        <button 
+          class="segment" 
           :class="{ active: currentView === 'selfPortrait' }"
           @click="emit('update:currentView', 'selfPortrait')"
         >
@@ -45,15 +54,6 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
           <span>自我画像</span>
-        </button>
-
-        <button 
-          class="segment" 
-          :class="{ active: currentView === 'email' }"
-          @click="emit('update:currentView', 'email')"
-        >
-          <svg class="segment-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <span>邮件管理</span>
         </button>
       </div>
     </div>

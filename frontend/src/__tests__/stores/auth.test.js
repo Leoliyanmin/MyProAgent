@@ -31,9 +31,14 @@ describe('auth store', () => {
       expect(auth.error).toBeNull()
     })
 
-    it('restores token from localStorage', () => {
-      localStorage.setItem('token', 'stored-token')
+    it('restores token from localStorage', async () => {
+      localStorage.setItem('auth-session', JSON.stringify({
+        token: 'stored-token',
+        user_email: 'user@test.com',
+        expires_at: Date.now() + 999999999
+      }))
       const auth = useAuthStore()
+      await auth.initAuth()
       expect(auth.token).toBe('stored-token')
       expect(auth.isAuthenticated).toBe(true)
     })
@@ -57,7 +62,8 @@ describe('auth store', () => {
       expect(result.success).toBe(true)
       expect(auth.token).toBe('test-token')
       expect(auth.isAuthenticated).toBe(true)
-      expect(localStorage.getItem('token')).toBe('test-token')
+      const stored = JSON.parse(localStorage.getItem('auth-session'))
+      expect(stored.token).toBe('test-token')
     })
 
     it('sets error on failed login', async () => {
@@ -128,7 +134,7 @@ describe('auth store', () => {
       expect(auth.user).toBeNull()
       expect(auth.token).toBeNull()
       expect(auth.isAuthenticated).toBe(false)
-      expect(localStorage.getItem('token')).toBeNull()
+      expect(localStorage.getItem('auth-session')).toBeNull()
     })
   })
 

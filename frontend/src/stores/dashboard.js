@@ -33,7 +33,8 @@ const saveTodosToStorage = (todos) => {
 
 const DEFAULT_LAYOUT = [
   { x: 0, y: 0, w: 6, h: 5, i: '3', type: 'todo', minW: 3, minH: 4 },
-  { x: 6, y: 0, w: 6, h: 5, i: '4', type: 'messages', minW: 4, minH: 3 }
+  { x: 6, y: 0, w: 6, h: 5, i: '4', type: 'messages', minW: 4, minH: 3 },
+  { x: 0, y: 5, w: 12, h: 8, i: '5', type: 'markdown', minW: 6, minH: 4 }
 ]
 
 const loadLayoutFromStorage = () => {
@@ -42,6 +43,12 @@ const loadLayoutFromStorage = () => {
     if (stored) {
       const parsed = JSON.parse(stored)
       if (Array.isArray(parsed) && parsed.length > 0) {
+        const savedTypes = new Set(parsed.map(item => item.type))
+        const newItems = DEFAULT_LAYOUT.filter(item => !savedTypes.has(item.type))
+        if (newItems.length > 0) {
+          const merged = [...parsed, ...newItems]
+          return merged
+        }
         return parsed
       }
     }
@@ -106,14 +113,14 @@ const inferColorByPriority = (priority) => {
 }
 
 const mapRemoteTaskToTodo = (task) => {
-  const dueDate = task.due_date || task.data_ddl_time || ''
+  const dueDate = task.due_date || ''
   const { date, time } = parseDueDateTime(dueDate)
   const priority = inferPriority(task)
-  const description = task.description || task.data_content_text || ''
+  const description = task.description || ''
 
   return {
-    id: task.id ?? task.data_id,
-    title: task.title ?? task.data_title ?? '未命名任务',
+    id: task.task_id,
+    title: task.title || '未命名任务',
     completed: String(task.status || '').toLowerCase() === 'completed',
     start: date || new Date().toISOString().split('T')[0],
     end: date || new Date().toISOString().split('T')[0],
@@ -225,7 +232,12 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
-  const removeTodo = (id) => {
+  const removeTodo = async (id) => {
+    try {
+      await tasksAPI.deleteTask(id)
+    } catch (err) {
+      console.error('Failed to delete task from backend:', err)
+    }
     todos.value = todos.value.filter(t => t.id !== id)
     saveTodosToStorage(todos.value)
   }
