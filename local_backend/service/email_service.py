@@ -4,6 +4,7 @@ import smtplib
 import traceback
 import hashlib
 import base64
+import datetime
 from email.message import EmailMessage
 from typing import Dict, Optional
 
@@ -11,6 +12,7 @@ from cryptography.fernet import Fernet, InvalidToken
 
 from service.scraper.mail_scraper import MailScraper, write_mail_result
 from database.code.handle.database_email_v2_handle import EmailV2Handle
+from database.code.command.database_command import upsert_user
 from config import settings
 
 logging.basicConfig(level=logging.INFO)
@@ -58,6 +60,16 @@ class EmailService:
             account = self.email_handle.account_ops.get(user_id)
             if account:
                 self.email_handle.handle_unbind_email(user_id)
+
+            upsert_user(
+                user_id=user_id,
+                username=user_id,
+                user_email=user_id,
+                user_is_active=1,
+                user_created_at=datetime.datetime.utcnow().isoformat(),
+                user_last_login=None,
+                user_source_device_id=None,
+            )
 
             bind_result = self.email_handle.handle_bind_email(
                 user_id=user_id,

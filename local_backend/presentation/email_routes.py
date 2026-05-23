@@ -3,12 +3,14 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
 from service.email_service import EmailService
+from service.email_priority_service import EmailPriorityService
 from presentation.dependencies import get_current_user_id
 
 router = APIRouter(prefix="/api/v1/email", tags=["email"])
 security = HTTPBearer()
 
 email_service = EmailService()
+email_priority_service = EmailPriorityService()
 
 
 class EmailBindRequest(BaseModel):
@@ -134,4 +136,13 @@ async def empty_trash(user_id: str = Depends(get_current_user_id)):
     result = email_service.empty_trash(user_id)
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '清空失败'))
+    return result
+
+
+@router.post("/prioritize")
+async def prioritize_emails(user_id: str = Depends(get_current_user_id)):
+    """结合用户画像和日程，AI 分析邮件重要性，返回 top5 置顶"""
+    result = await email_priority_service.prioritize(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '分析失败'))
     return result

@@ -34,6 +34,15 @@
         >
           🗑 {{ trashCount > 0 ? trashCount : '' }}
         </button>
+        <button
+          class="mac-btn-primary prioritize-btn"
+          :disabled="!bindStatus.is_bound || store.prioritizing"
+          :class="{ 'is-loading': store.prioritizing }"
+          @click="handlePrioritize"
+          :title="store.priorityStrategy === 'llm' ? 'AI 分析' : store.priorityStrategy === 'rule' ? '规则分析' : ''"
+        >
+          {{ store.prioritizing ? '分析中...' : 'AI 智能置顶' }}
+        </button>
       </div>
     </div>
 
@@ -123,13 +132,18 @@
             v-for="(msg, idx) in sortedMessages"
             :key="msg.id || idx"
             class="message-item"
+            :class="{ 'is-prioritized': prioritizedSet.has(msg.id) }"
             @click="openEmail(idx)"
           >
             <div class="message-header">
+              <span v-if="prioritizedSet.has(msg.id)" class="priority-badge" :title="priorityReasons[msg.id]">⭐</span>
               <span class="msg-title">{{ msg.title || '(无主题)' }}</span>
               <span class="msg-sender">{{ msg.sender || '' }}</span>
               <span class="msg-time">{{ formatTime(msg.release_time) }}</span>
               <button class="delete-msg-btn" @click.stop="handleDelete(msg.id, idx)" title="删除">×</button>
+            </div>
+            <div v-if="prioritizedSet.has(msg.id) && priorityReasons[msg.id]" class="priority-reason">
+              {{ priorityReasons[msg.id] }}
             </div>
           </div>
         </div>
@@ -226,20 +240,55 @@ const selectedEmail = computed(() => {
   return sortedMessages.value[selectedIndex.value] || null
 })
 
+const prioritizedSet = computed(() => {
+  const ids = new Set()
+  for (const p of store.prioritizedEmails) {
+    ids.add(p.id)
+  }
+  return ids
+})
+
+const priorityReasons = computed(() => {
+  const map = {}
+  for (const p of store.prioritizedEmails) {
+    map[p.id] = p.reason || ''
+  }
+  return map
+})
+
 const sortedMessages = computed(() => {
   const list = [...store.messages]
+
+  const prioIds = prioritizedSet.value
+  const prioItems = []
+  const rest = []
+
+  for (const msg of list) {
+    if (prioIds.has(msg.id)) {
+      prioItems.push(msg)
+    } else {
+      rest.push(msg)
+    }
+  }
+
   switch (sortBy.value) {
     case 'time-asc':
-      return list.sort((a, b) => (a.release_time || '').localeCompare(b.release_time || ''))
+      rest.sort((a, b) => (a.release_time || '').localeCompare(b.release_time || ''))
+      break
     case 'time-desc':
-      return list.sort((a, b) => (b.release_time || '').localeCompare(a.release_time || ''))
+      rest.sort((a, b) => (b.release_time || '').localeCompare(a.release_time || ''))
+      break
     case 'sender':
-      return list.sort((a, b) => (a.sender || '').localeCompare(b.sender || ''))
+      rest.sort((a, b) => (a.sender || '').localeCompare(b.sender || ''))
+      break
     case 'title':
-      return list.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+      rest.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+      break
     default:
-      return list
+      rest.sort((a, b) => (b.release_time || '').localeCompare(a.release_time || ''))
   }
+
+  return [...prioItems, ...rest]
 })
 
 const composeForm = reactive({
@@ -307,6 +356,7 @@ function sanitizeHtml(html) {
 async function handleSync() {
   syncResult.value = null
   const result = await store.sync()
+  store.clearPrioritized()
   if (result?.success) {
     syncResult.value = result
     setTimeout(() => { syncResult.value = null }, 5000)
@@ -315,6 +365,11 @@ async function handleSync() {
 
 async function handleRefresh() {
   await store.fetchMessages()
+  store.clearPrioritized()
+}
+
+async function handlePrioritize() {
+  await store.prioritize()
 }
 
 async function openTrash() {
@@ -360,7 +415,7 @@ onMounted(async () => {
   }
   autoRefreshTimer = setInterval(() => {
     if (store.bindStatus.is_bound) store.fetchMessages()
-  }, 5000)
+  }, 30000)
 })
 
 onUnmounted(() => {
@@ -725,6 +780,38 @@ onUnmounted(() => {
 }
 .message-item:hover .delete-msg-btn {
   opacity: 1;
+}
+
+.priority-badge {
+  flex-shrink: 0;
+  font-size: 14px;
+  cursor: help;
+}
+
+.priority-reason {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 4px;
+  padding: 2px 8px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.message-item.is-prioritized {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.prioritize-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  border-color: #d97706 !important;
+}
+.prioritize-btn:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
 }
 
 /* ========== Email Detail Modal ========== */

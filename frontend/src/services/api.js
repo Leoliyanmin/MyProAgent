@@ -504,6 +504,12 @@ export const emailAPI = {
     return fetchWithAuth('/api/v1/email/trash', {
       method: 'DELETE'
     })
+  },
+
+  prioritize: async () => {
+    return fetchWithAuth('/api/v1/email/prioritize', {
+      method: 'POST'
+    })
   }
 }
 

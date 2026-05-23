@@ -211,10 +211,35 @@ export const useEmailStore = defineStore('email', () => {
     }
   }
 
+  const prioritizedEmails = ref([])
+  const prioritizing = ref(false)
+  const priorityStrategy = ref('')
+
+  async function prioritize() {
+    prioritizing.value = true
+    try {
+      const res = await emailAPI.prioritize()
+      if (res.success) {
+        prioritizedEmails.value = res.prioritized || []
+        priorityStrategy.value = res.strategy_used || ''
+      }
+    } catch (err) {
+      error.value = err?.message || '分析失败'
+    } finally {
+      prioritizing.value = false
+    }
+  }
+
+  function clearPrioritized() {
+    prioritizedEmails.value = []
+    priorityStrategy.value = ''
+  }
+
   return {
     bindStatus, messages, loading, syncing, sending, error,
     fetchStatus, fetchMessages, sync, send, deleteMessage,
     trashMessages, trashLoading, fetchTrash, restoreMessage, permanentDelete, emptyTrash,
     notifications, checkNewEmails, dismissNotification, startPolling, stopPolling,
+    prioritizedEmails, prioritizing, priorityStrategy, prioritize, clearPrioritized,
   }
 })
