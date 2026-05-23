@@ -11,6 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(__dirname, '..')
 
 const isWindows = process.platform === 'win32'
+const venvPython = resolve(rootDir, '..', '.venv', 'Scripts', 'python.exe')
 
 const services = [
   {
@@ -23,18 +24,18 @@ const services = [
   {
     name: 'LOCAL',
     color: '\x1b[32m',
-    command: isWindows ? 'cmd' : 'uvicorn',
+    command: isWindows ? venvPython : 'uvicorn',
     args: isWindows
-      ? ['/c', 'uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8002']
+      ? ['-m', 'uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8002']
       : ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8002'],
     cwd: resolve(rootDir, 'local_backend')
   },
   {
     name: 'SERVER',
     color: '\x1b[33m',
-    command: isWindows ? 'cmd' : 'uvicorn',
+    command: isWindows ? venvPython : 'uvicorn',
     args: isWindows
-      ? ['/c', 'uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8001']
+      ? ['-m', 'uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8001']
       : ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8001'],
     cwd: resolve(rootDir, 'server_backend')
   }

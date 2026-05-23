@@ -1,5 +1,17 @@
 # ProAgent Desktop - 快速启动指南
 
+> **重要：先激活 Python 虚拟环境**
+>
+> 虚拟环境在项目根目录的上层：
+> ```
+> 路径: D:\collections2026\phd_application\project_productivity\.venv\Scripts\python.exe
+> ```
+>
+> ```powershell
+> cd D:\collections2026\phd_application\project_productivity\team-project-26spring-26s-27
+> ..\.venv\Scripts\Activate.ps1
+> ```
+
 ## 已完成配置
 
 Tauri 桌面端项目已成功配置。项目结构：

@@ -31,6 +31,7 @@ from .tools.email_tools import (
     CheckEmailStatusTool,
     GetEmailsTool,
     SendEmailTool,
+    AnalyzeEmailsTool,
 )
 from .config import (
     LocalAgentConfig,
@@ -132,6 +133,7 @@ class LocalAgent:
         self.max_iterations = self._config.agent.max_iterations
         self.system_prompt = system_prompt or self._load_system_prompt()
         self.messages: list[dict[str, Any]] = []
+        self._profile_store: Any = None
 
     @property
     def config(self) -> LocalAgentConfig:
@@ -177,6 +179,12 @@ class LocalAgent:
             lambda: self._runtime_context.get("user_id"),
             lambda: self._runtime_context.get("token"),
         ))
+        self.tools.register(AnalyzeEmailsTool(
+            lambda: self._runtime_context.get("user_id"),
+            lambda: self._runtime_context.get("token"),
+            self.provider,
+            profile_getter=lambda: self._get_user_profile_for_email(),
+        ))
 
     def set_runtime_context(self, **context: Any) -> None:
         self._runtime_context.update(context)
@@ -190,6 +198,15 @@ class LocalAgent:
             current_time=now.strftime("%H:%M"),
             current_weekday=["周一","周二","周三","周四","周五","周六","周日"][now.weekday()],
         )
+
+    def _get_user_profile_for_email(self) -> dict:
+        user_id = self._runtime_context.get("user_id")
+        if not user_id or not self._profile_store:
+            return {}
+        try:
+            return self._profile_store.get_profile(user_id)
+        except Exception:
+            return {}
 
     def update_model(self, model: str) -> None:
         self.provider.update_config(model=model)

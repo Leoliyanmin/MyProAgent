@@ -69,6 +69,7 @@ class AgentService:
         self.profile_extractor = ProfileExtractor(llm_provider=self.agent.provider)
         self.mbti_inferencer = MBTIInferencer(llm_provider=self.agent.provider)
         self.profile_store = UserProfileStore(personal_base / "profiles")
+        self.agent._profile_store = self.profile_store
 
     def process_query(self, user_id: str, message: str, session_id: str = None):
         # 如果没有 session_id，创建一个新会话

@@ -66,7 +66,7 @@
   ],
   "preferences_inferred": {
     "communication_style": "casual",
-    "response_length_preference": "short",
+    "response_length_preference": "medium",
     "preferred_language": "zh",
     "preferred_tool_usage": "automatic"
   },
@@ -74,40 +74,40 @@
     "topic_areas": [],
     "typical_task_types": [],
     "active_hours": [
-      "evening",
-      "afternoon"
+      "afternoon",
+      "evening"
     ],
     "work_style": "flexible"
   },
   "personality_indicators": {
     "detail_oriented": 0.5,
     "proactive": 0.5,
-    "collaborative": 0.537518310546875
+    "collaborative": 0.5421897888183593
   },
   "mbti_inference": {
-    "mbti_type": "ENFP",
+    "mbti_type": "INTP",
     "scores": {
       "E_I": {
-        "E": 0.8,
-        "I": 0.4
+        "E": 0.5,
+        "I": 0.5
       },
       "S_N": {
-        "S": 0.6,
-        "N": 0.6
+        "S": 0.5,
+        "N": 0.5
       },
       "T_F": {
-        "T": 0.496,
-        "F": 0.833
+        "T": 0.596,
+        "F": 0.533
       },
       "J_P": {
-        "J": 0.3,
-        "P": 1.0
+        "J": 0.4,
+        "P": 0.7
       }
     },
-    "confidence": 0.718,
-    "description": "竞选者型 - 热情、有创造力的自由精神",
-    "last_updated": "2026-04-26T19:18:41.603568"
+    "confidence": 0.181,
+    "description": "逻辑学家型 - 好奇、分析型思考者，喜欢探索理论",
+    "last_updated": "2026-05-22T20:23:04.749083"
   },
-  "interaction_count": 14,
-  "last_updated": "2026-04-26T19:18:41.603568"
+  "interaction_count": 17,
+  "last_updated": "2026-05-22T20:23:04.749083"
 }
