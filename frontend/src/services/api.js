@@ -4,7 +4,7 @@
 
 import { getTokenSync, clearAuth } from './auth-storage.js'
 
-const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8001'
+const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8002'
 
 // Helper to get token from auth-storage (supports both localStorage and Tauri store)
 const getToken = () => getTokenSync()

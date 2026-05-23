@@ -18,6 +18,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
+# 添加 localagent 和 personality 路径
+sys.path.insert(0, str(Path(__file__).parent.parent / "localagent"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "personality"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 # 导入后端路由
 try:
     from config import settings
@@ -26,6 +31,7 @@ try:
     from presentation.task_routes import router as task_router
     from presentation.agent_routes import router as agent_router
     from presentation.sync_routes import router as sync_router
+    from presentation.email_routes import router as email_router
     from logging_config import setup_logging
 except ImportError as e:
     print(f"Import error: {e}")
@@ -58,6 +64,7 @@ app.include_router(schedule_router)
 app.include_router(task_router)
 app.include_router(agent_router)
 app.include_router(sync_router)
+app.include_router(email_router)
 
 
 @app.get("/")

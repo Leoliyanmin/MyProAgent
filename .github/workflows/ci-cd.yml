@@ -522,6 +522,12 @@ jobs:
           cd frontend
           npm ci
 
+      - name: Build Python sidecar
+        run: |
+          pip install pyinstaller
+          pip install -r local_backend/requirements.txt
+          python3 scripts/build_sidecar.py
+
       - name: Generate icon
         run: python3 scripts/gen_icon.py
 
@@ -582,6 +588,12 @@ jobs:
         run: |
           cd frontend
           npm ci
+
+      - name: Build Python sidecar
+        run: |
+          pip install pyinstaller
+          pip install -r local_backend/requirements.txt
+          python scripts/build_sidecar.py
 
       - name: Generate icon
         run: python scripts/gen_icon.py
