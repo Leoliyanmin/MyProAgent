@@ -75,7 +75,6 @@ def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, s
         "--add-data", f"{project_root / 'localagent'}{sep}localagent",
         "--add-data", f"{project_root / 'personality'}{sep}personality",
         "--add-data", f"{project_root / 'logging_config.py'}{sep}.",
-        "--add-data", f"{project_root / 'config.json'}{sep}.",
         "--hidden-import", "passlib.handlers.bcrypt",
         "--hidden-import", "passlib.handlers.sha2_crypt",
         "--hidden-import", "passlib.handlers.pbkdf2",
