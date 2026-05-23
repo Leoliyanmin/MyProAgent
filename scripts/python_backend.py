@@ -55,7 +55,7 @@ app = FastAPI(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:8002", "*"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -110,6 +110,16 @@ def stdin_loop():
             break
 
 
+def init_database():
+    """初始化数据库表"""
+    try:
+        from database.code.init.database_init import main as db_init
+        db_init()
+        print("[sidecar] Database initialized", flush=True)
+    except Exception as e:
+        print(f"[sidecar] Database init warning: {e}", flush=True)
+
+
 def start_api_server():
     """启动 FastAPI 服务器"""
     global server_instance
@@ -138,9 +148,12 @@ if __name__ == "__main__":
     app_data_dir.mkdir(exist_ok=True)
     os.environ["PROAGENT_DATA_DIR"] = str(app_data_dir)
     
+    # 初始化数据库
+    init_database()
+
     # 启动 stdin 监听线程
     input_thread = threading.Thread(target=stdin_loop, daemon=True)
     input_thread.start()
-    
+
     # 启动 API 服务器
     start_api_server()
