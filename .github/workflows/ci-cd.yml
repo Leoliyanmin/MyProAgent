@@ -231,6 +231,9 @@ jobs:
           mkdir -p pkg/proagent-local-${{ steps.version.outputs.VERSION }}
           cp -r local_backend pkg/proagent-local-${{ steps.version.outputs.VERSION }}/
           cp -r frontend/dist pkg/proagent-local-${{ steps.version.outputs.VERSION }}/frontend-dist
+          cp -r localagent pkg/proagent-local-${{ steps.version.outputs.VERSION }}/
+          cp -r personality pkg/proagent-local-${{ steps.version.outputs.VERSION }}/
+          cp logging_config.py pkg/proagent-local-${{ steps.version.outputs.VERSION }}/
           cp scripts/start-local.sh pkg/proagent-local-${{ steps.version.outputs.VERSION }}/start.sh
           cp scripts/start-local.bat pkg/proagent-local-${{ steps.version.outputs.VERSION }}/start.bat
           cp local_backend/requirements.txt pkg/proagent-local-${{ steps.version.outputs.VERSION }}/
@@ -262,6 +265,7 @@ jobs:
         run: |
           mkdir -p pkg/proagent-server-${{ steps.version.outputs.VERSION }}
           cp -r server_backend pkg/proagent-server-${{ steps.version.outputs.VERSION }}/
+          cp logging_config.py pkg/proagent-server-${{ steps.version.outputs.VERSION }}/
           cp scripts/start-server.sh pkg/proagent-server-${{ steps.version.outputs.VERSION }}/start.sh
           cp server_backend/requirements.txt pkg/proagent-server-${{ steps.version.outputs.VERSION }}/
 
@@ -377,39 +381,6 @@ jobs:
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.yml down
-
-  docker-push:
-    name: Push Docker Images to GHCR
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/integration')
-    needs: [docker-build]
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push local backend image
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-local:latest -f Dockerfile.local .
-          docker push ghcr.io/${{ github.repository_owner }}/proagent-local:latest
-
-      - name: Build and push server backend image
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-server:latest -f Dockerfile.server .
-          docker push ghcr.io/${{ github.repository_owner }}/proagent-server:latest
-
-      - name: Build and push frontend image
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest -f Dockerfile.frontend .
-          docker push ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest
 
   # ============================================================
   # 阶段六：Kubernetes

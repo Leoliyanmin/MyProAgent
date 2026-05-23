@@ -30,6 +30,7 @@ pip install -r requirements.txt -q
 
 # 初始化数据库
 echo "[3/4] 初始化数据库..."
+export PYTHONPATH="$SCRIPT_DIR:$PYTHONPATH"
 cd local_backend
 python database/code/init/database_init.py
 cd ..
