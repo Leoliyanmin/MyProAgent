@@ -115,24 +115,34 @@ def init_database():
     try:
         bundle_root = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else bundle_dir
         schema_path = bundle_root / "local_backend" / "database" / "code" / "init" / "database_init.sql"
+        schema_v2_path = bundle_root / "local_backend" / "database" / "code" / "init" / "database_init_v2.sql"
         print(f"[sidecar] Schema: {schema_path}", flush=True)
 
         from database.code.init.database_init import init_database as run_init
+        from database.code.init.database_init import _run_migrations_v2
 
-        # local_backend.xxx 路径 —— 大部分数据库操作走这个
+        def init_one(db_path):
+            db_path = Path(db_path)
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+            print(f"[sidecar] DB: {db_path}", flush=True)
+            run_init(db_path=str(db_path), schema_path=schema_path)
+            # PyInstaller 下 __file__ 路径与 --add-data 路径不一致，手动补 v2
+            import sqlite3
+            if schema_v2_path.exists():
+                v2_sql = schema_v2_path.read_text(encoding="utf-8")
+                with sqlite3.connect(str(db_path)) as conn:
+                    conn.execute("PRAGMA foreign_keys = ON;")
+                    conn.executescript(v2_sql)
+                    _run_migrations_v2(conn)
+                    conn.commit()
+                print(f"[sidecar] v2 migration applied", flush=True)
+
         import local_backend.database.code.command.database_command as db_cmd
-        db_path1 = Path(db_cmd.DEFAULT_DB_PATH)
-        db_path1.parent.mkdir(parents=True, exist_ok=True)
-        print(f"[sidecar] DB (local_backend): {db_path1}", flush=True)
-        run_init(db_path=str(db_path1), schema_path=schema_path)
+        init_one(db_cmd.DEFAULT_DB_PATH)
 
-        # database.xxx 路径 —— scheduler/email service 走这个
         import database.code.command.database_command as db_cmd2
-        db_path2 = Path(db_cmd2.DEFAULT_DB_PATH)
-        if db_path2 != db_path1:
-            db_path2.parent.mkdir(parents=True, exist_ok=True)
-            print(f"[sidecar] DB (database): {db_path2}", flush=True)
-            run_init(db_path=str(db_path2), schema_path=schema_path)
+        if db_cmd2.DEFAULT_DB_PATH != db_cmd.DEFAULT_DB_PATH:
+            init_one(db_cmd2.DEFAULT_DB_PATH)
 
         print("[sidecar] Database initialized", flush=True)
     except Exception as e:
