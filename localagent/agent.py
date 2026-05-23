@@ -172,19 +172,15 @@ class LocalAgent:
         self.tools.register(DeleteScheduleEventTool(lambda: self._runtime_context.get("user_id")))
         self.tools.register(CheckEmailStatusTool(
             lambda: self._runtime_context.get("user_id"),
-            lambda: self._runtime_context.get("token"),
         ))
         self.tools.register(GetEmailsTool(
             lambda: self._runtime_context.get("user_id"),
-            lambda: self._runtime_context.get("token"),
         ))
         self.tools.register(SendEmailTool(
             lambda: self._runtime_context.get("user_id"),
-            lambda: self._runtime_context.get("token"),
         ))
         self.tools.register(AnalyzeEmailsTool(
             lambda: self._runtime_context.get("user_id"),
-            lambda: self._runtime_context.get("token"),
             self.provider,
             profile_getter=lambda: self._get_user_profile(),
         ))
