@@ -88,14 +88,14 @@ class EmailMessageV2Operations:
 
 
 class StarredEmailV2Operations:
-    def add_star(self, user_id: str, email_id: int, reason: str | None = None, source: str = 'manual') -> int:
+    def add_star(self, user_id: str, email_id: int, reason: str | None = None, source: str = 'manual') -> tuple[int, bool]:
         from local_backend.database.code.command.database_command import (
             create_starred_email, get_starred_email
         )
         existing = get_starred_email(user_id, email_id)
         if existing:
-            return existing['star_id']
-        return create_starred_email(user_id=user_id, email_id=email_id, reason=reason, source=source)
+            return existing['star_id'], False
+        return create_starred_email(user_id=user_id, email_id=email_id, reason=reason, source=source), True
 
     def remove_star(self, user_id: str, email_id: int) -> None:
         from local_backend.database.code.command.database_command import delete_starred_email

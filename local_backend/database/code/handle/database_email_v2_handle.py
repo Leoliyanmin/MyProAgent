@@ -112,8 +112,9 @@ class EmailV2Handle:
         try:
             from local_backend.database.code.operations.database_email_v2_operations import StarredEmailV2Operations
             star_ops = StarredEmailV2Operations()
-            star_ops.add_star(user_id, email_id, reason or '手动标注', 'manual')
-            return {'success': True, 'message': '已星标'}
+            _star_id, is_new = star_ops.add_star(user_id, email_id, reason or '手动标注', 'manual')
+            msg = '已星标' if is_new else '该邮件已星标，已更新原因（如提供）'
+            return {'success': True, 'message': msg}
         except Exception as e:
             return {'success': False, 'message': '星标失败: {}'.format(e)}
 
