@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisco
 from fastapi.responses import JSONResponse
 from pathlib import Path
 from typing import List
+import asyncio
 from presentation.schemas import (
     AgentChatMessage,
     AgentFileManagerDirectoryCreateRequest,
@@ -231,9 +232,10 @@ async def get_chat_history(session_id: str, user_id: str = Depends(get_current_u
 
 
 @router.get("/session/{session_id}")
-async def get_agent_session(session_id: str, _: str = Depends(get_current_user_id)):
+async def get_agent_session(session_id: str, user_id: str = Depends(get_current_user_id)):
     """获取 LocalAgent 会话消息"""
-    result = agent_service.get_local_agent_session(session_id)
+    actual_session_id = f"{user_id}_{session_id}"
+    result = agent_service.get_local_agent_session(actual_session_id)
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', 'Failed to get session'))
     return result
@@ -468,9 +470,17 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
     for i, interaction in enumerate(interactions, 1):
         msg = interaction.get("user_input", {}).get("raw_message", "")[:50]
         print(f"\n[Reanalyze] [{i}/{total}] 正在分析交互: \"{msg}...\"")
-        update = await agent_service.profile_extractor.extract_from_interaction(interaction)
-        agent_service.profile_store.update_profile(user_id, update)
-        print(f"[Reanalyze] [{i}/{total}] 完成")
+        try:
+            update = await asyncio.wait_for(
+                agent_service.profile_extractor.extract_from_interaction(interaction),
+                timeout=15.0,
+            )
+            agent_service.profile_store.update_profile(user_id, update)
+            print(f"[Reanalyze] [{i}/{total}] 完成")
+        except asyncio.TimeoutError:
+            print(f"[Reanalyze] [{i}/{total}] 超时跳过")
+        except Exception as e:
+            print(f"[Reanalyze] [{i}/{total}] 错误: {e}")
 
     profile = agent_service.profile_store.get_profile(user_id)
     raw_messages = [
@@ -479,9 +489,17 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
         if it.get("user_input", {}).get("raw_message")
     ]
     print(f"\n[Reanalyze] 开始 MBTI 大模型分析（共 {len(raw_messages)} 条对话）...")
-    mbti = await agent_service.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages)
-    agent_service.profile_store.update_mbti(user_id, mbti)
-    print(f"[Reanalyze] MBTI 分析完成: {mbti.get('mbti_type', 'unknown')}")
+    try:
+        mbti = await asyncio.wait_for(
+            agent_service.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages),
+            timeout=30.0,
+        )
+        agent_service.profile_store.update_mbti(user_id, mbti)
+        print(f"[Reanalyze] MBTI 分析完成: {mbti.get('mbti_type', 'unknown')}")
+    except asyncio.TimeoutError:
+        print("[Reanalyze] MBTI 分析超时")
+    except Exception as e:
+        print(f"[Reanalyze] MBTI 分析错误: {e}")
 
     elapsed = (datetime.datetime.now() - start_time).total_seconds()
     print(f"[Reanalyze] 全部完成！耗时 {elapsed:.1f} 秒")

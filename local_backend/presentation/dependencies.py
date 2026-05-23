@@ -20,6 +20,11 @@ def _extract_user_id_from_payload(payload: dict | None) -> str | None:
 
 def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
     if settings.TEST_MODE:
+        if credentials is not None:
+            payload = auth_service.decode_token(credentials.credentials)
+            user_id = _extract_user_id_from_payload(payload)
+            if user_id is not None:
+                return user_id
         return "test_user"
     if credentials is None:
         raise HTTPException(

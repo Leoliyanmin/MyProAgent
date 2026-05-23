@@ -680,19 +680,36 @@ class AgentService:
                     "total_execution_time_ms": 0
                 }
             }
-            profile_update = await self.profile_extractor.extract_from_interaction(interaction_data)
-            interaction_data["user_profile_update"] = profile_update
+            # 先保存交互记录，确保即使 LLM 失败也不丢失
             self.interaction_logger.log_interaction(interaction_data)
-            self.profile_store.update_profile(user_id, profile_update)
-            profile = self.profile_store.get_profile(user_id)
-            all_interactions = self.interaction_logger.get_user_interactions(user_id, limit=9999)
-            raw_messages = [
-                it["user_input"]["raw_message"]
-                for it in all_interactions
-                if it.get("user_input", {}).get("raw_message")
-            ]
-            mbti = await self.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages)
-            self.profile_store.update_mbti(user_id, mbti)
+
+            # LLM 画像提取（带超时，失败不影响交互记录）
+            try:
+                profile_update = await asyncio.wait_for(
+                    self.profile_extractor.extract_from_interaction(interaction_data),
+                    timeout=30.0,
+                )
+                interaction_data["user_profile_update"] = profile_update
+                self.profile_store.update_profile(user_id, profile_update)
+            except Exception as e:
+                print(f"[AgentService] profile extraction error (non-fatal): {e}")
+
+            # MBTI 推断（带超时）
+            try:
+                profile = self.profile_store.get_profile(user_id)
+                all_interactions = self.interaction_logger.get_user_interactions(user_id, limit=9999)
+                raw_messages = [
+                    it["user_input"]["raw_message"]
+                    for it in all_interactions
+                    if it.get("user_input", {}).get("raw_message")
+                ]
+                mbti = await asyncio.wait_for(
+                    self.mbti_inferencer.infer_mbti(profile, raw_messages=raw_messages),
+                    timeout=30.0,
+                )
+                self.profile_store.update_mbti(user_id, mbti)
+            except Exception as e:
+                print(f"[AgentService] MBTI inference error (non-fatal): {e}")
         except Exception as e:
             print(f"[AgentService] _log_interaction error: {e}")
 

@@ -753,19 +753,54 @@ const stopGenerating = () => {
 
 
 
-  onMounted(() => {
+const loadFromBackendSession = async () => {
+  if (!authStore.isAuthenticated) return
+
+  try {
+    const result = await agentAPI.getLocalSession('default')
+    if (result && result.success && result.messages && result.messages.length > 0) {
+      const backendMessages = result.messages.map(m => ({
+        role: m.role === 'assistant' ? 'assistant' : 'user',
+        text: m.content || '',
+        done: true
+      }))
+
+      const chatId = generateId()
+      const chat = {
+        id: chatId,
+        title: '历史对话',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+
+      chatList.value.unshift(chat)
+      localStorage.setItem(getChatStorageKey(chatId), JSON.stringify(backendMessages))
+      saveChatList()
+
+      currentChatId.value = chatId
+      messages.value = backendMessages
+
+      nextTick(() => scrollToBottom())
+    }
+  } catch (e) {
+    console.error('Failed to load backend session:', e)
+  }
+}
+
+  onMounted(async () => {
   loadChatList()
   loadDismissedThemes()
-  
-  // 如果没有聊天记录，创建一个
+
   if (chatList.value.length === 0) {
-    createNewChat()
+    await loadFromBackendSession()
+    if (chatList.value.length === 0) {
+      createNewChat()
+    }
   } else {
-    // 加载最近的对话
     currentChatId.value = chatList.value[0].id
     loadChatMessages(currentChatId.value)
   }
-  
+
   if (authStore.isAuthenticated && !hasInitialized.value) {
     hasInitialized.value = true
     connectWebSocket()
