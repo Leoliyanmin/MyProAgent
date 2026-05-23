@@ -38,7 +38,7 @@ try:
     from logging_config import setup_logging
 except ImportError as e:
     print(f"Import error: {e}")
-    print(f"Backend path: {backend_path}")
+    print(f"Bundle dir: {bundle_dir}")
     print(f"Python path: {sys.path}")
     sys.exit(1)
 
