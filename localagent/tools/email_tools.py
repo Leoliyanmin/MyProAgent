@@ -342,7 +342,8 @@ class StarEmailTool(_EmailToolBase):
         data = service.star_email(user_id, int(email_id), reason)
 
         if data.get("success"):
-            return f"Email #{email_id} starred successfully."
+            msg = data.get("message") or f"Email #{email_id} starred."
+            return msg
         return f"Error: {data.get('message', 'Failed to star email')}"
 
 
