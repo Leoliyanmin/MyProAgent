@@ -157,6 +157,7 @@ import { useThemeStore } from '../../stores/theme.js'
 import { useCalendarStore } from '../../stores/calendar.js'
 import { useDashboardStore } from '../../stores/dashboard.js'
 import { useFileManagerStore } from '../../stores/fileManager.js'
+import { useEmailStore } from '../../stores/email.js'
 import { useMessageParser } from '../../composables/useMessageParser.js'
 import { agentAPI } from '../../services/api.js'
 import { marked } from 'marked'
@@ -177,6 +178,7 @@ const themeStore = useThemeStore()
 const calendarStore = useCalendarStore()
 const dashboardStore = useDashboardStore()
 const fmStore = useFileManagerStore()
+const emailStore = useEmailStore()
 const { parse: parseMessage } = useMessageParser()
 
 const shortDir = computed(() => {
@@ -200,6 +202,16 @@ const FILE_TOOL_NAMES = new Set([
   'copy_file',
   'delete_file',
   'create_dir'
+])
+
+const EMAIL_TOOL_NAMES = new Set([
+  'star_email',
+  'unstar_email',
+  'get_starred_emails',
+  'check_email_status',
+  'get_emails',
+  'send_email',
+  'analyze_emails',
 ])
 
 // 状态
@@ -586,6 +598,7 @@ const refreshPanelsIfNeeded = async (toolNames = []) => {
 
   const hasCalendarMutation = toolNames.some((name) => CALENDAR_TOOL_NAMES.has(name))
   const hasFileMutation = toolNames.some((name) => FILE_TOOL_NAMES.has(name))
+  const hasEmailMutation = toolNames.some((name) => EMAIL_TOOL_NAMES.has(name))
 
   const promises = []
 
@@ -598,6 +611,10 @@ const refreshPanelsIfNeeded = async (toolNames = []) => {
 
   if (hasFileMutation && fmStore.isDirectorySet) {
     promises.push(fmStore.listFiles())
+  }
+
+  if (hasEmailMutation) {
+    promises.push(emailStore.fetchStarred())
   }
 
   if (promises.length === 0) return
