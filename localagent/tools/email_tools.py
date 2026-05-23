@@ -135,7 +135,8 @@ class GetEmailsTool(_EmailToolBase):
             title = msg.get("title") or "(No subject)"
             sender = msg.get("sender") or ""
             time = (msg.get("release_time") or "")[:16].replace("T", " ")
-            lines.append(f"{i}. \"{title}\"")
+            msg_id = msg.get("message_id") or msg.get("id") or ""
+            lines.append(f"{i}. [#{msg_id}] \"{title}\"")
             lines.append(f"   From: {sender}  |  {time}")
             lines.append("")
 
@@ -299,7 +300,8 @@ class GetStarredEmailsTool(_EmailToolBase):
             sender = msg.get("sender") or ""
             time = (msg.get("release_time") or "")[:16].replace("T", " ")
             reason = msg.get("star_reason", "")
-            lines.append(f"{i}. ★ \"{title}\"")
+            msg_id = msg.get("message_id") or msg.get("id") or ""
+            lines.append(f"{i}. ★ [#{msg_id}] \"{title}\"")
             lines.append(f"   From: {sender}  |  {time}")
             if reason:
                 lines.append(f"   Reason: {reason}")
