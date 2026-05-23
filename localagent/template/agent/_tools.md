@@ -30,3 +30,6 @@ When user asks to create/update/delete schedule-related data, call the calendar 
 - **Get emails** (get_emails) - Retrieve synced emails, filter by title keyword
 - **Send email** (send_email) - Send email through bound account
 - **Analyze emails** (analyze_emails) - Use AI to analyze and find important emails based on your personal profile
+
+### Profile Operations
+- **Get user profile** (get_user_profile) - Read AI-inferred personality profile including MBTI type, interests, skills, and work patterns. Use when the user asks about their personality, MBTI, interests, or what kind of person they are.

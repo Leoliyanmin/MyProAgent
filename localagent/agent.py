@@ -33,6 +33,9 @@ from .tools.email_tools import (
     SendEmailTool,
     AnalyzeEmailsTool,
 )
+from .tools.profile_tools import (
+    GetUserProfileTool,
+)
 from .config import (
     LocalAgentConfig,
     load_config,
@@ -183,7 +186,10 @@ class LocalAgent:
             lambda: self._runtime_context.get("user_id"),
             lambda: self._runtime_context.get("token"),
             self.provider,
-            profile_getter=lambda: self._get_user_profile_for_email(),
+            profile_getter=lambda: self._get_user_profile(),
+        ))
+        self.tools.register(GetUserProfileTool(
+            profile_getter=lambda: self._get_user_profile(),
         ))
 
     def set_runtime_context(self, **context: Any) -> None:
@@ -199,7 +205,7 @@ class LocalAgent:
             current_weekday=["周一","周二","周三","周四","周五","周六","周日"][now.weekday()],
         )
 
-    def _get_user_profile_for_email(self) -> dict:
+    def _get_user_profile(self) -> dict:
         user_id = self._runtime_context.get("user_id")
         if not user_id or not self._profile_store:
             return {}
