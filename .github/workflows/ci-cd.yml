@@ -565,6 +565,10 @@ jobs:
         with:
           workspaces: './frontend/src-tauri -> target'
 
+      - name: Install C++ Build Tools
+        run: |
+          choco install visualstudio2022-workload-vctools -y --package-parameters "--passive --wait"
+
       - name: Install frontend deps
         run: |
           cd frontend
