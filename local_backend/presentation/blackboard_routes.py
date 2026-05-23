@@ -55,22 +55,25 @@ def _parse_due(due_str: str):
 
 @router.get("/status")
 async def get_bb_status(user_id: str = Depends(get_current_user_id)):
-    """获取Blackboard绑定状态"""
-    import json
-    import os
+    """获取Blackboard绑定状态（从DB读取）"""
+    from local_backend.database.code.command.database_command import list_categories_by_user, list_data_by_user
+
     result = blackboard_service.get_blackboard_status(user_id)
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '获取状态失败'))
 
-    json_path = os.path.join(os.path.expanduser('~'), '.proagent', 'bind_data', f'{user_id}_blackboard_courses.json')
-    if os.path.exists(json_path):
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        result['bind_time'] = data.get('bind_time', '')
-        result['courses_count'] = len(data.get('courses', []))
-        result['assignments_count'] = sum(len(c.get('assignments', [])) for c in data.get('courses', []))
-        course_names = [c.get('name', '') for c in data.get('courses', [])]
-        result['course_names'] = course_names[:5]
+    categories = list_categories_by_user(user_id)
+    bb_courses = [c for c in categories
+                  if c.get('category_kind') == 'course' and c.get('category_source') == 'blackboard']
+    all_data = list_data_by_user(user_id)
+    bb_course_ids = {c['category_id'] for c in bb_courses}
+    assignments = [d for d in all_data
+                   if d.get('data_content_type') == 'assignment'
+                   and d.get('data_category_id') in bb_course_ids]
+
+    result['courses_count'] = len(bb_courses)
+    result['assignments_count'] = len(assignments)
+    result['course_names'] = [c.get('category_title', '') for c in bb_courses[:5]]
     return result
 
 @router.post("/bind")

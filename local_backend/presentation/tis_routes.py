@@ -30,22 +30,24 @@ class TisCookieRequest(BaseModel):
 
 @router.get("/status")
 async def get_tis_status(user_id: str = Depends(get_current_user_id)):
-    """获取TIS绑定状态"""
-    import json
-    import os
-    result = tis_service.get_tis_status(user_id)
-    if not result.get('success'):
-        raise HTTPException(status_code=400, detail=result.get('message', '获取状态失败'))
+    """获取TIS绑定状态（从DB读取）"""
+    from local_backend.database.code.handle.database_tis_handle import TisHandle
+    from local_backend.database.code.command.database_command import list_tis_courses_by_user
 
-    json_path = os.path.join(os.path.expanduser('~'), '.proagent', 'bind_data', f'{user_id}_tis_schedule.json')
-    if os.path.exists(json_path):
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        result['bind_time'] = data.get('bind_time', '')
-        result['student_id'] = data.get('student_id', '')
-        result['student_name'] = data.get('student_name', '')
-        result['total_courses'] = data.get('total_courses', 0)
-    return result
+    tis_handle = TisHandle()
+    db_status = tis_handle.handle_get_tis_status(user_id)
+    if db_status.get('success') and db_status.get('is_bound'):
+        courses = list_tis_courses_by_user(user_id)
+        return {
+            'success': True,
+            'is_bound': True,
+            'student_id': db_status.get('student_id', ''),
+            'bind_time': db_status.get('bind_time', ''),
+            'last_sync_time': db_status.get('last_sync_time', ''),
+            'total_courses': len(courses),
+            'message': '已绑定TIS账号',
+        }
+    return {'success': True, 'is_bound': False, 'message': '未绑定TIS账号'}
 
 
 @router.post("/bind")
@@ -82,105 +84,69 @@ async def bind_with_cookie(request: TisCookieRequest, user_id: str = Depends(get
 
 
 @router.get("/schedule")
-async def get_tis_schedule(user_id: str = Depends(get_current_user_id)):
-    """获取TIS课表数据，转换为日历事件格式返回（整学期展开）"""
-    import json
-    import os
-    import re
+async def get_tis_schedule(user_id: str = Depends(get_current_user_id), current_week: int = 1):
+    """获取TIS课表数据，转换为日历事件格式返回（整学期展开，从DB读取）"""
     from datetime import datetime, timedelta
+    from local_backend.database.code.command.database_command import list_tis_events_by_user, list_tis_courses_by_user
 
-    save_dir = os.path.join(os.path.expanduser('~'), '.proagent', 'bind_data')
-    json_path = os.path.join(save_dir, f'{user_id}_tis_schedule.json')
+    courses_raw = list_tis_courses_by_user(user_id)
+    events_data = list_tis_events_by_user(user_id)
 
-    if not os.path.exists(json_path):
+    if not courses_raw and not events_data:
         raise HTTPException(status_code=404, detail='未找到TIS课表数据，请先绑定TIS账号')
 
-    with open(json_path, 'r', encoding='utf-8') as f:
-        tis_data = json.load(f)
+    # Build course lookup
+    courses = {c['course_id']: c for c in courses_raw}
 
-    schedule = tis_data.get('schedule', {})
-    if not schedule:
-        raise HTTPException(status_code=404, detail='TIS课表数据为空')
+    # Auto-detect current_week if not explicitly provided
+    if current_week == 1 and events_data:
+        weeks = [e.get('week_num', 1) for e in events_data]
+        today = datetime.now()
+        estimated_week = max(1, today.isocalendar()[1] - 8)
+        current_week = min(weeks, key=lambda w: abs(w - estimated_week)) if weeks else 1
 
-    weekday_map = {
-        '星期一': 0, '星期二': 1, '星期三': 2,
-        '星期四': 3, '星期五': 4, '星期六': 5, '星期日': 6,
-    }
-
-    current_week = int(tis_data.get('week', '1') or '1')
     today = datetime.now()
     semester_monday = today - timedelta(days=today.weekday() + (current_week - 1) * 7)
 
-    def parse_weeks(weeks_str):
-        result = set()
-        if not weeks_str:
-            return result
-        for part in weeks_str.replace('，', ',').split(','):
-            part = part.strip()
-            m = re.match(r'(\d+)-(\d+)(双|单)?周', part)
-            if m:
-                start, end = int(m.group(1)), int(m.group(2))
-                parity = m.group(3)
-                for w in range(start, end + 1):
-                    if parity == '双' and w % 2 != 0:
-                        continue
-                    if parity == '单' and w % 2 != 1:
-                        continue
-                    result.add(w)
-            else:
-                m2 = re.match(r'(\d+)周', part)
-                if m2:
-                    result.add(int(m2.group(1)))
-        return result
-
     events = []
-    for day_name, courses in schedule.items():
-        dow = weekday_map.get(day_name)
-        if dow is None:
-            continue
+    for ev in events_data:
+        cid = ev.get('course_id')
+        course = courses.get(cid, {})
+        week_num = ev.get('week_num', 1)
+        dow = ev.get('day_of_week', 0)
+        offset_days = (week_num - 1) * 7 + dow
+        event_date = semester_monday + timedelta(days=offset_days)
 
-        for course in courses:
-            title = course.get('title', '未知课程')
-            location = course.get('location', '')
-            teacher = course.get('teacher', '')
-            start_time = course.get('start', '')
-            end_time = course.get('end', '')
-            periods = course.get('periods', '')
-            weeks_str = course.get('weeks', '')
+        teacher = course.get('teacher', '')
+        location = course.get('location', '')
+        weeks = course.get('weeks', '')
+        ps = ev.get('period_start', 0)
+        pe = ev.get('period_end', 0)
 
-            active_weeks = parse_weeks(weeks_str)
-            if not active_weeks:
-                active_weeks = {current_week}
+        desc_parts = []
+        if teacher:
+            desc_parts.append(f'教师: {teacher}')
+        if location:
+            desc_parts.append(f'地点: {location}')
+        if ps and pe:
+            desc_parts.append(f'节次: {ps}-{pe}节')
+        if weeks:
+            desc_parts.append(f'周次: {weeks}')
+        description = '\n'.join(desc_parts)
 
-            description_parts = []
-            if teacher:
-                description_parts.append(f'教师: {teacher}')
-            if location:
-                description_parts.append(f'地点: {location}')
-            if periods:
-                description_parts.append(f'节次: {periods}')
-            if weeks_str:
-                description_parts.append(f'周次: {weeks_str}')
-            description = '\n'.join(description_parts)
-
-            for week_num in sorted(active_weeks):
-                offset_days = (week_num - 1) * 7 + dow
-                event_date = semester_monday + timedelta(days=offset_days)
-                date_str = event_date.strftime('%Y-%m-%d')
-
-                events.append({
-                    'title': title,
-                    'start': date_str,
-                    'end': date_str,
-                    'startTime': start_time,
-                    'endTime': end_time,
-                    'priority': 0,
-                    'color': '#ff3b30',
-                    'description': description,
-                    'source': 'tis',
-                    'isTodo': False,
-                    'weekNum': week_num,
-                })
+        events.append({
+            'title': course.get('course_name', ev.get('course_name', '未知课程')),
+            'start': event_date.strftime('%Y-%m-%d'),
+            'end': event_date.strftime('%Y-%m-%d'),
+            'startTime': ev.get('start_time', ''),
+            'endTime': ev.get('end_time', ''),
+            'priority': 0,
+            'color': '#ff3b30',
+            'description': description,
+            'source': 'tis',
+            'isTodo': False,
+            'weekNum': week_num,
+        })
 
     return {'success': True, 'events': events, 'total': len(events)}
 
