@@ -86,6 +86,11 @@ def stdin_loop():
 def init_database():
     """初始化数据库表"""
     try:
+        import database.code.command.database_command as db_cmd
+        persistent_db = Path.home() / ".proagent" / "server.db"
+        persistent_db.parent.mkdir(parents=True, exist_ok=True)
+        db_cmd.DEFAULT_DB_PATH = str(persistent_db)
+        print(f"[server] DB: {persistent_db}", flush=True)
         from database.code.init.database_init import main as db_init
         db_init()
         print("[server] Database initialized", flush=True)
@@ -113,10 +118,6 @@ def start_api_server():
 
 
 if __name__ == "__main__":
-    data_dir = Path.home() / ".proagent"
-    data_dir.mkdir(exist_ok=True)
-    os.environ["PROAGENT_DATA_DIR"] = str(data_dir)
-
     init_database()
 
     input_thread = threading.Thread(target=stdin_loop, daemon=True)

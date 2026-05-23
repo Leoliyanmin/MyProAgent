@@ -113,11 +113,18 @@ def stdin_loop():
 def init_database():
     """初始化数据库表"""
     try:
+        import database.code.command.database_command as db_cmd
+        persistent_db = Path.home() / ".proagent" / "local.db"
+        persistent_db.parent.mkdir(parents=True, exist_ok=True)
+        db_cmd.DEFAULT_DB_PATH = str(persistent_db)
+        print(f"[sidecar] DB: {persistent_db}", flush=True)
         from database.code.init.database_init import main as db_init
         db_init()
         print("[sidecar] Database initialized", flush=True)
     except Exception as e:
-        print(f"[sidecar] Database init warning: {e}", flush=True)
+        print(f"[sidecar] Database init error: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
 
 
 def start_api_server():
@@ -143,11 +150,6 @@ def start_api_server():
 
 
 if __name__ == "__main__":
-    # 设置数据库路径为应用数据目录
-    app_data_dir = Path.home() / ".proagent"
-    app_data_dir.mkdir(exist_ok=True)
-    os.environ["PROAGENT_DATA_DIR"] = str(app_data_dir)
-    
     # 初始化数据库
     init_database()
 
