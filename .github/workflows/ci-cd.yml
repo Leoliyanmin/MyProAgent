@@ -521,6 +521,9 @@ jobs:
           cd frontend
           npm ci
 
+      - name: Generate icon
+        run: python3 scripts/gen_icon.py
+
       - name: Build Tauri app
         run: |
           cd frontend
@@ -554,6 +557,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -561,6 +567,9 @@ jobs:
         run: |
           cd frontend
           npm ci
+
+      - name: Generate icon
+        run: python scripts/gen_icon.py
 
       - name: Build Tauri app
         run: |

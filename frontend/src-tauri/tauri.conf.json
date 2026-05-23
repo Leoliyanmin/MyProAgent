@@ -38,7 +38,7 @@
     "copyright": "© 2026 Team 26S-27",
     "shortDescription": "智能协作工作台",
     "longDescription": "ProAgent 是一个智能协作工作台，帮助团队高效管理任务、日程、文件和个人画像。",
-    "icon": [],
+    "icon": ["icons/icon.png"],
     "externalBin": [],
     "resources": [],
     "windows": {
