@@ -149,61 +149,66 @@ async def bind_with_ics(request: BlackboardIcsRequest, user_id: str = Depends(ge
 
 @router.get("/assignments")
 async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
-    """获取Blackboard作业列表，转换为日历事件+待办格式返回"""
-    save_dir = os.path.join(os.path.expanduser('~'), '.proagent', 'bind_data')
-    json_path = os.path.join(save_dir, f'{user_id}_blackboard_courses.json')
+    """获取Blackboard作业列表，转换为日历事件+待办格式返回（从DB读取）"""
+    from local_backend.database.code.command.database_command import list_categories_by_user, list_data_by_user
 
-    if not os.path.exists(json_path):
-        raise HTTPException(status_code=404, detail='未找到Blackboard数据，请先绑定Blackboard账号')
+    categories = list_categories_by_user(user_id)
+    bb_course_map = {}
+    for c in categories:
+        if c.get('category_kind') == 'course' and c.get('category_source') == 'blackboard':
+            bb_course_map[c['category_id']] = c.get('category_title', '未知课程')
 
-    with open(json_path, 'r', encoding='utf-8') as f:
-        bb_data = json.load(f)
+    if not bb_course_map:
+        raise HTTPException(status_code=404, detail='未找到Blackboard课程数据，请先绑定Blackboard账号')
 
-    courses = bb_data.get('courses', [])
-    if not courses:
-        raise HTTPException(status_code=404, detail='Blackboard课程数据为空')
+    all_data = list_data_by_user(user_id)
+    assignments = [d for d in all_data
+                   if d.get('data_content_type') == 'assignment'
+                   and d.get('data_category_id') in bb_course_map]
+
+    if not assignments:
+        raise HTTPException(status_code=404, detail='Blackboard作业数据为空')
 
     events = []
     todos = []
-    for course in courses:
-        course_name = course.get('name', '未知课程')
+    for item in assignments:
+        item_name = item.get('data_title', '未命名')
+        due_str = item.get('data_ddl_time', '')
+        start, end, start_time, end_time = _parse_due(due_str)
+        if not start:
+            continue
 
-        for item in course.get('assignments', []):
-            item_name = item.get('label', item.get('title', item.get('name', '未命名')))
-            due_str = item.get('due_date', '') or item.get('deadline', '')
-            start, end, start_time, end_time = _parse_due(due_str)
-            if not start:
-                continue
+        course_name = bb_course_map.get(item.get('data_category_id'), '未知课程')
 
-            events.append({
-                'title': item_name,
-                'start': start,
-                'end': end,
-                'startTime': start_time,
-                'endTime': end_time,
-                'priority': 0,
-                'color': '#ff3b30',
-                'description': f'课程: {course_name}',
-                'source': 'blackboard',
-                'isTodo': True,
-            })
+        events.append({
+            'title': item_name,
+            'start': start,
+            'end': end,
+            'startTime': start_time,
+            'endTime': end_time,
+            'priority': 0,
+            'color': '#ff3b30',
+            'description': f'课程: {course_name}',
+            'source': 'blackboard',
+            'isTodo': True,
+        })
 
-            todos.append({
-                'title': item_name,
-                'completed': False,
-                'start': start,
-                'end': end,
-                'priority': 0,
-                'color': '#ff3b30',
-                'description': f'课程: {course_name}',
-                'source': 'blackboard',
-            })
+        todos.append({
+            'title': item_name,
+            'completed': False,
+            'start': start,
+            'end': end,
+            'priority': 0,
+            'color': '#ff3b30',
+            'description': f'课程: {course_name}',
+            'source': 'blackboard',
+        })
 
     return {
         'success': True,
         'events': events,
         'todos': todos,
-        'total_courses': len(courses),
+        'total_courses': len(bb_course_map),
         'total_events': len(events),
         'total_todos': len(todos),
     }
