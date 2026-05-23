@@ -16,7 +16,10 @@ from .email_tools import (
     AnalyzeEmailsTool,
     CheckEmailStatusTool,
     GetEmailsTool,
+    GetStarredEmailsTool,
     SendEmailTool,
+    StarEmailTool,
+    UnstarEmailTool,
 )
 from .profile_tools import GetUserProfileTool
 
@@ -40,7 +43,10 @@ __all__ = [
     "DeleteScheduleEventTool",
     "CheckEmailStatusTool",
     "GetEmailsTool",
+    "GetStarredEmailsTool",
     "SendEmailTool",
+    "StarEmailTool",
+    "UnstarEmailTool",
     "AnalyzeEmailsTool",
     "GetUserProfileTool",
 ]

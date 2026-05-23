@@ -125,9 +125,12 @@ class GetEmailsTool(_EmailToolBase):
             max_results = 20
         if max_results > 50:
             max_results = 50
-        messages = messages[:max_results]
+        all_messages = messages
+        messages = all_messages[:max_results]
+        total = len(all_messages)
 
-        lines = [f"Found {len(messages)} email(s):", ""]
+        header = f"Showing {len(messages)} of {total} total email(s):"
+        lines = [header, ""]
         for i, msg in enumerate(messages, 1):
             title = msg.get("title") or "(No subject)"
             sender = msg.get("sender") or ""
@@ -262,6 +265,115 @@ class AnalyzeEmailsTool(_EmailToolBase):
             return response.content or "No analysis result produced."
         except Exception as e:
             return f"Error analyzing emails: {e}"
+
+
+class GetStarredEmailsTool(_EmailToolBase):
+    name = "get_starred_emails"
+    description = "Retrieve all starred (星标) emails for the current user. Use when the user asks about starred emails, important emails, or saved emails."
+    parameters = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+    }
+
+    async def execute(self, **kwargs) -> str:
+        user_id, error = self._require_auth()
+        if error:
+            return error
+
+        service = _get_service()
+        if service is None:
+            return "Error: Email service not available."
+        data = service.get_starred_emails(user_id)
+
+        if not data.get("success"):
+            return f"Error: {data.get('message', 'Failed to get starred emails')}"
+
+        messages = data.get("messages", [])
+        if not messages:
+            return "No starred emails. Star emails in the Email page or ask me to star specific emails."
+
+        lines = [f"You have {len(messages)} starred email(s):", ""]
+        for i, msg in enumerate(messages, 1):
+            title = msg.get("title") or "(No subject)"
+            sender = msg.get("sender") or ""
+            time = (msg.get("release_time") or "")[:16].replace("T", " ")
+            reason = msg.get("star_reason", "")
+            lines.append(f"{i}. ★ \"{title}\"")
+            lines.append(f"   From: {sender}  |  {time}")
+            if reason:
+                lines.append(f"   Reason: {reason}")
+            lines.append("")
+        return "\n".join(lines).strip()
+
+
+class StarEmailTool(_EmailToolBase):
+    name = "star_email"
+    description = "Star (add to starred) an email by its ID or title keyword. Use when the user wants to mark an email as important."
+    parameters = {
+        "type": "object",
+        "properties": {
+            "email_id": {
+                "type": "integer",
+                "description": "Email ID number (from get_emails results).",
+            },
+            "reason": {
+                "type": "string",
+                "description": "Optional reason for starring.",
+            },
+        },
+        "required": ["email_id"],
+    }
+
+    async def execute(self, **kwargs) -> str:
+        user_id, error = self._require_auth()
+        if error:
+            return error
+        email_id = kwargs.get("email_id")
+        if email_id is None:
+            return "Error: email_id is required."
+        reason = kwargs.get("reason")
+
+        service = _get_service()
+        if service is None:
+            return "Error: Email service not available."
+        data = service.star_email(user_id, int(email_id), reason)
+
+        if data.get("success"):
+            return f"Email #{email_id} starred successfully."
+        return f"Error: {data.get('message', 'Failed to star email')}"
+
+
+class UnstarEmailTool(_EmailToolBase):
+    name = "unstar_email"
+    description = "Remove star from an email by its ID. Use when the user wants to unmark a previously starred email."
+    parameters = {
+        "type": "object",
+        "properties": {
+            "email_id": {
+                "type": "integer",
+                "description": "Email ID number.",
+            },
+        },
+        "required": ["email_id"],
+    }
+
+    async def execute(self, **kwargs) -> str:
+        user_id, error = self._require_auth()
+        if error:
+            return error
+        email_id = kwargs.get("email_id")
+        if email_id is None:
+            return "Error: email_id is required."
+
+        service = _get_service()
+        if service is None:
+            return "Error: Email service not available."
+        data = service.unstar_email(user_id, int(email_id))
+
+        if data.get("success"):
+            return f"Email #{email_id} unstarred."
+        return f"Error: {data.get('message', 'Failed to unstar email')}"
 
 
 def _build_analysis_prompt(

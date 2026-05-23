@@ -32,6 +32,9 @@ from .tools.email_tools import (
     GetEmailsTool,
     SendEmailTool,
     AnalyzeEmailsTool,
+    GetStarredEmailsTool,
+    StarEmailTool,
+    UnstarEmailTool,
 )
 from .tools.profile_tools import (
     GetUserProfileTool,
@@ -183,6 +186,15 @@ class LocalAgent:
             lambda: self._runtime_context.get("user_id"),
             self.provider,
             profile_getter=lambda: self._get_user_profile(),
+        ))
+        self.tools.register(GetStarredEmailsTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(StarEmailTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(UnstarEmailTool(
+            lambda: self._runtime_context.get("user_id"),
         ))
         self.tools.register(GetUserProfileTool(
             profile_getter=lambda: self._get_user_profile(),
