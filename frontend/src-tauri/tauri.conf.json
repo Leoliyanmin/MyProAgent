@@ -39,7 +39,7 @@
     "shortDescription": "智能协作工作台",
     "longDescription": "ProAgent 是一个智能协作工作台，帮助团队高效管理任务、日程、文件和个人画像。",
     "icon": ["icons/icon.png"],
-    "externalBin": [],
+    "externalBin": ["binaries/python-backend"],
     "resources": [],
     "windows": {
       "wix": {

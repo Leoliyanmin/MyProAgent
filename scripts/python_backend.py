@@ -10,9 +10,17 @@ import asyncio
 import threading
 from pathlib import Path
 
-# 添加 local_backend 到路径
-backend_path = Path(__file__).parent.parent / "local_backend"
-sys.path.insert(0, str(backend_path))
+# PyInstaller 打包后资源在 sys._MEIPASS，否则用脚本相对路径
+if getattr(sys, 'frozen', False):
+    bundle_dir = Path(sys._MEIPASS)
+else:
+    bundle_dir = Path(__file__).parent.parent
+
+# 添加各模块到路径
+sys.path.insert(0, str(bundle_dir / "local_backend"))
+sys.path.insert(0, str(bundle_dir / "localagent"))
+sys.path.insert(0, str(bundle_dir / "personality"))
+sys.path.insert(0, str(bundle_dir))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,10 +34,11 @@ try:
     from presentation.task_routes import router as task_router
     from presentation.agent_routes import router as agent_router
     from presentation.sync_routes import router as sync_router
+    from presentation.email_routes import router as email_router
     from logging_config import setup_logging
 except ImportError as e:
     print(f"Import error: {e}")
-    print(f"Backend path: {backend_path}")
+    print(f"Bundle dir: {bundle_dir}")
     print(f"Python path: {sys.path}")
     sys.exit(1)
 
@@ -46,7 +55,7 @@ app = FastAPI(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:8002", "*"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,6 +67,7 @@ app.include_router(schedule_router)
 app.include_router(task_router)
 app.include_router(agent_router)
 app.include_router(sync_router)
+app.include_router(email_router)
 
 
 @app.get("/")
@@ -100,6 +110,16 @@ def stdin_loop():
             break
 
 
+def init_database():
+    """初始化数据库表"""
+    try:
+        from database.code.init.database_init import main as db_init
+        db_init()
+        print("[sidecar] Database initialized", flush=True)
+    except Exception as e:
+        print(f"[sidecar] Database init warning: {e}", flush=True)
+
+
 def start_api_server():
     """启动 FastAPI 服务器"""
     global server_instance
@@ -128,9 +148,12 @@ if __name__ == "__main__":
     app_data_dir.mkdir(exist_ok=True)
     os.environ["PROAGENT_DATA_DIR"] = str(app_data_dir)
     
+    # 初始化数据库
+    init_database()
+
     # 启动 stdin 监听线程
     input_thread = threading.Thread(target=stdin_loop, daemon=True)
     input_thread.start()
-    
+
     # 启动 API 服务器
     start_api_server()
