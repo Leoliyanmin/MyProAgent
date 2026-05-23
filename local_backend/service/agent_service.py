@@ -265,6 +265,7 @@ class AgentService:
         session_id: str = "default",
         working_directory: Optional[str] = None,
         on_stream: Callable[[str], Awaitable[None]] | None = None,
+        token: str | None = None,
     ):
         session = self.session_manager.get_or_create(session_id)
 
@@ -281,7 +282,7 @@ class AgentService:
         elif effective_working_dir is not None:
             agent_message = self._build_file_manager_message(message, effective_working_dir)
 
-        self.agent.set_runtime_context(user_id=user_id)
+        self.agent.set_runtime_context(user_id=user_id, token=token)
         self._apply_user_api_key(user_id)
 
         try:
@@ -410,6 +411,39 @@ class AgentService:
             "entries": entries,
         }
 
+    # 危险文件扩展名黑名单
+    _BLOCKED_EXTENSIONS = frozenset({
+        # Executables
+        ".exe", ".bat", ".cmd", ".com", ".scr", ".pif", ".msi",
+        ".app", ".dmg", ".pkg", ".deb", ".rpm", ".apk",
+        # System
+        ".dll", ".sys", ".so", ".dylib", ".drv", ".reg", ".hta",
+        ".cpl", ".msc", ".bin",
+        # Scripts
+        ".sh", ".bash", ".zsh", ".ps1", ".psm1", ".vbs", ".vba",
+        ".vbe", ".jse", ".wsf", ".wsh",
+        # Web shells
+        ".php", ".asp", ".aspx", ".jsp", ".jspx", ".war", ".ear",
+        # Bytecode/compressed malicious
+        ".jar", ".pyc", ".pyo", ".pyd",
+    })
+
+    _BLOCKED_EXTENSIONS = frozenset({ext.lower() for ext in {
+        # Executables
+        ".exe", ".bat", ".cmd", ".com", ".scr", ".pif", ".msi",
+        # macOS / Linux packages
+        ".app", ".dmg", ".pkg", ".deb", ".rpm", ".apk",
+        # Shell scripts
+        ".sh", ".bash", ".zsh", ".ps1", ".psm1", ".vbs", ".vba", ".vbe",
+        ".jse", ".wsf", ".wsh", ".csh", ".ksh",
+        # Web shells / server-side scripts
+        ".php", ".asp", ".aspx", ".jsp", ".jspx", ".war", ".ear",
+        # Compiled / bytecode / system libraries
+        ".jar", ".pyc", ".pyo", ".pyd", ".so", ".dll", ".dylib", ".sys",
+        # System configuration / registry
+        ".reg", ".hta", ".cpl", ".msc", ".drv",
+    }})
+
     @staticmethod
     def _validate_filename(filename: str) -> str:
         name = filename.strip()
@@ -419,6 +453,10 @@ class AgentService:
             raise ValueError("仅支持文件名，不支持路径")
         if name in {".", ".."}:
             raise ValueError("非法文件名")
+        # Check for blocked extensions
+        suffix = Path(name).suffix.lower()
+        if suffix and suffix in AgentService._BLOCKED_EXTENSIONS:
+            raise ValueError(f"文件扩展名 '{suffix}' 不被允许")
         return name
 
     def _resolve_target_directory(self, working_directory: str, relative_path: str = "") -> tuple[Path, Path, str]:

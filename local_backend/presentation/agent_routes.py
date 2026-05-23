@@ -23,7 +23,7 @@ from presentation.schemas import (
     AgentConfigUpdateResponse,
     AgentTestConnectionResponse,
 )
-from presentation.dependencies import get_current_user_id, get_current_user_id_websocket
+from presentation.dependencies import get_current_user_id, get_current_user_id_with_token, get_current_user_id_websocket
 from service.agent_service import AgentService, connect_user, disconnect_user
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
@@ -33,12 +33,14 @@ agent_service = AgentService()
 # ==================== 核心聊天端点（使用 LocalAgent）====================
 
 @router.post("/chat", response_model=AgentResponse)
-async def chat_with_agent(chat_data: AgentChatMessage, user_id: str = Depends(get_current_user_id)):
+async def chat_with_agent(chat_data: AgentChatMessage, auth: tuple[str, str] = Depends(get_current_user_id_with_token)):
     """使用 LocalAgent 处理聊天请求（支持文件管理功能）- 核心端点"""
+    user_id, token = auth
     result = await agent_service.process_with_local_agent(
         user_id=user_id,
         message=chat_data.message,
-        session_id=chat_data.session_id or f"{user_id}_default"
+        session_id=chat_data.session_id or f"{user_id}_default",
+        token=token,
     )
     return AgentResponse(
         response=result.get('response', ''),
@@ -51,15 +53,17 @@ async def chat_with_agent(chat_data: AgentChatMessage, user_id: str = Depends(ge
 @router.post("/chat/file-manager", response_model=AgentResponse)
 async def chat_with_agent_for_file_manager(
     chat_data: AgentFileManagerMessage,
-    user_id: str = Depends(get_current_user_id),
+    auth: tuple[str, str] = Depends(get_current_user_id_with_token),
 ):
     """文件管理专用聊天端点：要求传入工作目录并注入到 agent 上下文。"""
+    user_id, token = auth
     try:
         result = await agent_service.process_with_local_agent(
             user_id=user_id,
             message=chat_data.message,
             session_id=chat_data.session_id or f"{user_id}_file_manager",
             working_directory=chat_data.working_directory,
+            token=token,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
@@ -328,7 +332,8 @@ async def chat_with_nanobot(message: str, client_id: str = "local_backend"):
 @router.websocket("/ws/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
     """WebSocket 端点，支持流式 token 推送"""
-    user_id = await get_current_user_id_websocket(websocket)
+    auth = await get_current_user_id_websocket(websocket)
+    user_id, token = auth
     if not user_id:
         await websocket.accept()
         await websocket.close(code=4001, reason="Unauthorized")
@@ -373,6 +378,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                         message=message,
                         session_id=actual_session_id,
                         on_stream=on_stream,
+                        token=token,
                     )
 
                     for tool in result.get('tool_calls', []):
