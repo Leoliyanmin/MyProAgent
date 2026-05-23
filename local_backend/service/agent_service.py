@@ -25,6 +25,26 @@ if str(personal_path) not in sys.path:
 from personality import InteractionLogger, ProfileExtractor, MBTIInferencer, UserProfileStore
 
 
+# Track currently connected (WebSocket) users.
+# Only users in this set are considered "active" for scheduled tasks like email sync.
+_active_users: set[str] = set()
+
+
+def connect_user(user_id: str) -> None:
+    """Mark a user as connected (called from WebSocket handler on connect)."""
+    _active_users.add(str(user_id))
+
+
+def disconnect_user(user_id: str) -> None:
+    """Mark a user as disconnected (called from WebSocket handler on close)."""
+    _active_users.discard(str(user_id))
+
+
+def is_user_active(user_id: str) -> bool:
+    """Check whether a user currently has an active WebSocket connection."""
+    return str(user_id) in _active_users
+
+
 class AgentService:
     CALENDAR_MUTATION_TOOLS = {
         "create_schedule_event",

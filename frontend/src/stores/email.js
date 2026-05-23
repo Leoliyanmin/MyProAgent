@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { emailAPI } from '../services/api.js'
+import { useAuthStore } from './auth.js'
 
 const LAST_CHECK_KEY = 'email_last_check_time'
 
@@ -69,7 +70,14 @@ export const useEmailStore = defineStore('email', () => {
 
   function stopPolling() {
     if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null }
+    _knownIds.clear()
+    _firstRun = true
   }
+
+  const auth = useAuthStore()
+  watch(() => auth.token, (newToken) => {
+    if (!newToken) stopPolling()
+  })
 
   // store 创建时自动启动
 
