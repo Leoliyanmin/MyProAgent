@@ -1,5 +1,6 @@
 from business.agent_logic import AgentLogic
 from database.code.handle.database_chat_handle import ChatHandle
+from database.code.operations.api_key_storage import get_active_api_keys
 import asyncio
 import json
 import re
@@ -202,6 +203,28 @@ class AgentService:
             raise ValueError(f"工作目录不是文件夹: {candidate}")
         return candidate
 
+    def _apply_user_api_key(self, user_id: str) -> None:
+        try:
+            active_keys = get_active_api_keys(user_id)
+            if not active_keys:
+                self.agent.provider.update_config(api_key="")
+                return
+
+            provider_name = self.agent.provider_name
+            if not provider_name:
+                return
+
+            for key_entry in active_keys:
+                if key_entry.get("provider") == provider_name and key_entry.get("api_key"):
+                    self.agent.provider.update_config(
+                        api_key=key_entry["api_key"],
+                        api_base=key_entry.get("api_base") or None,
+                        model=key_entry.get("model") or None,
+                    )
+                    return
+        except Exception as e:
+            print(f"[AgentService] Failed to load user API key for {user_id}: {e}")
+
     @staticmethod
     def _build_file_manager_message(user_message: str, working_directory: Path) -> str:
         return (
@@ -259,6 +282,7 @@ class AgentService:
             agent_message = self._build_file_manager_message(message, effective_working_dir)
 
         self.agent.set_runtime_context(user_id=user_id)
+        self._apply_user_api_key(user_id)
 
         try:
             result = await self.agent.run(agent_message, on_stream=on_stream)
@@ -602,31 +626,41 @@ class AgentService:
         """更新 Agent 配置"""
         try:
             from localagent.config import save_config
-
-            # 获取当前配置对象并直接修改
             config = self.agent.config
 
             if provider:
                 config.agent.provider = provider
+                pc = getattr(config.providers, provider, None)
+                if pc:
+                    if api_key is not None:
+                        pc.api_key = api_key
+                    if api_base is not None:
+                        pc.api_base = api_base
 
             if model:
                 config.agent.model = model
 
-            if api_key and provider:
-                provider_config = getattr(config.providers, provider, None)
-                if provider_config:
-                    provider_config.api_key = api_key
+            if api_key and not provider:
+                provider_name = config.agent.provider
+                pc = getattr(config.providers, provider_name, None)
+                if pc:
+                    pc.api_key = api_key
 
-            if api_base and provider:
-                provider_config = getattr(config.providers, provider, None)
-                if provider_config:
-                    provider_config.api_base = api_base
+            if api_base and not provider:
+                provider_name = config.agent.provider
+                pc = getattr(config.providers, provider_name, None)
+                if pc:
+                    pc.api_base = api_base
 
-            # 重新创建 LocalAgent 应用新配置（不触发保存）
             if provider or model or api_key or api_base:
-                self.agent = LocalAgent(workspace=self.workspace, config=config)
+                self.agent = LocalAgent(
+                    workspace=self.workspace,
+                    config=config,
+                    api_key=api_key if api_key is not None else None,
+                    api_base=api_base if api_base is not None else None,
+                    model=model if model is not None else None,
+                )
 
-            # 保存配置
             save_config(config)
 
             return {

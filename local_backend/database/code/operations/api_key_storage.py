@@ -91,7 +91,8 @@ def save_api_key(user_id: str, provider: str, api_key: str, api_base: str,
             entry["api_base"] = api_base
             entry["model"] = model
             entry["updated_at"] = now
-            entry["last_test_success"] = last_test_success
+            if last_test_success is not None:
+                entry["last_test_success"] = last_test_success
             found = True
             break
 
@@ -102,7 +103,7 @@ def save_api_key(user_id: str, provider: str, api_key: str, api_base: str,
             "api_key": api_key,
             "api_base": api_base,
             "model": model,
-            "is_active": False,
+            "is_active": True,
             "updated_at": now,
             "last_test_success": last_test_success,
         })
@@ -120,11 +121,28 @@ def delete_api_key(user_id: str, provider: str) -> None:
     _write_all_lines(entries)
 
 
+def get_active_api_keys(user_id: str) -> list[dict]:
+    """Return all active API keys for a user (with full unmasked keys).
+
+    Returns a list of dicts with: provider, api_key, api_base, model.
+    """
+    all_entries = _read_all_lines()
+    results = []
+    for entry in all_entries:
+        if entry.get("user_id") == user_id and entry.get("is_active", False):
+            results.append({
+                "provider": entry.get("provider", ""),
+                "api_key": entry.get("api_key", ""),
+                "api_base": entry.get("api_base", ""),
+                "model": entry.get("model", ""),
+            })
+    return results
+
+
 def toggle_api_key(user_id: str, provider: str) -> dict:
     """Toggle the is_active flag for a given user+provider pair.
 
-    If toggling ON, all other keys for this user are set to inactive first
-    (only one active key at a time).
+    Multiple keys can be active simultaneously (non-mutual).
     Returns {"success": bool, "is_active": bool}.
     """
     entries = _read_all_lines()
@@ -132,32 +150,21 @@ def toggle_api_key(user_id: str, provider: str) -> dict:
     new_active = False
 
     for entry in entries:
-        if entry.get("user_id") != user_id:
-            continue
-        if entry.get("provider") == provider:
+        if entry.get("user_id") == user_id and entry.get("provider") == provider:
             current = entry.get("is_active", False)
             new_active = not current
             entry["is_active"] = new_active
             target_found = True
-        elif new_active:
-            # If we're activating this one, deactivate all others
-            entry["is_active"] = False
+            break
 
     if not target_found:
         return {"success": False, "is_active": False}
-
-    # If activating, need a second pass to deactivate others
-    # (handles case where target is after others in the list)
-    if new_active:
-        for entry in entries:
-            if entry.get("user_id") == user_id and entry.get("provider") != provider:
-                entry["is_active"] = False
 
     _write_all_lines(entries)
     return {"success": True, "is_active": new_active}
 
 
-def test_api_key(provider: str, api_key: str, api_base: str) -> dict:
+def test_api_key(provider: str, api_key: str, api_base: str, model: str = "") -> dict:
     """Test connectivity for a given API key by making a lightweight API call.
 
     Returns {"success": bool, "message": str}.
@@ -167,8 +174,9 @@ def test_api_key(provider: str, api_key: str, api_base: str) -> dict:
     base = api_base.rstrip("/") if api_base else "https://api.openai.com/v1"
     url = f"{base}/chat/completions"
 
+    test_model = model.strip() if model else "gpt-3.5-turbo"
     payload = {
-        "model": "gpt-3.5-turbo",
+        "model": test_model,
         "messages": [{"role": "user", "content": "hi"}],
         "max_tokens": 1,
     }
@@ -179,7 +187,7 @@ def test_api_key(provider: str, api_key: str, api_base: str) -> dict:
     }
 
     try:
-        with httpx.Client(timeout=httpx.Timeout(connect=8.0, read=15.0)) as client:
+        with httpx.Client(timeout=15.0) as client:
             resp = client.post(url, json=payload, headers=headers)
             if resp.status_code == 200:
                 return {"success": True, "message": f"{provider} 连接成功"}

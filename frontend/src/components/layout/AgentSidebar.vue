@@ -103,20 +103,55 @@
           @keydown.enter.exact.prevent="sendMessage"
           rows="3"
         ></textarea>
-        <button v-if="!isSending && !isThinking" class="send-btn" @click.prevent="sendMessage" type="button">
-          发送
-        </button>
-        <button v-else class="stop-btn" @click.prevent="stopGenerating" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-          停止
-        </button>
+        <div class="input-actions">
+          <div class="model-selector" @click.stop="toggleModelDropdown" ref="modelSelectorRef">
+            <span class="model-selector-label">{{ currentModelLabel }}</span>
+            <svg class="model-selector-arrow" :class="{ open: showModelDropdown }" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+            <div v-if="showModelDropdown" class="model-dropdown">
+              <div v-if="activeModels.length === 0" class="model-dropdown-empty">暂无可用模型</div>
+              <div
+                v-for="m in activeModels"
+                :key="m.provider"
+                class="model-dropdown-item"
+                :class="{ active: currentProvider === m.provider }"
+                @click.stop="switchModel(m)"
+              >
+                <span class="model-dropdown-name">{{ m.provider }} / {{ m.model }}</span>
+                <span v-if="currentProvider === m.provider" class="model-dropdown-check">✓</span>
+              </div>
+            </div>
+          </div>
+          <button v-if="!isSending && !isThinking" class="send-btn" @click.prevent="sendMessage" type="button">
+            发送
+          </button>
+          <button v-else class="stop-btn" @click.prevent="stopGenerating" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+            停止
+          </button>
+        </div>
       </div>
     </div>
+
+    <Teleport to="body">
+      <div v-if="noKeyModalVisible" class="no-key-modal-mask" @click.self="noKeyModalVisible = false">
+        <div class="no-key-modal" role="dialog" aria-modal="true" aria-label="未配置 API Key">
+          <h3 class="no-key-modal-title">未配置 API Key</h3>
+          <p class="no-key-modal-body">当前没有可用的 AI 服务密钥，请前往用户设置绑定 API Key。</p>
+          <div class="no-key-modal-actions">
+            <button class="no-key-modal-btn primary" type="button" @click="router.push('/user-settings'); noKeyModalVisible = false">去设置</button>
+            <button class="no-key-modal-btn ghost" type="button" @click="noKeyModalVisible = false">取消</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </aside>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth.js'
 import { useThemeStore } from '../../stores/theme.js'
 import { useCalendarStore } from '../../stores/calendar.js'
@@ -178,6 +213,74 @@ const messagesContainer = ref(null)
 const chatListCollapsed = ref(false)
 const abortControllerRef = ref(null)
 const isStopping = ref(false)
+
+// 模型选择
+const activeModels = ref([])
+const currentProvider = ref('')
+const currentModel = ref('')
+const showModelDropdown = ref(false)
+const modelSelectorRef = ref(null)
+const noKeyModalVisible = ref(false)
+
+const router = useRouter()
+const route = useRoute()
+
+const handleClickOutside = (e) => {
+  if (modelSelectorRef.value && !modelSelectorRef.value.contains(e.target)) {
+    showModelDropdown.value = false
+  }
+}
+
+const toggleModelDropdown = async () => {
+  if (!showModelDropdown.value) {
+    await loadActiveModels()
+  }
+  showModelDropdown.value = !showModelDropdown.value
+}
+
+const currentModelLabel = computed(() => {
+  if (activeModels.value.length === 0) return '未配置模型'
+  if (currentProvider.value && currentModel.value) {
+    return `${currentProvider.value} / ${currentModel.value}`
+  }
+  return '选择模型'
+})
+
+const loadActiveModels = async () => {
+  try {
+    const result = await agentAPI.backend.getActiveModels()
+    activeModels.value = result.models || []
+  } catch (e) {
+    console.error('Failed to load active models:', e)
+    activeModels.value = []
+  }
+}
+
+const loadCurrentModel = async () => {
+  try {
+    const status = await agentAPI.backend.getStatus()
+    currentProvider.value = status.provider || ''
+    currentModel.value = status.model || ''
+  } catch (e) {
+    console.error('Failed to load current model:', e)
+  }
+}
+
+const switchModel = async (m) => {
+  showModelDropdown.value = false
+  try {
+    await agentAPI.backend.updateConfig({
+      provider: m.provider,
+      model: m.model,
+      api_key: m.api_key,
+      api_base: m.api_base,
+    })
+    currentProvider.value = m.provider
+    currentModel.value = m.model
+  } catch (e) {
+    console.error('Failed to switch model:', e)
+  }
+}
 
 // 跟踪当前正在接收回复的对话 ID，防止切换对话后回复被放到错误的对话中
 const sentChatId = ref('')
@@ -622,8 +725,15 @@ const disconnectWebSocket = () => {
 }
 
 // 发送消息
-const sendMessage = () => {
+const sendMessage = async () => {
   if (!inputText.value.trim() || isSending.value) return
+
+  await loadActiveModels()
+
+  if (activeModels.value.length === 0) {
+    noKeyModalVisible.value = true
+    return
+  }
 
   isSending.value = true
   isThinking.value = true
@@ -790,6 +900,9 @@ const loadFromBackendSession = async () => {
   onMounted(async () => {
   loadChatList()
   loadDismissedThemes()
+  loadActiveModels()
+  loadCurrentModel()
+  document.addEventListener('click', handleClickOutside)
 
   if (chatList.value.length === 0) {
     await loadFromBackendSession()
@@ -810,6 +923,7 @@ const loadFromBackendSession = async () => {
 onUnmounted(() => {
   saveCurrentChat()
   disconnectWebSocket()
+  document.removeEventListener('click', handleClickOutside)
 })
 
 watch(() => authStore.isAuthenticated, (isAuth) => {
@@ -819,6 +933,10 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   } else if (!isAuth) {
     disconnectWebSocket()
   }
+})
+
+watch(() => route.path, () => {
+  loadActiveModels()
 })
 </script>
 
@@ -879,6 +997,109 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
 .fm-badge svg {
   flex-shrink: 0;
   color: #007aff;
+}
+
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: space-between;
+}
+
+/* 模型选择器 */
+.model-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  color: #333;
+  user-select: none;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.model-selector:hover {
+  border-color: #007aff;
+  background: #f0f7ff;
+}
+
+.model-selector-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-selector-arrow {
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s;
+}
+
+.model-selector-arrow.open {
+  transform: rotate(180deg);
+}
+
+.model-dropdown {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+  min-width: 180px;
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 100;
+  padding: 4px;
+}
+
+.model-dropdown-empty {
+  padding: 12px;
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.model-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #333;
+  transition: background 0.1s;
+}
+
+.model-dropdown-item:hover {
+  background: #f0f7ff;
+}
+
+.model-dropdown-item.active {
+  background: rgba(0, 122, 255, 0.08);
+  font-weight: 600;
+}
+
+.model-dropdown-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-dropdown-check {
+  color: #007aff;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-left: 6px;
 }
 
 .close-agent-btn {
@@ -1268,5 +1489,73 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   font-size: 13px;
   color: rgba(0, 0, 0, 0.5);
   font-style: italic;
+}
+
+.no-key-modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.no-key-modal {
+  width: min(380px, calc(100vw - 32px));
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  padding: 20px;
+}
+
+.no-key-modal-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.no-key-modal-body {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.no-key-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.no-key-modal-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.no-key-modal-btn.primary {
+  background: #007aff;
+  color: #fff;
+  border-color: #007aff;
+}
+
+.no-key-modal-btn.ghost {
+  background: transparent;
+  color: #374151;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.no-key-modal-btn.primary:hover {
+  background: #0066d6;
+}
+
+.no-key-modal-btn.ghost:hover {
+  background: rgba(0, 0, 0, 0.04);
 }
 </style>

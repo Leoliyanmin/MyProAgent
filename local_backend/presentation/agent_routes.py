@@ -289,6 +289,14 @@ async def update_agent_config(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
+@router.get("/active-models")
+async def get_active_models(user_id: str = Depends(get_current_user_id)):
+    """返回当前用户所有已激活的 API Key（供 Agent 下拉选择）"""
+    from database.code.operations.api_key_storage import get_active_api_keys
+    keys = get_active_api_keys(user_id)
+    return {"models": keys}
+
 @router.get("/test", response_model=AgentTestConnectionResponse)
 async def test_agent_connection(_: str = Depends(get_current_user_id)):
     """测试 Agent API 连接"""

@@ -126,12 +126,15 @@ async def test_api_key_connection(
     user_id: str = Depends(get_current_user_id),
 ):
     """Test an API key connection."""
-    from database.code.operations.api_key_storage import test_api_key
-    result = test_api_key(
-        body.get("provider", ""),
-        body.get("api_key", ""),
-        body.get("api_base", ""),
-    )
+    from database.code.operations.api_key_storage import test_api_key, save_api_key
+    provider = body.get("provider", "")
+    api_key = body.get("api_key", "")
+    api_base = body.get("api_base", "")
+    model = body.get("model", "")
+    result = test_api_key(provider, api_key, api_base, model=model)
+    # 持久化测试结果
+    save_api_key(user_id, provider, api_key, api_base, model=model,
+                 last_test_success=result["success"])
     return result
 
 

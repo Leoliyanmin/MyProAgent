@@ -245,6 +245,10 @@ export const agentAPI = {
         method: 'POST',
         body: JSON.stringify(config)
       })
+    },
+
+    getActiveModels: async () => {
+      return fetchWithAuth('/agent/active-models')
     }
   },
 
@@ -559,10 +563,10 @@ export const settingsAPI = {
       method: 'DELETE'
     })
   },
-  testApiKey: async (provider, api_key, api_base) => {
+  testApiKey: async (provider, api_key, api_base, model = '') => {
     return fetchWithAuth('/auth/settings/api-keys/test', {
       method: 'POST',
-      body: JSON.stringify({ provider, api_key, api_base })
+      body: JSON.stringify({ provider, api_key, api_base, model })
     })
   },
   toggleApiKey: async (provider) => {

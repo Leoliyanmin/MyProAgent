@@ -105,29 +105,25 @@
                 <select v-model="addForm.provider" class="text-input">
                   <option value="">选择服务商</option>
                   <option value="deepseek">DeepSeek</option>
-                  <option value="openai">OpenAI</option>
-                  <option value="anthropic">Anthropic</option>
-                  <option value="zhipu">Zhipu (智谱)</option>
-                  <option value="openrouter">OpenRouter</option>
-                  <option value="groq">Groq</option>
-                  <option value="moonshot">Moonshot</option>
-                  <option value="gemini">Gemini</option>
-                  <option value="custom">自定义</option>
                 </select>
 
                 <label class="field-label">模型名称</label>
-                <input v-model.trim="addForm.model" class="text-input" type="text" placeholder="例如: gpt-4o, claude-3-5-sonnet, deepseek-chat" />
+                <select v-if="providerModels[addForm.provider]" v-model="addForm.model" class="text-input">
+                  <option value="">选择模型</option>
+                  <option v-for="m in providerModels[addForm.provider]" :key="m" :value="m">{{ m }}</option>
+                </select>
+                <input v-else v-model.trim="addForm.model" class="text-input" type="text" placeholder="例如: deepseek-chat" />
 
                 <label class="field-label">API Key</label>
                 <input v-model.trim="addForm.api_key" class="text-input" type="password" placeholder="sk-..." />
 
                 <label class="field-label">API Base URL</label>
-                <input v-model.trim="addForm.api_base" class="text-input" type="text" :placeholder="defaultBaseFor(addForm.provider)" />
+                <input v-model.trim="addForm.api_base" class="text-input" type="text" placeholder="https://api.deepseek.com/v1" />
 
                 <p v-if="addNotice" class="password-notice" :class="'status-' + addNoticeType">{{ addNotice }}</p>
 
                 <div class="password-actions">
-                  <button class="action-btn" type="button" :disabled="saving" @click="submitAddKey">{{ saving ? '保存中...' : '保存' }}</button>
+                  <button class="action-btn" type="button" :disabled="saving || !addTestPassed" @click="submitAddKey">{{ saving ? '保存中...' : '保存' }}</button>
                   <button class="action-btn ghost" type="button" :disabled="saving" @click="testAddKey">测试连接</button>
                   <button class="action-btn ghost" type="button" @click="closeAddKeyModal">取消</button>
                 </div>
@@ -143,14 +139,18 @@
               <h3 class="password-modal-title">编辑 {{ editingKey.provider }}</h3>
               <div class="password-form">
                 <label class="field-label">模型名称</label>
-                <input v-model.trim="editForm.model" class="text-input" type="text" placeholder="例如: gpt-4o, claude-3-5-sonnet" />
+                <select v-if="providerModels[editingKey.provider]" v-model="editForm.model" class="text-input">
+                  <option value="">选择模型</option>
+                  <option v-for="m in providerModels[editingKey.provider]" :key="m" :value="m">{{ m }}</option>
+                </select>
+                <input v-else v-model.trim="editForm.model" class="text-input" type="text" placeholder="例如: deepseek-chat" />
                 <label class="field-label">API Key</label>
                 <input v-model.trim="editForm.api_key" class="text-input" type="password" placeholder="sk-..." />
                 <label class="field-label">API Base URL</label>
                 <input v-model.trim="editForm.api_base" class="text-input" type="text" placeholder="https://..." />
                 <p v-if="editNotice" class="password-notice" :class="'status-' + editNoticeType">{{ editNotice }}</p>
                 <div class="password-actions">
-                  <button class="action-btn" type="button" :disabled="saving" @click="saveEditKey">{{ saving ? '保存中...' : '保存' }}</button>
+                  <button class="action-btn" type="button" :disabled="saving || !editTestPassed" @click="saveEditKey">{{ saving ? '保存中...' : '保存' }}</button>
                   <button class="action-btn ghost" type="button" @click="testEditKey">测试连接</button>
                   <button class="action-btn ghost" type="button" @click="cancelEditKey">取消</button>
                 </div>
@@ -285,7 +285,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { tisAPI, blackboardAPI, emailAPI, settingsAPI } from '../services/api.js'
 import { useCalendarStore } from '../stores/calendar.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -346,6 +346,7 @@ const addForm = reactive({
 })
 const addNotice = ref('')
 const addNoticeType = ref('info')
+const addTestPassed = ref(false)
 
 const editingKey = ref(null)
 const editForm = reactive({
@@ -355,17 +356,14 @@ const editForm = reactive({
 })
 const editNotice = ref('')
 const editNoticeType = ref('info')
+const editTestPassed = ref(false)
 
 const defaultBases = {
   deepseek: 'https://api.deepseek.com/v1',
-  openai: 'https://api.openai.com/v1',
-  anthropic: 'https://api.anthropic.com',
-  zhipu: 'https://open.bigmodel.cn/api/paas/v4',
-  openrouter: 'https://openrouter.ai/api/v1',
-  groq: 'https://api.groq.com/openai/v1',
-  moonshot: 'https://api.moonshot.cn/v1',
-  gemini: 'https://generativelanguage.googleapis.com/v1beta',
-  custom: 'https://'
+}
+
+const providerModels = {
+  deepseek: ['deepseek-chat', 'deepseek-reasoner', 'deepseek-v4-flash', 'deepseek-v4-pro'],
 }
 
 const defaultBaseFor = (provider) => {
@@ -384,6 +382,22 @@ const loadApiKeys = async () => {
   }
 }
 
+// 选提供商时自动填 URL 和重置模型
+watch(() => addForm.provider, (p) => {
+  if (p && defaultBases[p]) {
+    addForm.api_base = defaultBases[p]
+  }
+  addForm.model = ''
+})
+
+// 任何表单字段变化 → 必须重新测试
+watch([() => addForm.provider, () => addForm.model, () => addForm.api_key, () => addForm.api_base],
+  () => { addTestPassed.value = false }
+)
+watch([() => editForm.model, () => editForm.api_key, () => editForm.api_base],
+  () => { editTestPassed.value = false }
+)
+
 const closeAddKeyModal = () => {
   showAddKeyModal.value = false
   addForm.provider = ''
@@ -392,6 +406,7 @@ const closeAddKeyModal = () => {
   addForm.api_base = ''
   addNotice.value = ''
   addNoticeType.value = 'info'
+  addTestPassed.value = false
 }
 
 const submitAddKey = async () => {
@@ -422,7 +437,8 @@ const testAddKey = async () => {
   addNoticeType.value = 'info'
   try {
     const apiBase = addForm.api_base || defaultBaseFor(addForm.provider)
-    const result = await settingsAPI.testApiKey(addForm.provider, addForm.api_key, apiBase)
+    const result = await settingsAPI.testApiKey(addForm.provider, addForm.api_key, apiBase, addForm.model)
+    addTestPassed.value = result.success
     if (result.success) {
       addNotice.value = '连接成功！'
       addNoticeType.value = 'success'
@@ -431,6 +447,7 @@ const testAddKey = async () => {
       addNoticeType.value = 'error'
     }
   } catch (e) {
+    addTestPassed.value = false
     addNotice.value = '测试失败: ' + e.message
     addNoticeType.value = 'error'
   }
@@ -440,15 +457,17 @@ const startEditKey = (item) => {
   editingKey.value = item
   editForm.model = item.model || ''
   editForm.api_key = ''
-  editForm.api_base = item.api_base || ''
+  editForm.api_base = item.api_base || defaultBases[item.provider] || ''
   editNotice.value = ''
   editNoticeType.value = 'info'
+  editTestPassed.value = false
 }
 
 const cancelEditKey = () => {
   editingKey.value = null
   editNotice.value = ''
   editNoticeType.value = 'info'
+  editTestPassed.value = false
 }
 
 const saveEditKey = async () => {
@@ -478,7 +497,9 @@ const testEditKey = async () => {
   try {
     const apiBase = editForm.api_base || editingKey.value.api_base
     const apiKey = editForm.api_key || ''
-    const result = await settingsAPI.testApiKey(editingKey.value.provider, apiKey, apiBase)
+    const model = editForm.model || editingKey.value.model || ''
+    const result = await settingsAPI.testApiKey(editingKey.value.provider, apiKey, apiBase, model)
+    editTestPassed.value = result.success
     if (result.success) {
       editNotice.value = '连接成功！'
       editNoticeType.value = 'success'
@@ -487,6 +508,7 @@ const testEditKey = async () => {
       editNoticeType.value = 'error'
     }
   } catch (e) {
+    editTestPassed.value = false
     editNotice.value = '测试失败: ' + e.message
     editNoticeType.value = 'error'
   }
@@ -496,10 +518,9 @@ const toggleApiKey = async (provider) => {
   try {
     const result = await settingsAPI.toggleApiKey(provider)
     if (result.success) {
-      // Update local state immediately so UI is responsive
       apiKeys.value = apiKeys.value.map(k => ({
         ...k,
-        is_active: k.provider === provider ? result.is_active : false
+        is_active: k.provider === provider ? result.is_active : k.is_active
       }))
     }
   } catch (e) {
@@ -999,6 +1020,13 @@ onBeforeUnmount(() => {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.action-btn:disabled {
+  border-color: #d1d5db;
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
 }
 
 .action-btn.ghost {
