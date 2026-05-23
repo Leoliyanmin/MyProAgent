@@ -62,12 +62,27 @@ class EmailPriorityService:
         try:
             result = await self._llm_rank(emails, profile, upcoming)
             result["strategy_used"] = "llm"
-            return result
         except Exception as e:
             logger.warning(f"LLM ranking failed, fallback to rule: {e}")
+            result = self._rule_rank(emails, profile, upcoming)
+            result["strategy_used"] = "rule"
 
-        result = self._rule_rank(emails, profile, upcoming)
-        result["strategy_used"] = "rule"
+        prioritized = result.get('prioritized', [])
+        if prioritized:
+            try:
+                from local_backend.database.code.operations.database_email_v2_operations import StarredEmailV2Operations
+                star_ops = StarredEmailV2Operations()
+                all_starred = star_ops.list_starred(user_id)
+                ai_starred_ids = {s['email_id'] for s in all_starred if s.get('source') == 'ai'}
+                new_ai_ids = {item['id'] for item in prioritized}
+                for email_id in ai_starred_ids - new_ai_ids:
+                    star_ops.remove_star(user_id, email_id)
+                for item in prioritized:
+                    if item['id'] not in ai_starred_ids:
+                        star_ops.add_star(user_id, item['id'], item.get('reason', ''), 'ai')
+            except Exception as e:
+                logger.warning(f"Failed to persist AI prioritized emails: {e}")
+
         return result
 
     async def _llm_rank(

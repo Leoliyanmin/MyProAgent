@@ -520,6 +520,23 @@ export const emailAPI = {
     return fetchWithAuth('/api/v1/email/prioritize', {
       method: 'POST'
     })
+  },
+
+  starred: {
+    list: async () => {
+      return fetchWithAuth('/api/v1/email/starred')
+    },
+    star: async (emailId, reason) => {
+      return fetchWithAuth(`/api/v1/email/messages/${emailId}/star`, {
+        method: 'POST',
+        body: JSON.stringify({ reason: reason || '手动标注' })
+      })
+    },
+    unstar: async (emailId) => {
+      return fetchWithAuth(`/api/v1/email/messages/${emailId}/star`, {
+        method: 'DELETE'
+      })
+    }
   }
 }
 

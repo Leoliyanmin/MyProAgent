@@ -328,6 +328,46 @@ def permanent_delete_email_message(message_id: int, db_path: str | Path = DEFAUL
     _execute("UPDATE email_message SET status = 2 WHERE message_id = ?", (message_id,), db_path)
 
 
+def create_starred_email(user_id, email_id, reason=None, source='manual', starred_at=None, db_path=DEFAULT_DB_PATH):
+    import datetime
+    if not starred_at:
+        starred_at = datetime.datetime.utcnow().isoformat()
+    return _execute(
+        """INSERT INTO starred_emails (user_id, email_id, reason, source, starred_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (user_id, email_id, reason, source, starred_at), db_path
+    )
+
+
+def list_starred_emails_by_user(user_id, db_path=DEFAULT_DB_PATH):
+    return _fetch_all(
+        "SELECT * FROM starred_emails WHERE user_id = ? ORDER BY source = 'ai' DESC, starred_at DESC",
+        (user_id,), db_path
+    )
+
+
+def get_starred_email(user_id, email_id, db_path=DEFAULT_DB_PATH):
+    rows = _fetch_all(
+        "SELECT * FROM starred_emails WHERE user_id = ? AND email_id = ? LIMIT 1",
+        (user_id, email_id), db_path
+    )
+    return rows[0] if rows else None
+
+
+def delete_starred_email(user_id, email_id, db_path=DEFAULT_DB_PATH):
+    _execute(
+        "DELETE FROM starred_emails WHERE user_id = ? AND email_id = ?",
+        (user_id, email_id), db_path
+    )
+
+
+def delete_starred_emails_by_email_id(email_id, db_path=DEFAULT_DB_PATH):
+    _execute(
+        "DELETE FROM starred_emails WHERE email_id = ?",
+        (email_id,), db_path
+    )
+
+
 # user_match_profile
 
 def upsert_user_match_profile(

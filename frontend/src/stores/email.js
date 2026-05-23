@@ -243,11 +243,56 @@ export const useEmailStore = defineStore('email', () => {
     priorityStrategy.value = ''
   }
 
+  // ---- Starred Emails ----
+  const starredEmails = ref([])
+  const starredLoading = ref(false)
+
+  async function fetchStarred() {
+    starredLoading.value = true
+    try {
+      const res = await emailAPI.starred.list()
+      if (res.success) {
+        starredEmails.value = res.messages || []
+      }
+    } catch (err) {
+      error.value = err?.message || '获取星标邮件失败'
+    } finally {
+      starredLoading.value = false
+    }
+  }
+
+  async function toggleStar(emailId, reason) {
+    try {
+      const idx = starredEmails.value.findIndex(e => e.id === emailId)
+      if (idx !== -1) {
+        starredEmails.value.splice(idx, 1)
+        await emailAPI.starred.unstar(emailId)
+        const pi = prioritizedEmails.value.findIndex(p => p.id === emailId)
+        if (pi !== -1) {
+          prioritizedEmails.value.splice(pi, 1)
+        }
+      } else {
+        const res = await emailAPI.starred.star(emailId, reason || '手动标注')
+        if (res.success) {
+          await fetchStarred()
+        }
+      }
+    } catch (err) {
+      error.value = err?.message || '星标操作失败'
+      await fetchStarred()
+    }
+  }
+
+  function isStarred(emailId) {
+    return starredEmails.value.some(e => e.id === emailId || e.id === Number(emailId))
+  }
+
   return {
     bindStatus, messages, loading, syncing, sending, error,
     fetchStatus, fetchMessages, sync, send, deleteMessage,
     trashMessages, trashLoading, fetchTrash, restoreMessage, permanentDelete, emptyTrash,
     notifications, checkNewEmails, dismissNotification, startPolling, stopPolling,
     prioritizedEmails, prioritizing, priorityStrategy, prioritize, clearPrioritized,
+    starredEmails, starredLoading, fetchStarred, toggleStar, isStarred,
   }
 })

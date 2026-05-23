@@ -144,4 +144,15 @@ CREATE TABLE IF NOT EXISTS email_message (
     FOREIGN KEY (account_id) REFERENCES email_account(account_id)
 );
 
+CREATE TABLE IF NOT EXISTS starred_emails (
+    star_id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id        TEXT NOT NULL,
+    email_id       INTEGER NOT NULL,
+    reason         TEXT,
+    source         TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('ai', 'manual')),
+    starred_at     TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (email_id) REFERENCES email_message(message_id)
+);
+
 COMMIT;

@@ -132,18 +132,21 @@
             v-for="(msg, idx) in sortedMessages"
             :key="msg.id || idx"
             class="message-item"
-            :class="{ 'is-prioritized': prioritizedSet.has(msg.id) }"
+            :class="{ 'is-prioritized': prioritizedSet.has(msg.id) || store.isStarred(msg.id) }"
             @click="openEmail(idx)"
           >
             <div class="message-header">
-              <span v-if="prioritizedSet.has(msg.id)" class="priority-badge" :title="priorityReasons[msg.id]">⭐</span>
+              <span v-if="prioritizedSet.has(msg.id)" class="priority-badge" :title="priorityReasons[msg.id]">⚙</span>
+              <button class="star-toggle" @click.stop="store.toggleStar(msg.id)" :title="store.isStarred(msg.id) ? '取消星标' : '星标'">
+                {{ store.isStarred(msg.id) ? '★' : '☆' }}
+              </button>
               <span class="msg-title">{{ msg.title || '(无主题)' }}</span>
               <span class="msg-sender">{{ msg.sender || '' }}</span>
               <span class="msg-time">{{ formatTime(msg.release_time) }}</span>
               <button class="delete-msg-btn" @click.stop="handleDelete(msg.id, idx)" title="删除">×</button>
             </div>
-            <div v-if="prioritizedSet.has(msg.id) && priorityReasons[msg.id]" class="priority-reason">
-              {{ priorityReasons[msg.id] }}
+            <div v-if="(prioritizedSet.has(msg.id) && priorityReasons[msg.id]) || (store.isStarred(msg.id) && starReasons[msg.id])" class="priority-reason">
+              {{ priorityReasons[msg.id] || starReasons[msg.id] }}
             </div>
           </div>
         </div>
@@ -160,7 +163,9 @@
           <span class="nav-counter">{{ selectedIndex + 1 }} / {{ sortedMessages.length }}</span>
           <button class="nav-btn" :disabled="selectedIndex >= sortedMessages.length - 1" @click="nextEmail">下一封 &rsaquo;</button>
           <div class="modal-actions">
-            <button class="nav-btn pin-btn" @click="addToHome" :disabled="pinned">📌 {{ pinned ? '已添加' : '添加到主页' }}</button>
+            <button class="nav-btn star-btn" @click="handleStarToggle" :disabled="!selectedEmail">
+              {{ isCurrentStarred ? '★ 取消星标' : '☆ 星标' }}
+            </button>
             <button class="nav-btn close-btn" @click="closeModal">✕ 关闭</button>
           </div>
         </div>
@@ -212,10 +217,8 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useEmailStore } from '../stores/email.js'
-import { useDashboardStore } from '../stores/dashboard.js'
 
 const store = useEmailStore()
-const dashboardStore = useDashboardStore()
 
 const bindStatus = computed(() => store.bindStatus)
 const messages = computed(() => store.messages)
@@ -224,7 +227,6 @@ const syncing = computed(() => store.syncing)
 const sending = computed(() => store.sending)
 
 const selectedIndex = ref(null)
-const pinned = ref(false)
 const syncResult = ref(null)
 const sendSuccess = ref(false)
 const sortBy = ref('time-desc')
@@ -238,6 +240,12 @@ const trashLoading = computed(() => store.trashLoading)
 const selectedEmail = computed(() => {
   if (selectedIndex.value === null) return null
   return sortedMessages.value[selectedIndex.value] || null
+})
+
+const isCurrentStarred = computed(() => {
+  const email = selectedEmail.value
+  if (!email) return false
+  return store.isStarred(email.id)
 })
 
 const prioritizedSet = computed(() => {
@@ -256,39 +264,63 @@ const priorityReasons = computed(() => {
   return map
 })
 
+const starReasons = computed(() => {
+  const map = {}
+  for (const s of store.starredEmails) {
+    map[s.id] = s.star_reason || ''
+  }
+  return map
+})
+
 const sortedMessages = computed(() => {
   const list = [...store.messages]
 
-  const prioIds = prioritizedSet.value
-  const prioItems = []
-  const rest = []
+  const aiIds = new Set()
+  for (const p of store.prioritizedEmails) {
+    aiIds.add(p.id)
+  }
 
-  for (const msg of list) {
-    if (prioIds.has(msg.id)) {
-      prioItems.push(msg)
-    } else {
-      rest.push(msg)
+  const manualStarIds = new Set()
+  for (const s of store.starredEmails) {
+    if (!aiIds.has(s.id)) {
+      manualStarIds.add(s.id)
     }
   }
 
-  switch (sortBy.value) {
-    case 'time-asc':
-      rest.sort((a, b) => (a.release_time || '').localeCompare(b.release_time || ''))
-      break
-    case 'time-desc':
-      rest.sort((a, b) => (b.release_time || '').localeCompare(a.release_time || ''))
-      break
-    case 'sender':
-      rest.sort((a, b) => (a.sender || '').localeCompare(b.sender || ''))
-      break
-    case 'title':
-      rest.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
-      break
-    default:
-      rest.sort((a, b) => (b.release_time || '').localeCompare(a.release_time || ''))
+  const aiStarred = []
+  const manualStarred = []
+  const unstarred = []
+
+  for (const msg of list) {
+    if (aiIds.has(msg.id)) {
+      aiStarred.push(msg)
+    } else if (manualStarIds.has(msg.id)) {
+      manualStarred.push(msg)
+    } else {
+      unstarred.push(msg)
+    }
   }
 
-  return [...prioItems, ...rest]
+  const sortFn = (a, b) => {
+    switch (sortBy.value) {
+      case 'time-asc':
+        return (a.release_time || '').localeCompare(b.release_time || '')
+      case 'time-desc':
+        return (b.release_time || '').localeCompare(a.release_time || '')
+      case 'sender':
+        return (a.sender || '').localeCompare(b.sender || '')
+      case 'title':
+        return (a.title || '').localeCompare(b.title || '')
+      default:
+        return (b.release_time || '').localeCompare(a.release_time || '')
+    }
+  }
+
+  aiStarred.sort(sortFn)
+  manualStarred.sort(sortFn)
+  unstarred.sort(sortFn)
+
+  return [...aiStarred, ...manualStarred, ...unstarred]
 })
 
 const composeForm = reactive({
@@ -299,39 +331,28 @@ const composeForm = reactive({
 
 function openEmail(idx) {
   selectedIndex.value = idx
-  pinned.value = false
 }
 
 function closeModal() {
   selectedIndex.value = null
-  pinned.value = false
 }
 
 function prevEmail() {
   if (selectedIndex.value > 0) {
     selectedIndex.value--
-    pinned.value = false
   }
 }
 
 function nextEmail() {
   if (selectedIndex.value < sortedMessages.value.length - 1) {
     selectedIndex.value++
-    pinned.value = false
   }
 }
 
-function addToHome() {
+function handleStarToggle() {
   const email = selectedEmail.value
-  if (!email || pinned.value) return
-  dashboardStore.pinEmail({
-    id: email.id,
-    title: email.title || '(无主题)',
-    content: `${email.sender || '未知'} - ${email.context ? email.context.slice(0, 100) : ''}`,
-    sender: email.sender,
-    release_time: email.release_time,
-  })
-  pinned.value = true
+  if (!email) return
+  store.toggleStar(email.id, '手动标注')
 }
 
 function formatTime(time) {
@@ -370,6 +391,7 @@ async function handleRefresh() {
 
 async function handlePrioritize() {
   await store.prioritize()
+  await store.fetchStarred()
 }
 
 async function openTrash() {
@@ -412,6 +434,7 @@ onMounted(async () => {
   await store.fetchStatus()
   if (store.bindStatus.is_bound) {
     store.fetchMessages()
+    store.fetchStarred()
   }
   autoRefreshTimer = setInterval(() => {
     if (store.bindStatus.is_bound) store.fetchMessages()
@@ -901,6 +924,13 @@ onUnmounted(() => {
   border-color: rgba(52,199,89,0.2);
   background: #f0fdf4;
 }
+
+.star-toggle { background: none; border: none; font-size: 18px; cursor: pointer; color: #d4a017; padding: 0 2px; flex-shrink: 0; line-height: 1; }
+.star-toggle:hover { color: #b8860b; }
+
+.star-btn { color: #d4a017; border-color: rgba(212,160,23,0.2); font-size: 14px; }
+.star-btn:hover:not(:disabled) { background: #fefce8; border-color: rgba(212,160,23,0.4); }
+.star-btn:disabled { opacity: 0.4; cursor: default; }
 
 .close-btn {
   color: #6b7280;

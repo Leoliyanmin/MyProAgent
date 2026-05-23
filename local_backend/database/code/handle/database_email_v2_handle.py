@@ -107,3 +107,30 @@ class EmailV2Handle:
             return {"success": True, "message": "回收站已清空"}
         except Exception as e:
             return {"success": False, "message": "清空失败: {}".format(e)}
+
+    def handle_star_email(self, user_id: str, email_id: int, reason: str | None = None) -> dict:
+        try:
+            from local_backend.database.code.operations.database_email_v2_operations import StarredEmailV2Operations
+            star_ops = StarredEmailV2Operations()
+            star_ops.add_star(user_id, email_id, reason or '手动标注', 'manual')
+            return {'success': True, 'message': '已星标'}
+        except Exception as e:
+            return {'success': False, 'message': '星标失败: {}'.format(e)}
+
+    def handle_unstar_email(self, user_id: str, email_id: int) -> dict:
+        try:
+            from local_backend.database.code.operations.database_email_v2_operations import StarredEmailV2Operations
+            star_ops = StarredEmailV2Operations()
+            star_ops.remove_star(user_id, email_id)
+            return {'success': True, 'message': '已取消星标'}
+        except Exception as e:
+            return {'success': False, 'message': '取消星标失败: {}'.format(e)}
+
+    def handle_get_starred_emails(self, user_id: str) -> dict:
+        try:
+            from local_backend.database.code.operations.database_email_v2_operations import StarredEmailV2Operations
+            star_ops = StarredEmailV2Operations()
+            starred = star_ops.list_starred(user_id)
+            return {'success': True, 'starred': starred}
+        except Exception as e:
+            return {'success': False, 'message': '获取失败: {}'.format(e)}

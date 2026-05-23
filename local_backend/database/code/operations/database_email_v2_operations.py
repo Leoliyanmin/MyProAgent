@@ -85,3 +85,26 @@ class EmailMessageV2Operations:
     def empty_trash(self, user_id: str) -> None:
         for msg in self.list_trash(user_id):
             permanent_delete_email_message(msg["message_id"])
+
+
+class StarredEmailV2Operations:
+    def add_star(self, user_id: str, email_id: int, reason: str | None = None, source: str = 'manual') -> int:
+        from local_backend.database.code.command.database_command import (
+            create_starred_email, get_starred_email
+        )
+        existing = get_starred_email(user_id, email_id)
+        if existing:
+            return existing['star_id']
+        return create_starred_email(user_id=user_id, email_id=email_id, reason=reason, source=source)
+
+    def remove_star(self, user_id: str, email_id: int) -> None:
+        from local_backend.database.code.command.database_command import delete_starred_email
+        delete_starred_email(user_id, email_id)
+
+    def list_starred(self, user_id: str) -> list:
+        from local_backend.database.code.command.database_command import list_starred_emails_by_user
+        return list_starred_emails_by_user(user_id)
+
+    def is_starred(self, user_id: str, email_id: int) -> bool:
+        from local_backend.database.code.command.database_command import get_starred_email
+        return get_starred_email(user_id, email_id) is not None

@@ -24,6 +24,10 @@ class EmailSendRequest(BaseModel):
     receiver: str
 
 
+class StarEmailRequest(BaseModel):
+    reason: str | None = None
+
+
 @router.get("/status")
 async def get_email_status(user_id: str = Depends(get_current_user_id)):
     result = email_service.get_email_status(user_id)
@@ -145,4 +149,32 @@ async def prioritize_emails(user_id: str = Depends(get_current_user_id)):
     result = await email_priority_service.prioritize(user_id)
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '分析失败'))
+    return result
+
+
+@router.post("/messages/{message_id}/star")
+async def star_email_message(message_id: int, request: StarEmailRequest | None = None, user_id: str = Depends(get_current_user_id)):
+    """手动星标一封邮件"""
+    reason = request.reason if request else None
+    result = email_service.star_email(user_id, message_id, reason or '手动标注')
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '星标失败'))
+    return result
+
+
+@router.delete("/messages/{message_id}/star")
+async def unstar_email_message(message_id: int, user_id: str = Depends(get_current_user_id)):
+    """取消星标"""
+    result = email_service.unstar_email(user_id, message_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '取消星标失败'))
+    return result
+
+
+@router.get("/starred")
+async def get_starred_emails(user_id: str = Depends(get_current_user_id)):
+    """获取所有星标邮件（含完整内容 + 原因 + 来源）"""
+    result = email_service.get_starred_emails(user_id)
+    if not result.get('success'):
+        raise HTTPException(status_code=400, detail=result.get('message', '获取失败'))
     return result

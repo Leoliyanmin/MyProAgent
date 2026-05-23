@@ -211,8 +211,61 @@ class EmailService:
             logger.error(f"发送邮件失败: {str(e)}")
             return {'success': False, 'message': f'发送失败: {str(e)}'}
 
+    def star_email(self, user_id: str, email_id: int, reason: str | None = None) -> Dict:
+        return self.email_handle.handle_star_email(user_id, email_id, reason)
+
+    def unstar_email(self, user_id: str, email_id: int) -> Dict:
+        return self.email_handle.handle_unstar_email(user_id, email_id)
+
+    def is_email_starred(self, user_id: str, email_id: int) -> Dict:
+        try:
+            from local_backend.database.code.operations.database_email_v2_operations import StarredEmailV2Operations
+            star_ops = StarredEmailV2Operations()
+            result = star_ops.is_starred(user_id, email_id)
+            return {'success': True, 'is_starred': result}
+        except Exception as e:
+            return {'success': False, 'message': str(e)}
+
+    def get_starred_emails(self, user_id: str) -> Dict:
+        try:
+            result = self.email_handle.handle_get_starred_emails(user_id)
+            if not result.get('success'):
+                return result
+            starred = result.get('starred', [])
+            msgs_result = self.email_handle.handle_get_messages(user_id)
+            msg_map = {}
+            if msgs_result.get('success'):
+                for m in msgs_result.get('messages', []):
+                    msg_map[m.get('message_id')] = m
+            enriched = []
+            for s in starred:
+                msg = msg_map.get(s.get('email_id'))
+                if msg:
+                    enriched.append({
+                        'id': msg.get('message_id'),
+                        'title': msg.get('subject', ''),
+                        'sender': msg.get('sender', ''),
+                        'release_time': msg.get('received_at', ''),
+                        'context': msg.get('body_text', ''),
+                        'raw_html': msg.get('body_html', ''),
+                        'star_reason': s.get('reason', ''),
+                        'star_source': s.get('source', 'manual'),
+                        'starred_at': s.get('starred_at', ''),
+                    })
+            return {'success': True, 'messages': enriched}
+        except Exception as e:
+            logger.error(f"获取星标邮件失败: {str(e)}")
+            return {'success': False, 'message': str(e)}
+
     def delete_email_message(self, user_id: str, message_id: int) -> Dict:
-        return self.email_handle.handle_delete_message(user_id, message_id)
+        result = self.email_handle.handle_delete_message(user_id, message_id)
+        if result.get('success'):
+            from local_backend.database.code.command.database_command import delete_starred_emails_by_email_id
+            try:
+                delete_starred_emails_by_email_id(message_id)
+            except:
+                pass
+        return result
 
     def get_trash_messages(self, user_id: str) -> Dict:
         try:
@@ -238,7 +291,14 @@ class EmailService:
         return self.email_handle.handle_restore_message(user_id, message_id)
 
     def permanent_delete_email(self, user_id: str, message_id: int) -> Dict:
-        return self.email_handle.handle_permanent_delete(user_id, message_id)
+        result = self.email_handle.handle_permanent_delete(user_id, message_id)
+        if result.get('success'):
+            from local_backend.database.code.command.database_command import delete_starred_emails_by_email_id
+            try:
+                delete_starred_emails_by_email_id(message_id)
+            except:
+                pass
+        return result
 
     def empty_trash(self, user_id: str) -> Dict:
         return self.email_handle.handle_empty_trash(user_id)
