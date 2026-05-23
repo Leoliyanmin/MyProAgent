@@ -100,7 +100,7 @@
           v-model="inputText"
           class="message-input"
           placeholder="输入你的问题... (Shift+Enter 换行)"
-          @keydown.enter.exact.prevent="sendMessage"
+          @keydown.enter.exact.prevent="onEnterSubmit"
           rows="3"
         ></textarea>
         <div class="input-actions">
@@ -722,6 +722,13 @@ const disconnectWebSocket = () => {
     wsRef.value.close()
     wsRef.value = null
   }
+}
+
+// 处理 Enter 键提交，过滤 IME 输入法组合事件
+const onEnterSubmit = (e) => {
+  // isComposing 为 true 表示正在使用输入法（如中文拼音），此时 Enter 仅用于确认选字
+  if (e.isComposing) return
+  sendMessage()
 }
 
 // 发送消息

@@ -9,7 +9,7 @@
             v-model="dirInput"
             class="fm-dir-input"
             placeholder="输入工作目录，如 /Users/yanmin/Documents"
-            @keydown.enter="handleSetDirectory"
+            @keydown.enter="!$event.isComposing && handleSetDirectory()"
           />
         </div>
         <button class="fm-btn" @click="handleSetDirectory" :disabled="fmStore.isLoading">
@@ -63,7 +63,7 @@
         v-model="createName"
         class="fm-create-input"
         :placeholder="createType === 'folder' ? '文件夹名称' : '文件名称'"
-        @keydown.enter="confirmCreate"
+        @keydown.enter="!$event.isComposing && confirmCreate()"
         @keydown.escape="cancelCreate"
       />
       <button class="fm-btn-sm" @click="confirmCreate" :disabled="!createName.trim()">确认</button>
@@ -111,7 +111,7 @@
                   ref="renameInputRef"
                   v-model="renameValue"
                   class="fm-rename-input"
-                  @keydown.enter="confirmRename(entry)"
+                  @keydown.enter="!$event.isComposing && confirmRename(entry)"
                   @keydown.escape="cancelRename"
                 />
                 <button class="fm-btn-sm" @click="confirmRename(entry)" :disabled="!renameValue.trim()">确认</button>
