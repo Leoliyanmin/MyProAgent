@@ -23,6 +23,7 @@ class BbV2Operations:
                     user_id=user_id, data_category_id=cat_id,
                     data_content_type="assignment", data_classification_code=3,
                     data_title=a.get("name", ""), data_link_url=a.get("link", ""),
+                    data_release_time=None,
                     data_ddl_time=a.get("due_date"),
                     data_content_text=json.dumps(a.get("content", []), ensure_ascii=False),
                     data_is_previewable=1, data_source="blackboard",
@@ -36,6 +37,7 @@ class BbV2Operations:
                     data_content_type="announcement", data_classification_code=1,
                     data_title=ann.get("title", ""), data_link_url=ann.get("url", ""),
                     data_release_time=ann.get("date", ""),
+                    data_ddl_time=None,
                     data_content_text=str(ann.get("content", "")),
                     data_is_previewable=1, data_source="blackboard",
                     data_created_at=datetime.datetime.utcnow().isoformat(),
@@ -47,6 +49,7 @@ class BbV2Operations:
                     data_content_type="material", data_classification_code=2,
                     data_title=mat.get("title", ""), data_link_url=mat.get("url", ""),
                     data_release_time=mat.get("date", ""),
+                    data_ddl_time=None,
                     data_content_text=str(mat.get("content", "")),
                     data_is_previewable=1, data_source="blackboard",
                     data_created_at=datetime.datetime.utcnow().isoformat(),
@@ -66,6 +69,7 @@ class BbV2Operations:
         now = datetime.datetime.utcnow().isoformat()
         return create_category(
             user_id=user_id, category_kind="course", category_title=name,
+            category_content=None, category_link=None,
             category_source="blackboard", category_external_id=bb_id,
             category_created_at=now,
         )
