@@ -1,22 +1,14 @@
 ========================================
 邮件爬取结果
 ========================================
-时间: 2026-05-23 18:24:13
-邮件总数: 460
+时间: 2026-05-23 18:52:25
+邮件总数: 461
 本次获取: 100
 
 ========================================
 邮件详情列表
 ========================================
 --- 邮件 1 ---
-邮件ID: 2439
-发件人: soar@soar.openbmb.cn
-主题: SOAR 提交评测结果通知（未通过） / Evaluation Result (Failed)
-时间: 2026-05-18 21:01:01
-正文:
-尊敬的参赛选手：您好！您最新一次提交评测失败，暂未计入排行榜。请登录比赛官网查看详细评测报告及具体指标表现：https://soar.openbmb.cn比赛期间可多次提交（每日提交次数以规则为准），系统将自动更新排行榜。如对评测结果有疑问，欢迎加入社区讨论：飞书、Discord，或发送邮件至 contact@openbmb.cn 与我们联系。感谢您的参与，期待您的下一次突破！祝比赛顺利！赛事组委会---Dear Contestant,Your latest submission has failed evaluation and is not included in the leaderboard.Please visit the competition website for the detailed evaluation report: https://soar.openbmb.cnYou may submit multiple times during the competition (subject to daily submission limits). The leaderboard will be updated automatically.If you have any questions about the evaluation result, feel free to join the community discussion on Feishu or Discord, or contact us at contact@openbmb.cn.Thank you for your participation. We look forward to your next breakthrough!Best of luck!Competition Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
-
---- 邮件 2 ---
 邮件ID: 2440
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交评测结果通知（未通过） / Evaluation Result (Failed)
@@ -24,7 +16,7 @@
 正文:
 尊敬的参赛选手：您好！您最新一次提交评测失败，暂未计入排行榜。请登录比赛官网查看详细评测报告及具体指标表现：https://soar.openbmb.cn比赛期间可多次提交（每日提交次数以规则为准），系统将自动更新排行榜。如对评测结果有疑问，欢迎加入社区讨论：飞书、Discord，或发送邮件至 contact@openbmb.cn 与我们联系。感谢您的参与，期待您的下一次突破！祝比赛顺利！赛事组委会---Dear Contestant,Your latest submission has failed evaluation and is not included in the leaderboard.Please visit the competition website for the detailed evaluation report: https://soar.openbmb.cnYou may submit multiple times during the competition (subject to daily submission limits). The leaderboard will be updated automatically.If you have any questions about the evaluation result, feel free to join the community discussion on Feishu or Discord, or contact us at contact@openbmb.cn.Thank you for your participation. We look forward to your next breakthrough!Best of luck!Competition Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 3 ---
+--- 邮件 2 ---
 邮件ID: 2441
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交评测结果通知（未通过） / Evaluation Result (Failed)
@@ -32,7 +24,7 @@
 正文:
 尊敬的参赛选手：您好！您最新一次提交评测失败，暂未计入排行榜。请登录比赛官网查看详细评测报告及具体指标表现：https://soar.openbmb.cn比赛期间可多次提交（每日提交次数以规则为准），系统将自动更新排行榜。如对评测结果有疑问，欢迎加入社区讨论：飞书、Discord，或发送邮件至 contact@openbmb.cn 与我们联系。感谢您的参与，期待您的下一次突破！祝比赛顺利！赛事组委会---Dear Contestant,Your latest submission has failed evaluation and is not included in the leaderboard.Please visit the competition website for the detailed evaluation report: https://soar.openbmb.cnYou may submit multiple times during the competition (subject to daily submission limits). The leaderboard will be updated automatically.If you have any questions about the evaluation result, feel free to join the community discussion on Feishu or Discord, or contact us at contact@openbmb.cn.Thank you for your participation. We look forward to your next breakthrough!Best of luck!Competition Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 4 ---
+--- 邮件 3 ---
 邮件ID: 2442
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -41,7 +33,7 @@
 正文:
 @lsz-asd pushed 1 commit. 6bedc78 add unit test &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/ecdf2c8c85803acdbefaf9a0aa3a6ae3085e8b9e/after/6bedc78179b2fc910648424b8c3fe60545ca77b3@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/ecdf2c8c85803acdbefaf9a0aa3a6ae3085e8b9e..6bedc78179b2fc910648424b8c3fe60545ca77b3?email_source=notifications\u0026email_token=BNRJFTFKDPVFSDKHGKC6KVD43MTU3A5CNFSNUAGDM5UWIORPF5TWS5BNNB2WEL2QOVWGYUTFOF2WK43UKB2XG2CON52GSZTJMNQXI2LPNYXVA5LMNQSTEMZTGU2DKOBVGY4TEMSCMVTG64TFEUZDGZLDMRTDEYZYMM4DKOBQGNQWGZDCMVTGCZRZMEYGCYJTME3GCZJTGA4DKZJYMI4WKQLGORSXEJJSGM3GEZLEMM3TQMJXHFRDEZTDHEYTANRUHA2DENDCHBRTGZTFGYYDKNBVMNQTON3CGNIHK43IMVSEC5BFGIZTCNZXHEYTCNZZG43FA5LTNBSXEJJSGMZDAOBWGE3TINBXUZZGKYLTN5XKI4DVONUKKZLWMVXHJK3HNVQWS3C7MNWGSY3L", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/ecdf2c8c85803acdbefaf9a0aa3a6ae3085e8b9e..6bedc78179b2fc910648424b8c3fe60545ca77b3?email_source=notifications\u0026email_token=BNRJFTFKDPVFSDKHGKC6KVD43MTU3A5CNFSNUAGDM5UWIORPF5TWS5BNNB2WEL2QOVWGYUTFOF2WK43UKB2XG2CON52GSZTJMNQXI2LPNYXVA5LMNQSTEMZTGU2DKOBVGY4TEMSCMVTG64TFEUZDGZLDMRTDEYZYMM4DKOBQGNQWGZDCMVTGCZRZMEYGCYJTME3GCZJTGA4DKZJYMI4WKQLGORSXEJJSGM3GEZLEMM3TQMJXHFRDEZTDHEYTANRUHA2DENDCHBRTGZTFGYYDKNBVMNQTON3CGNIHK43IMVSEC5BFGIZTCNZXHEYTCNZZG43FA5LTNBSXEJJSGMZDAOBWGE3TINBXUZZGKYLTN5XKI4DVONUKKZLWMVXHJK3HNVQWS3C7MNWGSY3L", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 5 ---
+--- 邮件 4 ---
 邮件ID: 2443
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -49,7 +41,7 @@
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 6 ---
+--- 邮件 5 ---
 邮件ID: 2444
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -57,7 +49,7 @@
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 7 ---
+--- 邮件 6 ---
 邮件ID: 2445
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -65,7 +57,7 @@
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 8 ---
+--- 邮件 7 ---
 邮件ID: 2446
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交评测结果通知（未通过） / Evaluation Result (Failed)
@@ -73,7 +65,7 @@
 正文:
 尊敬的参赛选手：您好！您最新一次提交评测失败，暂未计入排行榜。请登录比赛官网查看详细评测报告及具体指标表现：https://soar.openbmb.cn比赛期间可多次提交（每日提交次数以规则为准），系统将自动更新排行榜。如对评测结果有疑问，欢迎加入社区讨论：飞书、Discord，或发送邮件至 contact@openbmb.cn 与我们联系。感谢您的参与，期待您的下一次突破！祝比赛顺利！赛事组委会---Dear Contestant,Your latest submission has failed evaluation and is not included in the leaderboard.Please visit the competition website for the detailed evaluation report: https://soar.openbmb.cnYou may submit multiple times during the competition (subject to daily submission limits). The leaderboard will be updated automatically.If you have any questions about the evaluation result, feel free to join the community discussion on Feishu or Discord, or contact us at contact@openbmb.cn.Thank you for your participation. We look forward to your next breakthrough!Best of luck!Competition Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 9 ---
+--- 邮件 8 ---
 邮件ID: 2447
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交评测结果通知（未通过） / Evaluation Result (Failed)
@@ -81,7 +73,7 @@
 正文:
 尊敬的参赛选手：您好！您最新一次提交评测失败，暂未计入排行榜。请登录比赛官网查看详细评测报告及具体指标表现：https://soar.openbmb.cn比赛期间可多次提交（每日提交次数以规则为准），系统将自动更新排行榜。如对评测结果有疑问，欢迎加入社区讨论：飞书、Discord，或发送邮件至 contact@openbmb.cn 与我们联系。感谢您的参与，期待您的下一次突破！祝比赛顺利！赛事组委会---Dear Contestant,Your latest submission has failed evaluation and is not included in the leaderboard.Please visit the competition website for the detailed evaluation report: https://soar.openbmb.cnYou may submit multiple times during the competition (subject to daily submission limits). The leaderboard will be updated automatically.If you have any questions about the evaluation result, feel free to join the community discussion on Feishu or Discord, or contact us at contact@openbmb.cn.Thank you for your participation. We look forward to your next breakthrough!Best of luck!Competition Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 10 ---
+--- 邮件 9 ---
 邮件ID: 2448
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交评测结果通知（未通过） / Evaluation Result (Failed)
@@ -89,7 +81,7 @@
 正文:
 尊敬的参赛选手：您好！您最新一次提交评测失败，暂未计入排行榜。请登录比赛官网查看详细评测报告及具体指标表现：https://soar.openbmb.cn比赛期间可多次提交（每日提交次数以规则为准），系统将自动更新排行榜。如对评测结果有疑问，欢迎加入社区讨论：飞书、Discord，或发送邮件至 contact@openbmb.cn 与我们联系。感谢您的参与，期待您的下一次突破！祝比赛顺利！赛事组委会---Dear Contestant,Your latest submission has failed evaluation and is not included in the leaderboard.Please visit the competition website for the detailed evaluation report: https://soar.openbmb.cnYou may submit multiple times during the competition (subject to daily submission limits). The leaderboard will be updated automatically.If you have any questions about the evaluation result, feel free to join the community discussion on Feishu or Discord, or contact us at contact@openbmb.cn.Thank you for your participation. We look forward to your next breakthrough!Best of luck!Competition Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 11 ---
+--- 邮件 10 ---
 邮件ID: 2449
 发件人: 国际合作部(geo_students)  <global_students@sustech.edu.cn>
 主题: 【通知Notice】2026年暑秋境外交流项目行前培训Pre-DepartureTrainingforStudyAbroadProgramsinSummer&Autumn2026
@@ -97,7 +89,7 @@
 正文:
 body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; margin-left: 0.5em; }p { margin-top: 0px; margin-bottom: 0px; }div.FoxDiv20260519093033425498 { }body { font-size: 14px; font-family: "Microsoft YaHei UI"; color: rgb(0, 0, 0); line-height: 1.5; } 同学们好，&nbsp;2026年暑秋境外交流行前培训将于5月21日（本周四）中午举行，具体通知如下。&nbsp;时间：5月21日（星期四），12:30-13:30地点：第一科研楼报告厅内容：1.&nbsp;教学工作部：境外交流学分转换、离校备案手续及回国报到手续2.&nbsp;国际合作部：本科生境外学习奖助申请、离校交流手续办理、出国安全提醒及注意事项等特别提醒：计划出境参加2026年暑期与秋季境外交流项目的同学必须参加本次培训会，此次行前培训为境外交流手续的必要环节，需现场签到。&nbsp;Dear students,&nbsp;Pre-Departure Training for Study Abroad Programs in Summer &amp; Autumn 2026 will be held on&nbsp;21st May. Please see the following details for the Training.&nbsp;Time:&nbsp;12:30-13:30, Thursday, May 21Venue:&nbsp;<span style="background-image: linear-gradient(to right, rgba(111, 75, 250, 0.12), rgba(111, 75, 250, 0.12)); background-position: 50% 100%; background-size: 100% 9px; background-repeat: no-repeat; background-attachment: scroll; background-origin: padding-box; background-clip: border-box; -webkit-font-smoothing: antialiased; -webkit-text-stro...(truncated)
 
---- 邮件 12 ---
+--- 邮件 11 ---
 邮件ID: 2450
 发件人: 国际合作部(geo_students)  <global_students@sustech.edu.cn>
 主题: 【重要通知_Notice】2026年暑假与秋季学期本科生境外学习奖助申请及离校交流手续办理通知/ Scholarship Application and Pre-departure Procedures for Undergraduate Study Abroad Programs in Summer and Autumn 2026
@@ -105,7 +97,7 @@ body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; marg
 正文:
 body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; margin-left: 0.5em; }p { margin-top: 0px; margin-bottom: 0px; }div.FoxDiv20260519093217429050 { }body { font-size: 14px; font-family: "Microsoft YaHei UI"; color: rgb(0, 0, 0); line-height: 1.5; } 各位同学， &nbsp;大家好！&nbsp;南方科技大学2026年暑秋学期本科生境外学习奖助申请及离校交流手续办理现已正式启动。现将有关事项通知如下：&nbsp;&nbsp;一、奖助申请受理对象：参加2026年暑假与秋季学期境外交流项目的本科生。申请提交时间：2026年5月15日至5月29日下午17:00 PM申请方式：访问境外交流信息平台（ws.sustech.edu.cn）-“交流手续/奖助申请”-“操作”-“奖助申请”，填写并提交申请。<p class="MsoNormal" style="color: rgb(0, 0, 0); line-height: 20...(truncated)
 
---- 邮件 13 ---
+--- 邮件 12 ---
 邮件ID: 2451
 发件人: " 人文社会科学学院党委(rwskxydw) " <rwskxydw@sustech.edu.cn>
 主题: 【讲座通知】香港大学原协理副校长刘宁荣教授开讲“AI时代的全球化趋势” Lecture Notice Professor LIU Ningrong, Former Associate Vice-President of The University of Hong Kong, to Deliver a Lecture on Globalization Trends in the AI Era
@@ -113,7 +105,7 @@ body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; marg
 正文:
 Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException Locked="false" SemiHidden="true" Unh...(truncated)
 
---- 邮件 14 ---
+--- 邮件 13 ---
 邮件ID: 2452
 发件人: " 理学院(sci-dean) " <sci-dean@sustech.edu.cn>
 主题: 【理学院科学大讲堂第241期】 5月26日10:30-夏威夷大学-Ralf I. Kaiser教授 【Science Lecture of the College of Science, No. 241】 10:30 AM, 26 May-University of Hawai’i-Prof. Ralf I. Kaiser
@@ -121,7 +113,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 各位老师、同学：大家好！应理学院杨学明院士的邀请，夏威夷大学马诺阿分校化学系教授Ralf I. Kaiser将做理学院第241期科学大讲堂报告，详情如下，欢迎感兴趣的师生参加！题&nbsp;目：冷化学，热影响：星际空间中的分子复杂性主&nbsp;讲：Ralf I. Kaiser &nbsp;教授 时&nbsp;间：2026年5月26日（周二）10:30地&nbsp;点：理学院一楼化学系C1038报告厅&nbsp;Dear all,Upon&nbsp;the invitation of&nbsp;Academician Xueming Yang, College of Science, Prof. Ralf I. Kaiser from University of Hawai’i at Manoa will give a Lecture of Science.&nbsp;All are welcome! Details of the lecture are listed below.Topic:&nbsp;Cold Chemistry, Hot Implications: Molecular Complexity in Interstellar SpaceSpeaker: Prof. Ralf I. Kaiser Time:&nbsp;10:30 pm, 26 May 2026Venue: Room C1038, College of Science 理学院南方科技大学/其他/公共邮箱广东省深圳市南山区学苑大道1088号
 
---- 邮件 15 ---
+--- 邮件 14 ---
 邮件ID: 2453
 发件人: " 南科大教学信息(taa) " <taa@sustech.edu.cn>
 主题: 关于2026年5月23-24日因全国大学英语四、六级口语考试对智华楼5楼封场的通知 Notice On Building Closure Due To The National College English Test-Spoken English Test (CET-SET) Band 4 and Band 6
@@ -129,7 +121,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 关于2026年5月23-24日因全国大学英语四、六级口语考试对智华楼5楼封场的通知各位老师、同学：大家好！2026年上半年全国大学英语四、六级口语考试将于5月23日（四级口语）、5月24日（六级口语）举行，我校口语考场设在智华楼5楼机房，为维护考试秩序、确保考试顺利进行，将于5月22日晚上22:00-5月24日12:00期间对用作考场的智华楼5楼进行封场，望周知。封场期间，除考务人员外，其余人员不得进入以上区域。参加考试的考生，请按准考证规定时间入场。请各位老师和同学合理安排好自己对此区域的使用时间。特此通知。（联系人：教学工作部，傅老师，ful3@sustech.edu.cn）&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 教学工作部&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...(truncated)
 
---- 邮件 16 ---
+--- 邮件 15 ---
 邮件ID: 2454
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -138,7 +130,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 @lsz-asd pushed 1 commit. ecb6a37 fix: resolve conftest import conflict by running backends separately &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/6bedc78179b2fc910648424b8c3fe60545ca77b3/after/ecb6a37f9560e65bb8bb82d425d5cbd3001f5614@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/6bedc78179b2fc910648424b8c3fe60545ca77b3..ecb6a37f9560e65bb8bb82d425d5cbd3001f5614?email_source=notifications\u0026email_token=BNRJFTE46PZVG42ELJUQQXT43PGV7A5CNFSNUAGDM5UWIORPF5TWS5BNNB2WEL2QOVWGYUTFOF2WK43UKB2XG2CON52GSZTJMNQXI2LPNYXVA5LMNQSTEMZTGU2DKOBVGY4TEMSCMVTG64TFEUZDGNTCMVSGGNZYGE3TSYRSMZRTSMJQGY2DQNBSGRRDQYZTMZSTMMBVGQ2WGYJXG5RDGQLGORSXEJJSGNSWGYRWMEZTOZRZGU3DAZJWGVRGEODCMI4DEZBUGI2WINLDMJSDGMBQGFTDKNRRGRIHK43IMVSEC5BFGIZTCNZXHEYTMMBVGIZFA5LTNBSXEJJSGMZDAOBWGE3TINBXUZZGKYLTN5XKI4DVONUKKZLWMVXHJK3HNVQWS3C7MNWGSY3L", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/6bedc78179b2fc910648424b8c3fe60545ca77b3..ecb6a37f9560e65bb8bb82d425d5cbd3001f5614?email_source=notifications\u0026email_token=BNRJFTE46PZVG42ELJUQQXT43PGV7A5CNFSNUAGDM5UWIORPF5TWS5BNNB2WEL2QOVWGYUTFOF2WK43UKB2XG2CON52GSZTJMNQXI2LPNYXVA5LMNQSTEMZTGU2DKOBVGY4TEMSCMVTG64TFEUZDGNTCMVSGGNZYGE3TSYRSMZRTSMJQGY2DQNBSGRRDQYZTMZSTMMBVGQ2WGYJXG5RDGQLGORSXEJJSGNSWGYRWMEZTOZRZGU3DAZJWGVRGEODCMI4DEZBUGI2WINLDMJSDGMBQGFTDKNRRGRIHK43IMVSEC5BFGIZTCNZXHEYTMMBVGIZFA5LTNBSXEJJSGMZDAOBWGE3TINBXUZZGKYLTN5XKI4DVONUKKZLWMVXHJK3HNVQWS3C7MNWGSY3L", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 17 ---
+--- 邮件 16 ---
 邮件ID: 2455
 发件人: 南方科技大学红十字会 <rcss@sustech.edu.cn>
 主题: 关于举办初级救护员培训（5月23日）的通知 | Notice on Primary First Aid Training session - May 23
@@ -146,7 +138,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 关于举办初级救护员培训（5月23日）的通知 | Notice on Primary First Aid Training session - May 23各位老师、同学们：&nbsp;为普及应急救护知识，提升师生急救能力，由南方科技大学红十字会和睿鹰急救天眼联合举办的初级救护员培训将于5月23日（周六） 14:00-19:00 （含考核），在智华教学楼（原第三教学楼）107举行，欢迎各位老师、同学报名参加。&nbsp;一、培训报名扫描附件中的二维码加入本期培训总群，按照群公告和群文件中的指南完成报名，达到80人限额关闭报名通道。请珍惜培训机会，合理安排时间，确保全程培训。&nbsp;二、培训安排（一）培训时间：2026年5月23日 14:00-19:00（含考核）。（二）培训地点：智华教学楼（原第三教学楼）107。（三）培训对象：面向学校师生、家属、第三方。（四）培训内容：本次培训由南方科技大学红十字会负责，培训内容包括心肺复苏技术、创伤急救四项技术、常见意外伤害应急救护技术等，全程中文教学。培训分为线上学习和线下学习，学员需要在线下培训前，需注册并登陆“救在身边”平台：https://www.crcntc.org.cn/，完成救护员课程培训与考核。（详见培训总群内群文件）（五）培训考核：理论考核和操作考核，修满学时并通过考核者，获得深圳市红十字会发放的《红十字初级救护员证》。（六）培训宣讲：培训内容结束后将安排“睿鹰急救天眼”项目的简短宣讲。该 APP 由南科大商学院王宇教授团队研发，旨在搭建患者与救助者间的信息传递平台，可在院外心脏骤停场景下智能匹配附近急救员，助力在黄金四分钟内为患者提供心肺复苏支持，为校园应急救护网络提供数字化补充。&nbsp;三、注意事项（一）遵守培训纪律，提前半个小时到场签到，不迟到不早退，未能全程参加培训的不予发放证书。（二）未满16周岁，身体不适、怀孕、近期手术后等情况的，不能参加此次培训。（三）着轻便服装，不宜穿裙子、高跟鞋、低领衣服等。&nbsp;南方科技大学红十字会2026年5月18日&nbsp;Notice on Primary First Aid Training session - May 23Dear SUSTech members,&nbsp;To popularize emergency first aid knowledge and improve the emergency response capabilities of our faculty and students, Ruiying First Aid Sky Eye and SUSTech Red Cross will hold a Primary First Aid Training session. The training will take place on May 23 from 14:00 to 19:00 (assessment included) at Room 107, Chi Wah Lecture Hall (formerly Lecture Hall 3). We welcome all faculty and students to sign up.<span lang="EN-US" style="font-size:11.0pt; line-height:150%;font-family:&quot;Times New Roman&quot;,serif;mso-fareast-font-family: 宋体;color:#3...(truncated)
 
---- 邮件 18 ---
+--- 邮件 17 ---
 邮件ID: 2456
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -154,7 +146,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 19 ---
+--- 邮件 18 ---
 邮件ID: 2457
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -162,7 +154,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 20 ---
+--- 邮件 19 ---
 邮件ID: 2458
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -170,7 +162,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 21 ---
+--- 邮件 20 ---
 邮件ID: 2459
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -179,7 +171,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 @lsz-asd pushed 1 commit. 60e9bf1 fix: install email-validator in test &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/ecb6a37f9560e65bb8bb82d425d5cbd3001f5614/after/60e9bf17fe4a480138758b624c2e5d0f63dc2ea8@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/ecb6a37f9560e65bb8bb82d425d5cbd3001f5614..60e9bf17fe4a480138758b624c2e5d0f63dc2ea8?email_source=notifications\u0026email_token=BNRJFTHGU4BR3FJMPF4EGNL43PN27A5CNFSNUAGDM5UWIORPF5TWS5BNNB2WEL2QOVWGYUTFOF2WK43UKB2XG2CON52GSZTJMNQXI2LPNYXVA5LMNQSTEMZTGU2DKOBVGY4TEMSCMVTG64TFEUZDGZLDMI3GCMZXMY4TKNRQMU3DKYTCHBRGEOBSMQ2DENLEGVRWEZBTGAYDCZRVGYYTIQLGORSXEJJSGM3DAZJZMJTDCN3GMU2GCNBYGAYTGOBXGU4GENRSGRRTEZJVMQYGMNRTMRRTEZLBHBIHK43IMVSEC5BFGIZTCNZXHEYTMNBRHA3FA5LTNBSXEJJSGMZDAOBWGE3TINBXUZZGKYLTN5XKI4DVONUKKZLWMVXHJK3HNVQWS3C7MNWGSY3L", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/ecb6a37f9560e65bb8bb82d425d5cbd3001f5614..60e9bf17fe4a480138758b624c2e5d0f63dc2ea8?email_source=notifications\u0026email_token=BNRJFTHGU4BR3FJMPF4EGNL43PN27A5CNFSNUAGDM5UWIORPF5TWS5BNNB2WEL2QOVWGYUTFOF2WK43UKB2XG2CON52GSZTJMNQXI2LPNYXVA5LMNQSTEMZTGU2DKOBVGY4TEMSCMVTG64TFEUZDGZLDMI3GCMZXMY4TKNRQMU3DKYTCHBRGEOBSMQ2DENLEGVRWEZBTGAYDCZRVGYYTIQLGORSXEJJSGM3DAZJZMJTDCN3GMU2GCNBYGAYTGOBXGU4GENRSGRRTEZJVMQYGMNRTMRRTEZLBHBIHK43IMVSEC5BFGIZTCNZXHEYTMNBRHA3FA5LTNBSXEJJSGMZDAOBWGE3TINBXUZZGKYLTN5XKI4DVONUKKZLWMVXHJK3HNVQWS3C7MNWGSY3L", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 22 ---
+--- 邮件 21 ---
 邮件ID: 2460
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -188,7 +180,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 @lsz-asd pushed 1 commit. 85feb87 fix: add missing deps (requests, websockets) to test workflow &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/60e9bf17fe4a480138758b624c2e5d0f63dc2ea8/after/85feb87cca141af6d7668861091ce0ada955eabb@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/60e9bf17fe4a480138758b624c2e5d0f63dc2ea8..85feb87cca141af6d7668861091ce0ada955eabb?email_source=notifications\u0026email_token=BNRJFTD53LTCF4ECWX4VR2T43PPOPA5CNFSNUAGDM5UWIORPF5TWS5BNNB2WEL2QOVWGYUTFOF2WK43UKB2XG2CON52GSZTJMNQXI2LPNYXVA5LMNQSTEMZTGU2DKOBVGY4TEMSCMVTG64TFEUZDGNRQMU4WEZRRG5TGKNDBGQ4DAMJTHA3TKODCGYZDIYZSMU2WIMDGGYZWIYZSMVQTQQLGORSXEJJSGM4DKZTFMI4DOY3DMEYTIMLBMY3GINZWGY4DQNRRGA4TCY3FGBQWIYJZGU2WKYLCMJIHK43IMVSEC5BFGIZTCNZXHEYTMNJQGEYFA5LTNBSXEJJSGMZDAOBWGE3TINBXUZZGKYLTN5XKI4DVONUKKZLWMVXHJK3HNVQWS3C7MNWGSY3L", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/60e9bf17fe4a480138758b624c2e5d0f63dc2ea8..85feb87cca141af6d7668861091ce0ada955eabb?email_source=notifications\u0026email_token=BNRJFTD53LTCF4ECWX4VR2T43PPOPA5CNFSNUAGDM5UWIORPF5TWS5BNNB2WEL2QOVWGYUTFOF2WK43UKB2XG2CON52GSZTJMNQXI2LPNYXVA5LMNQSTEMZTGU2DKOBVGY4TEMSCMVTG64TFEUZDGNRQMU4WEZRRG5TGKNDBGQ4DAMJTHA3TKODCGYZDIYZSMU2WIMDGGYZWIYZSMVQTQQLGORSXEJJSGM4DKZTFMI4DOY3DMEYTIMLBMY3GINZWGY4DQNRRGA4TCY3FGBQWIYJZGU2WKYLCMJIHK43IMVSEC5BFGIZTCNZXHEYTMNJQGEYFA5LTNBSXEJJSGMZDAOBWGE3TINBXUZZGKYLTN5XKI4DVONUKKZLWMVXHJK3HNVQWS3C7MNWGSY3L", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 23 ---
+--- 邮件 22 ---
 邮件ID: 2461
 发件人: " 致仁书院(zhiren) " <zhiren@sustech.edu.cn>
 主题: 【演出预告】“一纪风华·国韵流芳”——2026年致仁民乐团十二周年专场音乐会
@@ -196,7 +188,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 【演出预告】“一纪风华·国韵流芳”——2026年致仁民乐团十二周年专场音乐会&nbsp;亲爱的老师们、同学们：国音以载道，传千年之文脉；丝竹以言志，奏一纪之风华。十二年，是一个轮回，也是一次新生。以琴为舟，以歌为楫。我们渡时光之河，守初心不改。这一路，有你有我，有音乐，有回响。5月24日，周日晚19:00，南方科技大学会议中心音乐厅，期待各位的到来，与我们共襄音乐盛会！&nbsp;注意事项：1. 请扫描下方二维码实名登记抢票，一人一票，报名成功后将通过邮件通知门票线下领取事宜；若携带亲友同行，请提前到场，统一在现场领取对应门票。2. 本次演出座位不固定，请您入场后迅速就坐；3. 场馆内禁止吸烟，禁止使用明火，禁止携带违禁品入场；4. 请妥善保管随身物品，以免丢失；5. 请维护场馆卫生，请勿乱丢垃圾、随地吐痰；6. 演出开始前，请将手机调至静音；演出期间请保持安静，各位家长请看护好您的孩子，文明观演。&nbsp;为保证演出的顺利进行以及各位观众良好的观演体验，感谢各位的配合。致仁民乐团以音待友，静候知音。报名二维码↓&nbsp;致仁书院、致仁民乐团2026年5月19日Special Concert for the 12th Anniversary of the Zhiren&nbsp;Chinese Orchestra&nbsp;&nbsp;Introduction:Zhiren Chinese Orchestra of SUSTech will hold a special Chinese musi...(truncated)
 
---- 邮件 24 ---
+--- 邮件 23 ---
 邮件ID: 2462
 发件人: Leoliyanmin <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -205,7 +197,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 @Leoliyanmin pushed 10 commits. 7394f57 add mertics_tool for calculate metrics 035d3c7 传递mail的raw_html信息 077103b Merge branch &#39;multi-platform-aggrevate&#39; into integration 79ff3d1 邮件列表新增删除功能，正文改为HTML渲染 9b9f760 邮件HTML渲染前剥离style标签，防止全局CSS泄漏 ab533cd 邮件页新增刷新按钮，仅读取本地数据库 72073e7 增强邮件HTML清洗：剥离style、注释、VML/Outlook行为规则 39d5b3a 邮件删除移除confirm弹窗（Tauri WebView兼容），添加点击日志 ac40b06 邮件列表新增排序功能：时间/发件人/标题 06fbc4a 邮件列表补回context字段，无raw_html时用纯文本兜底 &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/85feb87cca141af6d7668861091ce0ada955eabb/after/06fbc4a678d2ecc3dfa3001cdd9e3ad3f576b893@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/85feb87cca141af6d7668861091ce0ada955eabb..06fbc4a678d2ecc3dfa3001cdd9e3ad3f576b893", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/85feb87cca141af6d7668861091ce0ada955eabb..06fbc4a678d2ecc3dfa3001cdd9e3ad3f576b893", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 25 ---
+--- 邮件 24 ---
 邮件ID: 2463
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -213,7 +205,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 26 ---
+--- 邮件 25 ---
 邮件ID: 2464
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -221,7 +213,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 27 ---
+--- 邮件 26 ---
 邮件ID: 2465
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -229,7 +221,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 28 ---
+--- 邮件 27 ---
 邮件ID: 2466
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -238,7 +230,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 @lsz-asd pushed 2 commits. 7c11bc4 ci: add full CI/CD pipeline with compile, test, package, docs, Docker, and K8s 55dd823 Merge branch &#39;integration&#39; of https://github.com/sustech-cs304/team-project-26spring-26s-27 into integration &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/06fbc4a678d2ecc3dfa3001cdd9e3ad3f576b893/after/55dd8230a24e86ad86be26031d09d7adaefbd87d@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/06fbc4a678d2ecc3dfa3001cdd9e3ad3f576b893..55dd8230a24e86ad86be26031d09d7adaefbd87d", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/06fbc4a678d2ecc3dfa3001cdd9e3ad3f576b893..55dd8230a24e86ad86be26031d09d7adaefbd87d", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 29 ---
+--- 邮件 28 ---
 邮件ID: 2467
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -247,7 +239,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 @lsz-asd pushed 1 commit. 19d522a ci: fix lint, docker build, pdoc, and kubeconform issues in pipeline &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/55dd8230a24e86ad86be26031d09d7adaefbd87d/after/19d522a4c4b0698e439a72ae61542db130da9a6a@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/55dd8230a24e86ad86be26031d09d7adaefbd87d..19d522a4c4b0698e439a72ae61542db130da9a6a", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/55dd8230a24e86ad86be26031d09d7adaefbd87d..19d522a4c4b0698e439a72ae61542db130da9a6a", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 30 ---
+--- 邮件 29 ---
 邮件ID: 2468
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -256,7 +248,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 @lsz-asd pushed 1 commit. c6bfae9 ci: fix Dockerfile.local gitignore, lint, pdoc, and kubeconform issues &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/19d522a4c4b0698e439a72ae61542db130da9a6a/after/c6bfae9bc602656b84324ee4699a749751b401a4@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/19d522a4c4b0698e439a72ae61542db130da9a6a..c6bfae9bc602656b84324ee4699a749751b401a4", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/19d522a4c4b0698e439a72ae61542db130da9a6a..c6bfae9bc602656b84324ee4699a749751b401a4", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 31 ---
+--- 邮件 30 ---
 邮件ID: 2469
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -264,7 +256,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 32 ---
+--- 邮件 31 ---
 邮件ID: 2470
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -272,7 +264,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 33 ---
+--- 邮件 32 ---
 邮件ID: 2471
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -280,7 +272,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 29 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #29🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 34 ---
+--- 邮件 33 ---
 邮件ID: 2472
 发件人: 沈昀 计算机科学与工程系 - sheny@mail.sustech.edu.cn  <blackboard@sustech.edu.cn>
 主题: Operating Systems Spring 2026: 【reminder】Please submit Assignment5 on time【ddl: 6.5 23:00】
@@ -288,7 +280,7 @@ Normal 0 false 7.8 磅 0 2 false false false EN-US ZH-CN X-NONE <w:LsdException 
 正文:
 Dear students, Assignment4 is released. Please remember to submit Assignment5 on Time.【ddl: 6.5 23:00】 Yun
 
---- 邮件 35 ---
+--- 邮件 34 ---
 邮件ID: 2473
 发件人: 教学与招生培养部  <admissions@sii.edu.cn>
 主题: 上海创智学院2026年夏令营感谢信
@@ -296,7 +288,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 上海创智学院2026年夏令营感谢信亲爱的同学：展信佳！我们由衷感激你将目光投向上海创智学院 2026年夏令营，这份关注对我们而言意义非凡。本次夏令营吸引了无数怀揣着对人工智能炽热梦想的同学纷至沓来。在众多的申请材料中，优秀的学子们如繁星闪耀，你们的才华与热情，让我们真切感受到人工智能领域蓬勃的未来。学院精心筹备，召集领域多位资深专家组成评审团，认真审阅每份材料。你在学术展现出的坚韧不拔令我们印象深刻，你对人工智能领域的热情让我们惊喜。经过学院招生委员会多轮深入研讨、综合权衡，很遗憾地通知你没有通过本次夏令营遴选。但请坚信，一时的错过绝非终点。我们相信你对人工智能的执着和热情一定会在未来开出美丽的花，我们也会以开放的办学模式向你们提供更多优质科研教学资源，如AI微专业、先修课程、线上论坛等，期待未来助力你的人工智能科研求索之路！我们诚邀您持续关注学院后续活动，并期待在学院后续选拔营中与您再次相遇。顺颂学祺，愿您不负热爱，前行不辍。上海创智学院招生培养部电话：021-53300123地址：上海市徐汇区华发路699弄3号
 
---- 邮件 36 ---
+--- 邮件 35 ---
 邮件ID: 2474
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -305,7 +297,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 @lsz-asd pushed 1 commit. 8452db9 ci: fix: correct database_init.py path in Dockerfiles and startup scripts &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/c6bfae9bc602656b84324ee4699a749751b401a4/after/8452db97f76e3f5d7994794a83f794a8c0b87224@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/c6bfae9bc602656b84324ee4699a749751b401a4..8452db97f76e3f5d7994794a83f794a8c0b87224", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/c6bfae9bc602656b84324ee4699a749751b401a4..8452db97f76e3f5d7994794a83f794a8c0b87224", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 37 ---
+--- 邮件 36 ---
 邮件ID: 2475
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -314,7 +306,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 @lsz-asd pushed 1 commit. 54d2393 fix: use qualified module names in spec_from_file_location for localagent imports &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/8452db97f76e3f5d7994794a83f794a8c0b87224/after/54d239355bc943d9c69c33ca61e5032bfe466350@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/8452db97f76e3f5d7994794a83f794a8c0b87224..54d239355bc943d9c69c33ca61e5032bfe466350", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/8452db97f76e3f5d7994794a83f794a8c0b87224..54d239355bc943d9c69c33ca61e5032bfe466350", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 38 ---
+--- 邮件 37 ---
 邮件ID: 2476
 发件人: " 保卫部(oss) " <oss@sustech.edu.cn>
 主题: 【温馨提示】关于加强夏季用电安全的温馨提示 Tips on Electrical Safety in Summer
@@ -322,7 +314,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 关于加强夏季用电安全的温馨提示&nbsp;各位老师、同学：天气逐渐炎热，学校已进入用电高峰期。为进一步加强学校用电安全管理，切实消除用电安全隐患，杜绝火灾等各类用电安全事故发生，确保学校师生员工生命和财产安全，现就有关事项通知如下：1.夏季使用空调应关好门窗；如遇假期或下班室内无人时，及时关闭空调、电脑、灯具等用电设备，做到“人走电关”，避免不必要的能耗。2.禁止私自拉、接电线，禁止改动供电线路及用电设施设备。避免多台设备共用一个插排，或插排串接使用造成线路过载运行。宿舍内严禁存放和使用大功率电器。3.经常检查设备插头、接线端、线路和开关是否出现发热、绝缘老化现象，发现问题及时报修或更换；漏电保护开关应每月进行一次测试，保障功能完好。4.用电设备应保持干燥，避开空调出风口、水管等易产生冷凝水位置；洁净间电箱开关应做好防水防凝露措施。设备摆放避免阳光直射，四周留出散热空间。5.每月对24小时运转的电气设备（如冰箱、精密空调、打印机、饮水机、空气净化器、洗衣机等）、用电线路进行巡查、停电检修。及时清理供电设施、电气设备、用电线路周边的各类易燃可燃杂物，确保供电设施、用电设备、线路安全。6.电动自行车及电池严禁进楼停放或充电，严禁私自改装，定期维护；手机、充电宝、笔记本等避免长时间充电，充电时远离可燃物。电气设备使用过程中如遇打火、异味、高热、异响等异常情况时，请立即停止操作并关闭电源，及时拨打物业客服电话88010123；如遇突发紧急事件，请及时拨打学校应急电话：88010110、18566211101。&nbsp;保卫部总务后勤部2026年5月20日&nbsp;Tips on Electrical Safety in Summer&nbsp;May 20, 2026&nbsp;Dear all,&nbsp;As&nbsp;it’s getting hot, we have entered the peak season of electricity consumption. To further enhance the electrical safety management, effectively eliminate electrical hazards, fires and other electrical accidents, and ensure the safety of SUSTech members, we have the following tips: &nbsp;1. Close doors and windows when using air conditioners. Turn off the electricity equipment, including air conditioners, PCs and lights, during holidays or after the end of the day when there is no one indoors to avoid unnecessary energy consumption. Do not add or connect wires without permission. Do not change power supply lines and electrical facilities and equipment without permission. Avoid multiple devices sharing a plug, or a plug connecting with another resulting in electrical circuit overload. It is also strictly forbidden to store and use high-wattage appliances in the dormitory.<span style="mso-spacerun:'yes';f...(truncated)
 
---- 邮件 39 ---
+--- 邮件 38 ---
 邮件ID: 2477
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -331,7 +323,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 @lsz-asd pushed 1 commit. 1f99f39 fix: restructure Dockerfiles to preserve package dirs, fix health checks and k8s manifests &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/54d239355bc943d9c69c33ca61e5032bfe466350/after/1f99f3922bf85b2b950823c596eb79244fdcb33d@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/54d239355bc943d9c69c33ca61e5032bfe466350..1f99f3922bf85b2b950823c596eb79244fdcb33d", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/54d239355bc943d9c69c33ca61e5032bfe466350..1f99f3922bf85b2b950823c596eb79244fdcb33d", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 40 ---
+--- 邮件 39 ---
 邮件ID: 2478
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -340,7 +332,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 @lsz-asd pushed 1 commit. d81efe5 fix: add logging_config.py and personality to Dockerfiles for local_backend &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/1f99f3922bf85b2b950823c596eb79244fdcb33d/after/d81efe5a063cb186979a198d4a4c673e0722bf72@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/1f99f3922bf85b2b950823c596eb79244fdcb33d..d81efe5a063cb186979a198d4a4c673e0722bf72", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/1f99f3922bf85b2b950823c596eb79244fdcb33d..d81efe5a063cb186979a198d4a4c673e0722bf72", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 41 ---
+--- 邮件 40 ---
 邮件ID: 2479
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -349,7 +341,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 @lsz-asd pushed 1 commit. a2cddb9 fix: add k8s-specific nginx ConfigMap with correct service names for frontend &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/d81efe5a063cb186979a198d4a4c673e0722bf72/after/a2cddb96d67efd3ca5b6abc01a2f67fd52e20caa@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/d81efe5a063cb186979a198d4a4c673e0722bf72..a2cddb96d67efd3ca5b6abc01a2f67fd52e20caa", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/d81efe5a063cb186979a198d4a4c673e0722bf72..a2cddb96d67efd3ca5b6abc01a2f67fd52e20caa", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 42 ---
+--- 邮件 41 ---
 邮件ID: 2480
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -358,7 +350,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 @lsz-asd pushed 1 commit. 11233ec fix: allow docker-push to run on integration branch &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/a2cddb96d67efd3ca5b6abc01a2f67fd52e20caa/after/11233ec4a40a8f05432b442613ec2abdf0273d8a@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/a2cddb96d67efd3ca5b6abc01a2f67fd52e20caa..11233ec4a40a8f05432b442613ec2abdf0273d8a", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/a2cddb96d67efd3ca5b6abc01a2f67fd52e20caa..11233ec4a40a8f05432b442613ec2abdf0273d8a", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 43 ---
+--- 邮件 42 ---
 邮件ID: 2481
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -366,7 +358,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 44 ---
+--- 邮件 43 ---
 邮件ID: 2482
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -374,7 +366,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 45 ---
+--- 邮件 44 ---
 邮件ID: 2483
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -382,7 +374,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 46 ---
+--- 邮件 45 ---
 邮件ID: 2484
 发件人: Runpod Team <noreply@runpod.io>
 主题: Scaling GPUs is hard. Serverless makes it easy.
@@ -390,7 +382,7 @@ Dear students, Assignment4 is released. Please remember to submit Assignment5 on
 正文:
 Scaling GPUs is hard. Serverless makes it easy. a.cta_button{-moz-box-sizing:content-box !important;-webkit-box-sizing:content-box !important;box-sizing:content-box !important;vertical-align:middle}.hs-breadcrumb-menu{list-style-type:none;margin:0px 0px 0px 0px;padding:0px 0px 0px 0px}.hs-breadcrumb-menu-item{float:left;padding:10px 0px 10px 10px}.hs-breadcrumb-menu-divider:before{content:'›';padding-left:10px}.hs-featured-image-link{border:0}.hs-featured-image{float:right;margin:0 0 20px 20px;max-width:50%}@media (max-width: 568px){.hs-featured-image{float:none;margin:0;width:100%;max-width:100%}}.hs-screen-reader-text{clip:rect(1px, 1px, 1px, 1px);height:1px;overflow:hidden;position:absolute !important;width:1px} 96 ul > li { text-indent: -1em; } body, td {font-family: Arial, Helvetica, sans-serif;} .hse-body-wrapper-table {background-color: #EAF0F6;} .hse-column-container { border: none !important; padding: 0 !important; } @media only screen and (max-width:639px){img.stretch-on-mobile,.hs_rss_email_entries_table img,.hs-stretch-cta .hs-cta-img{height:auto !important;width:100% !important} .display_block_on_small_screens{display:block}.hs_padded{padding-left:20px !important;padding-right:20px !important} .hs-hm,table.hs-hm{display:none}.hs-hd{display:block !important}table.hs-hd{display:table !important} }@media only screen and (max-width:639px){.hse-border-m{border-left:1px solid #eaf0f6 !important;border-right:1px solid #eaf0f6 !important;box-sizing:border-box} .hse-border-bottom-m{border-bottom:1px solid #eaf0f6 !important}.hse-border-top-m{border-top:1px solid #eaf0f6 !important} .hse-border-top-hm{border-top:none !important}.hse-border-bottom-hm{border-bottom:none !important} }.moz-text-html .hse-column-container{max-width:600px !important;width:600px !important} .moz-text-html .hse-column{display:table-cell;vertical-align:top}.moz-text-html .hse-section .hse-size-12{max-width:600px !important;width:600px !important} @media only screen and (min-width:640px){.hse-column-container{max-width:600px !important;width:600px !important} .hse-column{display:table-cell;vertical-align:top}.hse-section .hse-size-12{max-width:600px !important;width:600px !important} }@media only screen and (max-width:639px){.hse-body-wrapper-td{padding-top:20px !important} #section-0 .hse-column-container{padding-top:4px !important;padding-bottom:3px !important} #section-0 .hse-column-container{background-color:#fff !important} }@media only screen and (max-width:639px){ #section-1 .hse-column-container{padding-top:10px !important;padding-bottom:10px !important} #section-1 .hse-column-container{background-color:#fff !important} }@media only screen and (max-width:639px){ #section-2 .hse-column-container{padding-top:0px !important;padding-bottom:0px !important} #section-2 .hse-column-container{background-color:#fff !important} }@media screen and (max-width:639px){.social-network-cell{display:inline-block} }@media only screen and (max-width:639px){.hse-body-wrapper-td{padding-bottom:20px !important} #section-3 .hse-column-container{padding-top:0px !important;padding-bottom:0px !important} #section-3 .hse-column-container{background-color:#fff !important} }#hs_body #hs_cos_wrapper_main a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;font-size:inherit !important;font-family:inherit !important;font-weight:inherit !important;line-height:inherit !important} a{text-decoration:underline}p{margin:0}body{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;moz-osx-font-smoothing:grayscale} table{border-spacing:0;mso-table-lspace:0;mso-table-rspace:0}table,td{border-collapse:collapse} img{-ms-interpolation-mode:bicubic}p,a,li,td,blockquote{mso-line-height-rule:exactly} .ShadowHTML p,.sh-modified-inline p{margin:0} Auto-scale from 0 to 1000+ workers. Sub-200ms cold starts. ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ &nbsp; <a href="https://d2S9mR04.na1.hubspotlinks.com/Ctc/DP+113/d2S9mR04/VXh2S391ZYGFW29STmf1GrZ7zVQq1455PgV6p...(truncated)
 
---- 邮件 47 ---
+--- 邮件 46 ---
 邮件ID: 2485
 发件人: " 南科大校友会 " <sustechaa@sustech.edu.cn>
 主题: 活动报名 |  南方科技大学校友健身俱乐部成立仪式暨健身知识分享活动等你赴约 Invitation to the Founding Ceremony of SUSTechAA (Fitness Club) & Fitness Tips Sharing Session
@@ -398,7 +390,7 @@ Scaling GPUs is hard. Serverless makes it easy. a.cta_button{-moz-box-sizing:con
 正文:
 亲爱的校友、老师、同学们：校友专属的健身平台终于来啦！2026年5月23日（周六），南方科技大学校友健身俱乐部成立仪式暨健身知识分享活动，与您一起甩掉疲惫、练就好体态，并肩奔赴元气满满新生活！活动时间：2026.5.23（周六）14:00-16:00活动地点：南方科技大学琳恩图书馆二楼学习书坊活动流程：14:00-14:30 签到入场14:30-15:00 校友健身俱乐部成立仪式15:00-16:00 健身知识分享&nbsp;欢迎扫码了解活动详情及报名参与&nbsp;报名截止时间为5月22日（周五）10:00&nbsp;南方科技大学校友会2026年5月20日&nbsp;May 20, 2026Dear all,On May 23, the Founding Ceremony of SUSTechAA (Fitness Club) &amp; Fitness Tips Sharing Session will be held at the gym of the residential college of SUSTech. We sincerely invite you to join us in the community to connect with fellow alumni and students who share a passion for fitness and work out together.<p cl...(truncated)
 
---- 邮件 48 ---
+--- 邮件 47 ---
 邮件ID: 2486
 发件人: " 南科大校友会 " <sustechaa@sustech.edu.cn>
 主题: 教师行业校友会分享会 | 教师成长计划第二期：在AI时代重新思考学习：从生命链接到具身认知的教师成长工作坊 Come and Join Us for the Second Session of the "Teacher Development " Sharing Series of SUSTechAA (Education)
@@ -406,7 +398,7 @@ Scaling GPUs is hard. Serverless makes it easy. a.cta_button{-moz-box-sizing:con
 正文:
 亲爱的校友们、老师们、同学们：2026年5月23日（周六），教师行业校友会特邀PBL领域专家、深圳市南山区仁智实验学校赵丹校长（博士），与校友们一起共研课程新范式，共话未来教育下的专业力量。分享嘉宾：赵丹，新闻学硕士，教育学博士。现任深圳市南山区仁智实验学校校长，深耕一线教学与课程创新改革工作十余年，具有丰富的PBL项目开发与实践经验。分享主题：《在AI时代重新思考学习：从生命链接到具身认知的教师成长工作坊》活动时间：2026年5月23日（周六）09:15-11:00活动地点：南方科技大学智华教学楼114教室活动对象：南科大校友（含毕业校友、教职工、在校生）&nbsp;欢迎扫码了解活动详情报名截止时间为5月22日（周五）10:00&nbsp;&nbsp;南方科技大学校友会2026年5月20日&nbsp;&nbsp;May 20, 2026Dear all,The second session of "Teacher Development" Series will be hosted by SUSTechAA (Education) on Saturday, May 23, 2026.&nbsp; We have invited Dr. Zhao Dan, an expert in Project-Based Learning (PBL) to share with us her insights on "Rethinking Learning in the AI Era: A Lifespan Perspective on Embodied Cognition".Event Information<span style="mso-spacerun:'yes';font-family:仿宋;mso-ascii-font-family:Arial; mso-hansi-font-family:Arial;ms...(truncated)
 
---- 邮件 49 ---
+--- 邮件 48 ---
 邮件ID: 2487
 发件人: " 教育基金会(sustechef) " <sustechef@sustech.edu.cn>
 主题: 活动报名 | 从腾讯离职到350万用户：我的OPC创业实践——南方科普大讲堂&iLEARN校友主题学习2026年第三期活动 Event Registration | The Third Session of SUSTech Science Popularization Lecture and iLEARN Alumni Thematic Learning in 2026
@@ -414,7 +406,7 @@ Scaling GPUs is hard. Serverless makes it easy. a.cta_button{-moz-box-sizing:con
 正文:
 亲爱的老师们、同学们、校友们：2026年5月23日（周六），南方科普大讲堂&amp;iLEARN校友主题学习2026年第三期将在学习书坊举行，JustAI创始人卢冠男将带来“从腾讯离职到350万用户：我的OPC创业实践”主题分享。欢迎全校师生、校友报名参加！活动时间：2026年5月23日（周六）10:00-10:30签到，10:30-12:00主题分享、互动交流活动地点：南方科技大学学习书坊（琳恩图书馆星巴克旁二楼）活动对象：南科大师生、校友，以及对讲座感兴趣的社会人士分享主题：从腾讯离职到350万用户：我的OPC创业实践主讲嘉宾：卢冠男，JustAI创始人&nbsp;欢迎扫码了解活动详情及报名参与报名截止时间5月22日（周五）16:00&nbsp;南方科技大学教育基金会2026年5月21日&nbsp;&nbsp;Dear all,On May 23, the Third Session of SUSTech Science Popularization Lecture and iLEARN Alumni Thematic Learning in 2026 will be held at SUSTech. We have invited GuanNan LU,founder of JUSTAI,will delive an exciting presentation titled ‘From leaving Tencent to 3.5 million users: My OPC entrepreneurial practice’.We look forward to seeing you at the event.Time:Saturday, May 23, 202610:00-10:30 Registration10:30-12:00 Theme Sharing and Interactive DiscussionVenue: Learning Studio of Lynn Library, SUSTech (above Starbucks)Target Audience:Faculty, students, and alumni of SUSTech, as well as members of the public interested in the lecture.Theme: From leaving Tencent to 3.5 million users: My OPC entrepreneurial practiceGuest Speaker:GuanNan Lu,founder of JUSTAI&nbsp;Scan the code for details and registration(Registration closes at 16:00 pm on May 22)&nbsp;教育基金会南方科技大学/其他/公共邮箱<p class="phone" style="mar...(truncated)
 
---- 邮件 50 ---
+--- 邮件 49 ---
 邮件ID: 2488
 发件人: " 语言中心外语能力个性化发展平台 " <fllp@sustech.edu.cn>
 主题: 【活动通知】欢迎参加5月22日英语角/Welcome to the English Corner on May 22nd
@@ -422,7 +414,7 @@ Scaling GPUs is hard. Serverless makes it easy. a.cta_button{-moz-box-sizing:con
 正文:
 font{ line-height: 1.6; } ul,ol{ padding-left: 20px; list-style-position: inside; } font{ line-height: 1.6; } ul,ol{ padding-left: 20px; list-style-position: inside; } Dear students,&nbsp;English Corner&nbsp;is an ongoing activity hosted by the Center for Language Education and the Student Development Committee of Zhiren College. This is a good opportunity to practice your spoken English.&nbsp;Everyone is welcome to join us at the&nbsp;Zhiren Activity Room&nbsp;on&nbsp;May 22nd at 7:00 pm. Please scan the following QR code on the poster or click on the link&nbsp;(https://www.wjx.top/vm/hegQALp.aspx)&nbsp;to register.&nbsp;We are looking forward to your participation. See you there!Student Development Committee of Zhiren CollegeCenter for Language Education
 
---- 邮件 51 ---
+--- 邮件 50 ---
 邮件ID: 2489
 发件人: 教学工作部（学生学习指导）(tao-sls)  <tao-sls@sustech.edu.cn>
 主题: 本科生2026年春季学期期末考试安排的通知   Notice Regarding Final Examination Arrangements for Undergraduate Students for Spring 2026
@@ -430,7 +422,7 @@ font{ line-height: 1.6; } ul,ol{ padding-left: 20px; list-style-position: inside
 正文:
 body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-size: 21px; font-family: 仿宋; color: rgb(0, 0, 0); line-height: 1.5; } 本科生2026年春季学期期末考试安排的通知各位同学：&nbsp; &nbsp; 大家好！&nbsp; &nbsp;&nbsp;2026年春季学期期末考试时间为2026年6月6日—2026年6月18日。现将本学期期末考试安排通知如下：&nbsp;1.不参加期末考试周考试的课程，由任课教师在期末考试周前自行安排，请同学们以任课教师通知为准。&nbsp;2.参加期末考试周考试的课程，请同学们登录教务系统查看考试安排，考试时间、考试地点、考试时长等信息请务必以教务系统为准。考试时长一般为2小时，部分课程考试时长3小时，请留意考试时间。&nbsp;3.考生须携带学生证或校园卡提前10分钟进入考场，并在考试过程中严格遵守考试纪律。开考30分钟后考生不得进入考场，开考30分钟内考生不得离开考场。考试作弊者，按相应规定予以处理。 &nbsp;&nbsp;&nbsp;4.申请缓考的同学，须于考试前填写《南方科技大学本科生期末考试缓考申请表》（附件1），并按照缓考须知的要求附上符合规定的有效证明，按照缓考流程在开考前交至教学工作部（南科大中心304）。已参加考试课程不能申请缓考，毕业学期课程不能申请缓考。由于缓考成绩获得时间较晚，会对选课、选专业、毕业等造成影响，请同学们结合自身情况慎重申请缓考。每门课程只有一次缓考机会，通过缓考申请的同学须在下一学期开学初参加缓考考试，如未参加缓考考试，此门课程按照“0分、旷考”记录成绩单。&nbsp;5.如学生未申请缓考或缓考申请未通过，擅自不参加考试者，按照“缺考0分”记录。&nbsp;6.研究生课程的缓考规则与本科生不同，原则上研究生课程缓考考试在该课程的下一个开课学期与期末考试同时进行，请申请研究生课程缓考的学生根据自身情况慎重选择。&nbsp; &nbsp; 7.请同学们严格遵守考试纪律，相关考试规定请参照《南方科技大学考试工作及成绩管理条例（2017年修订）》（附件2）和《南方科技大学学生处分实施办法》（附件3）。&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; 祝大家考试顺利！如有问题，可回复本邮箱咨询。&nbsp; &nbsp;&nbsp;备注：本学期缓考申请表有更新，如有缓考需求的同学请下载附件中的表格。&nbsp;附件1.&nbsp;南方科技大学本科生期末考试缓考申请表及缓考须知&nbsp;（2026年春季学期更新）&nbsp;附件2. 南方科技大学考试工作及成绩管理条例（2017年修订）&nbsp;附件3.&nbsp;南方科技大学学生处分实施办法&nbsp;&nbsp;&nbsp;Notice Regarding Final Examination Arrangements for Undergraduate Students&nbsp;for&nbsp;Spring&nbsp;2026&nbsp;<p class="MsoNormal" style="font-family: &quot;Microsoft YaHei UI&quot;, Tahoma; margin-top: 0px; margin-bottom: 0px;...(truncated)
 
---- 邮件 52 ---
+--- 邮件 51 ---
 邮件ID: 2490
 发件人: 国际合作部(geo_students)  <global_students@sustech.edu.cn>
 主题: 【通知Notice】2026年暑秋境外交流项目行前培训Pre-DepartureTrainingforStudyAbroadProgramsinSummer&Autumn2026
@@ -438,7 +430,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; margin-left: 0.5em; }p { margin-top: 0px; margin-bottom: 0px; }div.FoxDiv20260521095734284663 { }body { font-size: 14px; font-family: "Microsoft YaHei UI"; color: rgb(0, 0, 0); line-height: 1.5; } 同学们好，&nbsp;2026年暑秋境外交流行前培训将于5月21日（今天）中午举行，具体通知如下。&nbsp;时间：5月21日（星期四），12:30-13:30地点：第一科研楼报告厅内容：1.&nbsp;教学工作部：境外交流学分转换、离校备案手续及回国报到手续2.&nbsp;国际合作部：本科生境外学习奖助申请、离校交流手续办理、出国安全提醒及注意事项等特别提醒：计划出境参加2026年暑期与秋季境外交流项目的同学必须参加本次培训会，此次行前培训为境外交流手续的必要环节，需现场签到。&nbsp;Dear students,&nbsp;Pre-Departure Training for Study Abroad Programs in Summer &amp; Autumn 2026 will be held on&nbsp;21st May. Please see the following details for the Training.&nbsp;Time:&nbsp;12:30-13:30, Thursday, May 21Venue:&nbsp;<span style="background-image: linear-gradient(to right, rgba(111, 75, 250, 0.12), rgba(111, 75, 250, 0.12)); background-position: 50% 100%; background-size: 100% 9px; background-repeat: no-repeat; bac...(truncated)
 
---- 邮件 53 ---
+--- 邮件 52 ---
 邮件ID: 2491
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -446,7 +438,7 @@ body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; marg
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 54 ---
+--- 邮件 53 ---
 邮件ID: 2492
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -454,7 +446,7 @@ body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; marg
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 55 ---
+--- 邮件 54 ---
 邮件ID: 2493
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -462,7 +454,7 @@ body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; marg
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 56 ---
+--- 邮件 55 ---
 邮件ID: 2494
 发件人: src@sustech.edu.cn
 主题: 发件人已撤回邮件：团辅招募——依恋动物园：亲密关系主题单次心理团体辅导
@@ -470,7 +462,7 @@ body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; marg
 正文:
 该邮件已经被发件人撤回。
 
---- 邮件 57 ---
+--- 邮件 56 ---
 邮件ID: 2495
 发件人: 学生工作部(osa)  <osa@sustech.edu.cn>
 主题: 南方科技大学关于开展全国高校“两个结合”青春践行主题作品征集展示遴选的通知
@@ -478,7 +470,7 @@ body { line-height: 1.5; }blockquote { margin-top: 0px; margin-bottom: 0px; marg
 正文:
 body { line-height: 1.5; }body { font-size: 14px; font-family: "Microsoft YaHei UI"; color: rgb(0, 0, 0); line-height: 1.5; } 1111MicrosoftInternetExplorer402DocumentNotSpecified7.8 磅Normal0 <w:LsdException Locked="false" Priority="99" SemiHidden="false" Name="Body Text Indent 3...(truncated)
 
---- 邮件 58 ---
+--- 邮件 57 ---
 邮件ID: 2496
 发件人: 学生工作部(osa)  <osa@sustech.edu.cn>
 主题: 关于“永远的长征”主题演出活动的通知
@@ -486,7 +478,7 @@ body { line-height: 1.5; }body { font-size: 14px; font-family: "Microsoft YaHei 
 正文:
 body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-size: 14px; font-family: "Microsoft YaHei UI"; color: rgb(0, 0, 0); line-height: 1.5; } 1111MicrosoftInternetExplorer402DocumentNotSpecified7.8 磅Normal0 <w:LsdException Locked="false" Priority="99" Se...(truncated)
 
---- 邮件 59 ---
+--- 邮件 58 ---
 邮件ID: 2497
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -494,7 +486,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 60 ---
+--- 邮件 59 ---
 邮件ID: 2498
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -502,7 +494,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 61 ---
+--- 邮件 60 ---
 邮件ID: 2499
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -510,7 +502,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 62 ---
+--- 邮件 61 ---
 邮件ID: 2500
 发件人: 南科大义工联(suva)  <suva@sustech.edu.cn>
 主题: 【志愿者招募】国际未来高等教育峰会志愿者招募通知/【Volunteer Recruiment】Recruitment notice for volunteers in the Global Summit on the Future of Higher Education
@@ -518,7 +510,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }.fox_html_content_dummy_textarea { position: absolute; overflow: hidden; width: 1px; height: 1px; opacity: 0; }body { font-size: 19px; font-family: 仿宋; color: rgb(0, 0, 0); line-height: 1.5; } 国际未来高等教育峰会志愿者招募通知（报名方式见文末）各位同学：&nbsp;&nbsp;&nbsp;&nbsp;大家好！&nbsp;&nbsp;&nbsp;&nbsp;为保障国际未来高等教育峰会顺利举办，现面向全校公开招募志愿者，协助开展活动的相关服务工作。本次峰会定于2026年6月4日至7日，地点为南方科技大学专家公寓、君璞酒店（接待组），深圳宝安国际机场、广州白云机场、香港机场（接机组），南方科技大学会议中心2楼会议厅（会务组），深圳市内（企业参访组）。为确保本次工作的顺利开展，现计划招募志愿者共计60人，具体招募信息如下：&nbsp;一、活动时间和地点&nbsp;&nbsp;&nbsp;&nbsp;服务时间：2026年6月4日至7日(具体安排将在志愿者群内另行通知)&nbsp;&nbsp;&nbsp;&nbsp;服务地点：南方科技大学专家公寓、君璞酒店（接待组），深圳宝安国际机场、广州白云机场、香港机场（接机组），南方科技大学会议中心2楼会议厅（会务组），深圳市内（企业参访组）&nbsp;二、服务内容&nbsp;&nbsp;&nbsp;&nbsp;1.接待组（6.4-6.7）：主要负责协助参会嘉宾办理入住、退房手续、提供路线指引以及引导用餐等服务。&nbsp;&nbsp;&nbsp;&nbsp;2.接机组（6.4-6.5）：主要协助带队老师跟随接机车辆前往机场，对接来访宾客。热情招待并做好指引工作，并随接机车辆将宾客送至入住酒店，同时协助办理入住手续。&nbsp;&nbsp;&nbsp;&nbsp;3.会务组（6.5-6.6）：主要协助完成会场的布置及相关准备工作。包括会场签到及接待、会场指引和维持秩序，以及其他会务后勤相关工作。&nbsp;&nbsp;&nbsp;&nbsp;4.企业参访组（6.7）：主要协助组织参会嘉宾乘坐大巴前往指定的企业进行参观和访问，及时响应嘉宾需求并告知带队老师。&nbsp;<p class="MsoNormal" style="margin: 0px 0cm; font-family: 仿宋; font-size: 19px; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip: initial; text-align:...(truncated)
 
---- 邮件 63 ---
+--- 邮件 62 ---
 邮件ID: 2501
 发件人: Leoliyanmin <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -527,7 +519,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }.fox_html_co
 正文:
 @Leoliyanmin pushed 29 commits. 36a0de7 feat: 新增 v2 十张专用表（task/tis/bb/email/user_setting） 26c550d feat: init_database 自动执行 v2 建表脚本 b49172e feat: 注册链路存 password_hash + sync_state 自动初始化 57339e7 feat: 种子脚本加密码 + 登录校验密码 87bd202 feat: Task 模块双写入库（task 表 + category/data） cc15829 feat: schedule 表加 source/source_id 字段 73c7b3d feat: agent 对话写入 session/chat 表 5c393bf feat: Email 模块双写入库（email_account/message 表） 61d41a5 fix: email_account/email_message 去掉 UNIQUE 约束方便测试 6b3214c fix: 注册时本地用户已存在不视为失败 644c932 fix: 登录同步时本地用户已存在静默跳过 d3d009d fix: 左下角用户名改为读取 authStore 而非硬编码 e82b848 feat: user_setting 表接入 API + 前端对接 0e50d93 fix: 任务双写 UNIQUE 冲突 + status/priority 未传递 f5dd3ca 增加邮件定时拉取,默认最近50封，可在config.py中修改定时同步间隔 c118499 Merge branch &#39;multi-platform-aggrevate&#39; into integration 51a2b33 fix: 同步格式对齐服务端 SyncRequest schema 818d261 fix: 同步 data_type 对齐服务端 importer 的 key（data/schedule） 1565bc1 feat: task/user_setting 表加入服务器同步 f4b99c2 feat: TIS/BB 数据双写入库（v2 表 + category/data） fbb084d feat: TIS 数据加入服务器同步 7e93eb1 fix: 修复登录后 token 未传递导致所有接口返回 401 的问题 638fcd0 debug：修复月视图拖拽任务时未保留时间段、未同步后端、且独立todo被错误复制到 basicEvents 的问题 bff1ab1 debug: 修复 Ctrl+C 退出时 uvicorn reloader 进程残留导致终端阻塞 0a640ff feat: persist login session across Tauri restarts with tauri-plugin-store 7c3bb40 feat: 邮件定时同步完善 - 秒级间隔、弹窗详情、主页置顶、字段修复 3089788 feat: 邮件回收站 + 侧边栏新邮件通知 + 加密修复 92584d5 fix: IMAP UID 替代序列号 + 通知区改版 + 全局轮询 ae71206 Merge branch &#39;integration&#39; of https://github.com/sustech-cs304/team-project-26spring-26s-27 into integration &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/11233ec4a40a8f05432b442613ec2abdf0273d8a/after/ae71206f393e42ff7389069e24787b4a0d21b71a@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/11233ec4a40a8f05432b442613ec2abdf0273d8a..ae71206f393e42ff7389069e24787b4a0d21b71a", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/11233ec4a40a8f05432b442613ec2abdf0273d8a..ae71206f393e42ff7389069e24787b4a0d21b71a", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 64 ---
+--- 邮件 63 ---
 邮件ID: 2502
 发件人: Leoliyanmin <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -536,7 +528,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }.fox_html_co
 正文:
 @Leoliyanmin pushed 1 commit. d96b518 fix: UserSettingsView newEmail 重复声明导致构建失败 &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/ae71206f393e42ff7389069e24787b4a0d21b71a/after/d96b5186e8ce1605380a07510ba5b7bee4ffaed5@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/ae71206f393e42ff7389069e24787b4a0d21b71a..d96b5186e8ce1605380a07510ba5b7bee4ffaed5", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/ae71206f393e42ff7389069e24787b4a0d21b71a..d96b5186e8ce1605380a07510ba5b7bee4ffaed5", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 65 ---
+--- 邮件 64 ---
 邮件ID: 2503
 发件人: Leoliyanmin <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -545,7 +537,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }.fox_html_co
 正文:
 @Leoliyanmin pushed 1 commit. 56ea8ac test: 同步 auth.test.js 的 storage key 到 auth-session 格式 &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/d96b5186e8ce1605380a07510ba5b7bee4ffaed5/after/56ea8acecaad5dd4fc20a85ffee2a356ce06bec3@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/d96b5186e8ce1605380a07510ba5b7bee4ffaed5..56ea8acecaad5dd4fc20a85ffee2a356ce06bec3", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/d96b5186e8ce1605380a07510ba5b7bee4ffaed5..56ea8acecaad5dd4fc20a85ffee2a356ce06bec3", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 66 ---
+--- 邮件 65 ---
 邮件ID: 2504
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -553,7 +545,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }.fox_html_co
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 67 ---
+--- 邮件 66 ---
 邮件ID: 2505
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -561,7 +553,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }.fox_html_co
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 68 ---
+--- 邮件 67 ---
 邮件ID: 2506
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -569,7 +561,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }.fox_html_co
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 31 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #31🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 69 ---
+--- 邮件 68 ---
 邮件ID: 2507
 发件人: " 理学院(sci-dean) " <sci-dean@sustech.edu.cn>
 主题: 【理学院科学大讲堂第240期】 5月22日10:30-科罗拉多大学博尔德分校-钟时杰教授 【Science Lecture of the College of Science, No. 240】 10:30 AM, 22 May-University of Colorado-Prof. Shijie Zhong
@@ -577,7 +569,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }.fox_html_co
 正文:
 各位老师、同学：大家好！应理学院地球与空间科学系陈晓非院士和丁忞副教授的共同邀请，美国科罗拉多大学博尔德分校钟时杰教授将做理学院第240期科学大讲堂报告，详情如下，欢迎感兴趣的师生参加！题&nbsp;目：类地行星的大尺度结构与动力学：从火星的塔尔西斯隆起、月球的月海玄武岩到地球的超大陆旋回主&nbsp;讲：钟时杰 &nbsp;教授时&nbsp;间：2026年5月22日（周五）10:30-12:00地&nbsp;点：理学院一楼1142报告厅&nbsp;Dear all,Upon the invitation of Academician Xiaofei Chen and Associate Prof. Min Ding, Department of Earth and Space Sciences, Prof. Shijie Zhong from University of Colorado at Boulder will give a Lecture of Science. All are welcome! Details of the lecture are listed below.Topic: On the large-scale structure and dynamics of terrestrial planets: from Tharsis Rise on Mars to mare basalts on the Moon and to supercontinent cycles on EarthSpeaker: Prof. Shijie Zhong Time: 10:30 am-12:00 pm, 22 May 2026Venue: Room 1142, College of Science 理学院南方科技大学/其他/公共邮箱广东省深圳市南山区学苑大道1088号
 
---- 邮件 70 ---
+--- 邮件 69 ---
 邮件ID: 2508
 发件人: " 教学工作部（学生学习指导）(tao-sls) " <tao-sls@sustech.edu.cn>
 主题: 关于开展2026年春季学期本科生期末评教工作的通知│Notice on Conducting End-of-Term Evaluation for Undergraduate Students in Spring 2026
@@ -585,7 +577,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }.fox_html_co
 正文:
 body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-size: 21px; font-family: 仿宋; color: rgb(0, 0, 0); line-height: 1.5; }关于开展2026年春季学期本科生期末评教工作的通知亲爱的同学们：大家好！2026年春季学期即将结束，同学们的课程学习也进入到收尾阶段。为帮助任课教师优化课程设置，提升教学水平，不断增强同学们的学习体验与获得感，现开展本学期学生评教工作。具体事项说明如下：一、参评对象及范围参评对象：全体本科生。评价范围：2026年春季学期所修读的课程。二、评教时间2026年5月22日9:00—2026年6月5日24:00因学生评价须在期末考试开始前结束，请同学们务必在截止时间前完成所有课程评价，截止期后不支持补录！三、评教内容主要从学生对课程的总体满意度、教学内容、教学方法、教学效果、以及教师的职业素养等维度进行评价。问卷包括客观题及主观题，大约需要3分钟完成填写，评价表中所有评价项为必答项，请完整填写。每门课程仅需评价一次，对于多位教师合讲的课程，如对某位教师授课的部分有肯定或否定的评价意见，可在主观题中写下教师姓名以及相应的意见。四、方法及步骤1.网页端：登录教务系统：https://tis.sustech.edu.cn/&nbsp;-业务办理-评教任务-2026春季学期学生评价任务。系统按课程类型设置评价任务（理论类、实验实践类、体育类、艺术类），如页面上有多个评价任务，请逐一进入并提交评价。2.微信端：通过微信进入“南方科技大学”微信企业号--教学质量管理平台，在<span style="font-family: 仿宋; color: rgb(0, 0, 255); letter-spacing: 0pt; font-size: 16pt; background-image: initial; backgr...(truncated)
 
---- 邮件 71 ---
+--- 邮件 70 ---
 邮件ID: 2509
 发件人: " 南科大校友会 " <sustechaa@sustech.edu.cn>
 主题: 校友戏剧俱乐部 | 戏剧沙龙第六期：戏剧疗愈体验工作坊 Join Us in the Sixth Session of Drama Salon of SUSTechAA Drama Society
@@ -593,7 +585,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 亲爱的校友、同学们： 2026年5月23日（周六），校友戏剧俱乐部戏剧沙龙第六期携手重量级嘉宾——戏剧治疗师王勔追（Briana Wang），通过表演、身体、声音与想象力，走入自我深处的探索旅程。活动嘉宾：王勔追（Briana Wang）·&nbsp; 纽约大学戏剧治疗专业研究生（全球最顶尖的戏剧疗愈专业）·&nbsp; 纽约新学院心理学硕士·&nbsp; 霍夫斯特拉大学定量金融硕士·&nbsp; 纽约州立大学宾汉姆顿分校经济学博士·&nbsp; NYU回放剧场俱乐部创始人之一·&nbsp; 曾任DreamStreet Theatre Company教学助理·&nbsp; 曾任CRTC第五届戏剧节的导演与编剧·&nbsp; 专注方向：戏剧治疗、创造性艺术治疗、中国文化与跨文化心理学活动时间：2026.5.23（周六）14:00-16:00活动地点：南方科技大学智华教学楼112教室欢迎扫码了解活动详情及报名参与<span style="text-indent: 32pt; font-family: 仿宋; font-si...(truncated)
 
---- 邮件 72 ---
+--- 邮件 71 ---
 邮件ID: 2510
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -601,7 +593,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 73 ---
+--- 邮件 72 ---
 邮件ID: 2511
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -609,7 +601,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 74 ---
+--- 邮件 73 ---
 邮件ID: 2512
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -617,7 +609,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 75 ---
+--- 邮件 74 ---
 邮件ID: 2513
 发件人: " 理学院(sci-dean) " <sci-dean@sustech.edu.cn>
 主题: 【理学院科学大讲堂第242期】 5月28日16:00-浙江大学-蔡天新教授 【Science Lecture of the College of Science, No. 242】 4:00 PM, 28 May-Zhejiang University-Prof. Tianxin Cai
@@ -625,7 +617,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 各位老师、同学：大家好！应理学院统计与数据科学系邵启满讲席教授的邀请，浙江大学求是特聘教授蔡天新将做理学院第242期科学大讲堂报告，详情如下，欢迎感兴趣的师生参加！题&nbsp;目：许宝騄：从燕京到燕京主&nbsp;讲：蔡天新 &nbsp;求是特聘教授 时&nbsp;间：2026年5月28日（周四）16:00-17:00地&nbsp;点：商学院大楼101教室&nbsp;Dear all,Upon&nbsp;the invitation of&nbsp;Chair Prof. Qiman Shao, Department of Statistics and Data Science, Prof. Tainxin Cai from Zhejiang University will give a Lecture of Science.&nbsp;All are welcome! Details of the lecture are listed below.Topic:&nbsp;Pao-Lu Hsu: From Yenching to YenchingSpeaker: Prof. Tianxin Cai Time:&nbsp;4:00-5:00 pm, 28 May 2026Venue: Room 101, &nbsp;Business School Building 理学院南方科技大学/其他/公共邮箱广东省深圳市南山区学苑大道1088号
 
---- 邮件 76 ---
+--- 邮件 75 ---
 邮件ID: 2514
 发件人: " 理学院(sci-dean) " <sci-dean@sustech.edu.cn>
 主题: 【理学院科学大讲堂第243期】 5月28日16:30-南开大学-Joshua Zahl讲席教授 【Science Lecture of the College of Science, No. 243】 4:30 PM, 28 May-Nankai University-Chair Prof. Joshua Zahl
@@ -633,7 +625,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 各位老师、同学：大家好！应理学院数学系向青讲席教授和杨童鸥助理教授的共同邀请，南开大学讲席教授Joshua Zahl将做理学院第243期科学大讲堂报告，详情如下，欢迎感兴趣的师生参加！题&nbsp;目：贝西科维奇压缩现象及挂谷集合猜想主&nbsp;讲：Joshua Zahl &nbsp;讲席教授 时&nbsp;间：2026年5月28日（周四）16:30-17:30地&nbsp;点：理学院数学系M1001报告厅&nbsp;Dear all,Upon&nbsp;the invitation of&nbsp;Chair Prof. Qing Xiang and Assistant Prof. Tongou Yang, Department of Mathematics, Chair Prof. Joshua Zahl from Nankai University will give a Lecture of Science.&nbsp;All are welcome! Details of the lecture are listed below.Topic:&nbsp;The Besicovitch compression phenomenon and the Kakeya set conjectureSpeaker: Chair Prof. Joshua Zahl Time:&nbsp;4:30-5:30 pm, 28 May 2026Venue: Room M1001, College&nbsp;of Science 理学院南方科技大学/其他/公共邮箱广东省深圳市南山区学苑大道1088号<!--<![e...(truncated)
 
---- 邮件 77 ---
+--- 邮件 76 ---
 邮件ID: 2515
 发件人: " 医学院医院管理中心 " <hsptarrc@sustech.edu.cn>
 主题: “关爱脊柱健康，展现优美身姿” 脊柱健康公益检测活动第5期“Caring for Your Spine, Embrace a Beautiful Posture” Public Welfare Spine Health Screening (Phase 5)
@@ -641,7 +633,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 “关爱脊柱健康，展现优美身姿”脊柱健康公益检测活动第5期各位老师、同学：&nbsp; &nbsp; 脊柱侧弯隐匿性强，早期无痛感，日常不良姿势容易加重侧弯。这不仅会导致高低肩、驼背等体态问题，还会引发肩颈、腰背部的劳损，严重时可能压迫内脏，重度侧弯甚至需要手术治疗。&nbsp; &nbsp; 青少年时期是矫正脊柱侧弯的黄金时期。为守护全校师生及家属的脊柱健康，实现早筛查、早干预，医学院医院管理中心联合附属医院筹建办公室、深港微电子学院，特邀深圳市龙岗中心医院脊柱专科团队来校，开展第5期脊柱健康公益检测活动。欢迎各位老师、同学及家属踊跃参加。&nbsp; &nbsp; 活动具体安排如下：一、活动主题&nbsp; &nbsp; “关爱脊柱健康，展现优美身姿”二、活动时间及地点&nbsp; &nbsp; &nbsp;时间：2026年5月26日（星期二）10:30–16:30&nbsp; &nbsp; &nbsp;地点：学生宿舍11栋102活动室三、活动内容&nbsp; &nbsp; 脊柱侧弯筛查：现场公益脊柱健康检查&nbsp; &nbsp; 步态检测：利用脊柱侧弯评测设备，通过步态观察脊柱健康状况&nbsp; &nbsp; 脊柱健康处方：提供个性化脊柱健康管理指导及现场脊柱健康知识科普四、主办单位：&nbsp; &nbsp; 南方科技大学医学院医院管理中心&nbsp; &nbsp; 南方科技大学附属医院筹建办公室&nbsp; &nbsp; 南方科技大学深港微电子学院“Caring for Your Spine, Embrace a Beautiful Posture” Public Welfare Spine Health Screening (Phase 5)Dear faculty, students, and family members,&nbsp; Scoliosis is highly insidious and painless in its early stages. Poor daily posture can easily aggravate spinal curvature, leading not only to postural problems such as uneven shoulders and hunched back, but also to strain in the neck, shoulders, and lower back. In severe cases, it may compress internal organs and require surgical intervention.&nbsp; Adolescence is a critical period for scoliosis correction. To protect the spinal health of all faculty, students, and their families, and to achieve early screening and intervention, the Healthcare Arrangement Center of the School of Medicine, in collaboration with the Affiliated Hospital Preparation Office and the School of Microelectronics, has specially invited the Spinal Specialist Team from Shenzhen Longgang Central Hospital to conduct the 5th Public Welfare Spinal Health Screening on campus. Faculty, students, and family members are warmly welcome to participate.&nbsp; The detailed arrangements are as follows:&nbsp; I. Theme&nbsp; &nbsp; “Care for Spinal Health, Showcase an Elegant Posture”&nbsp; II. Date and Venue&nbsp; &nbsp; Date &amp; Time: 10:30 AM – 4:30 PM, Tuesday, May 26, 2026&nbsp; &nbsp; Venue: Activity Room 102, Building 11, Student Dormitory Area&nbsp; III. Activities&nbsp; &nbsp; Scoliosis Screening: On-site public spinal health examination&nbsp; &nbsp; Gait Analysis: Using scoliosis assessment equipment to evaluate spinal health through gait observation&nbsp; &nbsp; Spinal Health Prescription: Personalized spinal health management guidance and on-site spinal health education&nbsp; IV. Organizers&nbsp; &nbsp; Healthcare Arrangement Center, School of Medicine, SUSTech;&nbsp; &nbsp; Affiliated Hospital Preparation Office, SUSTech;&nbsp; &nbsp; School of Microelectronics, SUSTech.&nbsp; Best regards.
 
---- 邮件 78 ---
+--- 邮件 77 ---
 邮件ID: 2516
 发件人: " 理学院(sci-dean) " <sci-dean@sustech.edu.cn>
 主题: 【请以此邮件为准，讲座时间和地点已变更：理学院科学大讲堂第241期】 5月26日14:30-夏威夷大学-Ralf I. Kaiser教授 【Please consider this email as the final notice】 2:30 PM, 26 May-University of Hawai’i-Prof. Ralf I. Kaiser
@@ -649,7 +641,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 各位老师、同学：大家好！应理学院杨学明院士的邀请，夏威夷大学马诺阿分校化学系教授Ralf I. Kaiser教授将做理学院第241期科学大讲堂报告，详情如下，欢迎感兴趣的师生参加！题&nbsp;目：冷化学，热影响：星际空间中的分子复杂性主&nbsp;讲：Ralf I. Kaiser &nbsp;教授 时&nbsp;间：2026年5月26日（周二）14:30地&nbsp;点：理学院一楼1142报告厅&nbsp;Dear all,Upon&nbsp;the invitation of&nbsp;Academician Xueming Yang, College of Science, &nbsp;Prof. Ralf I. Kaiser from University of Hawai’i will give a Lecture of Science.&nbsp;All are welcome! Details of the lecture are listed below.Topic:&nbsp;Cold Chemistry, Hot Implications: Molecular Complexity in Interstellar SpaceSpeaker: Prof. Ralf I. Kaiser Time:&nbsp;2:30 pm, 26 May 2026Venue: Room 1142, College of Science 理学院南方科技大学/其他/公共邮箱广东省深圳市南山区学苑大道1088号
 
---- 邮件 79 ---
+--- 邮件 78 ---
 邮件ID: 2517
 发件人: 陶伊达 计算机科学与工程系 - taoyd@sustech.edu.cn  <blackboard@sustech.edu.cn>
 主题: Software Engineering Spring 2026: Sprint 2 presentation &‌ Lab practice deadline (项目答辩与实验练习截止通知)
@@ -657,7 +649,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 1. Project Sprint 2 Presentation (Weeks 14–15) Presentation at week 14 gets a +0.3 bonus. If your project depends on network connectivity or LLM outputs, it is strongly recommended to record a demo video in advance to ensure smooth presentation. Students who are not part of the presenting groups do not need to attend.&nbsp; Groups that have not yet filled in their presentation time slot are required to do so ASAP: https://v.wjx.cn/vm/tUF5ICj.aspx 2. Deadline for Lab Practice Check (Week 14)All lab practices must be checked in Week 14. No further checks will be accepted after the deadline. 1. 项目Sprint 2 14/15周答辩，14周+0.3。如果项目依赖网络环境或大模型结果，建议提前录制视频演示软件功能。这两周不计实验课考勤，非答辩小组无需到场。未填写答辩时间的小组请尽快填写：https://v.wjx.cn/vm/tUF5ICj.aspx 2. 14周所有实验练习的检查截止。
 
---- 邮件 80 ---
+--- 邮件 79 ---
 邮件ID: 2518
 发件人: soar@soar.openbmb.cn
 主题: 【SOAR 2026】代码提交规范与奖项发放说明
@@ -665,7 +657,7 @@ body { line-height: 1.5; }p { margin-top: 0px; margin-bottom: 0px; }body { font-
 正文:
 body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f4f5f7; color: #333; margin: 0; padding: 24px; } .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); overflow: hidden; } .header { background: linear-gradient(135deg, #2a2d52 0%, #3a3f7a 100%); color: #ffffff; padding: 32px 30px 28px; text-align: center; } .header h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: 0.5px; line-height: 1.4; } .header .subtitle { margin: 10px 0 0; font-size: 13px; color: #b8bfdf; letter-spacing: 0.5px; } .content { padding: 32px 34px; font-size: 14px; line-height: 1.9; color: #444; } .content p { margin: 0 0 16px; } .greeting { font-size: 14px; color: #333; margin: 0 0 18px; } .scope-note { background-color: #fff8e6; border-left: 4px solid #e8c36a; border-radius: 6px; padding: 14px 18px; margin: 0 0 20px; font-size: 13px; color: #665520; line-height: 1.75; } .info-card { background-color: #f8f9fc; border-left: 4px solid #3a3f7a; border-radius: 6px; padding: 18px 22px; margin: 0 0 14px; } .info-card h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #2a2d52; } .info-card p { margin: 0; font-size: 13px; color: #555; line-height: 1.8; } .section-title { margin: 24px 0 14px; font-size: 14px; font-weight: 600; color: #2a2d52; } .highlight { color: #2a2d52; font-weight: 600; } .closing { margin: 24px 0 0; font-size: 13px; color: #666; line-height: 1.8; } .footer { background-color: #f8f9fc; padding: 20px 34px; text-align: center; border-top: 1px solid #eee; } .footer .sig { margin: 0 0 8px; font-size: 13px; color: #3a3f7a; font-weight: 600; } .footer .meta { margin: 0; font-size: 11px; color: #aaa; } &#128226; 代码提交规范与奖项发放说明 SOAR 2026 各位参赛选手好： SOAR 大赛总决赛开赛在即，感谢大家在前期赛程中的积极参与、持续优化和出色表现。为便于总决赛后优秀方案的代码评审与合入工作顺利推进，现就代码整理及奖项公布、奖金发放安排说明如下。 本通知主要面向最终获奖选手及进入后续合入评估范围的优秀选手。如后续需要配合代码合入，我们会与相关选手进一步单独沟通。 【代码提交规范】 1. 按功能整理代码提交 请尽量按功能拆分 commit，说明每个 commit 对应的优化内容，避免将多个无关修改混在一起，方便后续评审和合入。 2. 保持增量式修改 后续代码合入将以降低主分支风险为原则，请尽量避免大范围改动已有代码，优先采用清晰、可 review、可回滚的增量修改方式。 3. 配合后续 Review 代码合入 SGLang 主分支需要经过 Review、修改和验证流程，后续可能会与相关选手进行多轮沟通。请相关选手在比赛结束后预留一定时间，配合后续代码整理、合入修改与测试补充工作。对于涉及功能改动或性能优化的代码，请同步补充必要的 unit test，用于证明改动的正确性，并确保不会对原有逻辑、推理结果和主分支稳定性造成影响。 【奖项公布与奖金发放】 本次比赛的奖项公布与奖金发放将分阶段进行。我们将先根据比赛成绩和评审结果公布获奖名单并进行颁奖；奖金则将在相关优化代码完成整理、评审，并成功合并入 SGLang 主分支后发放。 后续具体代码提交时间、Review 安排及合入要求，将由赛事组委会另行通知相关选手。 感谢各位选手的理解与配合，也感谢大家在比赛期间展现出的技术热情与持续投入。比赛即将进入最后的冲刺阶段，期待大家继续优化、挑战更高成绩，在最终角逐中取得理想名次。如有任何疑问，欢迎随时联系我们：contact@openbmb.cn。 OpenBMB 赛事组委会 2026年5月22日 &middot; &copy; 2026 OpenBMB
 
---- 邮件 81 ---
+--- 邮件 80 ---
 邮件ID: 2519
 发件人: soar@soar.openbmb.cn
 主题: 【SOAR 2026】代码提交规范与奖项发放说明
@@ -673,7 +665,7 @@ body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; backgro
 正文:
 body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f4f5f7; color: #333; margin: 0; padding: 24px; } .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); overflow: hidden; } .header { background: linear-gradient(135deg, #2a2d52 0%, #3a3f7a 100%); color: #ffffff; padding: 32px 30px 28px; text-align: center; } .header h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: 0.5px; line-height: 1.4; } .header .subtitle { margin: 10px 0 0; font-size: 13px; color: #b8bfdf; letter-spacing: 0.5px; } .content { padding: 32px 34px; font-size: 14px; line-height: 1.9; color: #444; } .content p { margin: 0 0 16px; } .greeting { font-size: 14px; color: #333; margin: 0 0 18px; } .scope-note { background-color: #fff8e6; border-left: 4px solid #e8c36a; border-radius: 6px; padding: 14px 18px; margin: 0 0 20px; font-size: 13px; color: #665520; line-height: 1.75; } .info-card { background-color: #f8f9fc; border-left: 4px solid #3a3f7a; border-radius: 6px; padding: 18px 22px; margin: 0 0 14px; } .info-card h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #2a2d52; } .info-card p { margin: 0; font-size: 13px; color: #555; line-height: 1.8; } .section-title { margin: 24px 0 14px; font-size: 14px; font-weight: 600; color: #2a2d52; } .highlight { color: #2a2d52; font-weight: 600; } .closing { margin: 24px 0 0; font-size: 13px; color: #666; line-height: 1.8; } .footer { background-color: #f8f9fc; padding: 20px 34px; text-align: center; border-top: 1px solid #eee; } .footer .sig { margin: 0 0 8px; font-size: 13px; color: #3a3f7a; font-weight: 600; } .footer .meta { margin: 0; font-size: 11px; color: #aaa; } &#128226; 代码提交规范与奖项发放说明 SOAR 2026 各位参赛选手好： SOAR 大赛总决赛开赛在即，感谢大家在前期赛程中的积极参与、持续优化和出色表现。为便于总决赛后优秀方案的代码评审与合入工作顺利推进，现就代码整理及奖项公布、奖金发放安排说明如下。 本通知主要面向最终获奖选手及进入后续合入评估范围的优秀选手。如后续需要配合代码合入，我们会与相关选手进一步单独沟通。 【代码提交规范】 1. 按功能整理代码提交 请尽量按功能拆分 commit，说明每个 commit 对应的优化内容，避免将多个无关修改混在一起，方便后续评审和合入。 2. 保持增量式修改 后续代码合入将以降低主分支风险为原则，请尽量避免大范围改动已有代码，优先采用清晰、可 review、可回滚的增量修改方式。 3. 配合后续 Review 代码合入 SGLang 主分支需要经过 Review、修改和验证流程，后续可能会与相关选手进行多轮沟通。请相关选手在比赛结束后预留一定时间，配合后续代码整理、合入修改与测试补充工作。对于涉及功能改动或性能优化的代码，请同步补充必要的 unit test，用于证明改动的正确性，并确保不会对原有逻辑、推理结果和主分支稳定性造成影响。 【奖项公布与奖金发放】 本次比赛的奖项公布与奖金发放将分阶段进行。我们将先根据比赛成绩和评审结果公布获奖名单并进行颁奖；奖金则将在相关优化代码完成整理、评审，并成功合并入 SGLang 主分支后发放。 后续具体代码提交时间、Review 安排及合入要求，将由赛事组委会另行通知相关选手。 感谢各位选手的理解与配合，也感谢大家在比赛期间展现出的技术热情与持续投入。比赛即将进入最后的冲刺阶段，期待大家继续优化、挑战更高成绩，在最终角逐中取得理想名次。如有任何疑问，欢迎随时联系我们：contact@openbmb.cn。 OpenBMB 赛事组委会 2026年5月22日 &middot; &copy; 2026 OpenBMB
 
---- 邮件 82 ---
+--- 邮件 81 ---
 邮件ID: 2520
 发件人: " 致仁书院(zhiren) " <zhiren@sustech.edu.cn>
 主题: 致仁书院关于开展2026年暑期“三下乡”社会实践活动暨“百千万工程”突击队行动的通知
@@ -681,7 +673,7 @@ body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; backgro
 正文:
 致仁书院关于开展2026年暑期“三下乡”社会实践活动暨“百千万工程”突击队行动的通知&nbsp;各位同学：为引导同学们在实践中深学细悟习近平新时代中国特色社会主义思想，深入学习领会党的二十大和二十届历次全会精神，落实习近平总书记关于青年工作的重要思想和关于教育的重要论述，落实广东省委“1310部署”和省高质量发展大会部署要求，进一步深化广东青年大学生“百千万工程”突击队行动，高质量落实学校“双百行动”，校团委决定组织开展2026年暑期“三下乡”社会实践活动暨“百千万工程”突击队行动，现将有关事项通知如下：&nbsp;一、活动主题青春建功“百千万”挺膺担当新征程&nbsp;二、实践形式<p class="p" align="justify" style="margin: 9.75pt 3.85pt 0pt 1.95pt; text-indent: 27.2pt; text-align: justify; vertical-alig...(truncated)
 
---- 邮件 83 ---
+--- 邮件 82 ---
 邮件ID: 2521
 发件人: Leoliyanmin <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -690,7 +682,7 @@ body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; backgro
 正文:
 @Leoliyanmin pushed 2 commits. e01c56f debug: 修复WidgetMessages字段映射和removeTodo循环调用bug，实现Tab换位和Todo删除同步 7453e07 debug: 邮箱绑定独立面板 + API Key弹窗切换 + 移除Agent设置页面 &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/56ea8acecaad5dd4fc20a85ffee2a356ce06bec3/after/7453e0775180949573b1960dd1ceddf18b629d38@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/56ea8acecaad5dd4fc20a85ffee2a356ce06bec3..7453e0775180949573b1960dd1ceddf18b629d38", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/56ea8acecaad5dd4fc20a85ffee2a356ce06bec3..7453e0775180949573b1960dd1ceddf18b629d38", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 84 ---
+--- 邮件 83 ---
 邮件ID: 2522
 发件人: lsz-asd <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -699,7 +691,7 @@ body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; backgro
 正文:
 @lsz-asd pushed 1 commit. 263d0a2 docs: add final team report with metrics and CI/CD description &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/7453e0775180949573b1960dd1ceddf18b629d38/after/263d0a205297e391219ae9dc4e51339340889d27@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/7453e0775180949573b1960dd1ceddf18b629d38..263d0a205297e391219ae9dc4e51339340889d27", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/7453e0775180949573b1960dd1ceddf18b629d38..263d0a205297e391219ae9dc4e51339340889d27", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 85 ---
+--- 邮件 84 ---
 邮件ID: 2523
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -707,7 +699,7 @@ body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; backgro
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：19.23 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 19.23 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 86 ---
+--- 邮件 85 ---
 邮件ID: 2524
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -715,7 +707,7 @@ body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; backgro
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：19.23 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 19.23 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 87 ---
+--- 邮件 86 ---
 邮件ID: 2525
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -723,7 +715,7 @@ body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; backgro
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：19.23 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 19.23 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 88 ---
+--- 邮件 87 ---
 邮件ID: 2526
 发件人: Leoliyanmin <notifications@github.com>
 主题: Re: [sustech-cs304/team-project-26spring-26s-27] feat: Intergration
@@ -732,7 +724,7 @@ body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; backgro
 正文:
 @Leoliyanmin pushed 8 commits. e258834 fix: prevent forced re-login after HMR by always dual-writing to localStorage 54a6ac4 feat: add create_directory API and support dir rename/delete e2387db feat: add createDirectory API client and createFolder store action d653470 fix: replace prompt/confirm with inline UI, add reactivity watcher, fix folder/file creation flow 182e4a2 fix: 后端 JWT 有效期从 30 分钟延长至 7 天（10080 分钟），对齐前端 session TTL 2da6376 feat: Obsidian风格——隐藏.md后缀，创建/改名自动补全 d5c6c5a chore: 显示 widget 和 email 通知的持续时间 0a97aaf Merge branch &#39;integration&#39; of https://github.com/sustech-cs304/team-project-26spring-26s-27 into integration &mdash;View it on GitHub or unsubscribe.Triage notifications on the go with GitHub Mobile for iOS or Android. You are receiving this because you are subscribed to this thread.Message ID: &lt;sustech-cs304/team-project-26spring-26s-27/pull/81/before/263d0a205297e391219ae9dc4e51339340889d27/after/0a97aaf37e6dc0c3db451c983798e105f336f635@github.com&gt; [ { "@context": "http://schema.org", "@type": "EmailMessage", "potentialAction": { "@type": "ViewAction", "target": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/263d0a205297e391219ae9dc4e51339340889d27..0a97aaf37e6dc0c3db451c983798e105f336f635", "url": "https://github.com/sustech-cs304/team-project-26spring-26s-27/pull/81/changes/263d0a205297e391219ae9dc4e51339340889d27..0a97aaf37e6dc0c3db451c983798e105f336f635", "name": "View Pull Request" }, "description": "View this Pull Request on GitHub", "publisher": { "@type": "Organization", "name": "GitHub", "url": "https://github.com" } } ]
 
---- 邮件 89 ---
+--- 邮件 88 ---
 邮件ID: 2527
 发件人: Runpod Team <team@runpod.io>
 主题: Your 7B model doesn't need an H200.
@@ -740,7 +732,7 @@ body { font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; backgro
 正文:
 Your 7B model doesn't need an H200. a.cta_button{-moz-box-sizing:content-box !important;-webkit-box-sizing:content-box !important;box-sizing:content-box !important;vertical-align:middle}.hs-breadcrumb-menu{list-style-type:none;margin:0px 0px 0px 0px;padding:0px 0px 0px 0px}.hs-breadcrumb-menu-item{float:left;padding:10px 0px 10px 10px}.hs-breadcrumb-menu-divider:before{content:'›';padding-left:10px}.hs-featured-image-link{border:0}.hs-featured-image{float:right;margin:0 0 20px 20px;max-width:50%}@media (max-width: 568px){.hs-featured-image{float:none;margin:0;width:100%;max-width:100%}}.hs-screen-reader-text{clip:rect(1px, 1px, 1px, 1px);height:1px;overflow:hidden;position:absolute !important;width:1px} 96 ul > li { text-indent: -1em; } body, td {font-family: Arial, Helvetica, sans-serif;} .hse-body-wrapper-table {background-color: #ffffff;} .hse-column-container { border: none !important; padding: 0 !important; } @media only screen and (max-width:639px){img.stretch-on-mobile,.hs_rss_email_entries_table img,.hs-stretch-cta .hs-cta-img{height:auto !important;width:100% !important} .display_block_on_small_screens{display:block}.hs_padded{padding-left:20px !important;padding-right:20px !important} .hs-hm,table.hs-hm{display:none}.hs-hd{display:block !important}table.hs-hd{display:table !important} }@media only screen and (max-width:639px){.hse-border-m{border-left:1px solid #eaf0f6 !important;border-right:1px solid #eaf0f6 !important;box-sizing:border-box} .hse-border-bottom-m{border-bottom:1px solid #eaf0f6 !important}.hse-border-top-m{border-top:1px solid #eaf0f6 !important} .hse-border-top-hm{border-top:none !important}.hse-border-bottom-hm{border-bottom:none !important} }.moz-text-html .hse-column-container{max-width:600px !important;width:600px !important} .moz-text-html .hse-column{display:table-cell;vertical-align:top}.moz-text-html .hse-section .hse-size-12{max-width:600px !important;width:600px !important} @media only screen and (min-width:640px){.hse-column-container{max-width:600px !important;width:600px !important} .hse-column{display:table-cell;vertical-align:top}.hse-section .hse-size-12{max-width:600px !important;width:600px !important} }@media only screen and (max-width:639px){.hse-body-wrapper-td{padding-top:20px !important} #section-2 .hse-column-container{padding-top:0px !important;padding-bottom:0px !important} #section-2 .hse-column-container{background-color:#fff !important} }@media screen and (max-width:639px){.social-network-cell{display:inline-block} }@media only screen and (max-width:639px){.hse-body-wrapper-td{padding-bottom:20px !important} #section-3 .hse-column-container{padding-top:0px !important;padding-bottom:0px !important} #section-3 .hse-column-container{background-color:#fff !important} }#hs_body #hs_cos_wrapper_main a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;font-size:inherit !important;font-family:inherit !important;font-weight:inherit !important;line-height:inherit !important} a{text-decoration:underline}p{margin:0}body{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;moz-osx-font-smoothing:grayscale} table{border-spacing:0;mso-table-lspace:0;mso-table-rspace:0}table,td{border-collapse:collapse} img{-ms-interpolation-mode:bicubic}p,a,li,td,blockquote{mso-line-height-rule:exactly} .ShadowHTML p,.sh-modified-inline p{margin:0} Multi-Instance GPU is live on Serverless, plus two guides worth bookmarking. ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ &nbsp; <div id="hs_cos_wrapper_module_17722054034123_" class="hs_cos_wrapper hs_cos_wrapper_widget hs_cos_wrapper_type_rich_text" style="color: inherit; font-size: inheri...(truncated)
 
---- 邮件 90 ---
+--- 邮件 89 ---
 邮件ID: 2528
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -748,7 +740,7 @@ Your 7B model doesn't need an H200. a.cta_button{-moz-box-sizing:content-box !im
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：19.23 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 19.23 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 91 ---
+--- 邮件 90 ---
 邮件ID: 2529
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -756,7 +748,7 @@ Your 7B model doesn't need an H200. a.cta_button{-moz-box-sizing:content-box !im
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：19.23 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 19.23 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 92 ---
+--- 邮件 91 ---
 邮件ID: 2530
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -764,7 +756,7 @@ Your 7B model doesn't need an H200. a.cta_button{-moz-box-sizing:content-box !im
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：19.23 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 19.23 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 93 ---
+--- 邮件 92 ---
 邮件ID: 2531
 发件人: MathWorks <mathworks@go.mathworks.com>
 主题: MATLAB  和 Simulink R2026a 新版发布
@@ -772,7 +764,7 @@ Your 7B model doesn't need an H200. a.cta_button{-moz-box-sizing:content-box !im
 正文:
 MATLAB and Simulink Release R2026a table {border-collapse:collapse;border-spacing:0;margin:0;} div, td {padding:0;} div {margin:0 !important;} 96 @media screen and (max-width: 500px) { .button { width: 100% !important; } img.release { width:125px !important; height:auto !important } } &#20102;&#35299; MATLAB &#21644; Simulink &#26032;&#29305;&#24615;&#65292;&#33719;&#21462;&#22810;&#20010;&#20854;&#20182;&#20135;&#21697;&#26356;&#26032; 以网页方式查看该邮件。 &#21016; &#30591;&#28085;， 您好! R2026a 现已发布，可供下载。R2026a 带来多项 MATLAB 和 Simulink 新特性，推出八款新产品，还包含其余各项产品更新。 立即下载 R2026a 有哪些新功能？ Simulink Copilot 专为 Simulink 优化的 AI 助手 MATLAB Course Designer 使用 MATLAB 与 Simulink 开发课程、课件、实验与练习的新产品。 Polyspace as You Code 可在您的 IDE 中识别编码标准违规和软件漏洞的新产品 Polyspace Copilot 专为 Polyspace 优化的 AI 助手 Raspberry Pi&reg; Blockset 用于设计、仿真和部署无人机 (UAV) 应用的新产品 Simulink FMU Builder 用于从 Simulink模型和 C/C++ 代码创建独立功能样机单元的新产品 STM32&reg; Microcontroller Blockset 为 STMicroelectronics STM32 微控制器设计、仿真和实现应用的新产品 Wireless Network Toolbox 用于无线通信网络建模、仿真、分析和可视化的新产品 有关 R2026a 的详细信息，请参阅版本亮点、视频及<a href="https://app.go.mathworks.com/e/er?s_v1=64919&elqem=5173850_EM_CN_DIR_26-04_R2026a-RELEASE-GENERAL&rec_id=6d92d54e56c34e16b67bc4facd2f23d8&s=646005169...(truncated)
 
---- 邮件 94 ---
+--- 邮件 93 ---
 邮件ID: 2532
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -780,7 +772,7 @@ MATLAB and Simulink Release R2026a table {border-collapse:collapse;border-spacin
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 95 ---
+--- 邮件 94 ---
 邮件ID: 2533
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -788,7 +780,7 @@ MATLAB and Simulink Release R2026a table {border-collapse:collapse;border-spacin
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 96 ---
+--- 邮件 95 ---
 邮件ID: 2534
 发件人: soar@soar.openbmb.cn
 主题: SOAR 提交结果与当前实时排名通知 / Submission Result & Live Ranking
@@ -796,7 +788,7 @@ MATLAB and Simulink Release R2026a table {border-collapse:collapse;border-spacin
 正文:
 尊敬的参赛选手：您好！您最新一次提交的结果已完成评测。📊 当前实时排名：第 32 名🏆 当前总分：23.92 分（满分 100 分）请登录比赛官网查看完整评测详情与排行榜情况：https://soar.openbmb.cn关于分数动态变化说明由于性能得分基于&ldquo;全场最快耗时&rdquo;进行相对计算，当有新的提交刷新最快记录时，系统将重新计算所有队伍的分数。因此，您的分数和排名可能会随着比赛进展产生波动。这是比赛机制的正常现象，请以官网实时榜单为准。感谢您的积极参与，期待您持续优化表现，取得更好的成绩！祝比赛顺利！SOAR 2026 赛事组委会---Dear Contestant,Your latest submission has been evaluated.📊 Current Live Ranking: #32🏆 Current Total Score: 23.92 / 100Please visit the competition website for full evaluation details and leaderboard: https://soar.openbmb.cnAbout Score FluctuationsPerformance scores are calculated relative to the fastest runtime across all teams. When a new submission sets a faster record, the system recalculates scores for all teams. As a result, your score and ranking may fluctuate as the competition progresses.This is a normal part of the competition mechanism. Please refer to the live leaderboard on the official website.Thank you for your active participation. We look forward to your continued improvement!Best of luck!SOAR 2026 Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.
 
---- 邮件 97 ---
+--- 邮件 96 ---
 邮件ID: 2535
 发件人: Runpod Team <noreply@runpod.io>
 主题: Create your first Serverless endpoint in 5 minutes
@@ -804,7 +796,7 @@ MATLAB and Simulink Release R2026a table {border-collapse:collapse;border-spacin
 正文:
 Create your first Serverless endpoint in 5 minutes a.cta_button{-moz-box-sizing:content-box !important;-webkit-box-sizing:content-box !important;box-sizing:content-box !important;vertical-align:middle}.hs-breadcrumb-menu{list-style-type:none;margin:0px 0px 0px 0px;padding:0px 0px 0px 0px}.hs-breadcrumb-menu-item{float:left;padding:10px 0px 10px 10px}.hs-breadcrumb-menu-divider:before{content:'›';padding-left:10px}.hs-featured-image-link{border:0}.hs-featured-image{float:right;margin:0 0 20px 20px;max-width:50%}@media (max-width: 568px){.hs-featured-image{float:none;margin:0;width:100%;max-width:100%}}.hs-screen-reader-text{clip:rect(1px, 1px, 1px, 1px);height:1px;overflow:hidden;position:absolute !important;width:1px} 96 ul > li { text-indent: -1em; } body, td {font-family: Arial, Helvetica, sans-serif;} .hse-body-wrapper-table {background-color: #EAF0F6;} .hse-column-container { border: none !important; padding: 0 !important; } @media only screen and (max-width:639px){img.stretch-on-mobile,.hs_rss_email_entries_table img,.hs-stretch-cta .hs-cta-img{height:auto !important;width:100% !important} .display_block_on_small_screens{display:block}.hs_padded{padding-left:20px !important;padding-right:20px !important} .hs-hm,table.hs-hm{display:none}.hs-hd{display:block !important}table.hs-hd{display:table !important} }@media only screen and (max-width:639px){.hse-border-m{border-left:1px solid #eaf0f6 !important;border-right:1px solid #eaf0f6 !important;box-sizing:border-box} .hse-border-bottom-m{border-bottom:1px solid #eaf0f6 !important}.hse-border-top-m{border-top:1px solid #eaf0f6 !important} .hse-border-top-hm{border-top:none !important}.hse-border-bottom-hm{border-bottom:none !important} }.moz-text-html .hse-column-container{max-width:600px !important;width:600px !important} .moz-text-html .hse-column{display:table-cell;vertical-align:top}.moz-text-html .hse-section .hse-size-12{max-width:600px !important;width:600px !important} @media only screen and (min-width:640px){.hse-column-container{max-width:600px !important;width:600px !important} .hse-column{display:table-cell;vertical-align:top}.hse-section .hse-size-12{max-width:600px !important;width:600px !important} }@media only screen and (max-width:639px){.hse-body-wrapper-td{padding-top:20px !important} #section-0 .hse-column-container{padding-top:4px !important;padding-bottom:3px !important} #section-0 .hse-column-container{background-color:#fff !important} }@media only screen and (max-width:639px){ #section-1 .hse-column-container{padding-top:10px !important;padding-bottom:10px !important} #section-1 .hse-column-container{background-color:#fff !important} }@media only screen and (max-width:639px){ #section-2 .hse-column-container{padding-top:0px !important;padding-bottom:0px !important} #section-2 .hse-column-container{background-color:#fff !important} }@media screen and (max-width:639px){.social-network-cell{display:inline-block} }@media only screen and (max-width:639px){.hse-body-wrapper-td{padding-bottom:20px !important} #section-3 .hse-column-container{padding-top:0px !important;padding-bottom:0px !important} #section-3 .hse-column-container{background-color:#fff !important} }#hs_body #hs_cos_wrapper_main a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;font-size:inherit !important;font-family:inherit !important;font-weight:inherit !important;line-height:inherit !important} a{text-decoration:underline}p{margin:0}body{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;moz-osx-font-smoothing:grayscale} table{border-spacing:0;mso-table-lspace:0;mso-table-rspace:0}table,td{border-collapse:collapse} img{-ms-interpolation-mode:bicubic}p,a,li,td,blockquote{mso-line-height-rule:exactly} .ShadowHTML p,.sh-modified-inline p{margin:0} Pick a template, enter your model, click Deploy. ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ͏ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ ­ &nbsp; <a href="https://d2S9mR04.na1.hubspotlinks.com/Ctc/DP+113/d2S9mR04/VVCSGw2y2p_BVh063r51tdVqW8yJSQm5PpjlyN...(truncated)
 
---- 邮件 98 ---
+--- 邮件 97 ---
 邮件ID: 2536
 发件人: " 保卫部(oss) " <oss@sustech.edu.cn>
 主题: 【温馨提示】关于交通安全的温馨提示 Reminder on Traffic Safety
@@ -812,7 +804,7 @@ Create your first Serverless endpoint in 5 minutes a.cta_button{-moz-box-sizing:
 正文:
 关于交通安全的温馨提示各位老师、同学：近日，学校一号门外发生了一起泥头车与电动车碰撞的严重交通事故，造成人员伤亡，教训极其惨痛。为进一步加强交通安全防范，切实保障师生出行安全，现就有关事项提示如下：一、请全体师生在一号门区域特别注意交通安全，主动避让大型车辆，自觉遵守交通规则，不抢行、不逆行、不闯红灯，时刻观察周边交通状况，确保自身安全。二、校内非机动车数量较多，且道路较窄、坡度较大，请师生自觉遵守校园交通安全管理规定，减速慢行，做好个人安全防护。三、请各单位及时通知相关外来车辆，上下班高峰时段（7:30—9:00、17:00—18:30）避开一号门通行。特此提示。&nbsp;南方科技大学安全管理委员会办公室2026年5月23日&nbsp;Reminder on Traffic Safety&nbsp;May 23, 2026Dear all,A serious traffic accident occurred recently outside Gate 1 of the university, involving a collision between a dump truck and an e-bike that resulted in casualties. This serves as a profound and painful lesson. To strengthen traffic safety awareness and effectively protect the safety of all members of SUSTech community, we would like to remind you of the following:&nbsp;<p class="MsoNormal" style="margin-top: 5pt; margin-bottom: 5pt; line-height: 150%; background-image: initial; background-position: initial; background-size: initial; background-repeat: initial; background-attachment: initial; background-origin: initial; background-clip:...(truncated)
 
---- 邮件 99 ---
+--- 邮件 98 ---
 邮件ID: 2537
 发件人: " 邮件助手 " <10000@exmail.weixin.qq.com>
 主题: 企业微信邮箱登录提醒
@@ -820,7 +812,7 @@ Create your first Serverless endpoint in 5 minutes a.cta_button{-moz-box-sizing:
 正文:
 .eml-w { font-size: 16px !important; font-family: 'PingFang SC'; font-style: normal; font-weight: 400; } @media (max-width: 760px) { .eml-w-sys-layout { border-radius: none !important; box-shadow: none !important; margin: 0 !important; } .eml-w-sys-layout .eml-w-sys-line { display: none; } .eml-w-sys-layout .eml-w-sys-logo img { margin-right: 30px !important; } .eml-w-sys-layout .eml-w-sys-content { padding: 0 16px !important; } .eml-w-sys-layout .eml-w-txt-list-wrap { padding: 16px !important; } .eml-w-sys-layout .eml-w-sys-footer { padding-left: 30px !important; } } 你好，刘睿涵(LIU&nbsp;Ruihan) 系统监测到你的邮箱账号 12312210@mail.sustech.edu.cn 通过应用“edge”获取了邮箱访问权限 登录地点 广东省 深圳市 登录时间 2026-05-23 17:37 +08:00 设备名称 web IP地址 2001:da8:201d:1109::f70f 企业微信团队
 
---- 邮件 100 ---
+--- 邮件 99 ---
 邮件ID: 2538
 发件人: <autodl@mail.autodl.com>
 主题: AutoDL重要通知
@@ -828,21 +820,22 @@ Create your first Serverless endpoint in 5 minutes a.cta_button{-moz-box-sizing:
 正文:
 AutoDL重要通知 尊敬的 AutoDL 炼丹师： 尊敬的AutoDL算力云炼丹师，您的余额已不足50元，为保证您的正常使用，建议您及时充值（若已充值，请忽略本提醒） 此致 AutoDL 团队敬上 此电子邮件地址无法接收回复。如有疑问请微信联系客服:
 
+--- 邮件 100 ---
+邮件ID: 2539
+发件人: "Master-640" <notifications@github.com>
+主题: [sustech-cs304/team-project-26spring-26s-27] Run failed: CI/CD
+ Pipeline - integration (4bf4458)
+时间: 2026-05-23 03:28:23
+正文:
+[sustech-cs304/team-project-26spring-26s-27] Run failed: CI/CD Pipeline - integration (4bf4458) &#160; [sustech-cs304/team-project-26spring-26s-27] CI/CD Pipeline workflow run &#160; <table role="presentation" style="box-sizing: border-box; border-spacing: 0; border-collapse: co...(truncated)
+
 ========================================
 完整原始数据(JSON)
 ========================================
 {
-  "total": 460,
+  "total": 461,
   "returned": 100,
   "messages": [
-    {
-      "mail_id": "2439",
-      "subject": "SOAR 提交评测结果通知（未通过） / Evaluation Result (Failed)",
-      "sender": "soar@soar.openbmb.cn",
-      "time": "2026-05-18 21:01:01",
-      "body": "尊敬的参赛选手：您好！您最新一次提交评测失败，暂未计入排行榜。请登录比赛官网查看详细评测报告及具体指标表现：https://soar.openbmb.cn比赛期间可多次提交（每日提交次数以规则为准），系统将自动更新排行榜。如对评测结果有疑问，欢迎加入社区讨论：飞书、Discord，或发送邮件至 contact@openbmb.cn 与我们联系。感谢您的参与，期待您的下一次突破！祝比赛顺利！赛事组委会---Dear Contestant,Your latest submission has failed evaluation and is not included in the leaderboard.Please visit the competition website for the detailed evaluation report: https://soar.openbmb.cnYou may submit multiple times during the competition (subject to daily submission limits). The leaderboard will be updated automatically.If you have any questions about the evaluation result, feel free to join the community discussion on Feishu or Discord, or contact us at contact@openbmb.cn.Thank you for your participation. We look forward to your next breakthrough!Best of luck!Competition Organizing Committee---此邮件由系统自动发送，请勿直接回复。This is an automated email. Please do not reply.&copy; 2026 OpenBMB. All rights reserved.",
-      "raw_html": "尊敬的参赛选手：<br><br>您好！<br>您最新一次提交评测失败，暂未计入排行榜。<br><br>请登录比赛官网查看详细评测报告及具体指标表现：<a href='https://soar.openbmb.cn'>https://soar.openbmb.cn</a><br><br>比赛期间可多次提交（每日提交次数以规则为准），系统将自动更新排行榜。<br>如对评测结果有疑问，欢迎加入社区讨论：飞书、Discord，或发送邮件至 <a href='mailto:contact@openbmb.cn'>contact@openbmb.cn</a> 与我们联系。<br><br>感谢您的参与，期待您的下一次突破！<br>祝比赛顺利！<br><br>赛事组委会<br><br>---<br><br>Dear Contestant,<br><br>Your latest submission has failed evaluation and is not included in the leaderboard.<br><br>Please visit the competition website for the detailed evaluation report: <a href='https://soar.openbmb.cn'>https://soar.openbmb.cn</a><br><br>You may submit multiple times during the competition (subject to daily submission limits). The leaderboard will be updated automatically.<br>If you have any questions about the evaluation result, feel free to join the community discussion on Feishu or Discord, or contact us at <a href='mailto:contact@openbmb.cn'>contact@openbmb.cn</a>.<br><br>Thank you for your participation. We look forward to your next breakthrough!<br>Best of luck!<br><br>Competition Organizing Committee<br><br>---<br>此邮件由系统自动发送，请勿直接回复。<br>This is an automated email. Please do not reply.<br><br>&copy; 2026 OpenBMB. All rights reserved."
-    },
     {
       "mail_id": "2440",
       "subject": "SOAR 提交评测结果通知（未通过） / Evaluation Result (Failed)",
@@ -1634,6 +1627,14 @@ AutoDL重要通知 尊敬的 AutoDL 炼丹师： 尊敬的AutoDL算力云炼丹�
       "time": "2026-05-23 18:04:21",
       "body": "AutoDL重要通知 尊敬的 AutoDL 炼丹师： 尊敬的AutoDL算力云炼丹师，您的余额已不足50元，为保证您的正常使用，建议您及时充值（若已充值，请忽略本提醒） 此致 AutoDL 团队敬上 此电子邮件地址无法接收回复。如有疑问请微信联系客服:",
       "raw_html": "\n<html>\n <head></head>\n <body>   \n  <table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\"> \n   <tbody> \n    <tr> \n     <td align=\"left\"> <img src=\"http://autodl-public.ks3-cn-beijing.ksyun.com/docs/logo-b.png\" style=\"display: block; width: 128px; height: 32px; padding-bottom:5px;\" width=\"128\" height=\"32\" /> </td> \n    </tr> \n   </tbody> \n  </table>      \n  <table style=\"min-width: 332px; max-width: 600px; border: 1px solid #409EFF; border-bottom: 0; border-top-left-radius: 3px; border-top-right-radius: 3px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" bgcolor=\"#409EFF\"> \n   <tbody> \n    <tr> \n     <td colspan=\"3\" height=\"72px\"></td> \n    </tr> \n    <tr> \n     <td width=\"32px\"></td> \n     <td style=\"font-family: Roboto-Regular,Helvetica,Arial,sans-serif; font-size: 24px; color: #FFFFFF; line-height: 1.25;\"> AutoDL重要通知 </td> \n     <td width=\"32px\"></td> \n    </tr> \n    <tr> \n     <td colspan=\"3\" height=\"18px\"></td> \n    </tr> \n   </tbody> \n  </table>     \n  <table style=\"min-width: 332px; max-width: 600px; border: 1px solid #F0F0F0; border-bottom: 1px solid #C0C0C0; border-top: 0; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" bgcolor=\"#FAFAFA\"> \n   <tbody> \n    <tr height=\"16px\"> \n     <td rowspan=\"3\" width=\"32px\"></td> \n     <td></td> \n     <td rowspan=\"3\" width=\"32px\"></td> \n    </tr> \n    <tr> \n     <td><p>尊敬的 AutoDL 炼丹师：</p>\n       <div style=\"text-align: center;\"> \n       \t<p dir=\"ltr\"> <strong style=\"text-align: center; font-size: 24px; font-weight: bold;\"> 尊敬的AutoDL算力云炼丹师，您的余额已不足50元，为保证您的正常使用，建议您及时充值（若已充值，请忽略本提醒） </strong> </p> \n       </div> \n\t<p> </p> \n\t<p>此致</p> <p>AutoDL 团队敬上</p>\n     </td> \n    </tr> \n    <tr height=\"32px\"></tr> \n   </tbody> \n  </table>      \n  <table> \n   <tbody> \n    <tr> \n     <td>此电子邮件地址无法接收回复。如有疑问请微信联系客服: <br /> \n      <table style=\"font-family: Roboto-Regular,Helvetica,Arial,sans-serif; font-size: 10px; color: #666666; line-height: 18px; padding-bottom: 10px\"></table> </td> \n    </tr> \n    <tr> \n     <td align=\"left\"> <img src=\"http://autodl-public.ks3-cn-beijing.ksyun.com/docs/cs_qrcode_167.png\" style=\"display: block; width: 92px; height: 92px;\" width=\"92\" height=\"32\" /> </td> \n    </tr> \n   </tbody> \n  </table>   \n </body>\n</html>\r\n\r\n"
+    },
+    {
+      "mail_id": "2539",
+      "subject": "[sustech-cs304/team-project-26spring-26s-27] Run failed: CI/CD\r\n Pipeline - integration (4bf4458)",
+      "sender": "\"Master-640\" <notifications@github.com>",
+      "time": "2026-05-23 03:28:23",
+      "body": "[sustech-cs304/team-project-26spring-26s-27] Run failed: CI/CD Pipeline - integration (4bf4458) &#160; [sustech-cs304/team-project-26spring-26s-27] CI/CD Pipeline workflow run &#160; <table role=\"presentation\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: co...(truncated)",
+      "raw_html": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\" style=\"-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; font-family: sans-serif; box-sizing: border-box;\" xml:lang=\"en\">\r\n  <head>\r\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n    <meta name=\"viewport\" content=\"width=device-width\" />\r\n    <title>[sustech-cs304/team-project-26spring-26s-27] Run failed: CI/CD Pipeline - integration (4bf4458)</title>\r\n    \r\n  </head>\r\n  <body style=\"box-sizing: border-box; color: #24292e; background-color: #fff; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji; font-size: 14px; line-height: 1.5; margin: 0;\" bgcolor=\"#fff\">\r\n    <table align=\"center\" class=\"container-sm width-full\" width=\"100%\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; max-width: 544px; margin-left: auto; margin-right: auto; width: 100% !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n      <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n        <td class=\"center tmp-p-3\" align=\"center\" valign=\"top\" style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 16px;\">\r\n          <center style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n            <table role=\"presentation\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"center\" class=\"width-full container-md\" width=\"100%\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; max-width: 768px; margin-left: auto; margin-right: auto; width: 100% !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n  <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n    <td align=\"center\" style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 0;\">\r\n              <table role=\"presentation\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n  <tbody style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n    <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n      <td height=\"16\" style=\"font-size: 16px; line-height: 16px; box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 0;\">&#160;</td>\r\n    </tr>\r\n  </tbody>\r\n</table>\r\n\r\n              <table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"left\" width=\"100%\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n                <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n                  <td class=\"text-left\" style=\"box-sizing: border-box; text-align: left !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 0;\" align=\"left\">\r\n                    <img src=\"https://github.githubassets.com/assets/octocat-logo-805b5c3e249f.png\" alt=\"GitHub\" width=\"32\" style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; border-style: none;\" />\r\n                    <h2 class=\"lh-condensed mt-2 text-normal\" style=\"box-sizing: border-box; margin-top: 8px !important; margin-bottom: 0; font-size: 24px; font-weight: 400 !important; line-height: 1.25 !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n                        [sustech-cs304/team-project-26spring-26s-27] CI/CD Pipeline workflow run\r\n\r\n                    </h2>\r\n                  </td>\r\n                </tr>\r\n              </table>\r\n              <table role=\"presentation\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n  <tbody style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n    <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n      <td height=\"16\" style=\"font-size: 16px; line-height: 16px; box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 0;\">&#160;</td>\r\n    </tr>\r\n  </tbody>\r\n</table>\r\n\r\n</td>\r\n  </tr>\r\n</table>\r\n            <table width=\"100%\" class=\"width-full\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; width: 100% !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n              <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n                <td class=\"border rounded-2 d-block\" style=\"box-sizing: border-box; border-radius: 6px !important; display: block !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 0; border: 1px solid #e1e4e8;\">\r\n                  <table align=\"center\" class=\"width-full text-center\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; width: 100% !important; text-align: center !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n                    <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n                      <td style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 0;\">\r\n                        <table role=\"presentation\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"center\" class=\"width-full\" width=\"100%\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; width: 100% !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n  <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n    <td align=\"center\" style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 0;\">\r\n                          \r\n<table role=\"presentation\" align=\"center\" class=\"border-bottom width-full text-center\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; border-bottom-width: 1px !important; border-bottom-color: #e1e4e8 !important; border-bottom-style: solid !important; width: 100% !important; text-align: center !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n  <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n    <td class=\"d-block tmp-px-3 tmp-pt-3 tmp-p-sm-4\" style=\"box-sizing: border-box; display: block !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 16px 16px 0;\">\r\n      <table role=\"presentation\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"center\" class=\"width-full\" width=\"100%\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: collapse; width: 100% !important; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n  <tr style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important;\">\r\n    <td align=\"center\" style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; padding: 0;\">\r\n        \r\n    <img src=\"https://github.githubassets.com/assets/actions-1cc0c3ccfe18.png\" width=\"56\" height=\"56\" alt=\"\" style=\"box-sizing: border-box; font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji !important; border-style: none;\" />\r\n  <table role=\"presentation\" style=\"box-sizing: border-box; border-spacing: 0; border-collapse: co...(truncated)"
     }
   ]
 }

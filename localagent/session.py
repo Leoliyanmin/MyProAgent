@@ -79,7 +79,7 @@ class SessionManager:
 
     def _get_session_path(self, key: str) -> Path:
         """Get file path for a session."""
-        safe_key = key.replace(":", "_").replace("/", "_")
+        safe_key = key.replace(":", "_").replace("/", "_").replace("\\", "_")
         return self.sessions_dir / f"{safe_key}.jsonl"
 
     def get_or_create(self, key: str) -> Session:

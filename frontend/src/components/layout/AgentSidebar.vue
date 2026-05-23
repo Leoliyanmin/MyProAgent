@@ -663,7 +663,7 @@ const sendViaREST = async (message, chatId) => {
   abortControllerRef.value = controller
   try {
     const sessionId = fmStore.isDirectorySet
-      ? `file-manager:${fmStore.workingDirectory.replace(/\//g, '_')}`
+      ? `file-manager:${fmStore.workingDirectory.replace(/[\/\\]/g, '_')}`
       : 'default'
 
     const result = fmStore.isDirectorySet

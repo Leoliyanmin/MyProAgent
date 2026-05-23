@@ -9,18 +9,18 @@ from typing import Any, Callable
 from .base import BaseTool
 
 try:
-    from database.code.database_schedule_handle import ScheduleHandle
+    from database.code.handle.database_schedule_handle import ScheduleHandle
 except Exception:  # pragma: no cover
     try:
-        from local_backend.database.code.database_schedule_handle import ScheduleHandle
+        from local_backend.database.code.handle.database_schedule_handle import ScheduleHandle
     except Exception:  # pragma: no cover
         ScheduleHandle = None
 
 try:
-    from database.code.database_task_handle import TaskHandle
+    from database.code.handle.database_task_handle import TaskHandle
 except Exception:  # pragma: no cover
     try:
-        from local_backend.database.code.database_task_handle import TaskHandle
+        from local_backend.database.code.handle.database_task_handle import TaskHandle
     except Exception:  # pragma: no cover
         TaskHandle = None
 

@@ -135,7 +135,16 @@ class ScheduleOperations:
 
     def _require_user(self, user_id: str) -> None:
         if db.get_user(user_id) is None:
-            raise ValueError(f"User not found: {user_id}")
+            import datetime as _dt
+            db.upsert_user(
+                user_id=user_id,
+                username=user_id,
+                user_email=user_id,
+                user_is_active=1,
+                user_created_at=_dt.datetime.utcnow().isoformat(),
+                user_last_login=None,
+                user_source_device_id=None,
+            )
 
     def _bump_sync_state(self, user_id: str) -> None:
         now = _now_iso()
