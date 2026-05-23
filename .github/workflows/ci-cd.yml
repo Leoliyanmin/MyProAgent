@@ -487,7 +487,7 @@ jobs:
 
   tauri-build:
     name: Build Tauri Desktop App (Linux)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [test-local, test-server, test-frontend]
     steps:
       - uses: actions/checkout@v4
@@ -504,22 +504,25 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             libwebkit2gtk-4.1-dev \
-            build-essential \
-            curl \
-            wget \
-            file \
-            libxdo-dev \
-            libssl-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './frontend/src-tauri -> target'
 
       - name: Install frontend deps
         run: |
           cd frontend
           npm ci
+
+      - name: Generate icon
+        run: python3 scripts/gen_icon.py
 
       - name: Build Tauri app
         run: |
@@ -557,10 +560,18 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './frontend/src-tauri -> target'
+
       - name: Install frontend deps
         run: |
           cd frontend
           npm ci
+
+      - name: Generate icon
+        run: python scripts/gen_icon.py
 
       - name: Build Tauri app
         run: |
