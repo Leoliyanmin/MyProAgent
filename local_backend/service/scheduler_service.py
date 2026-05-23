@@ -13,6 +13,7 @@ schedule_ops = ScheduleOperations()
 task_v2_ops = TaskV2Operations()
 setting_ops = UserSettingOperations()
 from config import settings
+from service.agent_service import is_user_active
 import requests
 
 logger = logging.getLogger("scheduler_service")
@@ -67,29 +68,28 @@ class SchedulerService:
     
     def sync_local_to_server(self):
         """本地数据同步到服务器"""
+        users = list_users()
+        active_users = [u for u in users if u.get('user_id') and is_user_active(u['user_id'])]
+        if not active_users:
+            return
+
         logger.info("开始执行本地到服务器同步任务")
         
         try:
-            users = list_users()
-            
-            if not users:
-                logger.info("没有找到用户，跳过同步")
-                return
-            
             total_synced = 0
             total_failed = 0
             
-            for user in users:
+            for user in active_users:
                 user_id = user.get('user_id')
                 if not user_id:
                     continue
-                
+
                 try:
                     tasks = TaskOperations.get_tasks_by_user(user_id)
                     schedules = schedule_ops.get_schedules_by_user(user_id)
                     tasks_v2 = task_v2_ops.get_all(user_id)
                     user_setting = setting_ops.get(user_id)
-                    
+
                     if not tasks and not schedules and not tasks_v2 and not user_setting:
                         continue
                     
@@ -169,20 +169,19 @@ class SchedulerService:
     
     def sync_emails_for_all_users(self):
         """定时同步所有已绑定邮箱用户的邮件"""
+        users = list_users()
+        active_users = [u for u in users if u.get('user_id') and is_user_active(u['user_id'])]
+        if not active_users:
+            return
+
         logger.info("开始执行邮件定时同步任务")
 
         try:
-            users = list_users()
-
-            if not users:
-                logger.info("没有找到用户，跳过邮件同步")
-                return
-
             total_synced = 0
             total_skipped = 0
             total_failed = 0
 
-            for user in users:
+            for user in active_users:
                 user_id = user.get('user_id')
                 if not user_id:
                     continue

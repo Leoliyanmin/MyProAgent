@@ -24,7 +24,7 @@ from presentation.schemas import (
     AgentTestConnectionResponse,
 )
 from presentation.dependencies import get_current_user_id, get_current_user_id_websocket
-from service.agent_service import AgentService
+from service.agent_service import AgentService, connect_user, disconnect_user
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
 agent_service = AgentService()
@@ -327,6 +327,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         return
 
     await websocket.accept()
+    connect_user(user_id)
     actual_session_id = f"{user_id}_{session_id}"
 
     try:
@@ -405,6 +406,8 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
             await websocket.close(code=4000, reason=str(e))
         except:
             pass
+    finally:
+        disconnect_user(user_id)
 
 
 # ==================== 用户画像端点 ====================
