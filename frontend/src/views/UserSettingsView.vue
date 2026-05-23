@@ -191,20 +191,18 @@
               <p class="binding-meta" v-if="bb.status === 'loading'">绑定中…</p>
               <p class="binding-meta" v-else-if="bb.status === 'binding'">请在弹窗中完成登录，然后点击「完成登录」</p>
               <template v-else-if="bb.status === 'bound'">
-                <p class="binding-meta binding-success">已绑定 · {{ bb.coursesCount }} 门课程</p>
+                <p class="binding-meta binding-success">已绑定 · {{ bb.assignmentsCount || bb.coursesCount }} 个事件</p>
                 <p class="binding-meta">绑定时间：{{ bb.bindTime }}</p>
               </template>
               <p class="binding-meta" v-else>未绑定</p>
+              <input v-if="bb.status !== 'bound'" v-model.trim="bbIcsUrl" class="text-input" type="text" placeholder="ICS 日历 URL（从 BB 日历 → 获取外部链接复制）" style="font-size:11px;margin-top:6px;" />
             </div>
             <div class="action-group">
               <template v-if="bb.status === 'binding'">
                 <button class="action-btn" type="button" @click="completeBinding('blackboard')">完成登录，开始绑定</button>
               </template>
-              <template v-else-if="bb.status === 'unbound'">
-                <button v-if="isTauriApp" class="action-btn" type="button" @click="bindBb">绑定 Blackboard</button>
-                <button v-else class="action-btn ghost" type="button" @click="bindBb">绑定 Blackboard</button>
-              </template>
-              <button v-else-if="bb.status === 'bound'" class="action-btn ghost" type="button" @click="unbindBb">解绑</button>
+              <button v-else-if="bb.status !== 'bound'" class="action-btn" type="button" @click="bindBbWithIcs">绑定 Blackboard</button>
+              <button v-else class="action-btn ghost" type="button" @click="unbindBb">解绑</button>
             </div>
           </li>
 
@@ -679,6 +677,7 @@ const tis = reactive({
 const bb = reactive({
   status: 'loading',
   coursesCount: 0,
+  assignmentsCount: 0,
   bindTime: '',
 })
 
@@ -715,6 +714,7 @@ const loadBindingStatus = async () => {
     if (bbRes.is_bound) {
       bb.status = 'bound'
       bb.coursesCount = bbRes.courses_count || 0
+      bb.assignmentsCount = bbRes.assignments_count || 0
       bb.bindTime = bbRes.bind_time || ''
     } else {
       bb.status = 'unbound'
@@ -827,6 +827,7 @@ const bindBb = async () => {
 
 const bindingError = ref('')
 const bindingProgress = reactive({ active: false, step: '' })
+const bbIcsUrl = ref('')
 
 const completeBinding = async (platform) => {
   const state = platform === 'tis' ? tis : bb
@@ -868,7 +869,11 @@ const completeBinding = async (platform) => {
     bindingProgress.step = '正在绑定到教务系统，请稍候…'
     const token = getTokenSync() || ''
     const bindFn = platform === 'tis' ? 'bind_tis' : 'bind_blackboard'
-    const result = await invoke(bindFn, { cookies, backendUrl: 'http://127.0.0.1:8002', token })
+    const invokeArgs = { cookies, backendUrl: 'http://127.0.0.1:8002', token }
+    if (platform === 'blackboard' && bbIcsUrl.value) {
+      invokeArgs.icsUrl = bbIcsUrl.value
+    }
+    const result = await invoke(bindFn, invokeArgs)
     if (result && result.success) {
       bindingError.value = ''
       bindingProgress.step = '正在导入数据…'
@@ -892,12 +897,41 @@ const completeBinding = async (platform) => {
   }
 }
 
+const bindBbWithIcs = async () => {
+  if (!bbIcsUrl.value) {
+    bindingError.value = '请先输入 ICS 日历 URL'
+    return
+  }
+  bb.status = 'loading'
+  bindingError.value = ''
+  try {
+    const result = await blackboardAPI.bindIcs(bbIcsUrl.value)
+    if (result.success) {
+      bindingError.value = ''
+      await loadBindingStatus()
+      const calendarStore = useCalendarStore()
+      await calendarStore.importBlackboardAssignments()
+    } else {
+      bindingError.value = result.message || 'ICS 绑定失败'
+      bb.status = 'unbound'
+    }
+  } catch (err) {
+    bindingError.value = err?.message || 'ICS 绑定失败'
+    bb.status = 'unbound'
+  }
+}
+
 const unbindTis = async () => {
   try { await tisAPI.unbind(); await loadBindingStatus() } catch {}
 }
 
 const unbindBb = async () => {
-  try { await blackboardAPI.unbind(); await loadBindingStatus() } catch {}
+  try {
+    await blackboardAPI.unbind()
+    await loadBindingStatus()
+    const calendarStore = useCalendarStore()
+    calendarStore.clearBlackboardEvents()
+  } catch {}
 }
 
 const loadSettings = async () => {

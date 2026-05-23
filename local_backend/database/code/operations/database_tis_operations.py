@@ -67,8 +67,8 @@ class TisAccountOperations:
 
 class TisCourseOperations:
     def save_all(self, user_id: str, schedule_data: dict) -> dict:
-        delete_tis_courses_by_user(user_id)
         delete_tis_events_by_user(user_id)
+        delete_tis_courses_by_user(user_id)
 
         schedule = schedule_data.get("schedule", {})
         course_map = {}
@@ -81,7 +81,7 @@ class TisCourseOperations:
                 weeks = course.get("weeks", "")
                 periods = course.get("periods", "")
 
-                key = (name, teacher, loc, weeks)
+                key = (name, schedule_data.get("term", ""))
                 if key not in course_map:
                     import json, datetime as dt
                     cid = create_tis_course(
@@ -97,6 +97,7 @@ class TisCourseOperations:
                         data_title=name,
                         data_content_text=json.dumps(course, ensure_ascii=False),
                         data_link_url="tis:{}".format(cid),
+                        data_release_time=None, data_ddl_time=None,
                         data_is_previewable=1, data_source="tis",
                         data_created_at=dt.datetime.utcnow().isoformat(),
                     )
@@ -152,6 +153,7 @@ class TisCourseOperations:
         now = dt.datetime.utcnow().isoformat()
         return create_category(
             user_id=user_id, category_kind="tis_course", category_title=course_name,
+            category_content=None, category_link=f"tis:{course_name}",
             category_source="tis", category_created_at=now,
         )
 

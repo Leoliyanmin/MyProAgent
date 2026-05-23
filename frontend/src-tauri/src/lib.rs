@@ -151,11 +151,11 @@ fn query_cookies(window: &tauri::WebviewWindow, url: &Url) -> Result<Vec<serde_j
 
 #[tauri::command]
 async fn extract_cookies(app: tauri::AppHandle, platform: Option<String>) -> Result<Vec<serde_json::Value>, String> {
-    let cas_url = Url::parse("https://cas.sustech.edu.cn").unwrap();
-    let target_url = match platform.as_deref() {
-        Some("blackboard") => Url::parse("https://bb.sustech.edu.cn"),
-        _ => Url::parse("https://tis.sustech.edu.cn"),
-    }.map_err(|e| format!("Invalid URL: {}", e))?;
+    let cas_url_str = "https://cas.sustech.edu.cn";
+    let target_url_str = match platform.as_deref() {
+        Some("blackboard") => "https://bb.sustech.edu.cn",
+        _ => "https://tis.sustech.edu.cn",
+    };
 
     let window_label = match platform.as_deref() {
         Some("blackboard") => "cas-login-bb",
@@ -168,10 +168,22 @@ async fn extract_cookies(app: tauri::AppHandle, platform: Option<String>) -> Res
     let mut seen = std::collections::HashSet::new();
     let mut all_cookies = Vec::new();
 
-    for url in &[cas_url, target_url] {
-        match query_cookies(&window, url) {
+    // Navigate to each domain so cookies_for_url can read them on all platforms.
+    // macOS WKWebView allows cross-domain cookie reads, but Windows WebView2
+    // and Linux WebKitGTK may restrict reads to the current page's origin.
+    for url_str in &[cas_url_str, target_url_str] {
+        let nav_url = Url::parse(url_str).map_err(|e| format!("Invalid URL: {}", e))?;
+        // Navigate to the target domain first
+        if let Err(e) = window.navigate(nav_url) {
+            eprintln!("[extract_cookies] navigate to {} failed: {}", url_str, e);
+        }
+        // Wait for navigation to settle and cookies to become accessible
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+        let url = Url::parse(url_str).map_err(|e| format!("Invalid URL: {}", e))?;
+        match query_cookies(&window, &url) {
             Ok(cookies) => {
-                eprintln!("[extract_cookies] {} returned {} cookies", url, cookies.len());
+                eprintln!("[extract_cookies] {} returned {} cookies", url_str, cookies.len());
                 for cookie in &cookies {
                     let name = cookie.get("name").and_then(|v| v.as_str()).unwrap_or("");
                     let domain = cookie.get("domain").and_then(|v| v.as_str()).unwrap_or("");
@@ -183,7 +195,7 @@ async fn extract_cookies(app: tauri::AppHandle, platform: Option<String>) -> Res
                 }
             }
             Err(e) => {
-                eprintln!("[extract_cookies] Warning for {}: {}", url, e);
+                eprintln!("[extract_cookies] Warning for {}: {}", url_str, e);
             }
         }
     }
@@ -284,7 +296,7 @@ async fn bind_tis(cookies: Vec<CookieInfo>, backend_url: String, token: String) 
 }
 
 #[tauri::command]
-async fn bind_blackboard(cookies: Vec<CookieInfo>, backend_url: String, token: String) -> Result<BindResult, String> {
+async fn bind_blackboard(cookies: Vec<CookieInfo>, backend_url: String, token: String, ics_url: Option<String>) -> Result<BindResult, String> {
     if let Err(e) = check_backend_health(&backend_url).await {
         return Ok(BindResult { success: false, message: e, data: None });
     }
@@ -302,12 +314,17 @@ async fn bind_blackboard(cookies: Vec<CookieInfo>, backend_url: String, token: S
     let client = make_reqwest_client()?;
     let url = format!("{}/api/v1/blackboard/bind", backend_url.trim_end_matches('/'));
 
+    let mut body = serde_json::json!({
+        "cookies": bb_cookies.to_string()
+    });
+    if let Some(ref url) = ics_url {
+        body["ics_url"] = serde_json::Value::String(url.clone());
+    }
+
     let mut req = client
         .post(&url)
         .header("Content-Type", "application/json")
-        .json(&serde_json::json!({
-            "cookies": bb_cookies.to_string()
-        }));
+        .json(&body);
 
     if !token.is_empty() {
         req = req.header("Authorization", format!("Bearer {}", token));

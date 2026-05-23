@@ -44,7 +44,7 @@ class BlackboardService:
         
         return session
     
-    def bind_with_cookie(self, user_id: str, cookies_str: str) -> Dict:
+    def bind_with_cookie(self, user_id: str, cookies_str: str, ics_url: str | None = None) -> Dict:
         try:
             logger.info(f"使用Cookie绑定: user_id={user_id}")
             
@@ -81,6 +81,26 @@ class BlackboardService:
             logger.info("爬取Blackboard课程数据...")
             scraper = BlackboardScraper(session=session)
             scrape_result = scraper.scrape_courses()
+
+            # Fetch ICS calendar feed for accurate due dates (one HTTP, all courses)
+            ics_dates = {}
+            if ics_url:
+                try:
+                    logger.info(f"获取 ICS 日历: {ics_url}")
+                    ics_resp = session.get(ics_url, allow_redirects=True, timeout=30)
+                    if ics_resp.status_code == 200 and 'BEGIN:VCALENDAR' in ics_resp.text:
+                        import re
+                        for block in ics_resp.text.split('BEGIN:VEVENT')[1:]:
+                            m_dt = re.search(r'DTSTART(?:;TZID=[^:]+)?:(\d{8})T(\d{6})', block)
+                            m_sum = re.search(r'SUMMARY:(.+)', block)
+                            if m_dt and m_sum:
+                                dt = f"{m_dt.group(1)[:4]}-{m_dt.group(1)[4:6]}-{m_dt.group(1)[6:8]} {m_dt.group(2)[:2]}:{m_dt.group(2)[2:4]}"
+                                ics_dates[m_sum.group(1).strip().lower()] = dt
+                        logger.info(f"ICS 解析到 {len(ics_dates)} 个截止日期")
+                    else:
+                        logger.warning(f"ICS 获取失败: HTTP {ics_resp.status_code}")
+                except Exception as e:
+                    logger.warning(f"ICS 获取异常: {e}")
             
             if scrape_result['success']:
                 courses_data = []
@@ -94,11 +114,15 @@ class BlackboardService:
                         'course_materials': []
                     }
                     for assignment in course.get('upload_assignments', []):
+                        label = assignment.get('label', '')
+                        due = assignment.get('due_date', '')
+                        if not due and ics_dates:
+                            due = ics_dates.get(label.lower(), '')
                         course_data['assignments'].append({
-                            'id': assignment.get('label', ''),
-                            'name': assignment.get('label', ''),
+                            'id': label,
+                            'name': label,
                             'link': assignment.get('url', ''),
-                            'due_date': assignment.get('due_date', ''),
+                            'due_date': due,
                             'content': assignment.get('content_blocks', [])
                         })
                     for announcement in course.get('announcements', []):
@@ -259,6 +283,74 @@ class BlackboardService:
             logger.error("Cookie解密失败")
             return {}
     
+    def bind_with_ics(self, user_id: str, ics_url: str) -> Dict:
+        """使用 BB 日历 ICS 链接直接绑定，无需 CAS 登录和 Cookie"""
+        import re
+        try:
+            logger.info(f"使用 ICS 绑定 Blackboard: user_id={user_id}")
+            resp = requests.get(ics_url, timeout=30, headers={
+                "User-Agent": "Mozilla/5.0"
+            })
+            if resp.status_code != 200 or 'BEGIN:VCALENDAR' not in resp.text:
+                return {'success': False, 'message': f'ICS 获取失败: HTTP {resp.status_code}'}
+
+            ics_events = []
+            for block in resp.text.split('BEGIN:VEVENT')[1:]:
+                m_dt = re.search(r'DTSTART(?:;TZID=[^:]+)?:(\d{8})T(\d{6})', block)
+                m_sum = re.search(r'SUMMARY:(.+)', block)
+                m_uid = re.search(r'UID:(.+)', block)
+                if m_dt and m_sum:
+                    due = f"{m_dt.group(1)[:4]}-{m_dt.group(1)[4:6]}-{m_dt.group(1)[6:8]} {m_dt.group(2)[:2]}:{m_dt.group(2)[2:4]}"
+                    ics_events.append({
+                        'label': m_sum.group(1).strip(),
+                        'due_date': due,
+                        'uid': m_uid.group(1).strip() if m_uid else '',
+                    })
+            if not ics_events:
+                return {'success': False, 'message': 'ICS 中没有找到任何事件'}
+
+            logger.info(f"ICS 解析到 {len(ics_events)} 个事件")
+
+            courses_data = [{
+                'id': 'ics',
+                'name': 'Blackboard',
+                'link': 'https://bb.sustech.edu.cn',
+                'assignments': [{
+                    'id': e['label'],
+                    'name': e['label'],
+                    'link': '',
+                    'due_date': e['due_date'],
+                    'content': [],
+                } for e in ics_events],
+                'announcements': [],
+                'course_materials': [],
+            }]
+
+            json_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_courses.json')
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump({
+                    'user_id': user_id,
+                    'bind_time': time.strftime('%Y-%m-%d %H:%M:%S'),
+                    'courses': courses_data,
+                }, f, ensure_ascii=False, indent=2)
+            logger.info(f"Blackboard ICS 数据已保存: {json_path}")
+
+            try:
+                from database.code.handle.database_bb_v2_handle import BbV2Handle
+                bb_handle = BbV2Handle()
+                result = bb_handle.save_courses(user_id, courses_data)
+                logger.info(f"BB v2入库: {result}")
+            except Exception as e:
+                logger.error(f"BB v2入库失败: {e}")
+
+            return {
+                'success': True,
+                'message': f'Blackboard 绑定成功，{len(ics_events)} 个事件',
+            }
+        except Exception as e:
+            logger.error(f"ICS 绑定失败: {e}")
+            return {'success': False, 'message': f'绑定失败: {e}'}
+
     def get_bb_assignments(self, user_id: str) -> Dict:
         return {"success": True, "message": "use /api/v1/blackboard/assignments instead", "assignments": []}
 

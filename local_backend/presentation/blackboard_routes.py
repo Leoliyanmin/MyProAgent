@@ -29,6 +29,28 @@ def _get_executor():
 class BlackboardCookieRequest(BaseModel):
     """Blackboard Cookie请求体模型"""
     cookies: str
+    ics_url: str | None = None
+
+
+class BlackboardIcsRequest(BaseModel):
+    """Blackboard ICS 绑定请求"""
+    ics_url: str
+
+
+def _parse_due(due_str: str):
+    """Parse '2026-05-27 23:59' into (date, date, start_time, end_time).
+    Start time rounds down to the nearest hour."""
+    if not due_str:
+        return '', '', '', ''
+    try:
+        from datetime import datetime
+        dt = datetime.strptime(due_str.strip(), '%Y-%m-%d %H:%M')
+        date = dt.strftime('%Y-%m-%d')
+        end_time = dt.strftime('%H:%M')
+        start_hour = dt.replace(minute=0).strftime('%H:%M')
+        return date, date, start_hour, end_time
+    except ValueError:
+        return due_str, '', '', ''
 
 
 @router.get("/status")
@@ -46,6 +68,7 @@ async def get_bb_status(user_id: str = Depends(get_current_user_id)):
             data = json.load(f)
         result['bind_time'] = data.get('bind_time', '')
         result['courses_count'] = len(data.get('courses', []))
+        result['assignments_count'] = sum(len(c.get('assignments', [])) for c in data.get('courses', []))
         course_names = [c.get('name', '') for c in data.get('courses', [])]
         result['course_names'] = course_names[:5]
     return result
@@ -71,7 +94,7 @@ async def bind_with_cookie(request: BlackboardCookieRequest, user_id: str = Depe
         result = await loop.run_in_executor(
             _get_executor(),
             blackboard_service.bind_with_cookie,
-            user_id, cookies
+            user_id, cookies, request.ics_url
         )
         if not result.get('success'):
             raise HTTPException(status_code=400, detail=result.get('message', '绑定失败'))
@@ -99,6 +122,28 @@ async def unbind_bb(user_id: str = Depends(get_current_user_id)):
     return result
 
 
+@router.post("/bind-ics")
+async def bind_with_ics(request: BlackboardIcsRequest, user_id: str = Depends(get_current_user_id)):
+    """使用 ICS 日历链接绑定 Blackboard，无需 CAS 登录"""
+    if not request.ics_url:
+        raise HTTPException(status_code=400, detail="ics_url 不能为空")
+    try:
+        loop = asyncio.get_running_loop()
+        result = await loop.run_in_executor(
+            _get_executor(),
+            blackboard_service.bind_with_ics,
+            user_id, request.ics_url
+        )
+        if not result.get('success'):
+            raise HTTPException(status_code=400, detail=result.get('message', '绑定失败'))
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"BB ICS bind 崩溃: {e}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"服务器内部错误: {e}")
+
+
 @router.get("/assignments")
 async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
     """获取Blackboard作业列表，转换为日历事件+待办格式返回"""
@@ -119,63 +164,37 @@ async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
     todos = []
     for course in courses:
         course_name = course.get('name', '未知课程')
-        all_items = []
-        for item in course.get('upload_assignments', []):
-            all_items.append(('作业', item))
-        for item in course.get('announcements', []):
-            all_items.append(('公告', item))
-        for item in course.get('course_materials', []):
-            all_items.append(('资料', item))
 
-        if not all_items:
-            events.append({
-                'title': course_name,
-                'start': '', 'end': '', 'startTime': '', 'endTime': '',
-                'priority': 1, 'color': '#ff9500',
-                'description': f'课程: {course_name}', 'source': 'blackboard',
-                'isTodo': False,
-            })
-            continue
-
-        for item_type, item in all_items:
+        for item in course.get('assignments', []):
             item_name = item.get('label', item.get('title', item.get('name', '未命名')))
-            title = f"[{course_name}] {item_name}"
-
-            description_parts = [f'课程: {course_name}', f'类型: {item_type}']
-            content_blocks = item.get('content_blocks', [])
-            for block in content_blocks[:3]:
-                if isinstance(block, dict):
-                    text = block.get('text', '')
-                    if text and len(text) < 200:
-                        description_parts.append(text)
-            description = '\n'.join(description_parts)
-
-            due_date = item.get('due_date', '') or item.get('deadline', '')
+            due_str = item.get('due_date', '') or item.get('deadline', '')
+            start, end, start_time, end_time = _parse_due(due_str)
+            if not start:
+                continue
 
             events.append({
-                'title': title,
-                'start': due_date or '',
-                'end': due_date or '',
-                'startTime': '', 'endTime': '',
-                'priority': 1 if item_type == '作业' else 2,
-                'color': '#ff9500',
-                'description': description,
+                'title': item_name,
+                'start': start,
+                'end': end,
+                'startTime': start_time,
+                'endTime': end_time,
+                'priority': 0,
+                'color': '#ff3b30',
+                'description': f'课程: {course_name}',
                 'source': 'blackboard',
-                'isTodo': item_type == '作业',
-                'dueDate': due_date,
+                'isTodo': True,
             })
 
-            if item_type == '作业':
-                todos.append({
-                    'title': title,
-                    'completed': False,
-                    'start': due_date or '',
-                    'end': due_date or '',
-                    'priority': 1,
-                    'color': '#ff9500',
-                    'description': description,
-                    'source': 'blackboard',
-                })
+            todos.append({
+                'title': item_name,
+                'completed': False,
+                'start': start,
+                'end': end,
+                'priority': 0,
+                'color': '#ff3b30',
+                'description': f'课程: {course_name}',
+                'source': 'blackboard',
+            })
 
     return {
         'success': True,

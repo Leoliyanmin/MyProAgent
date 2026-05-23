@@ -283,9 +283,9 @@ export const useCalendarStore = defineStore('calendar', () => {
           completed: false,
         }
         if (!event.start && !event.startTime) {
-          const today = new Date().toISOString().split('T')[0]
-          event.start = today
-          event.end = today
+          // Items without a due date (announcements, materials) should not
+          // be forced onto today's calendar — skip them.
+          continue
         }
         basicEvents.value.push(event)
         existingIds.add(id)
@@ -315,13 +315,20 @@ export const useCalendarStore = defineStore('calendar', () => {
     } catch (err) {
       error.value = err.message
       console.error('Failed to import Blackboard assignments:', err)
-      return { success: false, eventsAdded: 0, todosAdded: 0, total: 0, message: err.message }
-    } finally {
-      loading.value = false
+    return { success: false, eventsAdded: 0, todosAdded: 0, total: 0, message: err.message }
+  } finally {
+    loading.value = false
+  }
+  }
+
+  const clearBlackboardEvents = () => {
+    basicEvents.value = basicEvents.value.filter(e => e.source !== 'blackboard')
+    for (const t of [...dashboardStore.todos]) {
+      if (t.source === 'blackboard') dashboardStore.removeTodo(t.id)
     }
   }
 
-  return { 
+  return {
     basicEvents,
     allEvents, 
     addEvent, 
@@ -334,6 +341,7 @@ export const useCalendarStore = defineStore('calendar', () => {
     updateScheduleOnBackend,
     importTISSchedule,
     importBlackboardAssignments,
+    clearBlackboardEvents,
     currentDate,
     viewType
   }

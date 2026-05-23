@@ -453,7 +453,13 @@ export const blackboardAPI = {
   },
   unbind: async () => {
     return fetchWithAuth('/api/v1/blackboard/unbind', { method: 'POST' })
-  }
+  },
+  bindIcs: async (icsUrl) => {
+    return fetchWithAuth('/api/v1/blackboard/bind-ics', {
+      method: 'POST',
+      body: JSON.stringify({ ics_url: icsUrl })
+    })
+  },
 }
 
 // ==================== Email API ====================
