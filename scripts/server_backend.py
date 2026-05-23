@@ -86,17 +86,25 @@ def stdin_loop():
 def init_database():
     """初始化数据库表"""
     try:
-        persistent_db = Path.home() / ".proagent" / "server.db"
-        persistent_db.parent.mkdir(parents=True, exist_ok=True)
-        print(f"[server] DB: {persistent_db}", flush=True)
-
-        import database.code.command.database_command as db_cmd
-        db_cmd.DEFAULT_DB_PATH = str(persistent_db)
-        import server_backend.database.code.command.database_command as db_cmd2
-        db_cmd2.DEFAULT_DB_PATH = str(persistent_db)
+        bundle_root = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else bundle_dir
+        schema_path = bundle_root / "server_backend" / "database" / "code" / "init" / "database_init.sql"
+        print(f"[server] Schema: {schema_path}", flush=True)
 
         from database.code.init.database_init import init_database as run_init
-        run_init(db_path=str(persistent_db))
+
+        import server_backend.database.code.command.database_command as db_cmd
+        db_path1 = Path(db_cmd.DEFAULT_DB_PATH)
+        db_path1.parent.mkdir(parents=True, exist_ok=True)
+        print(f"[server] DB (server_backend): {db_path1}", flush=True)
+        run_init(db_path=str(db_path1), schema_path=str(schema_path))
+
+        import database.code.command.database_command as db_cmd2
+        db_path2 = Path(db_cmd2.DEFAULT_DB_PATH)
+        if db_path2 != db_path1:
+            db_path2.parent.mkdir(parents=True, exist_ok=True)
+            print(f"[server] DB (database): {db_path2}", flush=True)
+            run_init(db_path=str(db_path2), schema_path=str(schema_path))
+
         print("[server] Database initialized", flush=True)
     except Exception as e:
         print(f"[server] Database init warning: {e}", flush=True)

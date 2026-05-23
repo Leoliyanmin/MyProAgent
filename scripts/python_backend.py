@@ -113,18 +113,27 @@ def stdin_loop():
 def init_database():
     """初始化数据库表"""
     try:
-        persistent_db = Path.home() / ".proagent" / "local.db"
-        persistent_db.parent.mkdir(parents=True, exist_ok=True)
-        print(f"[sidecar] DB: {persistent_db}", flush=True)
-
-        # 两个模块路径都要覆盖（database.xxx 和 local_backend.database.xxx 是不同的模块对象）
-        import database.code.command.database_command as db_cmd
-        db_cmd.DEFAULT_DB_PATH = str(persistent_db)
-        import local_backend.database.code.command.database_command as db_cmd2
-        db_cmd2.DEFAULT_DB_PATH = str(persistent_db)
+        bundle_root = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else bundle_dir
+        schema_path = bundle_root / "local_backend" / "database" / "code" / "init" / "database_init.sql"
+        print(f"[sidecar] Schema: {schema_path}", flush=True)
 
         from database.code.init.database_init import init_database as run_init
-        run_init(db_path=str(persistent_db))
+
+        # local_backend.xxx 路径 —— 大部分数据库操作走这个
+        import local_backend.database.code.command.database_command as db_cmd
+        db_path1 = Path(db_cmd.DEFAULT_DB_PATH)
+        db_path1.parent.mkdir(parents=True, exist_ok=True)
+        print(f"[sidecar] DB (local_backend): {db_path1}", flush=True)
+        run_init(db_path=str(db_path1), schema_path=str(schema_path))
+
+        # database.xxx 路径 —— scheduler/email service 走这个
+        import database.code.command.database_command as db_cmd2
+        db_path2 = Path(db_cmd2.DEFAULT_DB_PATH)
+        if db_path2 != db_path1:
+            db_path2.parent.mkdir(parents=True, exist_ok=True)
+            print(f"[sidecar] DB (database): {db_path2}", flush=True)
+            run_init(db_path=str(db_path2), schema_path=str(schema_path))
+
         print("[sidecar] Database initialized", flush=True)
     except Exception as e:
         print(f"[sidecar] Database init error: {e}", flush=True)
