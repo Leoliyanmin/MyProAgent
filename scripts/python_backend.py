@@ -113,18 +113,37 @@ def stdin_loop():
 def init_database():
     """初始化数据库表"""
     try:
-        persistent_db = Path.home() / ".proagent" / "local.db"
-        persistent_db.parent.mkdir(parents=True, exist_ok=True)
-        print(f"[sidecar] DB: {persistent_db}", flush=True)
-
-        # 两个模块路径都要覆盖（database.xxx 和 local_backend.database.xxx 是不同的模块对象）
-        import database.code.command.database_command as db_cmd
-        db_cmd.DEFAULT_DB_PATH = str(persistent_db)
-        import local_backend.database.code.command.database_command as db_cmd2
-        db_cmd2.DEFAULT_DB_PATH = str(persistent_db)
+        bundle_root = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else bundle_dir
+        schema_path = bundle_root / "local_backend" / "database" / "code" / "init" / "database_init.sql"
+        schema_v2_path = bundle_root / "local_backend" / "database" / "code" / "init" / "database_init_v2.sql"
+        print(f"[sidecar] Schema: {schema_path}", flush=True)
 
         from database.code.init.database_init import init_database as run_init
-        run_init(db_path=str(persistent_db))
+        from database.code.init.database_init import _run_migrations_v2
+
+        def init_one(db_path):
+            db_path = Path(db_path)
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+            print(f"[sidecar] DB: {db_path}", flush=True)
+            run_init(db_path=str(db_path), schema_path=schema_path)
+            # PyInstaller 下 __file__ 路径与 --add-data 路径不一致，手动补 v2
+            import sqlite3
+            if schema_v2_path.exists():
+                v2_sql = schema_v2_path.read_text(encoding="utf-8")
+                with sqlite3.connect(str(db_path)) as conn:
+                    conn.execute("PRAGMA foreign_keys = ON;")
+                    conn.executescript(v2_sql)
+                    _run_migrations_v2(conn)
+                    conn.commit()
+                print(f"[sidecar] v2 migration applied", flush=True)
+
+        import local_backend.database.code.command.database_command as db_cmd
+        init_one(db_cmd.DEFAULT_DB_PATH)
+
+        import database.code.command.database_command as db_cmd2
+        if db_cmd2.DEFAULT_DB_PATH != db_cmd.DEFAULT_DB_PATH:
+            init_one(db_cmd2.DEFAULT_DB_PATH)
+
         print("[sidecar] Database initialized", flush=True)
     except Exception as e:
         print(f"[sidecar] Database init error: {e}", flush=True)
