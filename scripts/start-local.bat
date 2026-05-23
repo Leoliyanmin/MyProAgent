@@ -1,48 +1,47 @@
 @echo off
-chcp 65001 >nul
 setlocal
 
 echo ============================================
-echo   ProAgent Local - æ™ºèƒ½åä½œå·¥ä½œå°
+echo   ProAgent Local - ÖÇÄÜĞ­×÷¹¤×÷Ì¨
 echo ============================================
 echo.
 
 cd /d "%~dp0"
 
-:: æ£€æŸ¥ Python
+:: ¼ì²é Python
 where python >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Python æœªå®‰è£…ï¼Œè¯·å…ˆå®‰è£… Python 3.10+
+    echo [ERROR] Python Î´°²×°£¬ÇëÏÈ°²×° Python 3.10+
     pause
     exit /b 1
 )
 
-:: åˆ›å»ºè™šæ‹Ÿç¯å¢ƒ
+:: ´´½¨ĞéÄâ»·¾³
 if not exist "venv" (
-    echo [1/4] åˆ›å»ºè™šæ‹Ÿç¯å¢ƒ...
+    echo [1/4] ´´½¨ĞéÄâ»·¾³...
     python -m venv venv
 )
 
-:: æ¿€æ´»è™šæ‹Ÿç¯å¢ƒ
+:: ¼¤»îĞéÄâ»·¾³
 call venv\Scripts\activate.bat
 
-:: å®‰è£…ä¾èµ–
-echo [2/4] å®‰è£…ä¾èµ–...
+:: °²×°ÒÀÀµ
+echo [2/4] °²×°ÒÀÀµ...
 pip install -r requirements.txt -q
 
-:: åˆå§‹åŒ–æ•°æ®åº“
-echo [3/4] åˆå§‹åŒ–æ•°æ®åº“...
+:: ³õÊ¼»¯Êı¾İ¿â
+echo [3/4] ³õÊ¼»¯Êı¾İ¿â...
 set PYTHONPATH=%~dp0;%PYTHONPATH%
 cd local_backend
 python database\code\init\database_init.py
 cd ..
 
-:: å¯åŠ¨æœåŠ¡
-echo [4/4] å¯åŠ¨æœåŠ¡...
+:: Æô¶¯·şÎñ
+echo [4/4] Æô¶¯·şÎñ...
 echo.
-echo   åç«¯ API:  http://localhost:8002/docs
-echo   å‰ç«¯è¯·ç”¨æµè§ˆå™¨æ‰“å¼€ frontend-dist\index.html
-echo   æˆ–ä½¿ç”¨ live-server: npx serve frontend-dist
+echo   ºó¶Ë API:  http://localhost:8002/docs
+echo   Ç°¶ËÇëÓÃä¯ÀÀÆ÷´ò¿ª frontend-dist\index.html
+echo   »òÊ¹ÓÃ live-server: npx serve frontend-dist
 echo.
 
 cd local_backend
