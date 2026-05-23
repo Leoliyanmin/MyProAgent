@@ -8,10 +8,24 @@
         <h3 class="panel-title">Markdown 笔记</h3>
       </div>
       <div class="header-actions">
-        <button class="header-action-btn" @click="handleNewFolder" :disabled="isCreating" title="新建文件夹">📁 新建文件夹</button>
-        <button class="header-action-btn" @click="handleNewNote" :disabled="isCreating" title="新建笔记">📄 新建笔记</button>
-        <button v-if="saveMode === 'manual' && currentFile" class="header-action-btn save-btn" :disabled="isSaving" @click="handleManualSave" title="保存 (Ctrl+S)">💾 保存</button>
-        <span v-if="statusMessage" class="status-text">{{ statusMessage }}</span>
+        <span class="status-text" :class="{ hidden: !statusMessage }">{{ statusMessage || '\u00A0' }}</span>
+        <button class="header-action-btn" @click="handleNewFolder" :disabled="isCreating" title="新建文件夹">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          新建文件夹
+        </button>
+        <button class="header-action-btn" @click="handleNewNote" :disabled="isCreating" title="新建笔记">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          新建笔记
+        </button>
+        <button
+          class="header-action-btn save-btn"
+          :class="{ hidden: !currentFile }"
+          :disabled="isSaving || !currentFile"
+          @click="handleManualSave"
+          title="保存 (Ctrl+S)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          {{ saveFeedback === 'saved' ? '已保存' : '保存' }}
+        </button>
         <div class="settings-wrapper" ref="settingsRef">
           <button class="header-icon-btn" @click="showSettings = !showSettings" title="设置">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -63,7 +77,10 @@
               @click="handleEntryClick(entry)"
               @dblclick="handleDoubleClick(entry)"
             >
-              <span class="file-icon">{{ entry.is_directory ? '📁' : '📄' }}</span>
+              <span class="file-icon">
+                <svg v-if="entry.is_directory" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </span>
               <span v-if="renamingEntry === entry" class="rename-input-wrapper">
                 <input
                   ref="renameInput"
@@ -162,6 +179,7 @@ const renameValue = ref('')
 const isSaving = ref(false)
 const isCreating = ref(false)
 const statusMessage = ref('')
+const saveFeedback = ref(null)  // 'saved' | null
 
 // New state for inline title editing and folder creation
 const editingTitle = ref(false)
@@ -206,10 +224,8 @@ async function loadFile(entry) {
   currentFile.value = entry
   editorMode.value = 'edit'
   try {
-    showStatus('加载中...')
     await fileManagerStore.openPreview(entry)
     editContent.value = fileManagerStore.previewContent || ''
-    clearStatus()
   } catch (e) {
     showStatus('加载失败: ' + e.message, 'error')
   }
@@ -218,7 +234,6 @@ async function loadFile(entry) {
 function handleInput() {
   if (saveMode.value === 'auto' && currentFile.value) {
     clearTimeout(saveTimer)
-    showStatus('未保存')
     saveTimer = setTimeout(() => {
       handleManualSave()
     }, 500)
@@ -228,11 +243,10 @@ function handleInput() {
 async function handleManualSave() {
   if (!currentFile.value || isSaving.value) return
   isSaving.value = true
-  showStatus('保存中...')
   try {
     await fileManagerStore.updateFile(currentFile.value.name, editContent.value)
-    showStatus('已保存', 'success')
-    setTimeout(clearStatus, 2000)
+    saveFeedback.value = 'saved'
+    setTimeout(() => { saveFeedback.value = null }, 2000)
   } catch (e) {
     showStatus('保存失败: ' + e.message, 'error')
   } finally {
@@ -496,6 +510,10 @@ onUnmounted(() => {
 }
 
 .header-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
   padding: 4px 10px;
   font-size: 11px;
   border-radius: 6px;
@@ -519,11 +537,16 @@ onUnmounted(() => {
 .header-action-btn.save-btn {
   background: #007aff;
   color: #fff;
-  border-color: #007aff;
+  border-color: #0056cc;
 }
 
 .header-action-btn.save-btn:hover {
   background: #0062cc;
+}
+
+.header-action-btn.save-btn.hidden {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .header-icon-btn {
@@ -546,13 +569,19 @@ onUnmounted(() => {
 }
 
 .status-text {
+  flex-shrink: 0;
   font-size: 11px;
   color: #86868b;
   margin-left: 4px;
   white-space: nowrap;
 }
 
+.status-text.hidden {
+  visibility: hidden;
+}
+
 .settings-wrapper {
+  flex-shrink: 0;
   position: relative;
 }
 
@@ -720,8 +749,15 @@ onUnmounted(() => {
 }
 
 .file-icon {
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.file-item.is-directory .file-icon {
+  color: #007aff;
 }
 
 .file-name {
