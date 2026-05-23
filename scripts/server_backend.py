@@ -86,13 +86,17 @@ def stdin_loop():
 def init_database():
     """初始化数据库表"""
     try:
-        import database.code.command.database_command as db_cmd
         persistent_db = Path.home() / ".proagent" / "server.db"
         persistent_db.parent.mkdir(parents=True, exist_ok=True)
-        db_cmd.DEFAULT_DB_PATH = str(persistent_db)
         print(f"[server] DB: {persistent_db}", flush=True)
-        from database.code.init.database_init import main as db_init
-        db_init()
+
+        import database.code.command.database_command as db_cmd
+        db_cmd.DEFAULT_DB_PATH = str(persistent_db)
+        import server_backend.database.code.command.database_command as db_cmd2
+        db_cmd2.DEFAULT_DB_PATH = str(persistent_db)
+
+        from database.code.init.database_init import init_database as run_init
+        run_init(db_path=str(persistent_db))
         print("[server] Database initialized", flush=True)
     except Exception as e:
         print(f"[server] Database init warning: {e}", flush=True)
