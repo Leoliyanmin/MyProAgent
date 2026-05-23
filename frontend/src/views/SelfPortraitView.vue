@@ -213,7 +213,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, onMounted } from 'vue'
+import { computed, reactive, ref, onMounted, onActivated } from 'vue'
 import { profileAPI } from '../services/api.js'
 
 const skillOptions = ['Vue', 'Node.js', 'UI 设计', '数据分析', '产品思维', '自动化']
@@ -373,6 +373,10 @@ function formatTime(ts) {
 }
 
 onMounted(() => {
+  fetchProfile()
+})
+
+onActivated(() => {
   fetchProfile()
 })
 </script>
