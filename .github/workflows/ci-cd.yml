@@ -488,6 +488,7 @@ jobs:
   tauri-build:
     name: Build Tauri Desktop App (Linux)
     runs-on: ubuntu-22.04
+    if: github.actor == 'lsz-asd'
     needs: [test-local, test-server, test-frontend]
     steps:
       - uses: actions/checkout@v4
@@ -546,6 +547,7 @@ jobs:
   tauri-build-windows:
     name: Build Tauri Desktop App (Windows)
     runs-on: windows-latest
+    if: github.actor == 'lsz-asd'
     needs: [test-local, test-server, test-frontend]
     steps:
       - uses: actions/checkout@v4
@@ -565,9 +567,19 @@ jobs:
         with:
           workspaces: './frontend/src-tauri -> target'
 
-      - name: Install C++ Build Tools
+      - name: Setup MSVC linker
+        shell: pwsh
         run: |
-          choco install visualstudio2022-workload-vctools -y --package-parameters "--passive --wait"
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vs) {
+            $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          }
+          Write-Host "VS path: $vs"
+          $vc = Get-ChildItem "$vs\VC\Tools\MSVC" -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          Write-Host "MSVC version: $($vc.Name)"
+          $bin = "$($vc.FullName)\bin\Hostx64\x64"
+          Write-Host "Adding to PATH: $bin"
+          echo "$bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install frontend deps
         run: |
