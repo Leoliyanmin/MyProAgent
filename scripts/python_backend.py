@@ -10,18 +10,21 @@ import asyncio
 import threading
 from pathlib import Path
 
-# 添加 local_backend 到路径
-backend_path = Path(__file__).parent.parent / "local_backend"
-sys.path.insert(0, str(backend_path))
+# PyInstaller 打包后资源在 sys._MEIPASS，否则用脚本相对路径
+if getattr(sys, 'frozen', False):
+    bundle_dir = Path(sys._MEIPASS)
+else:
+    bundle_dir = Path(__file__).parent.parent
+
+# 添加各模块到路径
+sys.path.insert(0, str(bundle_dir / "local_backend"))
+sys.path.insert(0, str(bundle_dir / "localagent"))
+sys.path.insert(0, str(bundle_dir / "personality"))
+sys.path.insert(0, str(bundle_dir))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-
-# 添加 localagent 和 personality 路径
-sys.path.insert(0, str(Path(__file__).parent.parent / "localagent"))
-sys.path.insert(0, str(Path(__file__).parent.parent / "personality"))
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # 导入后端路由
 try:

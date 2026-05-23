@@ -51,6 +51,9 @@ def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, s
     if sys.platform == "win32":
         output_name += ".exe"
 
+    project_root = script_dir.parent
+    sep = ";" if sys.platform == "win32" else ":"
+
     print(f"\nBuilding {name} for {target_triple}...")
     print(f"Script: {script}")
     print(f"Output: {binaries_dir / output_name}")
@@ -64,6 +67,14 @@ def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, s
         "--distpath", str(binaries_dir),
         "--workpath", str(script_dir / "build"),
         "--specpath", str(script_dir),
+        "--paths", str(project_root / "local_backend"),
+        "--paths", str(project_root / "localagent"),
+        "--paths", str(project_root / "personality"),
+        "--paths", str(project_root),
+        "--add-data", f"{project_root / 'local_backend'}{sep}local_backend",
+        "--add-data", f"{project_root / 'localagent'}{sep}localagent",
+        "--add-data", f"{project_root / 'personality'}{sep}personality",
+        "--add-data", f"{project_root / 'logging_config.py'}{sep}.",
         str(script)
     ]
 
