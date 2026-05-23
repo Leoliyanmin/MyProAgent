@@ -118,7 +118,7 @@
         </div>
 
         <div v-if="!currentFile" class="editor-placeholder">
-          <p>从侧边栏选择一个 .md 文件开始编辑</p>
+          <p>从侧边栏选择一个 Markdown 文件开始编辑</p>
         </div>
 
         <div v-else-if="editorMode === 'edit'" class="editor-edit">
@@ -176,8 +176,8 @@ let saveTimer = null
 
 const sidebarEntries = computed(() => {
   const dirs = fileManagerStore.directories || []
-  const mdFiles = (fileManagerStore.files || []).filter(f => f.name.endsWith('.md'))
-  return [...dirs, ...mdFiles]
+  const files = fileManagerStore.files || []
+  return [...dirs, ...files]
 })
 
 const renderedMarkdown = computed(() => {
@@ -193,6 +193,10 @@ function handleEntryClick(entry) {
     fileManagerStore.navigateToFolder(targetPath).catch(e => {
       showStatus('导航失败: ' + e.message, 'error')
     })
+  } else if (!entry.name.endsWith('.md')) {
+    currentFile.value = null
+    editContent.value = ''
+    showStatus('此文件类型不支持编辑，请在文件管理中查看', 'notice')
   } else {
     loadFile(entry)
   }

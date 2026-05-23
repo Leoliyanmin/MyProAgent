@@ -52,7 +52,7 @@ class WriteFileTool(BaseTool):
     """Write content to a file."""
 
     name = "write_file"
-    description = "Write content to a file. Creates the file if it doesn't exist, overwrites if it does."
+    description = "Write content to a file. Creates the file if it doesn't exist, overwrites if it does. For text content, prefer .md extension — .txt files will be auto-renamed to .md if content looks like Markdown."
     parameters = {
         "type": "object",
         "properties": {
@@ -80,9 +80,18 @@ class WriteFileTool(BaseTool):
     async def execute(self, path: str, content: str) -> str:
         try:
             file_path = self._resolve_path(path)
+
+            # Auto-correct .txt to .md when content looks like Markdown
+            _MD_HINTS = {'#', '- ', '* ', '[', '`', '|', '> '}
+            if path.endswith('.txt') and any(hint in content for hint in _MD_HINTS):
+                file_path = file_path.with_suffix('.md')
+                note = " (note: auto-renamed from .txt to .md — content detected as Markdown)"
+            else:
+                note = ""
+
             file_path.parent.mkdir(parents=True, exist_ok=True)
             file_path.write_text(content, encoding="utf-8")
-            return f"Successfully wrote {len(content)} characters to {file_path}"
+            return f"Successfully wrote {len(content)} characters to {file_path}{note}"
         except Exception as e:
             return f"Error writing file: {e}"
 

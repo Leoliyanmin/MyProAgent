@@ -15,6 +15,7 @@ When creating new files:
 - Wait for the tool response to confirm success
 - Report the actual file path and size to the user
 - **NEVER** claim to have created a file without calling the tool
+- **For text content (notes, reports, documentation, etc.), ALWAYS use `.md` extension** — never `.txt`. The app's note widget only recognizes Markdown files.
 
 ### File Organization Tasks
 
