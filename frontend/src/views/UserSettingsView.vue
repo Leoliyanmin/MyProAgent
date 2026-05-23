@@ -105,14 +105,6 @@
                 <select v-model="addForm.provider" class="text-input">
                   <option value="">选择服务商</option>
                   <option value="deepseek">DeepSeek</option>
-                  <option value="openai">OpenAI</option>
-                  <option value="anthropic">Anthropic</option>
-                  <option value="zhipu">Zhipu (智谱)</option>
-                  <option value="openrouter">OpenRouter</option>
-                  <option value="groq">Groq</option>
-                  <option value="moonshot">Moonshot</option>
-                  <option value="gemini">Gemini</option>
-                  <option value="custom">自定义</option>
                 </select>
 
                 <label class="field-label">模型名称</label>
@@ -120,13 +112,13 @@
                   <option value="">选择模型</option>
                   <option v-for="m in providerModels[addForm.provider]" :key="m" :value="m">{{ m }}</option>
                 </select>
-                <input v-else v-model.trim="addForm.model" class="text-input" type="text" placeholder="例如: gpt-4o, claude-3-5-sonnet" />
+                <input v-else v-model.trim="addForm.model" class="text-input" type="text" placeholder="例如: deepseek-chat" />
 
                 <label class="field-label">API Key</label>
                 <input v-model.trim="addForm.api_key" class="text-input" type="password" placeholder="sk-..." />
 
                 <label class="field-label">API Base URL</label>
-                <input v-model.trim="addForm.api_base" class="text-input" type="text" placeholder="https://api.openai.com/v1" />
+                <input v-model.trim="addForm.api_base" class="text-input" type="text" placeholder="https://api.deepseek.com/v1" />
 
                 <p v-if="addNotice" class="password-notice" :class="'status-' + addNoticeType">{{ addNotice }}</p>
 
@@ -151,7 +143,7 @@
                   <option value="">选择模型</option>
                   <option v-for="m in providerModels[editingKey.provider]" :key="m" :value="m">{{ m }}</option>
                 </select>
-                <input v-else v-model.trim="editForm.model" class="text-input" type="text" placeholder="例如: gpt-4o, claude-3-5-sonnet" />
+                <input v-else v-model.trim="editForm.model" class="text-input" type="text" placeholder="例如: deepseek-chat" />
                 <label class="field-label">API Key</label>
                 <input v-model.trim="editForm.api_key" class="text-input" type="password" placeholder="sk-..." />
                 <label class="field-label">API Base URL</label>
@@ -368,19 +360,10 @@ const editTestPassed = ref(false)
 
 const defaultBases = {
   deepseek: 'https://api.deepseek.com/v1',
-  openai: 'https://api.openai.com/v1',
-  anthropic: 'https://api.anthropic.com',
-  zhipu: 'https://open.bigmodel.cn/api/paas/v4',
-  openrouter: 'https://openrouter.ai/api/v1',
-  groq: 'https://api.groq.com/openai/v1',
-  moonshot: 'https://api.moonshot.cn/v1',
-  gemini: 'https://generativelanguage.googleapis.com/v1beta',
-  custom: 'https://'
 }
 
 const providerModels = {
   deepseek: ['deepseek-chat', 'deepseek-reasoner', 'deepseek-v4-flash', 'deepseek-v4-pro'],
-  zhipu: ['glm-4-flash', 'glm-4-plus', 'glm-4', 'glm-4-air', 'glm-4-airx', 'glm-4-long'],
 }
 
 const defaultBaseFor = (provider) => {
