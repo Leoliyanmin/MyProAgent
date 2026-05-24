@@ -170,21 +170,41 @@ export const tasksAPI = {
 
 // ==================== Events API (unified) ====================
 
+const isLocalEventId = (id) => {
+  const n = Number(id)
+  return Number.isFinite(n) && n > 1000000000000
+}
+
 export const eventsAPI = {
   list: async (params = {}) => {
     const qs = new URLSearchParams(params).toString()
     return fetchWithAuth(`/events/${qs ? '?' + qs : ''}`)
   },
-  get: async (eventId) => fetchWithAuth(`/events/${eventId}`),
+  get: async (eventId) => {
+    if (!getToken() || isLocalEventId(eventId)) {
+      return { success: false, message: 'Local event has no remote record', skipped: true }
+    }
+    return fetchWithAuth(`/events/${eventId}`)
+  },
   create: async (data) => fetchWithAuth('/events/', {
     method: 'POST', body: JSON.stringify(data)
   }),
-  update: async (eventId, data) => fetchWithAuth(`/events/${eventId}`, {
-    method: 'PUT', body: JSON.stringify(data)
-  }),
-  delete: async (eventId) => fetchWithAuth(`/events/${eventId}`, {
-    method: 'DELETE'
-  }),
+  update: async (eventId, data) => {
+    if (!getToken() || isLocalEventId(eventId)) {
+      return { success: true, message: 'Skip remote update for local event', skipped: true }
+    }
+    return fetchWithAuth(`/events/${eventId}`, {
+      method: 'PUT', body: JSON.stringify(data)
+    })
+  },
+  delete: async (eventId) => {
+    if (!getToken() || isLocalEventId(eventId)) {
+      return { success: true, message: 'Skip remote delete for local event', skipped: true }
+    }
+    return fetchWithAuth(`/events/${eventId}`, {
+      method: 'DELETE'
+    })
+  },
 }
 
 // ==================== Schedules API ====================
@@ -594,25 +614,29 @@ export const settingsAPI = {
   getApiKeys: async () => {
     return fetchWithAuth('/auth/settings/api-keys')
   },
-  saveApiKey: async (provider, api_key, api_base, model = '') => {
+  saveApiKey: async (provider, api_key, api_base, model = '', key_id = null) => {
+    const body = { provider, api_key, api_base, model }
+    if (key_id) body.key_id = key_id
     return fetchWithAuth('/auth/settings/api-keys', {
       method: 'PUT',
-      body: JSON.stringify({ provider, api_key, api_base, model })
+      body: JSON.stringify(body)
     })
   },
-  deleteApiKey: async (provider) => {
-    return fetchWithAuth(`/auth/settings/api-keys/${encodeURIComponent(provider)}`, {
+  deleteApiKey: async (key_id) => {
+    return fetchWithAuth(`/auth/settings/api-keys/${encodeURIComponent(key_id)}`, {
       method: 'DELETE'
     })
   },
-  testApiKey: async (provider, api_key, api_base, model = '') => {
+  testApiKey: async (provider, api_key, api_base, model = '', key_id = null) => {
+    const body = { provider, api_key, api_base, model }
+    if (key_id) body.key_id = key_id
     return fetchWithAuth('/auth/settings/api-keys/test', {
       method: 'POST',
-      body: JSON.stringify({ provider, api_key, api_base, model })
+      body: JSON.stringify(body)
     })
   },
-  toggleApiKey: async (provider) => {
-    return fetchWithAuth(`/auth/settings/api-keys/${encodeURIComponent(provider)}/toggle`, {
+  toggleApiKey: async (key_id) => {
+    return fetchWithAuth(`/auth/settings/api-keys/${encodeURIComponent(key_id)}/toggle`, {
       method: 'POST'
     })
   }

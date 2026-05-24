@@ -98,14 +98,26 @@ export const useCalendarStore = defineStore('calendar', () => {
       source: event.source || (event.id ? 'remote' : 'local')
     }
     if (newEvent.completed === undefined) newEvent.completed = false
-    if (!newEvent.color) newEvent.color = '#007aff'
+    if (!newEvent.color) newEvent.color = priorityColors[newEvent.priority] || '#007aff'
 
     basicEvents.value.push(newEvent)
 
-    dashboardStore.addTodo({
-      ...newEvent,
-      linkedScheduleId: newEvent.id,
-    })
+    if (newEvent.showInTodo !== false) {
+      dashboardStore.todos.unshift({
+        id: newEvent.id,
+        title: newEvent.title,
+        completed: false,
+        priority: newEvent.priority ?? 2,
+        color: newEvent.color || '#007aff',
+        start: newEvent.start || '',
+        end: newEvent.end || newEvent.start || '',
+        startTime: newEvent.startTime || '',
+        endTime: newEvent.endTime || '',
+        linkedScheduleId: newEvent.id,
+        description: newEvent.description || '',
+        source: newEvent.source || 'remote',
+      })
+    }
   }
 
   const updateEvent = (updatedEvent) => {
@@ -118,16 +130,23 @@ export const useCalendarStore = defineStore('calendar', () => {
 
     const linkedTodo = dashboardStore.todos.find(t => t.linkedScheduleId === Number(updatedEvent.id))
     if (linkedTodo) {
-      dashboardStore.updateTodo({
-        ...linkedTodo,
-        title: updatedEvent.title,
-        start: updatedEvent.start,
-        end: updatedEvent.end || updatedEvent.start,
-        startTime: updatedEvent.startTime,
-        endTime: updatedEvent.endTime,
-        priority: updatedEvent.priority,
-        color: updatedEvent.color,
-      })
+      if (updatedEvent.showInTodo === false) {
+        const todoIdx = dashboardStore.todos.findIndex(t => t.id === linkedTodo.id)
+        if (todoIdx !== -1) {
+          dashboardStore.todos.splice(todoIdx, 1)
+        }
+      } else {
+        dashboardStore.updateTodo({
+          ...linkedTodo,
+          title: updatedEvent.title,
+          start: updatedEvent.start,
+          end: updatedEvent.end || updatedEvent.start,
+          startTime: updatedEvent.startTime,
+          endTime: updatedEvent.endTime,
+          priority: updatedEvent.priority,
+          color: updatedEvent.color,
+        })
+      }
     }
   }
 
@@ -162,8 +181,9 @@ export const useCalendarStore = defineStore('calendar', () => {
         startTime: (e.event_start_time || '').slice(11, 16) || '',
         endTime: (e.event_end_time || '').slice(11, 16) || '',
         isTodo: !!e.event_show_in_todo,
+        showInTodo: !!e.event_show_in_todo,
         source: e.event_source,
-        color: e.event_color_tag || '#007aff',
+        color: e.event_color_tag || priorityColors[e.event_priority] || '#007aff',
         priority: e.event_priority ?? 2,
         description: e.event_description || '',
         completed: !!e.event_is_completed,
@@ -184,10 +204,11 @@ export const useCalendarStore = defineStore('calendar', () => {
         event_description: eventData.description || '',
         event_start_time: combineDateAndTime(eventData.start, eventData.startTime, '00:00'),
         event_end_time: combineDateAndTime(eventData.end || eventData.start, eventData.endTime, eventData.startTime || '23:59'),
-        event_color_tag: eventData.color || '#ff9500',
+        event_color_tag: eventData.color || priorityColors[eventData.priority] || '#007aff',
         event_priority: normalizePriority(eventData.priority, 'p2'),
         event_type: 'manual',
         event_source: 'manual',
+        event_show_in_todo: eventData.showInTodo !== false ? 1 : 0,
       })
       return result
     } catch (err) {
@@ -205,6 +226,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         event_end_time: combineDateAndTime(eventData.end || eventData.start, eventData.endTime, eventData.startTime || '23:59'),
         event_color_tag: eventData.color,
         event_priority: eventData.priority !== undefined ? normalizePriority(eventData.priority, 'p2') : undefined,
+        event_show_in_todo: eventData.showInTodo !== undefined ? (eventData.showInTodo ? 1 : 0) : undefined,
       })
       return result
     } catch (err) {
@@ -217,33 +239,12 @@ export const useCalendarStore = defineStore('calendar', () => {
     loading.value = true
     error.value = null
     try {
-      const result = await tisAPI.getSchedule()
-      const tisEvents = result.events || []
-      const existingIds = new Set(basicEvents.value.map(e => e.id))
-
-      const buildId = (e) => `tis_${e.title}_${e.start}_${e.startTime}`.replace(/\s+/g, '_')
-
-      const newEvents = tisEvents.filter(e => !existingIds.has(buildId(e)))
-      const uniqueCourses = new Set(newEvents.map(e => e.title)).size
-
-      let added = 0
-      for (const ev of newEvents) {
-        basicEvents.value.push({
-          ...ev,
-          id: buildId(ev),
-          priority: 3,
-          color: '#e5e5ea',
-          source: 'tis',
-          isTodo: false,
-        })
-        added++
-      }
-
-      return { success: true, added, uniqueCourses, total: tisEvents.length }
+      await loadSchedules()
+      return { success: true, message: 'TIS课表已刷新' }
     } catch (err) {
       error.value = err.message
       console.error('Failed to import TIS schedule:', err)
-      return { success: false, added: 0, total: 0, message: err.message }
+      return { success: false, message: err.message }
     } finally {
       loading.value = false
     }
