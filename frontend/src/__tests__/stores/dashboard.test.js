@@ -21,9 +21,9 @@ describe('dashboard store', () => {
   })
 
   describe('initial state', () => {
-    it('loads default todos when localStorage is empty', () => {
+    it('starts with empty todos when localStorage is empty', () => {
       const dashboard = useDashboardStore()
-      expect(dashboard.todos.length).toBeGreaterThanOrEqual(2)
+      expect(dashboard.todos).toEqual([])
     })
 
     it('restores todos from localStorage', () => {
@@ -36,24 +36,28 @@ describe('dashboard store', () => {
       expect(dashboard.todos.length).toBe(1)
       expect(dashboard.todos[0].title).toBe('Saved task')
     })
+
+    it('starts with default layout', () => {
+      const dashboard = useDashboardStore()
+      expect(dashboard.layoutConfig.length).toBeGreaterThanOrEqual(2)
+    })
   })
 
   describe('addTodo', () => {
-    it('adds a todo from a string', () => {
+    it('adds a todo from a string', async () => {
       const dashboard = useDashboardStore()
-      const initialCount = dashboard.todos.length
 
-      dashboard.addTodo('New task from string')
+      await dashboard.addTodo('New task from string')
 
-      expect(dashboard.todos.length).toBe(initialCount + 1)
+      expect(dashboard.todos.length).toBe(1)
       expect(dashboard.todos[0].title).toBe('New task from string')
       expect(dashboard.todos[0].completed).toBe(false)
     })
 
-    it('adds a todo from an object', () => {
+    it('adds a todo from an object', async () => {
       const dashboard = useDashboardStore()
 
-      dashboard.addTodo({ title: 'Custom task', priority: 0, color: '#ff3b30' })
+      await dashboard.addTodo({ title: 'Custom task', priority: 0, color: '#ff3b30' })
 
       const added = dashboard.todos[0]
       expect(added.title).toBe('Custom task')
@@ -61,9 +65,9 @@ describe('dashboard store', () => {
       expect(added.color).toBe('#ff3b30')
     })
 
-    it('persists to localStorage after adding', () => {
+    it('persists to localStorage after adding', async () => {
       const dashboard = useDashboardStore()
-      dashboard.addTodo('Persist me')
+      await dashboard.addTodo('Persist me')
 
       const stored = JSON.parse(localStorage.getItem('proagent_todos'))
       expect(stored[0].title).toBe('Persist me')
@@ -71,8 +75,9 @@ describe('dashboard store', () => {
   })
 
   describe('updateTodo', () => {
-    it('updates an existing todo', () => {
+    it('updates an existing todo', async () => {
       const dashboard = useDashboardStore()
+      await dashboard.addTodo('Original title')
       const todo = dashboard.todos[0]
 
       dashboard.updateTodo({ id: todo.id, title: 'Updated title' })
@@ -92,8 +97,9 @@ describe('dashboard store', () => {
   })
 
   describe('toggleTodo', () => {
-    it('toggles completion status', () => {
+    it('toggles completion status', async () => {
       const dashboard = useDashboardStore()
+      await dashboard.addTodo('Toggle me')
       const todo = dashboard.todos[0]
       const initialStatus = todo.completed
 
@@ -104,12 +110,13 @@ describe('dashboard store', () => {
   })
 
   describe('removeTodo', () => {
-    it('removes a todo by id', () => {
+    it('removes a todo by id', async () => {
       const dashboard = useDashboardStore()
+      await dashboard.addTodo('Remove me')
       const todo = dashboard.todos[0]
       const initialLength = dashboard.todos.length
 
-      dashboard.removeTodo(todo.id)
+      await dashboard.removeTodo(todo.id)
 
       expect(dashboard.todos.length).toBe(initialLength - 1)
       expect(dashboard.todos.find(t => t.id === todo.id)).toBeUndefined()
@@ -117,10 +124,10 @@ describe('dashboard store', () => {
   })
 
   describe('sortedTodos', () => {
-    it('puts completed tasks last', () => {
+    it('puts completed tasks last', async () => {
       const dashboard = useDashboardStore()
-      dashboard.addTodo({ title: 'Done task', completed: true, priority: 0 })
-      dashboard.addTodo({ title: 'Active task', completed: false, priority: 2 })
+      await dashboard.addTodo({ title: 'Done task', completed: true, priority: 0 })
+      await dashboard.addTodo({ title: 'Active task', completed: false, priority: 2 })
 
       const sorted = dashboard.sortedTodos
       const doneIndex = sorted.findIndex(t => t.title === 'Done task')
@@ -131,11 +138,11 @@ describe('dashboard store', () => {
   })
 
   describe('pendingTodosCount', () => {
-    it('counts uncompleted todos', () => {
+    it('counts uncompleted todos', async () => {
       const dashboard = useDashboardStore()
-      dashboard.addTodo({ title: 'Pending 1', completed: false })
-      dashboard.addTodo({ title: 'Pending 2', completed: false })
-      dashboard.addTodo({ title: 'Done', completed: true })
+      await dashboard.addTodo({ title: 'Pending 1', completed: false })
+      await dashboard.addTodo({ title: 'Pending 2', completed: false })
+      await dashboard.addTodo({ title: 'Done', completed: true })
 
       expect(dashboard.pendingTodosCount).toBeGreaterThanOrEqual(2)
     })

@@ -5,7 +5,24 @@ import { eventsAPI } from '../services/api.js'
 const LAYOUT_STORAGE_KEY = 'proagent_layout'
 const PINNED_EMAILS_KEY = 'proagent_pinned_emails'
 
-const saveTodosToStorage = (todos) => {}
+const TODOS_STORAGE_KEY = 'proagent_todos'
+
+const saveTodosToStorage = (todos) => {
+  try {
+    localStorage.setItem(TODOS_STORAGE_KEY, JSON.stringify(todos))
+  } catch (err) {
+    console.error('Failed to save todos to localStorage:', err)
+  }
+}
+
+const loadTodosFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(TODOS_STORAGE_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch (err) {
+    return []
+  }
+}
 
 const DEFAULT_LAYOUT = [
   { x: 0, y: 0, w: 6, h: 5, i: '3', type: 'todo', minW: 3, minH: 4 },
@@ -133,7 +150,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   // ==============================
   // priority: 0 (P0 紧急且重要 - 红色), 1 (P1 重要不紧急 - 橙色)
   //           2 (P2 紧急不重要 - 蓝色), 3 (P3 不重要不紧急 - 绿色)
-  const todos = ref([])
+  const todos = ref(loadTodosFromStorage())
 
   // 未完成任务数
   const pendingTodosCount = computed(() => todos.value.filter(t => !t.completed).length)
@@ -175,7 +192,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       const newTodo = {
         id: result.event_id,
         title: title,
-        completed: false,
+        completed: taskPayload.completed === true || taskPayload.completed === 1,
         start: taskPayload.start || today,
         end: taskPayload.end || taskPayload.start || today,
         startTime: taskPayload.startTime || '',
