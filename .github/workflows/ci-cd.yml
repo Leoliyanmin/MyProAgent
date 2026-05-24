@@ -303,8 +303,6 @@ jobs:
             --add-data "logging_config.py:." \
             --hidden-import passlib.handlers.bcrypt \
             scripts/server_backend.py
-        env:
-          PATH: /tmp/srv-venv/bin:${{ env.PATH }}
 
       - name: Upload server binary
         uses: actions/upload-artifact@v4
@@ -676,8 +674,6 @@ jobs:
           pip install pyinstaller
           pip install -r local_backend/requirements.txt
           python scripts/build_sidecar.py
-        env:
-          PATH: /tmp/sidecar-venv/bin:${{ env.PATH }}
 
       - name: Rename sidecar for Tauri
         run: |
