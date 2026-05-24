@@ -163,4 +163,3 @@ CREATE TABLE IF NOT EXISTS starred_emails (
 );
 
 COMMIT;
--- run this manually: ALTER TABLE data ADD COLUMN data_linked_schedule_id INTEGER;

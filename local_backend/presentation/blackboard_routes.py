@@ -161,14 +161,18 @@ async def bind_with_ics(request: BlackboardIcsRequest, user_id: str = Depends(ge
 
 @router.get("/assignments")
 async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
-    """获取Blackboard作业列表（仅未来事件，去重）"""
     import json
     from datetime import datetime
-    from local_backend.database.code.command.database_command import list_events_by_user
+    from local_backend.database.code.command.database_command import list_events_by_user, list_accounts_by_user
+
+    accounts = list_accounts_by_user(user_id)
+    bound = any(a.get('account_platform_type') == 'blackboard' for a in accounts)
+    if not bound:
+        raise HTTPException(status_code=400, detail='未绑定Blackboard账号，请先在设置中绑定')
 
     assignment_events = list_events_by_user(user_id, event_type="assignment", event_source="blackboard")
     if not assignment_events:
-        raise HTTPException(status_code=404, detail='Blackboard作业数据为空')
+        raise HTTPException(status_code=404, detail='已绑定但暂无作业数据，请同步后查看')
 
     today = datetime.now().strftime('%Y-%m-%d')
     events = []
@@ -192,6 +196,7 @@ async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
         course_name = meta.get("course_name", course_name)
 
         events.append({
+            'id': item.get('event_id'),
             'title': item_name,
             'start': start,
             'end': end,
@@ -205,6 +210,7 @@ async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
         })
 
         todos.append({
+            'id': item.get('event_id'),
             'title': item_name,
             'completed': False,
             'start': start,

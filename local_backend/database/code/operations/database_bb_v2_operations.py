@@ -1,11 +1,16 @@
 import json, datetime
 from local_backend.database.code.command.database_command import (
-    create_event, upsert_sync_state, get_sync_state,
+    create_event, list_events_by_user, delete_event,
+    upsert_sync_state, get_sync_state,
 )
 
 
 class BbV2Operations:
     def save_all(self, user_id: str, courses: list) -> dict:
+        old = list_events_by_user(user_id, event_source="blackboard")
+        for ev in old:
+            delete_event(ev["event_id"])
+
         saved = 0
         for course in courses:
             course_name = course.get("name", "")

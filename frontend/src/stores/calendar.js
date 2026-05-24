@@ -132,7 +132,7 @@ export const useCalendarStore = defineStore('calendar', () => {
   }
 
   const removeEvent = async (id) => {
-    const linkedTodo = dashboardStore.todos.find(t => t.linkedScheduleId === Number(id))
+    const linkedTodo = dashboardStore.todos.find(t => t.linkedScheduleId === Number(id) || t.id === id)
     if (linkedTodo) {
       await dashboardStore.removeTodo(linkedTodo.id)
     }
@@ -257,47 +257,49 @@ export const useCalendarStore = defineStore('calendar', () => {
       const bbEvents = result.events || []
       const bbTodos = result.todos || []
 
-      const existingIds = new Set(basicEvents.value.map(e => e.id))
-
       let eventsAdded = 0
       let todosAdded = 0
 
       for (const ev of bbEvents) {
-        const id = `bb_${ev.title}`.replace(/\s+/g, '_').slice(0, 80)
-        if (existingIds.has(id)) continue
+        if (!ev.id) continue
+        const existing = basicEvents.value.find(e => e.id === ev.id)
+        if (existing) continue
         const event = {
           ...ev,
-          id,
           source: 'blackboard',
           isTodo: true,
           completed: false,
         }
         if (!event.start && !event.startTime) {
-          // Items without a due date (announcements, materials) should not
-          // be forced onto today's calendar — skip them.
           continue
         }
         basicEvents.value.push(event)
-        existingIds.add(id)
         eventsAdded++
       }
 
-      const existingTodoTitles = new Set(dashboardStore.todos.map(t => t.title))
+      const existingTodoIds = new Set(dashboardStore.todos.map(t => t.id))
       const now = new Date()
       now.setHours(0, 0, 0, 0)
       for (const todo of bbTodos) {
-        if (existingTodoTitles.has(todo.title)) continue
+        if (!todo.id) continue
+        if (existingTodoIds.has(todo.id)) continue
         const dueDate = todo.start || ''
         if (!dueDate) continue
         const dueDateObj = new Date(dueDate)
         if (isNaN(dueDateObj.getTime()) || dueDateObj < now) continue
-        dashboardStore.addTodo({
-          ...todo,
+        dashboardStore.todos.unshift({
+          id: todo.id,
+          title: todo.title,
+          completed: false,
+          start: todo.start,
+          end: todo.end || todo.start,
           priority: 0,
           color: '#ff3b30',
-          linkedScheduleId: null,
+          source: 'blackboard',
+          linkedScheduleId: todo.id,
+          description: todo.description || '',
         })
-        existingTodoTitles.add(todo.title)
+        existingTodoIds.add(todo.id)
         todosAdded++
       }
 
