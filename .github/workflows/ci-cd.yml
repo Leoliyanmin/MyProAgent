@@ -299,6 +299,7 @@ jobs:
             --hidden-import pydantic_settings \
             --hidden-import email_validator \
             --hidden-import aiosmtplib \
+            --hidden-import sqlite3 \
             scripts/server_backend.py
 
       - name: Upload server binary
