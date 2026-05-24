@@ -41,16 +41,16 @@ def _normalize_priority(value: Any) -> str | None:
     if value is None:
         return None
     if isinstance(value, int):
-        if value in (0, 1, 2, 3):
+        if value in (0, 1, 2, 3, 4):
             return f"p{value}"
         return None
 
     text = str(value).strip().lower()
     if not text:
         return None
-    if text in {"p0", "p1", "p2", "p3"}:
+    if text in {"p0", "p1", "p2", "p3", "p4"}:
         return text
-    if text in {"0", "1", "2", "3"}:
+    if text in {"0", "1", "2", "3", "4"}:
         return f"p{text}"
     return None
 
@@ -65,11 +65,13 @@ def _format_datetime_for_display(dt_str: str | None) -> str:
     return date_part
 
 
-_PRIORITY_LABELS = {0: "P0 · 紧急", 1: "P1 · 高", 2: "P2 · 中", 3: "P3 · 低"}
+_PRIORITY_LABELS = {0: "P0 · 紧急", 1: "P1 · 高", 2: "P2 · 中", 3: "P3 · 低", 4: "P4 · 固定课程"}
+
+_PRIORITY_COLORS = {0: "#ff3b30", 1: "#ff9500", 2: "#007aff", 3: "#34c759", 4: "#8e8e93"}
 
 
 def _priority_label(task: dict[str, Any]) -> str:
-    priority = task.get("priority")
+    priority = task.get("event_priority")
     if isinstance(priority, str):
         norm = _normalize_priority(priority)
         if norm:
@@ -81,19 +83,23 @@ def _priority_label(task: dict[str, Any]) -> str:
 
 
 def _format_task_display(task: dict[str, Any], index: int | None = None) -> str:
-    task_id = task.get("task_id") or task.get("data_id") or task.get("id") or "?"
-    title = task.get("title") or task.get("data_title") or "未命名"
-    status = task.get("status") or "pending"
-    due_date = task.get("due_date") or task.get("data_ddl_time")
-    desc = task.get("description") or task.get("data_content_text") or ""
+    event_id = task.get("event_id") or "?"
+    title = task.get("event_title") or "未命名"
+    is_completed = task.get("event_is_completed", 0)
+    due_date = task.get("event_end_time")
+    desc = task.get("event_description") or ""
+    event_type = task.get("event_type", "")
 
-    status_label = "✅ 已完成" if status == "completed" else "⬜ 待办"
+    status_label = "✅ 已完成" if is_completed else "⬜ 待办"
+    start_display = _format_datetime_for_display(task.get("event_start_time"))
     due_display = _format_datetime_for_display(due_date)
+    type_tag = f" [{event_type}]" if event_type and event_type != "task" else ""
 
     prefix = f"{index}. " if index is not None else ""
+    time_str = f"{start_display} - {due_display}" if start_display != "无" or due_display != "无" else "无截止时间"
     lines = [
-        f"{prefix}[{status_label}] #{task_id} {title}",
-        f"   优先级: {_priority_label(task)} | 截止: {due_display}",
+        f"{prefix}[{status_label}] #{event_id}{type_tag} {title}",
+        f"   优先级: {_priority_label(task)} | 时间: {time_str}",
     ]
     if desc:
         desc_preview = desc[:80] + ("..." if len(desc) > 80 else "")
@@ -143,9 +149,9 @@ class _TaskToolBase(BaseTool):
         tasks = result.get("data", [])
         matches: list[int] = []
         for task in tasks:
-            title = str(task.get("title") or task.get("data_title") or "").lower()
+            title = str(task.get("event_title") or "").lower()
             if keyword in title:
-                tid = task.get("task_id") or task.get("data_id") or task.get("id")
+                tid = task.get("event_id")
                 try:
                     tid_int = int(tid)
                     if tid_int > 0:
@@ -193,7 +199,8 @@ class ListTasksTool(_TaskToolBase):
         tasks = result.get("data", [])
 
         if status_filter:
-            tasks = [t for t in tasks if (t.get("status") or "").lower() == status_filter.lower()]
+            want_completed = status_filter.lower() == "completed"
+            tasks = [t for t in tasks if bool(t.get("event_is_completed", 0)) == want_completed]
 
         if not tasks:
             status_label = (
@@ -218,7 +225,8 @@ class CreateTaskTool(_TaskToolBase):
         "Create a new task/TODO for the current user. "
         "BEFORE calling this, always call list_tasks first to check if an equivalent task already exists. "
         "If the user mentions a task you created earlier, DO NOT assume it still exists — verify with list_tasks. "
-        "Always provide a clear title. Optionally set due_date, priority (p0/p1/p2/p3), and description."
+        "Always provide a clear title. Optionally set due_date, priority (p0/p1/p2/p3/p4), and description."
+        "p4 is reserved for fixed course events — do NOT use p4 for regular tasks unless the user explicitly asks."
     )
     parameters = {
         "type": "object",
@@ -229,7 +237,7 @@ class CreateTaskTool(_TaskToolBase):
                 "type": "string",
                 "description": "Due date in ISO-8601 format, e.g. '2026-05-24T18:00:00'. For date-only, append T00:00:00.",
             },
-            "priority": {"type": "string", "description": "Priority: p0 (urgent), p1 (high), p2 (medium), p3 (low)"},
+            "priority": {"type": "string", "description": "Priority: p0 (urgent), p1 (high), p2 (medium), p3 (low), p4 (fixed course)"},
         },
         "required": ["title"],
     }
@@ -251,7 +259,7 @@ class CreateTaskTool(_TaskToolBase):
         if kwargs.get("priority") is not None:
             priority = _normalize_priority(kwargs.get("priority"))
             if priority is None:
-                return "Error: priority must be p0/p1/p2/p3"
+                return "Error: priority must be p0/p1/p2/p3/p4"
 
         result = self._handle.create_task(
             user_id=user_id,
@@ -290,7 +298,7 @@ class UpdateTaskTool(_TaskToolBase):
             },
             "title": {"type": "string", "description": "New title"},
             "due_date": {"type": "string", "description": "New due date (ISO-8601)"},
-            "priority": {"type": "string", "description": "New priority: p0/p1/p2/p3"},
+            "priority": {"type": "string", "description": "New priority: p0/p1/p2/p3/p4"},
             "description": {"type": "string", "description": "New description"},
             "status": {
                 "type": "string",
@@ -321,7 +329,7 @@ class UpdateTaskTool(_TaskToolBase):
             tasks = result.get("data", [])
             matched_tasks = [
                 t for t in tasks
-                if (t.get("task_id") or t.get("data_id") or t.get("id")) in task_ids
+                if t.get("event_id") in task_ids
             ]
 
             lines = [f"找到 {len(task_ids)} 个匹配任务，请让用户明确指定 task_id:"]
@@ -345,7 +353,7 @@ class UpdateTaskTool(_TaskToolBase):
         if kwargs.get("priority") is not None:
             priority = _normalize_priority(kwargs.get("priority"))
             if priority is None:
-                return "Error: priority must be p0/p1/p2/p3"
+                return "Error: priority must be p0/p1/p2/p3/p4"
 
         status: str | None = kwargs.get("status")
         if status is not None and status not in ("pending", "completed"):
@@ -421,7 +429,7 @@ class DeleteTaskTool(_TaskToolBase):
             tasks = result.get("data", [])
             matched_tasks = [
                 t for t in tasks
-                if (t.get("task_id") or t.get("data_id") or t.get("id")) in task_ids
+                if t.get("event_id") in task_ids
             ]
 
             lines = [f"找到 {len(task_ids)} 个匹配任务，请让用户明确指定要删除的 task_id:"]
@@ -436,10 +444,10 @@ class DeleteTaskTool(_TaskToolBase):
         result = self._handle.get_tasks(user_id)
         task_title = str(task_id)
         for t in result.get("data", []):
-            tid = t.get("task_id") or t.get("data_id") or t.get("id")
+            tid = t.get("event_id")
             try:
                 if int(tid) == task_id:
-                    task_title = t.get("title") or t.get("data_title") or str(task_id)
+                    task_title = t.get("event_title") or str(task_id)
                     break
             except (TypeError, ValueError):
                 pass

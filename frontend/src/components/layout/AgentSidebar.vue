@@ -198,7 +198,6 @@ const CALENDAR_TOOL_NAMES = new Set([
 ])
 
 const TASK_TOOL_NAMES = new Set([
-  'list_tasks',
   'create_task',
   'update_task',
   'delete_task'
@@ -609,24 +608,20 @@ const scrollToBottom = () => {
 
 const refreshPanelsIfNeeded = async (toolNames = []) => {
   if (!authStore.isAuthenticated) return
-  if (!Array.isArray(toolNames) || toolNames.length === 0) return
 
-  const hasCalendarMutation = toolNames.some((name) => CALENDAR_TOOL_NAMES.has(name))
-  const hasTaskMutation = toolNames.some((name) => TASK_TOOL_NAMES.has(name))
-  const hasFileMutation = toolNames.some((name) => FILE_TOOL_NAMES.has(name))
-  const hasEmailMutation = toolNames.some((name) => EMAIL_TOOL_NAMES.has(name))
+  const names = Array.isArray(toolNames) ? toolNames : []
+  const hasCalendarMutation = names.some((name) => CALENDAR_TOOL_NAMES.has(name))
+  const hasTaskMutation = names.some((name) => TASK_TOOL_NAMES.has(name))
+  const hasFileMutation = names.some((name) => FILE_TOOL_NAMES.has(name))
+  const hasEmailMutation = names.some((name) => EMAIL_TOOL_NAMES.has(name))
 
   const promises = []
 
-  if (hasCalendarMutation) {
+  if (hasCalendarMutation || hasTaskMutation) {
     promises.push(
       calendarStore.loadSchedules(),
       dashboardStore.loadTodosFromBackend()
     )
-  }
-
-  if (hasTaskMutation) {
-    promises.push(dashboardStore.loadTodosFromBackend())
   }
 
   if (hasFileMutation && fmStore.isDirectorySet) {
@@ -637,6 +632,11 @@ const refreshPanelsIfNeeded = async (toolNames = []) => {
     promises.push(emailStore.fetchStarred())
     promises.push(emailStore.fetchMessages())
     promises.push(emailStore.fetchTrash())
+  }
+
+  // Always refresh todo and calendar when agent finishes ANY tool work
+  if (!hasCalendarMutation && !hasTaskMutation && names.length > 0) {
+    promises.push(dashboardStore.loadTodosFromBackend())
   }
 
   if (promises.length === 0) return
@@ -861,6 +861,7 @@ const sendViaREST = async (message, chatId) => {
       done: true
     })
     if (chatId === currentChatId.value) scrollToBottom()
+    console.log('[AgentSidebar] refreshPanelsIfNeeded with tools:', result?.tool_calls)
     await refreshPanelsIfNeeded(result?.tool_calls || [])
   } catch (err) {
     if (controller.signal.aborted) return

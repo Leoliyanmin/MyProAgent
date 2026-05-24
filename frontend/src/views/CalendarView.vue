@@ -244,6 +244,12 @@
             </div>
           </div>
         </div>
+        <div class="mac-checkbox-row">
+          <label class="mac-checkbox-label">
+            <input type="checkbox" v-model="draftEvent.showInTodo" class="mac-checkbox" />
+            <span>在 Todo 中显示</span>
+          </label>
+        </div>
         <label>备注</label>
         <textarea v-model="draftEvent.description" class="mac-input" placeholder="添加备注..." rows="2"></textarea>
         <p v-if="validationMessage" class="form-validation-message">{{ validationMessage }}</p>
@@ -338,7 +344,7 @@ const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 
 const showModal = ref(false)
 const isEditing = ref(false)
-const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', priority: 2, color: '#007aff', description: '' })
+const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', priority: 3, color: '#34c759', description: '', showInTodo: true })
 const validationMessage = ref('')
 const weekTimelineHeaderRef = ref(null)
 const weekAllDayRowRef = ref(null)
@@ -481,7 +487,15 @@ const getEventsForDay = (isoDate) => {
             isEnd: isoDate === e.end,
             isMid: isoDate > e.start && isoDate < e.end
         }
-    }).sort((a,b) => a.id - b.id)
+    }).sort((a, b) => {
+        const pa = a.priority ?? 2
+        const pb = b.priority ?? 2
+        if (pa !== pb) return pa - pb
+        const timeA = a.startTime || '00:00'
+        const timeB = b.startTime || '00:00'
+        if (timeA !== timeB) return timeA.localeCompare(timeB)
+        return (a.title || '').localeCompare(b.title || '')
+    })
   }
 
 const getTimedEventStyle = (event) => {
@@ -590,7 +604,7 @@ const openEventModal = (dateStr, hour = null) => {
     startTime = `${String(hour).padStart(2, '0')}:00`
     endTime = `${String(hour + 1).padStart(2, '0')}:00`
   }
-  draftEvent.value = { id: null, title: '', start: dateStr, end: dateStr, startTime, endTime, priority: 2, color: '#007aff', description: '' }
+  draftEvent.value = { id: null, title: '', start: dateStr, end: dateStr, startTime, endTime, priority: 3, color: '#34c759', description: '', showInTodo: true }
   isEditing.value = false
   showModal.value = true
 }
@@ -603,7 +617,8 @@ const editEvent = (event) => {
     priority: event.priority !== undefined ? event.priority : 2,
     startTime: event.startTime || '',
     endTime: event.endTime || '',
-    description: event.description || ''
+    description: event.description || '',
+    showInTodo: event.showInTodo !== undefined ? event.showInTodo : (event.isTodo !== false),
   }
   isEditing.value = true
   showModal.value = true

@@ -50,6 +50,9 @@ def _fmt_time(st: str, et: str) -> str:
     return f"{s} - {e}"
 
 
+_PRIORITY_COLORS = {0: "#ff3b30", 1: "#ff9500", 2: "#007aff", 3: "#34c759", 4: "#8e8e93"}
+
+
 class _Base(BaseTool):
     def __init__(self, user_id_getter: Callable[[], str | None]):
         self._uid = user_id_getter
@@ -103,6 +106,8 @@ class CreateScheduleEventTool(_Base):
         if not st or not et:
             return "Error: invalid datetime format"
         todo = 1 if kwargs.get("show_in_todo", True) else 0
+        color_tag = kwargs.get("color_tag")
+        priority = int(kwargs.get("priority", 2))
         eid = create_event(
             user_id=uid, event_title=title,
             event_type="agent", event_source="manual",
@@ -110,8 +115,8 @@ class CreateScheduleEventTool(_Base):
             event_location=kwargs.get("location"),
             event_description=kwargs.get("description"),
             event_show_in_todo=todo,
-            event_priority=int(kwargs.get("priority", 2)),
-            event_color_tag=kwargs.get("color_tag", "#007aff"),
+            event_priority=priority,
+            event_color_tag=color_tag or _PRIORITY_COLORS.get(priority, "#007aff"),
         )
         return f"Event created: event_id={eid}, title={title}, time: {_fmt_time(st, et)}"
 

@@ -42,16 +42,21 @@ class TaskV2Operations:
         if linked_schedule_id is not None:
             meta["linked_schedule_id"] = linked_schedule_id
 
+        _priority_colors = {0: "#ff3b30", 1: "#ff9500", 2: "#007aff", 3: "#34c759", 4: "#8e8e93"}
+        event_color = _priority_colors.get(_priority, "#007aff")
+
         event_id = create_event(
             user_id=user_id,
             event_title=title,
             event_type="task",
             event_source="manual",
             event_description=description,
+            event_start_time=now,
             event_end_time=due_date,
             event_priority=_priority,
             event_is_completed=0,
             event_show_in_todo=1,
+            event_color_tag=event_color,
             event_meta_json=json.dumps(meta, ensure_ascii=False),
             event_created_at=now,
         )
@@ -59,7 +64,7 @@ class TaskV2Operations:
         return event_id
 
     def get_all(self, user_id: str) -> list[dict]:
-        return list_events_by_user(user_id, event_type="task")
+        return list_events_by_user(user_id, show_in_todo=1)
 
     def update(self, user_id: str, task_id: int, title: str = None,
                description: str = None, due_date: str = None,

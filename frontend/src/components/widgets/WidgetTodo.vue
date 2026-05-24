@@ -78,7 +78,7 @@
               @change="store.toggleTodo(task.id)" 
               class="mac-checkbox" 
             />
-            <div class="task-priority-indicator" :style="{ backgroundColor: task.color || '#007aff' }">P{{ task.priority !== undefined ? task.priority : 2 }}</div>
+            <div class="task-priority-indicator" :style="{ backgroundColor: task.color || priorityColor(task.priority) || '#007aff' }">P{{ task.priority !== undefined ? task.priority : 2 }}</div>
             <span class="task-text" style="flex: 1" @click="toggleExpand(task.id)">{{ task.title }}</span>
             <button @click.stop="deleteTodo(task)" class="delete-btn">×</button>
           </div>
@@ -130,6 +130,11 @@ const priorityLabel = (p) => {
   return labels[p ?? 2] || 'P2 紧急不重要'
 }
 
+const priorityColor = (p) => {
+  const colors = { 0: '#ff3b30', 1: '#ff9500', 2: '#007aff', 3: '#34c759', 4: '#8e8e93' }
+  return colors[p ?? 2] || '#007aff'
+}
+
 const showDatePicker = ref(false)
 const newTaskStart = ref('')
 const newTaskEnd = ref('')
@@ -168,7 +173,8 @@ const priorityOptions = [
   { level: 0, color: '#ff3b30', label: '紧急且重要' },
   { level: 1, color: '#ff9500', label: '重要不紧急' },
   { level: 2, color: '#007aff', label: '紧急不重要' },
-  { level: 3, color: '#34c759', label: '不重要不紧急' }
+  { level: 3, color: '#34c759', label: '不重要不紧急' },
+  { level: 4, color: '#8e8e93', label: '固定课程' }
 ]
 
 const setPriority = (p) => {

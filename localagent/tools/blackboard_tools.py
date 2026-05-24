@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from .base import BaseTool
 
 from local_backend.service.blackboard_service import BlackboardService
-from local_backend.database.code.command.database_command import list_categories_by_user, list_data_by_user
+from local_backend.database.code.command.database_command import list_events_by_user
 
 
 class _BlackboardToolBase(BaseTool):
@@ -112,28 +112,14 @@ class GetBlackboardAssignmentsTool(_BlackboardToolBase):
         if error:
             return error
 
-        categories = list_categories_by_user(user_id)
-        bb_course_map = {
-            c["category_id"]: c["category_title"]
-            for c in categories
-            if c["category_kind"] == "course" and c.get("category_source") == "blackboard"
-        }
-
-        if not bb_course_map:
-            return "No Blackboard courses found. Please bind and sync Blackboard first."
-
-        all_data = list_data_by_user(user_id)
-        assignments = [
-            d for d in all_data
-            if d["data_content_type"] == "assignment"
-            and d["data_category_id"] in bb_course_map
-        ]
+        import json
+        assignments = list_events_by_user(user_id, event_type="assignment")
 
         if not assignments:
-            return "No assignments found in your Blackboard courses."
+            return "No assignments found in your Blackboard courses. Please bind and sync Blackboard first."
 
-        def _sort_key(d: dict) -> tuple[int, str]:
-            due = d.get("data_ddl_time")
+        def _sort_key(e: dict) -> tuple[int, str]:
+            due = e.get("event_end_time")
             if due:
                 return (0, str(due))
             return (1, "")
@@ -142,9 +128,8 @@ class GetBlackboardAssignmentsTool(_BlackboardToolBase):
 
         lines = [f"You have {len(assignments)} assignment(s):", ""]
         for i, a in enumerate(assignments, 1):
-            course_name = bb_course_map.get(a["data_category_id"], "Unknown Course")
-            title = a.get("data_title") or "(No title)"
-            due = a.get("data_ddl_time", "")
+            title = a.get("event_title") or "(No title)"
+            due = a.get("event_end_time", "")
             if due:
                 try:
                     due_display = due[:16].replace("T", " ")
@@ -153,9 +138,18 @@ class GetBlackboardAssignmentsTool(_BlackboardToolBase):
             else:
                 due_display = "No deadline"
 
+            course_name = "Unknown Course"
+            meta_str = a.get("event_meta_json")
+            if meta_str:
+                try:
+                    meta = json.loads(meta_str)
+                    course_name = meta.get("course_name", course_name)
+                except (json.JSONDecodeError, TypeError):
+                    pass
+
             lines.append(f"{i}. [{course_name}] {title}")
             lines.append(f"   Due: {due_display}")
-            link = a.get("data_link_url")
+            link = a.get("event_link_url")
             if link:
                 lines.append(f"   Link: {link}")
             lines.append("")
