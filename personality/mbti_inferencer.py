@@ -44,10 +44,13 @@ class MBTIInferencer:
         if raw_messages and self.llm_provider:
             score = await self._llm_analyze(raw_messages, score)
 
-        score = self._analyze_energy_source(user_profile, score)
-        score = self._analyze_information_gathering(user_profile, score)
-        score = self._analyze_decision_making(user_profile, score)
-        score = self._analyze_lifestyle(user_profile, score)
+        # 规则调整已关闭，最终分数 = LLM原始分/5
+        # score = self._analyze_energy_source(user_profile, score)
+        # score = self._analyze_information_gathering(user_profile, score)
+        # score = self._analyze_decision_making(user_profile, score)
+        # score = self._analyze_lifestyle(user_profile, score)
+
+        print(f"[MBTIInferencer] MBTI 最终各维度评分(0-1): E={round(score.E, 3)} I={round(score.I, 3)} S={round(score.S, 3)} N={round(score.N, 3)} T={round(score.T, 3)} F={round(score.F, 3)} J={round(score.J, 3)} P={round(score.P, 3)}  (=前端百分比)")
 
         mbti_type = self._calculate_mbti_type(score)
 
