@@ -167,12 +167,14 @@ export const useCalendarStore = defineStore('calendar', () => {
   }
 
   // Backend sync for schedules
+  const priorityColors = ['#ff3b30', '#ff9500', '#007aff', '#34c759']
+
   const loadSchedules = async () => {
     loading.value = true
     error.value = null
     try {
       const schedules = await schedulesAPI.getSchedules()
-      basicEvents.value = schedules.map(schedule => ({
+      const scheduleEvents = schedules.map(schedule => ({
         id: schedule.id ?? schedule.schedule_id,
         title: schedule.title ?? schedule.schedule_title,
         start: toDateTimeParts(schedule.start_time ?? schedule.schedule_start_time).date,
@@ -181,9 +183,14 @@ export const useCalendarStore = defineStore('calendar', () => {
         endTime: toDateTimeParts(schedule.end_time ?? schedule.schedule_end_time).time,
         isTodo: false,
         source: schedule.source || 'remote',
-        color: schedule.color || schedule.color_tag || schedule.schedule_color_tag || '#ff9500',
+        color: schedule.color || schedule.color_tag || schedule.schedule_color_tag || priorityColors[schedule.schedule_priority] || '#ff9500',
+        priority: schedule.schedule_priority !== undefined ? schedule.schedule_priority : 2,
         description: schedule.description || schedule.schedule_description || ''
       }))
+      basicEvents.value = [
+        ...basicEvents.value.filter(e => e.source === 'tis' || e.source === 'blackboard'),
+        ...scheduleEvents
+      ]
     } catch (err) {
       error.value = err.message
       console.error('Failed to load schedules:', err)
@@ -234,22 +241,25 @@ export const useCalendarStore = defineStore('calendar', () => {
       const tisEvents = result.events || []
       const existingIds = new Set(basicEvents.value.map(e => e.id))
 
-      let added = 0
-      const newEvents = tisEvents.filter(e => !existingIds.has(e.id)).map(e => ({
-        ...e,
-        id: `tis_${e.title}_${e.start}_${e.startTime}`.replace(/\s+/g, '_'),
-        priority: 0,
-        color: '#ff3b30',
-        source: 'tis',
-        isTodo: false,
-      }))
+      const buildId = (e) => `tis_${e.title}_${e.start}_${e.startTime}`.replace(/\s+/g, '_')
 
+      const newEvents = tisEvents.filter(e => !existingIds.has(buildId(e)))
+      const uniqueCourses = new Set(newEvents.map(e => e.title)).size
+
+      let added = 0
       for (const ev of newEvents) {
-        basicEvents.value.push(ev)
+        basicEvents.value.push({
+          ...ev,
+          id: buildId(ev),
+          priority: 0,
+          color: '#ff3b30',
+          source: 'tis',
+          isTodo: false,
+        })
         added++
       }
 
-      return { success: true, added, total: newEvents.length }
+      return { success: true, added, uniqueCourses, total: tisEvents.length }
     } catch (err) {
       error.value = err.message
       console.error('Failed to import TIS schedule:', err)
@@ -321,6 +331,10 @@ export const useCalendarStore = defineStore('calendar', () => {
   }
   }
 
+  const clearTisEvents = () => {
+    basicEvents.value = basicEvents.value.filter(e => e.source !== 'tis')
+  }
+
   const clearBlackboardEvents = () => {
     basicEvents.value = basicEvents.value.filter(e => e.source !== 'blackboard')
     for (const t of [...dashboardStore.todos]) {
@@ -341,6 +355,7 @@ export const useCalendarStore = defineStore('calendar', () => {
     updateScheduleOnBackend,
     importTISSchedule,
     importBlackboardAssignments,
+    clearTisEvents,
     clearBlackboardEvents,
     currentDate,
     viewType

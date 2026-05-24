@@ -1,6 +1,4 @@
 import json
-import os
-import time
 import requests
 import logging
 from typing import Dict
@@ -9,9 +7,6 @@ from service.scraper.tis_scraper import TisScraper
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-_SAVE_DIR = os.path.join(os.path.expanduser('~'), '.proagent', 'bind_data')
-os.makedirs(_SAVE_DIR, exist_ok=True)
 
 
 class TisService:
@@ -22,51 +17,28 @@ class TisService:
     def get_tis_status(self, user_id: str) -> Dict:
         """获取TIS绑定状态"""
         try:
-            if user_id in self._bound_users:
-                bound_info = self._bound_users[user_id]
-                return {
-                    'success': True,
-                    'is_bound': True,
-                    'message': '已绑定TIS账号',
-                    'user_info': bound_info.get('user_info', {})
-                }
-            json_path = os.path.join(_SAVE_DIR, f'{user_id}_tis_schedule.json')
-            if os.path.exists(json_path):
-                import json as _json
-                with open(json_path, 'r', encoding='utf-8') as f:
-                    data = _json.load(f)
-                return {
-                    'success': True,
-                    'is_bound': True,
-                    'message': '已绑定TIS账号（历史数据）',
-                    'user_info': {
-                        'name': data.get('student_name', ''),
-                        'student_id': data.get('student_id', ''),
-                        'department': '',
-                    }
-                }
-            return {
-                'success': True,
-                'is_bound': False,
-                'message': '未绑定TIS账号'
-            }
+            from database.code.handle.database_tis_handle import TisHandle
+            tis_handle = TisHandle()
+            return tis_handle.handle_get_tis_status(user_id)
         except Exception as e:
             logger.error(f"获取TIS状态失败: {str(e)}")
-            return {'success': False, 'message': f'获取状态失败: {str(e)}'}
+            return {'success': False, 'is_bound': False, 'message': f'获取状态失败: {str(e)}'}
     
     def unbind_tis(self, user_id: str) -> Dict:
         """解绑TIS账号"""
         try:
             if user_id in self._bound_users:
                 del self._bound_users[user_id]
-            json_path = os.path.join(_SAVE_DIR, f'{user_id}_tis_schedule.json')
-            if os.path.exists(json_path):
-                os.remove(json_path)
-                logger.info(f"TIS解绑成功，已删除数据文件: user_id={user_id}")
-                return {'success': True, 'message': 'TIS账号解绑成功'}
-            if user_id not in self._bound_users:
-                return {'success': False, 'message': '未绑定TIS账号'}
-            logger.info(f"TIS解绑成功: user_id={user_id}")
+
+            from database.code.handle.database_tis_handle import TisHandle
+            from database.code.command.database_command import delete_tis_courses_by_user, delete_tis_events_by_user
+
+            tis_handle = TisHandle()
+            tis_handle.handle_unbind_tis(user_id)
+            delete_tis_events_by_user(user_id)
+            delete_tis_courses_by_user(user_id)
+
+            logger.info(f"TIS解绑成功，已清理数据库: user_id={user_id}")
             return {'success': True, 'message': 'TIS账号解绑成功'}
         except Exception as e:
             logger.error(f"TIS解绑失败: {str(e)}")
@@ -127,7 +99,7 @@ class TisService:
                     logger.error("Cookie无效，无法获取用户信息")
                     return {'success': False, 'message': 'Cookie已失效，请重新登录TIS'}
                 
-                student_id = student_info.get('xh') or student_info.get('yhdm')
+                student_id = (student_info.get('xh') or student_info.get('yhdm') or '')
                 student_name = student_info.get('xm')
                 
                 logger.info(f"TIS绑定成功: user_id={user_id}, 学号={student_id}, 姓名={student_name}")
@@ -137,28 +109,14 @@ class TisService:
                     schedule_result = scraper.scrape_schedule()
                     if schedule_result.get('success'):
                         logger.info(f"课程表爬取成功，共 {schedule_result.get('total_courses', 0)} 门课程")
-                        from service.scraper.tis_scraper import OUTPUT_FILE
-                        logger.info(f"tis_result.txt 已更新: {OUTPUT_FILE}")
-                        
-                        json_path = os.path.join(_SAVE_DIR, f'{user_id}_tis_schedule.json')
-                        with open(json_path, 'w', encoding='utf-8') as f:
-                            json.dump({
-                                'user_id': user_id,
-                                'bind_time': time.strftime('%Y-%m-%d %H:%M:%S'),
-                                'student_id': student_id,
-                                'student_name': student_name,
-                                'schedule': schedule_result.get('schedule', {}),
-                                'term': schedule_result.get('term', ''),
-                                'week': schedule_result.get('week', ''),
-                                'total_courses': schedule_result.get('total_courses', 0)
-                            }, f, ensure_ascii=False, indent=2)
-                        logger.info(f"TIS课程数据已保存到: {json_path}")
 
                         try:
                             from database.code.handle.database_tis_handle import TisHandle
                             tis_handle = TisHandle()
                             result = tis_handle.save_schedule_v2(user_id, schedule_result)
                             logger.info(f"TIS v2入库: {result}")
+                            tis_handle.handle_bind_tis(user_id, student_id, cookies_str)
+                            logger.info(f"TIS account记录已保存: user_id={user_id}, 学号={student_id}")
                         except Exception as e:
                             logger.error(f"TIS v2入库失败: {e}")
                     else:

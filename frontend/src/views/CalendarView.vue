@@ -35,6 +35,11 @@
       </div>
     </div>
 
+    <div v-if="importToast.message" class="import-toast" :class="importToast.type">
+      <span>{{ importToast.message }}</span>
+      <button class="toast-close" @click="importToast.message = ''">&times;</button>
+    </div>
+
     <div class="calendar-grid-container" v-if="calendarStore.viewType === 'month'">
       <div class="mock-calendar-body">
         <div class="weekdays-header">
@@ -238,7 +243,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { useCalendarStore } from '../stores/calendar.js'
 import { useDashboardStore } from '../stores/dashboard.js'
 
@@ -249,15 +254,26 @@ const isRefreshing = ref(false)
 const isImporting = ref(false)
 const isImportingBB = ref(false)
 
+const importToast = reactive({ message: '', type: 'error' })
+
 const handleImportTIS = async () => {
   if (isImporting.value) return
   isImporting.value = true
   try {
     const result = await calendarStore.importTISSchedule()
-    if (result.success && result.added > 0) {
-      console.log(`导入课表成功: ${result.added} 门课程`)
+    if (result.success) {
+      if (result.added > 0) {
+        importToast.message = `已导入 ${result.uniqueCourses} 门课程（共 ${result.total} 节课）`
+        importToast.type = 'success'
+      } else {
+        importToast.message = `课表已是最新，共 ${result.uniqueCourses || 0} 门课程`
+        importToast.type = 'success'
+      }
+      setTimeout(() => { importToast.message = '' }, 4000)
     } else if (result.message) {
-      console.warn('导入课表失败:', result.message)
+      importToast.message = result.message
+      importToast.type = 'error'
+      setTimeout(() => { importToast.message = '' }, 6000)
     }
   } catch (err) {
     console.error('导入课表异常:', err)
@@ -272,9 +288,13 @@ const handleImportBB = async () => {
   try {
     const result = await calendarStore.importBlackboardAssignments()
     if (result.success) {
-      console.log(`导入作业成功: ${result.eventsAdded} 个日历事件, ${result.todosAdded} 个待办`)
+      importToast.message = `成功导入 ${result.eventsAdded} 个日历事件, ${result.todosAdded} 个待办`
+      importToast.type = 'success'
+      setTimeout(() => { importToast.message = '' }, 4000)
     } else if (result.message) {
-      console.warn('导入作业失败:', result.message)
+      importToast.message = result.message
+      importToast.type = 'error'
+      setTimeout(() => { importToast.message = '' }, 6000)
     }
   } catch (err) {
     console.error('导入作业异常:', err)
@@ -1095,5 +1115,38 @@ const onResizeStart = (e, event) => {
 .resize-handle:hover {
   background: rgba(0, 122, 255, 0.3);
   border-radius: 0 0 4px 4px;
+}
+
+.import-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  margin: 8px 0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.import-toast.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+.import-toast.success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+.toast-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.5;
+  padding: 0 4px;
+}
+.toast-close:hover {
+  opacity: 1;
 }
 </style>

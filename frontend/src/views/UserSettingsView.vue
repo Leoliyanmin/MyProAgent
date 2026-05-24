@@ -922,7 +922,12 @@ const bindBbWithIcs = async () => {
 }
 
 const unbindTis = async () => {
-  try { await tisAPI.unbind(); await loadBindingStatus() } catch {}
+  try {
+    await tisAPI.unbind()
+    await loadBindingStatus()
+    const calendarStore = useCalendarStore()
+    calendarStore.clearTisEvents()
+  } catch {}
 }
 
 const unbindBb = async () => {
