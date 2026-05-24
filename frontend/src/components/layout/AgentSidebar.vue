@@ -101,6 +101,8 @@
           class="message-input"
           placeholder="输入你的问题... (Shift+Enter 换行)"
           @keydown.enter.exact.prevent="onEnterSubmit"
+          @compositionstart="isComposingIME = true"
+          @compositionend="isComposingIME = false"
           rows="3"
         ></textarea>
         <div class="input-actions">
@@ -741,10 +743,13 @@ const disconnectWebSocket = () => {
   }
 }
 
+// IME 输入法组合状态：自己跟踪，比 e.isComposing 更可靠（不同浏览器/输入法下可能不准）
+const isComposingIME = ref(false)
+
 // 处理 Enter 键提交，过滤 IME 输入法组合事件
 const onEnterSubmit = (e) => {
-  // isComposing 为 true 表示正在使用输入法（如中文拼音），此时 Enter 仅用于确认选字
-  if (e.isComposing) return
+  // 两种方式双保险：composition 事件标记 + 浏览器原生 isComposing 属性
+  if (isComposingIME.value || e.isComposing) return
   sendMessage()
 }
 
