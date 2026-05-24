@@ -85,6 +85,8 @@ def import_from_json(json_path: str, user_id: str) -> dict:
             user_id=user_id, event_title=name,
             event_type="course", event_source="tis",
             event_location=meta.get("location", ""),
+            event_priority=3,
+            event_color_tag="#8e8e93",
             event_meta_json=json.dumps(meta, ensure_ascii=False),
             event_created_at=now,
         )

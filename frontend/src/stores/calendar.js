@@ -231,8 +231,8 @@ export const useCalendarStore = defineStore('calendar', () => {
         basicEvents.value.push({
           ...ev,
           id: buildId(ev),
-          priority: 0,
-          color: '#ff3b30',
+          priority: 3,
+          color: '#e5e5ea',
           source: 'tis',
           isTodo: false,
         })
