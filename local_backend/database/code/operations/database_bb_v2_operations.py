@@ -11,12 +11,16 @@ class BbV2Operations:
         for ev in old:
             delete_event(ev["event_id"])
 
+        today = datetime.datetime.utcnow().strftime('%Y-%m-%d')
         saved = 0
         for course in courses:
             course_name = course.get("name", "")
             for a in course.get("assignments", []):
                 title = a.get("name", "")
                 due = a.get("due_date")
+                # 跳过今天之前的作业
+                if due and due[:10] < today:
+                    continue
                 link = a.get("link", "") or a.get("url", "")
                 ext_id = a.get("id") or title or ""
                 if not link and ext_id:
