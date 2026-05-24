@@ -643,9 +643,13 @@ jobs:
 
       - name: Build Python sidecar
         run: |
-          pip3 install --break-system-packages pyinstaller
-          pip3 install --break-system-packages -r local_backend/requirements.txt
-          python3 scripts/build_sidecar.py
+          python3 -m venv /tmp/sidecar-venv
+          source /tmp/sidecar-venv/bin/activate
+          pip install pyinstaller
+          pip install -r local_backend/requirements.txt
+          python scripts/build_sidecar.py
+        env:
+          PATH: /tmp/sidecar-venv/bin:${{ env.PATH }}
 
       - name: Rename sidecar for Tauri
         run: |
