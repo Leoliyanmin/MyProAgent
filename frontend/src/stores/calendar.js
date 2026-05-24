@@ -146,7 +146,7 @@ export const useCalendarStore = defineStore('calendar', () => {
   }
 
   // Backend sync for schedules
-  const priorityColors = ['#ff3b30', '#ff9500', '#007aff', '#34c759']
+  const priorityColors = ['#ff3b30', '#ff9500', '#007aff', '#34c759', '#8e8e93']
 
   const loadSchedules = async () => {
     loading.value = true

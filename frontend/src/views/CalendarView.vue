@@ -363,7 +363,8 @@ const priorityOptions = [
   { level: 0, color: '#ff3b30', label: '紧急且重要' },
   { level: 1, color: '#ff9500', label: '重要不紧急' },
   { level: 2, color: '#007aff', label: '紧急不重要' },
-  { level: 3, color: '#34c759', label: '不重要不紧急' }
+  { level: 3, color: '#34c759', label: '不重要不紧急' },
+  { level: 4, color: '#8e8e93', label: '固定课程' },
 ]
 
 const hours24 = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
@@ -499,7 +500,7 @@ const getTimedEventStyle = (event) => {
     top: `${top}px`,
     height: `${height}px`,
     backgroundColor: event.color ? event.color + '25' : '',
-    color: event.source === 'tis' ? '#1c1c1e' : (event.color || ''),
+    color: event.priority >= 4 ? '#ffffff' : (event.color || ''),
     borderLeft: `3px solid ${event.color || '#007aff'}`
   }
 }

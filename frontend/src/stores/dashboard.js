@@ -71,6 +71,7 @@ const inferColorByPriority = (priority) => {
   if (priority === 0) return '#ff3b30'
   if (priority === 1) return '#ff9500'
   if (priority === 3) return '#34c759'
+  if (priority === 4) return '#8e8e93'
   return '#007aff'
 }
 
