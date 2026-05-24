@@ -248,18 +248,24 @@ class BlackboardService:
     
     def unbind_blackboard(self, user_id: str) -> Dict:
         try:
-            if user_id in self._bound_users:
-                del self._bound_users[user_id]
+            from database.code.command.database_command import list_events_by_user, delete_event, list_accounts_by_user, delete_account
+
+            old_events = list_events_by_user(user_id, event_source="blackboard")
+            for ev in old_events:
+                delete_event(ev["event_id"])
+
+            accounts = list_accounts_by_user(user_id)
+            for a in accounts:
+                if a.get('account_platform_type') == 'blackboard':
+                    delete_account(a['account_id'])
+
             json_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_courses.json')
             if os.path.exists(json_path):
                 os.remove(json_path)
-                sync_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_sync.json')
-                if os.path.exists(sync_path):
-                    os.remove(sync_path)
-                logger.info(f"Blackboard解绑成功，已删除数据文件: user_id={user_id}")
-                return {'success': True, 'message': 'Blackboard账号解绑成功'}
-            if user_id not in self._bound_users:
-                return {'success': False, 'message': '未绑定Blackboard账号'}
+            sync_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_sync.json')
+            if os.path.exists(sync_path):
+                os.remove(sync_path)
+
             logger.info(f"Blackboard解绑成功: user_id={user_id}")
             return {'success': True, 'message': 'Blackboard账号解绑成功'}
         except Exception as e:

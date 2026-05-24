@@ -42,11 +42,6 @@ const saveLayoutToStorage = (layout) => {
   }
 }
 
-const isLocalGeneratedId = (id) => {
-  const numericId = Number(id)
-  return Number.isFinite(numericId) && numericId > 1000000000000
-}
-
 const parseDueDateTime = (value) => {
   if (!value) {
     return { date: '', time: '' }
@@ -157,55 +152,44 @@ export const useDashboardStore = defineStore('dashboard', () => {
   })
 
   const addTodo = async (taskPayload) => {
-    const localId = Date.now()
     const today = new Date().toISOString().split('T')[0]
-    let newTodo
+    const title = typeof taskPayload === 'string' ? taskPayload : (taskPayload.title || '')
+    const priority = typeof taskPayload === 'object' ? (taskPayload.priority ?? 2) : 2
 
-    if (typeof taskPayload === 'string') {
-      newTodo = { id: localId, title: taskPayload, completed: false, start: today, end: today, priority: 2, color: '#007aff', source: 'local' }
-    } else {
-      newTodo = {
-        id: taskPayload.id || localId,
-        title: taskPayload.title,
-        completed: taskPayload.completed || false,
-        start: taskPayload.start || today,
-        end: taskPayload.end || taskPayload.start || today,
-        startTime: taskPayload.startTime || '',
-        endTime: taskPayload.endTime || '',
-        priority: taskPayload.priority !== undefined ? taskPayload.priority : 2,
-        color: taskPayload.color || '#007aff',
-        source: taskPayload.source || 'local',
-        linkedScheduleId: taskPayload.linkedScheduleId || null,
-        description: taskPayload.description || ''
-      }
-    }
+    const dueDate = taskPayload.startTime
+      ? `${taskPayload.start || today}T${taskPayload.startTime}:00`
+      : (taskPayload.start || today)
 
-    todos.value.unshift(newTodo)
-    saveTodosToStorage(todos.value)
-
-    // 回写后端
     try {
-      const dueDate = newTodo.startTime
-        ? `${newTodo.start}T${newTodo.startTime}:00`
-        : newTodo.start
-
       const result = await eventsAPI.create({
-        event_title: newTodo.title,
-        event_description: newTodo.description || '',
+        event_title: title,
+        event_description: (taskPayload.description || ''),
         event_start_time: dueDate || undefined,
         event_show_in_todo: 1,
-        event_priority: newTodo.priority,
+        event_priority: priority,
         event_type: 'manual',
         event_source: 'manual',
       })
 
-      if (result && result.event_id) {
-        newTodo.id = result.event_id
-        newTodo.source = 'remote'
-        saveTodosToStorage(todos.value)
+      const newTodo = {
+        id: result.event_id,
+        title: title,
+        completed: false,
+        start: taskPayload.start || today,
+        end: taskPayload.end || taskPayload.start || today,
+        startTime: taskPayload.startTime || '',
+        endTime: taskPayload.endTime || '',
+        priority: priority,
+        color: taskPayload.color || '#007aff',
+        source: 'remote',
+        linkedScheduleId: taskPayload.linkedScheduleId || null,
+        description: taskPayload.description || '',
       }
+
+      todos.value.unshift(newTodo)
+      saveTodosToStorage(todos.value)
     } catch (err) {
-      console.error('Failed to sync new todo to backend:', err)
+      console.error('Failed to create todo:', err)
     }
   }
 
@@ -226,9 +210,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
       recordActivity(1)
     }
     saveTodosToStorage(todos.value)
-
-    // Skip backend sync for local-generated IDs (Date.now() timestamps)
-    if (isLocalGeneratedId(id)) return
 
     try {
       await eventsAPI.update(id, {
@@ -266,13 +247,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
         linkedScheduleId: null,
       }))
 
-      // Keep local-only draft todos while syncing remote-backed items.
-      const localOnlyTodos = todos.value.filter((todo) => {
-        if (todo?.source === 'local') return true
-        return isLocalGeneratedId(todo?.id)
-      })
-
-      todos.value = [...remoteTodos, ...localOnlyTodos]
+      todos.value = remoteTodos
       saveTodosToStorage(todos.value)
       return { success: true, count: remoteTodos.length }
     } catch (err) {
