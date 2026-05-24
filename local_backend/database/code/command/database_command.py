@@ -229,7 +229,8 @@ def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **k
     now = datetime.datetime.utcnow().isoformat()
     if existing:
         allowed = {"avatar_url", "bio", "current_focus", "work_preference",
-                   "skills", "theme_config", "notification_enabled", "privacy_share_data"}
+                   "skills", "theme_config", "notification_enabled", "privacy_share_data",
+                   "full_name"}
         fields = {k: v for k, v in kwargs.items() if k in allowed and v is not None}
         if not fields:
             return
@@ -1276,3 +1277,238 @@ def update_event(
 
 def delete_event(event_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM event WHERE event_id = ?", (event_id,), db_path)
+
+
+# ==================== api_key ====================
+
+def _get_fernet():
+    import hashlib
+    import base64
+    from cryptography.fernet import Fernet
+    from local_backend.config import settings
+    key = settings.ENCRYPTION_KEY.encode("utf-8")
+    derived = base64.urlsafe_b64encode(hashlib.sha256(key).digest())
+    return Fernet(derived)
+
+
+def _encrypt_api(value: str) -> str:
+    return _get_fernet().encrypt(value.encode("utf-8")).decode("utf-8")
+
+
+def _decrypt_api(encrypted: str) -> str:
+    try:
+        return _get_fernet().decrypt(encrypted.encode("utf-8")).decode("utf-8")
+    except Exception:
+        return encrypted
+
+
+def create_api_key(
+    user_id: str,
+    key_id: str,
+    provider: str,
+    api_key_plain: str,
+    api_base: str,
+    model: str = "",
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> int:
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    encrypted = _encrypt_api(api_key_plain)
+    return _execute(
+        """INSERT INTO api_key (user_id, key_id, provider, api_key_encrypted,
+           api_base, model, updated_at, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, key_id, provider, encrypted, api_base, model, now, now),
+        db_path,
+    )
+
+
+def list_api_keys_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all(
+        "SELECT * FROM api_key WHERE user_id = ? ORDER BY updated_at DESC",
+        (user_id,), db_path,
+    )
+
+
+def get_api_key(key_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    return _fetch_one("SELECT * FROM api_key WHERE key_id = ?", (key_id,), db_path)
+
+
+def update_api_key(
+    key_id: str,
+    provider: str | None = None,
+    api_key_plain: str | None = None,
+    api_base: str | None = None,
+    model: str | None = None,
+    is_active: int | None = None,
+    last_test_success: int | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    import datetime
+    fields = ["updated_at = ?"]
+    params: list = [datetime.datetime.utcnow().isoformat()]
+    if provider is not None:
+        fields.append("provider = ?"); params.append(provider)
+    if api_key_plain is not None:
+        fields.append("api_key_encrypted = ?"); params.append(_encrypt_api(api_key_plain))
+    if api_base is not None:
+        fields.append("api_base = ?"); params.append(api_base)
+    if model is not None:
+        fields.append("model = ?"); params.append(model)
+    if is_active is not None:
+        fields.append("is_active = ?"); params.append(is_active)
+    if last_test_success is not None:
+        fields.append("last_test_success = ?"); params.append(last_test_success)
+    params.append(key_id)
+    _execute(f"UPDATE api_key SET {', '.join(fields)} WHERE key_id = ?", tuple(params), db_path)
+
+
+def delete_api_key(key_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM api_key WHERE key_id = ?", (key_id,), db_path)
+
+
+def get_active_api_keys(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    rows = _fetch_all(
+        "SELECT * FROM api_key WHERE user_id = ? AND is_active = 1",
+        (user_id,), db_path,
+    )
+    for r in rows:
+        r["api_key"] = _decrypt_api(r["api_key_encrypted"])
+    return rows
+
+
+def get_api_key_by_id(key_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    row = _fetch_one("SELECT * FROM api_key WHERE key_id = ?", (key_id,), db_path)
+    if row:
+        row["api_key"] = _decrypt_api(row["api_key_encrypted"])
+    return row
+
+
+# ==================== user_personality ====================
+
+def upsert_user_personality(
+    user_id: str,
+    interests_json: str | None = None,
+    skills_json: str | None = None,
+    preferences_json: str | None = None,
+    study_work_patterns_json: str | None = None,
+    personality_indicators_json: str | None = None,
+    mbti_type: str | None = None,
+    mbti_scores_json: str | None = None,
+    mbti_confidence: float | None = None,
+    mbti_description: str | None = None,
+    interaction_count: int | None = None,
+    mbti_last_updated: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    existing = _fetch_one("SELECT * FROM user_personality WHERE user_id = ?", (user_id,), db_path)
+    if existing:
+        field_map = {
+            "interests_json": interests_json, "skills_json": skills_json,
+            "preferences_json": preferences_json, "study_work_patterns_json": study_work_patterns_json,
+            "personality_indicators_json": personality_indicators_json,
+            "mbti_type": mbti_type, "mbti_scores_json": mbti_scores_json,
+            "mbti_confidence": mbti_confidence, "mbti_description": mbti_description,
+            "interaction_count": interaction_count, "mbti_last_updated": mbti_last_updated,
+        }
+        fields = [f"{k} = ?" for k, v in field_map.items() if v is not None]
+        params = [v for v in field_map.values() if v is not None]
+        if fields:
+            fields.append("last_updated = ?")
+            params.append(now)
+            params.append(user_id)
+            _execute(f"UPDATE user_personality SET {', '.join(fields)} WHERE user_id = ?", tuple(params), db_path)
+    else:
+        _execute(
+            """INSERT INTO user_personality (user_id, interests_json, skills_json,
+               preferences_json, study_work_patterns_json, personality_indicators_json,
+               mbti_type, mbti_scores_json, mbti_confidence, mbti_description,
+               interaction_count, mbti_last_updated, last_updated)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (user_id, interests_json, skills_json, preferences_json,
+             study_work_patterns_json, personality_indicators_json,
+             mbti_type, mbti_scores_json, mbti_confidence, mbti_description,
+             interaction_count or 0, mbti_last_updated, now),
+            db_path,
+        )
+
+
+def get_user_personality(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    return _fetch_one("SELECT * FROM user_personality WHERE user_id = ?", (user_id,), db_path)
+
+
+def delete_user_personality(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM user_personality WHERE user_id = ?", (user_id,), db_path)
+
+
+# ==================== interaction_log ====================
+
+def create_interaction_log(
+    user_id: str,
+    conversation_id: str,
+    timestamp: str,
+    session_id: str | None = None,
+    platform: str | None = None,
+    user_message: str | None = None,
+    intent_category: str | None = None,
+    keywords_json: str | None = None,
+    language: str | None = None,
+    sentiment: str | None = None,
+    urgency: str | None = None,
+    message_length: int | None = None,
+    contains_file_reference: str | None = None,
+    agent_response: str | None = None,
+    agent_response_length: int | None = None,
+    follow_up_required: int | None = None,
+    suggested_actions_json: str | None = None,
+    tools_invoked_json: str | None = None,
+    files_accessed_json: str | None = None,
+    total_execution_time_ms: int | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> int:
+    return _execute(
+        """INSERT INTO interaction_log (user_id, conversation_id, session_id, platform,
+           timestamp, user_message, intent_category, keywords_json, language,
+           sentiment, urgency, message_length, contains_file_reference,
+           agent_response, agent_response_length, follow_up_required,
+           suggested_actions_json, tools_invoked_json, files_accessed_json,
+           total_execution_time_ms)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, conversation_id, session_id, platform, timestamp,
+         user_message, intent_category, keywords_json, language,
+         sentiment, urgency, message_length, contains_file_reference,
+         agent_response, agent_response_length, follow_up_required,
+         suggested_actions_json, tools_invoked_json, files_accessed_json,
+         total_execution_time_ms),
+        db_path,
+    )
+
+
+def list_interaction_logs_by_user(
+    user_id: str,
+    limit: int = 100,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> list[dict]:
+    return _fetch_all(
+        "SELECT * FROM interaction_log WHERE user_id = ? ORDER BY timestamp DESC LIMIT ?",
+        (user_id, limit), db_path,
+    )
+
+
+def get_interaction_log(conversation_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    return _fetch_one("SELECT * FROM interaction_log WHERE conversation_id = ?", (conversation_id,), db_path)
+
+
+def delete_interaction_log(conversation_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM interaction_log WHERE conversation_id = ?", (conversation_id,), db_path)
+
+
+def delete_interaction_logs_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM interaction_log WHERE user_id = ?", (user_id,), db_path)
+
+
+def count_interaction_logs_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> int:
+    row = _fetch_one("SELECT COUNT(*) as cnt FROM interaction_log WHERE user_id = ?", (user_id,), db_path)
+    return row["cnt"] if row else 0

@@ -1,6 +1,6 @@
 import json
 import time
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import Optional, Dict
 
 from local_backend.database.code.command.database_command import (
@@ -104,22 +104,52 @@ class TisCourseOperations:
                         "end_time": course.get("end", ""),
                     })
 
-        # Phase 2: create one event per course
+        semester_monday = self._estimate_semester_monday(term)
+        slot_count = 0
+
         for (name, _term), meta in courses.items():
-            create_event(
-                user_id=user_id,
-                event_title=name,
-                event_type="course",
-                event_source="tis",
-                event_location=meta.get("location", ""),
-                event_priority=4,
-                event_color_tag="#8e8e93",
-                event_meta_json=json.dumps(meta, ensure_ascii=False),
-                event_created_at=now,
-            )
+            for se in meta.get("schedule_events", []):
+                start_dt = None
+                end_dt = None
+                if semester_monday:
+                    event_date = semester_monday + timedelta(
+                        days=(se["week_num"] - 1) * 7 + se["day_of_week"]
+                    )
+                    st = se.get("start_time", "") or "00:00"
+                    et = se.get("end_time", "") or "23:59"
+                    start_dt = f"{event_date.isoformat()}T{st}:00"
+                    end_dt = f"{event_date.isoformat()}T{et}:00"
+
+                slot_meta = json.dumps({
+                    "course_name": name,
+                    "teacher": meta.get("teacher", ""),
+                    "location": meta.get("location", ""),
+                    "weeks": meta.get("weeks", ""),
+                    "term": meta.get("term", ""),
+                    "week_num": se["week_num"],
+                    "day_of_week": se["day_of_week"],
+                    "period_start": se.get("period_start", 0),
+                    "period_end": se.get("period_end", 0),
+                }, ensure_ascii=False)
+
+                create_event(
+                    user_id=user_id,
+                    event_title=name,
+                    event_type="course",
+                    event_source="tis",
+                    event_start_time=start_dt,
+                    event_end_time=end_dt,
+                    event_show_in_todo=0,
+                    event_location=meta.get("location", ""),
+                    event_priority=4,
+                    event_color_tag="#8e8e93",
+                    event_meta_json=slot_meta,
+                    event_created_at=now,
+                )
+                slot_count += 1
 
         self._bump_sync(user_id)
-        return {"courses": len(courses)}
+        return {"courses": len(courses), "slots": slot_count}
 
     def _parse_weeks(self, weeks_str):
         result = set()
@@ -143,6 +173,27 @@ class TisCourseOperations:
                 if m2:
                     result.add(int(m2.group(1)))
         return result
+
+    @staticmethod
+    def _estimate_semester_monday(term: str) -> date | None:
+        import re
+        m = re.match(r"(\d{4})", str(term))
+        if not m:
+            return None
+        year = int(m.group(1))
+        season = str(term).replace(m.group(0), "")
+        if "春" in season:
+            anchor = date(year, 2, 1)
+            days_to_monday = (7 - anchor.weekday()) % 7
+            return anchor + timedelta(days=days_to_monday, weeks=3)
+        elif "秋" in season:
+            anchor = date(year, 9, 1)
+        elif "夏" in season:
+            anchor = date(year, 7, 1)
+        else:
+            anchor = date(year, 1, 1)
+        days_until_monday = (7 - anchor.weekday()) % 7
+        return anchor + timedelta(days=days_until_monday)
 
     def _bump_sync(self, user_id: str) -> None:
         state = get_sync_state(user_id)

@@ -84,17 +84,16 @@ async def bind_with_cookie(request: TisCookieRequest, user_id: str = Depends(get
 
 
 @router.get("/schedule")
-async def get_tis_schedule(user_id: str = Depends(get_current_user_id), current_week: int = 1):
-    """获取TIS课表数据，转换为日历事件格式返回（从event表读取）"""
+async def get_tis_schedule(user_id: str = Depends(get_current_user_id)):
+    """获取TIS课表数据"""
     import json
-    from datetime import datetime, timedelta
     from local_backend.database.code.command.database_command import list_events_by_user
 
     course_events = list_events_by_user(user_id, event_type="course", event_source="tis")
     if not course_events:
         raise HTTPException(status_code=404, detail='未找到TIS课表数据，请先绑定TIS账号')
 
-    all_schedule_events = []
+    events = []
     for ev in course_events:
         meta = {}
         if ev.get("event_meta_json"):
@@ -102,37 +101,12 @@ async def get_tis_schedule(user_id: str = Depends(get_current_user_id), current_
                 meta = json.loads(ev["event_meta_json"])
             except (json.JSONDecodeError, TypeError):
                 pass
-        for se in meta.get("schedule_events", []):
-            se["course_name"] = ev.get("event_title", "")
-            se["teacher"] = meta.get("teacher", "")
-            se["location"] = ev.get("event_location", meta.get("location", ""))
-            se["weeks"] = meta.get("weeks", "")
-            all_schedule_events.append(se)
 
-    if not all_schedule_events:
-        raise HTTPException(status_code=404, detail='TIS课表数据为空')
-
-    if current_week == 1:
-        today = datetime.now()
-        estimated_week = max(1, today.isocalendar()[1] - 8)
-        all_weeks = [e.get("week_num", 1) for e in all_schedule_events]
-        current_week = min(all_weeks, key=lambda w: abs(w - estimated_week)) if all_weeks else 1
-
-    today = datetime.now()
-    semester_monday = today - timedelta(days=today.weekday() + (current_week - 1) * 7)
-
-    events = []
-    for ev in all_schedule_events:
-        week_num = ev.get("week_num", 1)
-        dow = ev.get("day_of_week", 0)
-        offset_days = (week_num - 1) * 7 + dow
-        event_date = semester_monday + timedelta(days=offset_days)
-
-        teacher = ev.get("teacher", "")
-        location = ev.get("location", "")
-        weeks = ev.get("weeks", "")
-        ps = ev.get("period_start", 0)
-        pe = ev.get("period_end", 0)
+        teacher = meta.get("teacher", "")
+        location = ev.get("event_location", meta.get("location", ""))
+        weeks = meta.get("weeks", "")
+        ps = meta.get("period_start", 0)
+        pe = meta.get("period_end", 0)
 
         desc_parts = []
         if teacher:
@@ -143,20 +117,25 @@ async def get_tis_schedule(user_id: str = Depends(get_current_user_id), current_
             desc_parts.append(f'节次: {ps}-{pe}节')
         if weeks:
             desc_parts.append(f'周次: {weeks}')
-        description = '\n'.join(desc_parts)
+
+        start_raw = ev.get("event_start_time", "")
+        end_raw = ev.get("event_end_time", "")
+        start_date = (start_raw or "").split("T")[0] if start_raw else ""
+        end_date = (end_raw or "").split("T")[0] if end_raw else ""
+        start_time = (start_raw or "").split("T")[1][:5] if start_raw and "T" in start_raw else ""
+        end_time = (end_raw or "").split("T")[1][:5] if end_raw and "T" in end_raw else ""
 
         events.append({
-            'title': ev.get("course_name", "未知课程"),
-            'start': event_date.strftime('%Y-%m-%d'),
-            'end': event_date.strftime('%Y-%m-%d'),
-            'startTime': ev.get('start_time', ''),
-            'endTime': ev.get('end_time', ''),
-            'priority': 0,
-            'color': '#ff3b30',
-            'description': description,
+            'title': ev.get("event_title", "未知课程"),
+            'start': start_date,
+            'end': end_date or start_date,
+            'startTime': start_time,
+            'endTime': end_time,
+            'priority': 4,
+            'color': '#8e8e93',
+            'description': '\n'.join(desc_parts),
             'source': 'tis',
             'isTodo': False,
-            'weekNum': week_num,
         })
 
     return {'success': True, 'events': events, 'total': len(events)}

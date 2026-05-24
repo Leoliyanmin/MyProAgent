@@ -1,7 +1,7 @@
 """Import TIS schedule JSON into event table."""
 import json, sys, re
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 from local_backend.database.code.command.database_command import (
@@ -37,6 +37,26 @@ def parse_weeks(weeks_str: str) -> set[int]:
             if m2:
                 result.add(int(m2.group(1)))
     return result
+
+
+def _estimate_semester_monday(term: str) -> date | None:
+    m = re.match(r"(\d{4})", str(term))
+    if not m:
+        return None
+    year = int(m.group(1))
+    season = str(term).replace(m.group(0), "")
+    if "春" in season:
+        anchor = date(year, 2, 1)
+        days_to_monday = (7 - anchor.weekday()) % 7
+        return anchor + timedelta(days=days_to_monday, weeks=3)
+    elif "秋" in season:
+        anchor = date(year, 9, 1)
+    elif "夏" in season:
+        anchor = date(year, 7, 1)
+    else:
+        anchor = date(year, 1, 1)
+    days_until_monday = (7 - anchor.weekday()) % 7
+    return anchor + timedelta(days=days_until_monday)
 
 
 def import_from_json(json_path: str, user_id: str) -> dict:
@@ -80,21 +100,53 @@ def import_from_json(json_path: str, user_id: str) -> dict:
                     "end_time": course.get("end", ""),
                 })
 
+    semester_monday = _estimate_semester_monday(term)
+    slot_count = 0
+
     for (name, _term), meta in courses.items():
-        cid = create_event(
-            user_id=user_id, event_title=name,
-            event_type="course", event_source="tis",
-            event_location=meta.get("location", ""),
-            event_priority=4,
-            event_color_tag="#8e8e93",
-            event_meta_json=json.dumps(meta, ensure_ascii=False),
-            event_created_at=now,
-        )
-        print(f"  course: {name} (id={cid})")
+        for se in meta.get("schedule_events", []):
+            start_dt = None
+            end_dt = None
+            if semester_monday:
+                event_date = semester_monday + timedelta(
+                    days=(se["week_num"] - 1) * 7 + se["day_of_week"]
+                )
+                st = se.get("start_time", "") or "00:00"
+                et = se.get("end_time", "") or "23:59"
+                start_dt = f"{event_date.isoformat()}T{st}:00"
+                end_dt = f"{event_date.isoformat()}T{et}:00"
+
+            slot_meta = json.dumps({
+                "course_name": name,
+                "teacher": meta.get("teacher", ""),
+                "location": meta.get("location", ""),
+                "weeks": meta.get("weeks", ""),
+                "term": meta.get("term", ""),
+                "week_num": se["week_num"],
+                "day_of_week": se["day_of_week"],
+                "period_start": se.get("period_start", 0),
+                "period_end": se.get("period_end", 0),
+            }, ensure_ascii=False)
+
+            cid = create_event(
+                user_id=user_id, event_title=name,
+                event_type="course", event_source="tis",
+                event_start_time=start_dt,
+                event_end_time=end_dt,
+                event_show_in_todo=0,
+                event_location=meta.get("location", ""),
+                event_priority=4,
+                event_color_tag="#8e8e93",
+                event_meta_json=slot_meta,
+                event_created_at=now,
+            )
+            slot_count += 1
+            print(f"  slot: {name} W{se['week_num']} D{se['day_of_week']} {se.get('start_time','')} (id={cid})")
 
     return {
         "ok": True,
         "courses": len(courses),
+        "slots": slot_count,
     }
 
 
