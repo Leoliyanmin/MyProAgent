@@ -1138,3 +1138,31 @@ def list_events_by_user(
         f"SELECT * FROM event WHERE {where} ORDER BY event_id",
         tuple(params), db_path,
     )
+
+
+# ==================== user_personality (encrypted blob) ====================
+
+def upsert_user_personality(
+    user_id: str,
+    encrypted_data: str,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    _execute(
+        """INSERT INTO user_personality (user_id, encrypted_data, updated_at)
+           VALUES (?, ?, ?)
+           ON CONFLICT(user_id) DO UPDATE SET
+               encrypted_data = excluded.encrypted_data,
+               updated_at = excluded.updated_at""",
+        (user_id, encrypted_data, now),
+        db_path,
+    )
+
+
+def get_user_personality(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    return _fetch_one("SELECT * FROM user_personality WHERE user_id = ?", (user_id,), db_path)
+
+
+def delete_user_personality(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM user_personality WHERE user_id = ?", (user_id,), db_path)

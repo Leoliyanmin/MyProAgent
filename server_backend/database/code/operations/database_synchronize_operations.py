@@ -140,6 +140,12 @@ CHAT_FIELDS = (
     "chat_created_at",
 )
 
+USER_PERSONALITY_FIELDS = (
+    "user_id",
+    "encrypted_data",
+    "updated_at",
+)
+
 _USER_LOCKS: dict[str, threading.RLock] = {}
 _USER_LOCKS_GUARD = threading.Lock()
 
@@ -449,6 +455,11 @@ def _clear_user_data(user_id: str) -> None:
     for row in db.list_accounts_by_user(user_id):
         db.delete_account(row["account_id"])
 
+    try:
+        db.delete_user_personality(user_id)
+    except Exception:
+        pass
+
 
 class ServerSyncExporter:
     def build_user_sync_json(self, user_id: str, output_path: str | Path | None = None) -> dict[str, Any]:
@@ -483,6 +494,11 @@ class ServerSyncExporter:
             "event": [_pick(row, EVENT_FIELDS) for row in db.list_events_by_user(user_id)],
             "session": [_pick(row, SESSION_FIELDS) for row in sessions],
             "chat": [_pick(row, CHAT_FIELDS) for row in chats],
+            "user_personality": (
+                _pick(row, USER_PERSONALITY_FIELDS)
+                if (row := db.get_user_personality(user_id))
+                else None
+            ),
         }
 
         if output_path is not None:
@@ -603,6 +619,15 @@ class ServerSyncImporter:
                     chat_tokens_usage=row.get("chat_tokens_usage"),
                     chat_created_at=row.get("chat_created_at", _now_iso()),
                 )
+
+            personality_row = content.get("user_personality")
+            if personality_row and isinstance(personality_row, dict):
+                encrypted = personality_row.get("encrypted_data")
+                if encrypted:
+                    db.upsert_user_personality(
+                        user_id=user_id,
+                        encrypted_data=encrypted,
+                    )
 
             incoming_version = _coerce_int(user.get("user_version"))
             current_version = int(sync_state.get("user_version") or 1)

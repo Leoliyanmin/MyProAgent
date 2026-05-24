@@ -90,15 +90,6 @@ CREATE TABLE IF NOT EXISTS code (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
-CREATE TABLE IF NOT EXISTS perm (
-    perm_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    perm_category TEXT NOT NULL,
-    perm_is_allowed INTEGER NOT NULL CHECK (perm_is_allowed IN (0, 1)),
-    perm_require_confirmation INTEGER NOT NULL CHECK (perm_require_confirmation IN (0, 1)),
-    perm_last_modified TEXT NOT NULL,
-    perm_call_method TEXT NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS event (
     event_id          INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id           TEXT NOT NULL,
@@ -135,6 +126,13 @@ CREATE TABLE IF NOT EXISTS user_setting (
     notification_enabled INTEGER NOT NULL DEFAULT 1,
     privacy_share_data   INTEGER NOT NULL DEFAULT 0,
     updated_at           TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_personality (
+    user_id TEXT PRIMARY KEY,
+    encrypted_data TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 

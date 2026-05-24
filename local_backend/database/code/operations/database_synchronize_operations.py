@@ -8,6 +8,29 @@ from typing import Any
 
 from ..command import database_command as db
 
+
+def _get_fernet():
+    import hashlib
+    import base64
+    from cryptography.fernet import Fernet
+    from local_backend.config import settings
+    key = settings.ENCRYPTION_KEY.encode("utf-8")
+    derived = base64.urlsafe_b64encode(hashlib.sha256(key).digest())
+    return Fernet(derived)
+
+
+def _encrypt_personality(data: dict) -> str:
+    payload = json.dumps(data, ensure_ascii=False)
+    return _get_fernet().encrypt(payload.encode("utf-8")).decode("utf-8")
+
+
+def _decrypt_personality(encrypted: str) -> dict:
+    try:
+        decrypted = _get_fernet().decrypt(encrypted.encode("utf-8")).decode("utf-8")
+        return json.loads(decrypted)
+    except Exception:
+        return {}
+
 USER_FIELDS = (
     "user_id",
     "username",
@@ -84,6 +107,39 @@ CHAT_FIELDS = (
     "chat_tokens_usage",
     "chat_created_at",
 )
+
+USER_PERSONALITY_FIELDS = (
+    "user_id",
+    "interests_json",
+    "skills_json",
+    "preferences_json",
+    "study_work_patterns_json",
+    "personality_indicators_json",
+    "mbti_type",
+    "mbti_scores_json",
+    "mbti_confidence",
+    "mbti_description",
+    "interaction_count",
+    "mbti_last_updated",
+    "last_updated",
+)
+
+
+def _load_payload(payload: dict[str, Any] | str | Path) -> dict[str, Any]:
+    if isinstance(payload, dict):
+        return payload
+
+    if isinstance(payload, Path):
+        return json.loads(payload.read_text(encoding="utf-8"))
+
+    if isinstance(payload, str):
+        try:
+            return json.loads(payload)
+        except json.JSONDecodeError:
+            return json.loads(Path(payload).read_text(encoding="utf-8"))
+
+    raise TypeError("payload must be dict, json string, or file path")
+
 
 _USER_LOCKS: dict[str, threading.RLock] = {}
 _USER_LOCKS_GUARD = threading.Lock()
@@ -412,6 +468,11 @@ def _clear_user_data(user_id: str) -> None:
     for row in db.list_accounts_by_user(user_id):
         db.delete_account(row["account_id"])
 
+    try:
+        db.delete_user_personality(user_id)
+    except Exception:
+        pass
+
 
 class LocalSyncExporter:
     def build_local_user_sync_json(
@@ -461,6 +522,11 @@ class LocalSyncExporter:
             "event": [_pick(row, EVENT_FIELDS) for row in db.list_events_by_user(target_user_id)],
             "session": [_pick(row, SESSION_FIELDS) for row in sessions],
             "chat": [_pick(row, CHAT_FIELDS) for row in chats],
+            "user_personality": (
+                {"encrypted_data": _encrypt_personality(_pick(row, USER_PERSONALITY_FIELDS))}
+                if (row := db.get_user_personality(target_user_id))
+                else None
+            ),
         }
 
         if output_path is not None:
@@ -582,6 +648,42 @@ class LocalSyncImporter:
                     chat_tokens_usage=row.get("chat_tokens_usage"),
                     chat_created_at=row.get("chat_created_at", _now_iso()),
                 )
+
+            personality_row = content.get("user_personality")
+            if personality_row and isinstance(personality_row, dict):
+                encrypted = personality_row.get("encrypted_data")
+                if encrypted:
+                    data = _decrypt_personality(encrypted)
+                    if data:
+                        db.upsert_user_personality(
+                            user_id=user_id,
+                            interests_json=data.get("interests_json"),
+                            skills_json=data.get("skills_json"),
+                            preferences_json=data.get("preferences_json"),
+                            study_work_patterns_json=data.get("study_work_patterns_json"),
+                            personality_indicators_json=data.get("personality_indicators_json"),
+                            mbti_type=data.get("mbti_type"),
+                            mbti_scores_json=data.get("mbti_scores_json"),
+                            mbti_confidence=data.get("mbti_confidence"),
+                            mbti_description=data.get("mbti_description"),
+                            interaction_count=data.get("interaction_count"),
+                            mbti_last_updated=data.get("mbti_last_updated"),
+                        )
+                else:
+                    db.upsert_user_personality(
+                        user_id=user_id,
+                        interests_json=personality_row.get("interests_json"),
+                        skills_json=personality_row.get("skills_json"),
+                        preferences_json=personality_row.get("preferences_json"),
+                        study_work_patterns_json=personality_row.get("study_work_patterns_json"),
+                        personality_indicators_json=personality_row.get("personality_indicators_json"),
+                        mbti_type=personality_row.get("mbti_type"),
+                        mbti_scores_json=personality_row.get("mbti_scores_json"),
+                        mbti_confidence=personality_row.get("mbti_confidence"),
+                        mbti_description=personality_row.get("mbti_description"),
+                        interaction_count=personality_row.get("interaction_count"),
+                        mbti_last_updated=personality_row.get("mbti_last_updated"),
+                    )
 
             previous_version = int(existing_state.get("user_version") or 1) if existing_state else 1
             incoming_version = _coerce_int(user.get("user_version"))

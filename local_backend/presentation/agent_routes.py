@@ -456,7 +456,13 @@ async def get_interaction_detail(
     user_id: str = Depends(get_current_user_id),
 ):
     """获取单条交互详情"""
-    interaction = agent_service.interaction_logger.get_interaction(conversation_id)
+    interaction = None
+    try:
+        interaction = agent_service.db_interaction_ops.get(conversation_id)
+    except Exception:
+        pass
+    if not interaction:
+        interaction = agent_service.interaction_logger.get_interaction(conversation_id)
     if not interaction:
         raise HTTPException(status_code=404, detail="交互记录不存在")
     if interaction.get("metadata", {}).get("user_id") != user_id:
@@ -472,7 +478,13 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
     print(f"\n{'='*60}")
     print(f"[Reanalyze] 开始重新分析用户 {user_id}")
 
-    interactions = agent_service.interaction_logger.get_user_interactions(user_id, limit=9999)
+    interactions = None
+    try:
+        interactions = agent_service.db_interaction_ops.list_for_user(user_id, limit=9999)
+    except Exception:
+        pass
+    if not interactions:
+        interactions = agent_service.interaction_logger.get_user_interactions(user_id, limit=9999)
     if not interactions:
         print(f"[Reanalyze] 没有交互记录需要分析")
         print(f"{'='*60}")
@@ -482,6 +494,10 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
     print(f"[Reanalyze] 找到 {total} 条交互记录，开始逐条分析...")
 
     agent_service.profile_store.delete_profile(user_id)
+    try:
+        agent_service.db_personality_ops.delete_profile(user_id)
+    except Exception:
+        pass
     print(f"[Reanalyze] 已清除旧画像")
 
     for i, interaction in enumerate(interactions, 1):
@@ -499,7 +515,13 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
         except Exception as e:
             print(f"[Reanalyze] [{i}/{total}] 错误: {e}")
 
-    profile = agent_service.profile_store.get_profile(user_id)
+    profile = None
+    try:
+        profile = agent_service.db_personality_ops.get_profile(user_id)
+    except Exception:
+        pass
+    if not profile:
+        profile = agent_service.profile_store.get_profile(user_id)
     raw_messages = [
         it["user_input"]["raw_message"]
         for it in interactions
@@ -512,6 +534,10 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
             timeout=30.0,
         )
         agent_service.profile_store.update_mbti(user_id, mbti)
+        try:
+            agent_service.db_personality_ops.update_mbti(user_id, mbti)
+        except Exception:
+            pass
         print(f"[Reanalyze] MBTI 分析完成: {mbti.get('mbti_type', 'unknown')}")
     except asyncio.TimeoutError:
         print("[Reanalyze] MBTI 分析超时")
@@ -521,6 +547,14 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
     elapsed = (datetime.datetime.now() - start_time).total_seconds()
     print(f"[Reanalyze] 全部完成！耗时 {elapsed:.1f} 秒")
     print(f"{'='*60}\n")
+
+    try:
+        profile = agent_service.profile_store.get_profile(user_id)
+        profile["user_id"] = user_id
+        agent_service.db_personality_ops.upsert_profile(user_id, profile)
+        print(f"[Reanalyze] 完整画像已同步到数据库")
+    except Exception as e:
+        print(f"[Reanalyze] DB 同步失败 (non-fatal): {e}")
 
     return {
         "success": True,
@@ -544,4 +578,8 @@ async def delete_interaction(
         raise HTTPException(status_code=403, detail="无权删除他人的交互记录")
 
     success = agent_service.interaction_logger.delete_interaction(conversation_id)
+    try:
+        agent_service.db_interaction_ops.delete(conversation_id)
+    except Exception:
+        pass
     return {"success": success, "message": "删除成功" if success else "删除失败"}

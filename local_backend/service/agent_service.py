@@ -24,6 +24,8 @@ personal_path = Path(__file__).parent.parent.parent / "personality"
 if str(personal_path) not in sys.path:
     sys.path.insert(0, str(personal_path))
 from personality import InteractionLogger, ProfileExtractor, MBTIInferencer, UserProfileStore
+from database.code.operations.database_interaction_log_operations import InteractionLogOperations
+from database.code.operations.database_user_personality_operations import UserPersonalityOperations
 
 
 # Track currently connected (WebSocket) users.
@@ -92,6 +94,8 @@ class AgentService:
         self.mbti_inferencer = MBTIInferencer(llm_provider=self.agent.provider)
         self.profile_store = UserProfileStore(personal_base / "profiles")
         self.agent._profile_store = self.profile_store
+        self.db_interaction_ops = InteractionLogOperations()
+        self.db_personality_ops = UserPersonalityOperations()
 
     def process_query(self, user_id: str, message: str, session_id: str = None):
         # 如果没有 session_id，创建一个新会话
@@ -773,6 +777,10 @@ class AgentService:
                 }
             }
             self.interaction_logger.log_interaction(interaction_data)
+            try:
+                self.db_interaction_ops.log(interaction_data)
+            except Exception as e:
+                print(f"[AgentService] db interaction log error (non-fatal): {e}")
 
             # Rate-limit profiling: only run every Nth interaction per session
             tools_used = getattr(result, 'tools_used', [])
@@ -787,6 +795,12 @@ class AgentService:
                     )
                     interaction_data["user_profile_update"] = profile_update
                     self.profile_store.update_profile(user_id, profile_update)
+                    try:
+                        profile = self.profile_store.get_profile(user_id)
+                        profile["user_id"] = user_id
+                        self.db_personality_ops.upsert_profile(user_id, profile)
+                    except Exception as e:
+                        print(f"[AgentService] db profile upsert error (non-fatal): {e}")
                 except Exception as e:
                     print(f"[AgentService] profile extraction error (non-fatal): {e}")
 
@@ -803,6 +817,10 @@ class AgentService:
                         timeout=30.0,
                     )
                     self.profile_store.update_mbti(user_id, mbti)
+                    try:
+                        self.db_personality_ops.update_mbti(user_id, mbti)
+                    except Exception as e:
+                        print(f"[AgentService] db mbti update error (non-fatal): {e}")
                 except Exception as e:
                     print(f"[AgentService] MBTI inference error (non-fatal): {e}")
         except Exception as e:
@@ -829,16 +847,49 @@ class AgentService:
         return [t for t in tokens if len(t) > 1 and t not in stop_words][:10]
 
     def get_user_profile(self, user_id: str) -> dict:
-        profile = self.profile_store.get_profile(user_id)
-        mbti = profile.get("mbti_inference", {})
-        profile["mbti_inference"] = mbti
-        return profile
+        try:
+            db_profile = self.db_personality_ops.get_profile(user_id)
+            if db_profile:
+                return db_profile
+        except Exception:
+            pass
+        return self.profile_store.get_profile(user_id)
 
     def get_user_mbti(self, user_id: str) -> dict:
+        try:
+            db_profile = self.db_personality_ops.get_profile(user_id)
+            if db_profile and db_profile.get("mbti_inference"):
+                return db_profile["mbti_inference"]
+        except Exception:
+            pass
         profile = self.profile_store.get_profile(user_id)
         return profile.get("mbti_inference", {})
 
     def get_user_interactions(self, user_id: str, limit: int = 20, offset: int = 0) -> dict:
+        try:
+            db_interactions = self.db_interaction_ops.list_for_user(user_id, limit=9999)
+            if db_interactions:
+                total = len(db_interactions)
+                page = db_interactions[offset:offset + limit]
+                items = []
+                for item in page:
+                    meta = item.get("metadata", {})
+                    ui = item.get("user_input", {})
+                    ao = item.get("agent_output", {})
+                    tools = item.get("tool_execution", {}).get("tools_invoked", [])
+                    items.append({
+                        "conversation_id": meta.get("conversation_id", ""),
+                        "timestamp": meta.get("timestamp", ""),
+                        "user_message_preview": (ui.get("raw_message", "") or "")[:80],
+                        "intent": ui.get("intent_category", ""),
+                        "language": ui.get("language", ""),
+                        "sentiment": ui.get("sentiment", ""),
+                        "response_preview": (ao.get("raw_response", "") or "")[:80],
+                        "tools_used": len(tools),
+                    })
+                return {"total": total, "limit": limit, "offset": offset, "items": items}
+        except Exception:
+            pass
         all_interactions = self.interaction_logger.get_user_interactions(user_id, limit=9999)
         total = len(all_interactions)
         page = all_interactions[offset:offset + limit]

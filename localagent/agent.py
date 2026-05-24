@@ -282,6 +282,18 @@ class LocalAgent:
         if not user_id or not self._profile_store:
             return {}
         try:
+            import sys
+            from pathlib import Path as _Path
+            _lb = _Path(__file__).resolve().parent.parent / "local_backend"
+            if str(_lb) not in sys.path:
+                sys.path.insert(0, str(_lb))
+            from database.code.operations.database_user_personality_operations import UserPersonalityOperations
+            db_profile = UserPersonalityOperations().get_profile(user_id)
+            if db_profile:
+                return db_profile
+        except Exception:
+            pass
+        try:
             return self._profile_store.get_profile(user_id)
         except Exception:
             return {}
