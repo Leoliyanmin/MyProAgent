@@ -500,7 +500,7 @@ const getTimedEventStyle = (event) => {
     top: `${top}px`,
     height: `${height}px`,
     backgroundColor: event.color ? event.color + '25' : '',
-    color: event.priority >= 4 ? '#ffffff' : (event.color || ''),
+    color: event.priority >= 4 ? '#1c1c1e' : (event.color || ''),
     borderLeft: `3px solid ${event.color || '#007aff'}`
   }
 }
