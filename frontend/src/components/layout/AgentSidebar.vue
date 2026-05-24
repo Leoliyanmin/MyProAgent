@@ -100,7 +100,7 @@
           v-model="inputText"
           class="message-input"
           placeholder="输入你的问题... (Shift+Enter 换行)"
-          @keydown.enter.exact.prevent="onEnterSubmit"
+          @keydown.enter.exact="handleEnterKey"
           @compositionstart="isComposingIME = true"
           @compositionend="isComposingIME = false"
           rows="3"
@@ -747,9 +747,10 @@ const disconnectWebSocket = () => {
 const isComposingIME = ref(false)
 
 // 处理 Enter 键提交，过滤 IME 输入法组合事件
-const onEnterSubmit = (e) => {
-  // 两种方式双保险：composition 事件标记 + 浏览器原生 isComposing 属性
+// 注意：不能用 .prevent 修饰符，因为 preventDefault 在 IME 组合期间会干扰输入法正常工作
+const handleEnterKey = (e) => {
   if (isComposingIME.value || e.isComposing) return
+  e.preventDefault()  // 只有非 IME 状态才阻止默认换行行为
   sendMessage()
 }
 
