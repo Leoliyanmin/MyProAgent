@@ -647,6 +647,17 @@ jobs:
           pip3 install -r local_backend/requirements.txt
           python3 scripts/build_sidecar.py
 
+      - name: Rename sidecar for Tauri
+        run: |
+          cd frontend/src-tauri/binaries
+          for f in python-backend-*; do
+            [ -f "$f" ] && ln -sf "$f" python-backend || true
+          done
+          for f in server-backend-*; do
+            [ -f "$f" ] && ln -sf "$f" server-backend || true
+          done
+          ls -la
+
       - name: Generate icon
         run: python3 scripts/gen_icon.py
 
