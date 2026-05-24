@@ -285,6 +285,34 @@ jobs:
           path: pkg/proagent-server-${{ steps.version.outputs.VERSION }}.zip
           retention-days: 30
 
+  package-server-macos:
+    name: Package Server Backend (macOS)
+    runs-on: macos-latest
+    needs: [test-server]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build server binary
+        run: |
+          python3 -m venv /tmp/srv-venv
+          source /tmp/srv-venv/bin/activate
+          pip install pyinstaller
+          pip install -r server_backend/requirements.txt
+          pyinstaller --onefile --name proagent-server-macos \
+            --add-data "server_backend:server_backend" \
+            --add-data "logging_config.py:." \
+            --hidden-import passlib.handlers.bcrypt \
+            scripts/server_backend.py
+        env:
+          PATH: /tmp/srv-venv/bin:${{ env.PATH }}
+
+      - name: Upload server binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: proagent-server-macos
+          path: dist/proagent-server-macos
+          retention-days: 30
+
   # ============================================================
   # 阶段四：生成文档 (Generate Docs)
   # ============================================================
