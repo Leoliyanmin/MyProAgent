@@ -244,6 +244,8 @@
             </div>
           </div>
         </div>
+        <label>备注</label>
+        <textarea v-model="draftEvent.description" class="mac-input" placeholder="添加备注..." rows="2"></textarea>
         <p v-if="validationMessage" class="form-validation-message">{{ validationMessage }}</p>
         <div class="modal-actions">
           <button class="mac-btn delete-btn-modal" v-if="isEditing" @click="deleteEvent">删除</button>
@@ -336,7 +338,7 @@ const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 
 const showModal = ref(false)
 const isEditing = ref(false)
-const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', priority: 2, color: '#007aff' })
+const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', priority: 2, color: '#007aff', description: '' })
 const validationMessage = ref('')
 const weekTimelineHeaderRef = ref(null)
 const weekAllDayRowRef = ref(null)
@@ -587,7 +589,7 @@ const openEventModal = (dateStr, hour = null) => {
     startTime = `${String(hour).padStart(2, '0')}:00`
     endTime = `${String(hour + 1).padStart(2, '0')}:00`
   }
-  draftEvent.value = { id: null, title: '', start: dateStr, end: dateStr, startTime, endTime, priority: 2, color: '#007aff' }
+  draftEvent.value = { id: null, title: '', start: dateStr, end: dateStr, startTime, endTime, priority: 2, color: '#007aff', description: '' }
   isEditing.value = false
   showModal.value = true
 }
@@ -599,7 +601,8 @@ const editEvent = (event) => {
     color: event.color || '#007aff',
     priority: event.priority !== undefined ? event.priority : 2,
     startTime: event.startTime || '',
-    endTime: event.endTime || ''
+    endTime: event.endTime || '',
+    description: event.description || ''
   }
   isEditing.value = true
   showModal.value = true

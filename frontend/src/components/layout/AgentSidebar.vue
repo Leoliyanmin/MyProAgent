@@ -197,6 +197,13 @@ const CALENDAR_TOOL_NAMES = new Set([
   'delete_schedule_event'
 ])
 
+const TASK_TOOL_NAMES = new Set([
+  'list_tasks',
+  'create_task',
+  'update_task',
+  'delete_task'
+])
+
 const FILE_TOOL_NAMES = new Set([
   'write_file',
   'edit_file',
@@ -214,6 +221,12 @@ const EMAIL_TOOL_NAMES = new Set([
   'get_emails',
   'send_email',
   'analyze_emails',
+  'sync_emails',
+  'delete_email',
+  'get_trash_emails',
+  'restore_email',
+  'permanent_delete_email',
+  'empty_trash',
 ])
 
 // 状态
@@ -599,6 +612,7 @@ const refreshPanelsIfNeeded = async (toolNames = []) => {
   if (!Array.isArray(toolNames) || toolNames.length === 0) return
 
   const hasCalendarMutation = toolNames.some((name) => CALENDAR_TOOL_NAMES.has(name))
+  const hasTaskMutation = toolNames.some((name) => TASK_TOOL_NAMES.has(name))
   const hasFileMutation = toolNames.some((name) => FILE_TOOL_NAMES.has(name))
   const hasEmailMutation = toolNames.some((name) => EMAIL_TOOL_NAMES.has(name))
 
@@ -609,6 +623,10 @@ const refreshPanelsIfNeeded = async (toolNames = []) => {
       calendarStore.loadSchedules(),
       dashboardStore.loadTodosFromBackend()
     )
+  }
+
+  if (hasTaskMutation) {
+    promises.push(dashboardStore.loadTodosFromBackend())
   }
 
   if (hasFileMutation && fmStore.isDirectorySet) {

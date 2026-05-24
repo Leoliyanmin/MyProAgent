@@ -40,11 +40,18 @@ class TaskV2Operations:
             )
 
     def create(self, user_id: str, title: str, description: str = None,
-               due_date: str = None, linked_schedule_id: int = None) -> int:
+               due_date: str = None, linked_schedule_id: int = None,
+               priority: str = None) -> int:
         now = datetime.utcnow().isoformat()
+        _priority = 2
+        if priority is not None:
+            if isinstance(priority, int):
+                _priority = priority
+            else:
+                _priority = int(str(priority).lstrip("p") or "2")
         task_id = create_task(
             user_id=user_id, title=title, description=description,
-            priority=2, status="pending", due_date=due_date,
+            priority=_priority, status="pending", due_date=due_date,
             linked_schedule_id=linked_schedule_id, source="manual",
             created_at=now,
         )
@@ -73,9 +80,15 @@ class TaskV2Operations:
         task = get_task(task_id)
         if not task or task["user_id"] != user_id:
             raise ValueError("Task not found: {}".format(task_id))
+        _priority = None
+        if priority is not None:
+            if isinstance(priority, int):
+                _priority = priority
+            else:
+                _priority = int(str(priority).lstrip("p") or "2")
         now = datetime.utcnow().isoformat()
         update_task(task_id, title=title, description=description,
-                    due_date=due_date, priority=priority, status=status,
+                    due_date=due_date, priority=_priority, status=status,
                     linked_schedule_id=linked_schedule_id,
                     updated_at=now)
         self._update_sync_version(user_id)

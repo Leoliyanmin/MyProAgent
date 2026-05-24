@@ -35,9 +35,33 @@ from .tools.email_tools import (
     GetStarredEmailsTool,
     StarEmailTool,
     UnstarEmailTool,
+    SyncEmailsTool,
+    DeleteEmailTool,
+    GetTrashEmailsTool,
+    RestoreEmailTool,
+    PermanentDeleteEmailTool,
+    EmptyTrashTool,
 )
 from .tools.profile_tools import (
     GetUserProfileTool,
+)
+from .tools.blackboard_tools import (
+    GetBlackboardStatusTool,
+    SyncBlackboardTool,
+    GetBlackboardAssignmentsTool,
+)
+from .tools.tis_tools import (
+    GetTisStatusTool,
+    GetTisScheduleTool,
+)
+from .tools.course_tools import (
+    ListCoursesTool,
+)
+from .tools.task_tools import (
+    ListTasksTool,
+    CreateTaskTool,
+    UpdateTaskTool,
+    DeleteTaskTool,
 )
 from .config import (
     LocalAgentConfig,
@@ -196,9 +220,49 @@ class LocalAgent:
         self.tools.register(UnstarEmailTool(
             lambda: self._runtime_context.get("user_id"),
         ))
+        self.tools.register(SyncEmailsTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(DeleteEmailTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(GetTrashEmailsTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(RestoreEmailTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(PermanentDeleteEmailTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(EmptyTrashTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
         self.tools.register(GetUserProfileTool(
             profile_getter=lambda: self._get_user_profile(),
         ))
+        self.tools.register(GetBlackboardStatusTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(SyncBlackboardTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(GetBlackboardAssignmentsTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(GetTisStatusTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(GetTisScheduleTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(ListCoursesTool(
+            lambda: self._runtime_context.get("user_id"),
+        ))
+        self.tools.register(ListTasksTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(CreateTaskTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(UpdateTaskTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(DeleteTaskTool(lambda: self._runtime_context.get("user_id")))
 
     def set_runtime_context(self, **context: Any) -> None:
         self._runtime_context.update(context)
