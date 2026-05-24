@@ -77,9 +77,6 @@
             <div class="binding-main">
               <p class="binding-title">{{ item.provider }}</p>
               <p v-if="item.model" class="binding-meta" style="font-size:11px;color:#6b7280;">模型: {{ item.model }}</p>
-              <p class="binding-meta" :class="item.last_test_success === true ? 'binding-success' : item.last_test_success === false ? 'status-error' : ''">
-                {{ item.last_test_success === true ? '● 已连接' : item.last_test_success === false ? '✕ 连接失败' : '○ 未测试' }}
-              </p>
               <p class="binding-meta">{{ item.api_key_masked }}</p>
               <p class="binding-meta" style="font-size:11px;color:#9ca3af;">{{ item.api_base }}</p>
             </div>
