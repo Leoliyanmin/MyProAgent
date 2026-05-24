@@ -2,9 +2,13 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, integration]
+    branches: [main, integration, integration_mac]
   pull_request:
-    branches: [main, integration]
+    branches: [main, integration, integration_mac]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # ============================================================
@@ -376,7 +380,7 @@ jobs:
 
       - name: Health check - Frontend
         run: |
-          curl -sf http://localhost/ && echo "Frontend OK" || echo "Frontend health check warning (non-fatal)"
+          curl -sf http://localhost:8080/ && echo "Frontend OK" || { echo "Frontend health check failed"; docker compose -f docker-compose.yml logs frontend; exit 1; }
 
       - name: Tear down
         if: always()
