@@ -64,7 +64,7 @@
                 :key="event.id"
                 class="event-bar"
                 :class="{'is-completed': event.completed, 'multi-start': event.isStart, 'multi-mid': event.isMid, 'multi-end': event.isEnd}"
-                :style="{ backgroundColor: event.color ? event.color + '25' : '', color: event.color || '' }"
+                :style="{ backgroundColor: event.color ? event.color + '25' : '', color: event.source === 'tis' ? '#1c1c1e' : (event.color || '') }"
                 @click.stop="editEvent(event)"
                 :title="event.title"
                 draggable="true"
@@ -115,7 +115,7 @@
               :key="event.id"
               class="event-bar"
               :class="{'is-completed': event.completed}"
-              :style="{ backgroundColor: event.color ? event.color + '25' : '', color: event.color || '' }"
+              :style="{ backgroundColor: event.color ? event.color + '25' : '', color: event.source === 'tis' ? '#1c1c1e' : (event.color || '') }"
               @click.stop="editEvent(event)"
               :title="event.title"
             >
@@ -499,7 +499,7 @@ const getTimedEventStyle = (event) => {
     top: `${top}px`,
     height: `${height}px`,
     backgroundColor: event.color ? event.color + '25' : '',
-    color: event.color || '',
+    color: event.source === 'tis' ? '#1c1c1e' : (event.color || ''),
     borderLeft: `3px solid ${event.color || '#007aff'}`
   }
 }
