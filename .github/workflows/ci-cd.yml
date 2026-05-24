@@ -118,11 +118,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov httpx
-          pip install pydantic-settings "passlib[bcrypt]==1.7.4" python-jose cryptography
-          pip install beautifulsoup4 apscheduler jieba requests websockets
-          pip install fastapi uvicorn sqlalchemy email-validator
-          pip install "bcrypt==4.0.1"
+          pip install -r local_backend/requirements.txt
+          pip install pytest pytest-cov
 
       - name: Run tests with coverage
         run: |
@@ -159,11 +156,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov httpx
-          pip install pydantic-settings "passlib[bcrypt]==1.7.4" python-jose cryptography
-          pip install fastapi uvicorn sqlalchemy email-validator
-          pip install redis aiosmtplib
-          pip install "bcrypt==4.0.1"
+          pip install -r server_backend/requirements.txt
+          pip install pytest pytest-cov
 
       - name: Run tests with coverage
         run: |
