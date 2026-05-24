@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
     },
     clearScreen: false,
     server: {
-      host: '127.0.0.1',
+      host: 'localhost',
       port: 5173,
       strictPort: true,
       proxy: {
@@ -27,11 +27,11 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:8002',
           changeOrigin: true
         },
-        '/tasks': {
+        '/events': {
           target: 'http://localhost:8002',
           changeOrigin: true
         },
-        '/schedules': {
+        '/tasks': {
           target: 'http://localhost:8002',
           changeOrigin: true
         },

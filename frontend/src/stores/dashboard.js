@@ -1,35 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { tasksAPI } from '../services/api.js'
+import { eventsAPI } from '../services/api.js'
 
-const STORAGE_KEY = 'proagent_todos'
 const LAYOUT_STORAGE_KEY = 'proagent_layout'
 const PINNED_EMAILS_KEY = 'proagent_pinned_emails'
 
-// 本地存储 helpers
-const loadTodosFromStorage = () => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      return JSON.parse(stored)
-    }
-  } catch (err) {
-    console.error('Failed to load todos from localStorage:', err)
-  }
-  // 默认示例数据
-  return [
-    { id: 1, title: 'Draft ECCV methodology section', completed: false, start: '2026-04-10', end: '2026-04-12', priority: 0, color: '#ff3b30' },
-    { id: 2, title: 'CS305 Matrix operations assignment', completed: false, start: '2026-04-15', end: '2026-04-15', priority: 3, color: '#34c759' }
-  ]
-}
-
-const saveTodosToStorage = (todos) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
-  } catch (err) {
-    console.error('Failed to save todos to localStorage:', err)
-  }
-}
+const saveTodosToStorage = (todos) => {}
 
 const DEFAULT_LAYOUT = [
   { x: 0, y: 0, w: 6, h: 5, i: '3', type: 'todo', minW: 3, minH: 4 },
@@ -71,19 +47,6 @@ const isLocalGeneratedId = (id) => {
   return Number.isFinite(numericId) && numericId > 1000000000000
 }
 
-const extractLinkedScheduleId = (task) => {
-  const explicitId = task.data_linked_schedule_id ?? task.linked_schedule_id
-  if (explicitId != null) {
-    const num = Number(explicitId)
-    if (Number.isFinite(num) && num > 0) return num
-  }
-  const text = String(task.description || task.data_content_text || '')
-  const match = text.match(/\[SCHEDULE_LINK:(\d+)\]/)
-  if (!match) return null
-  const linkedId = Number(match[1])
-  return Number.isFinite(linkedId) ? linkedId : null
-}
-
 const parseDueDateTime = (value) => {
   if (!value) {
     return { date: '', time: '' }
@@ -99,9 +62,13 @@ const parseDueDateTime = (value) => {
 }
 
 const inferPriority = (task) => {
-  const text = String(task.priority || task.data_priority || '').toLowerCase().trim()
-  if (text === 'high' || text === 'p0' || text === 'p1') return 1
-  if (text === 'low' || text === 'p3') return 3
+  const raw = task.event_priority ?? task.priority
+  if (typeof raw === 'number' && raw >= 0 && raw <= 3) return raw
+  const text = String(raw || '').toLowerCase().trim()
+  if (text === 'p0' || text === '0') return 0
+  if (text === 'high' || text === 'p1' || text === '1') return 1
+  if (text === 'p2' || text === '2') return 2
+  if (text === 'low' || text === 'p3' || text === '3') return 3
   return 2
 }
 
@@ -124,7 +91,7 @@ const mapRemoteTaskToTodo = (task) => {
     completed: String(task.status || '').toLowerCase() === 'completed',
     start: date || new Date().toISOString().split('T')[0],
     end: date || new Date().toISOString().split('T')[0],
-    startTime: time,
+    startTime: '',
     endTime: time,
     priority,
     color: inferColorByPriority(priority),
@@ -170,7 +137,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   // ==============================
   // priority: 0 (P0 紧急且重要 - 红色), 1 (P1 重要不紧急 - 橙色)
   //           2 (P2 紧急不重要 - 蓝色), 3 (P3 不重要不紧急 - 绿色)
-  const todos = ref(loadTodosFromStorage())
+  const todos = ref([])
 
   // 未完成任务数
   const pendingTodosCount = computed(() => todos.value.filter(t => !t.completed).length)
@@ -189,14 +156,16 @@ export const useDashboardStore = defineStore('dashboard', () => {
     })
   })
 
-  const addTodo = (taskPayload) => {
+  const addTodo = async (taskPayload) => {
+    const localId = Date.now()
+    const today = new Date().toISOString().split('T')[0]
+    let newTodo
+
     if (typeof taskPayload === 'string') {
-      const today = new Date().toISOString().split('T')[0]
-      todos.value.unshift({ id: Date.now(), title: taskPayload, completed: false, start: today, end: today, priority: 2, color: '#007aff', source: 'local' })
+      newTodo = { id: localId, title: taskPayload, completed: false, start: today, end: today, priority: 2, color: '#007aff', source: 'local' }
     } else {
-      const today = new Date().toISOString().split('T')[0]
-      todos.value.unshift({
-        id: taskPayload.id || Date.now(),
+      newTodo = {
+        id: taskPayload.id || localId,
         title: taskPayload.title,
         completed: taskPayload.completed || false,
         start: taskPayload.start || today,
@@ -208,9 +177,36 @@ export const useDashboardStore = defineStore('dashboard', () => {
         source: taskPayload.source || 'local',
         linkedScheduleId: taskPayload.linkedScheduleId || null,
         description: taskPayload.description || ''
-      })
+      }
     }
+
+    todos.value.unshift(newTodo)
     saveTodosToStorage(todos.value)
+
+    // 回写后端
+    try {
+      const dueDate = newTodo.startTime
+        ? `${newTodo.start}T${newTodo.startTime}:00`
+        : newTodo.start
+
+      const result = await eventsAPI.create({
+        event_title: newTodo.title,
+        event_description: newTodo.description || '',
+        event_start_time: dueDate || undefined,
+        event_show_in_todo: 1,
+        event_priority: newTodo.priority,
+        event_type: 'manual',
+        event_source: 'manual',
+      })
+
+      if (result && result.event_id) {
+        newTodo.id = result.event_id
+        newTodo.source = 'remote'
+        saveTodosToStorage(todos.value)
+      }
+    } catch (err) {
+      console.error('Failed to sync new todo to backend:', err)
+    }
   }
 
   const updateTodo = (updatedTask) => {
@@ -221,22 +217,33 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
-  const toggleTodo = (id) => {
+  const toggleTodo = async (id) => {
     const task = todos.value.find(t => t.id === id)
-    if (task) {
-      task.completed = !task.completed
-      if (task.completed) {
-        recordActivity(1)
-      }
-      saveTodosToStorage(todos.value)
+    if (!task) return
+
+    task.completed = !task.completed
+    if (task.completed) {
+      recordActivity(1)
+    }
+    saveTodosToStorage(todos.value)
+
+    // Skip backend sync for local-generated IDs (Date.now() timestamps)
+    if (isLocalGeneratedId(id)) return
+
+    try {
+      await eventsAPI.update(id, {
+        event_is_completed: task.completed ? 1 : 0
+      })
+    } catch (err) {
+      console.error('Failed to sync todo status:', err)
     }
   }
 
   const removeTodo = async (id) => {
     try {
-      await tasksAPI.deleteTask(id)
+      await eventsAPI.delete(id)
     } catch (err) {
-      console.error('Failed to delete task from backend:', err)
+      console.error('Failed to delete event:', err)
     }
     todos.value = todos.value.filter(t => t.id !== id)
     saveTodosToStorage(todos.value)
@@ -244,8 +251,20 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
   const loadTodosFromBackend = async () => {
     try {
-      const remoteTasks = await tasksAPI.getTasks()
-      const remoteTodos = (Array.isArray(remoteTasks) ? remoteTasks : []).map(mapRemoteTaskToTodo)
+      const res = await eventsAPI.list({ show_in_todo: '1' })
+      const remoteEvents = res.events || []
+      const remoteTodos = remoteEvents.map(e => ({
+        id: e.event_id,
+        title: e.event_title,
+        completed: !!e.event_is_completed,
+        priority: e.event_priority ?? 2,
+        color: e.event_color_tag || '#ff9500',
+        source: e.event_source,
+        description: e.event_description || '',
+        start: e.event_start_time || '',
+        end: e.event_end_time || '',
+        linkedScheduleId: null,
+      }))
 
       // Keep local-only draft todos while syncing remote-backed items.
       const localOnlyTodos = todos.value.filter((todo) => {

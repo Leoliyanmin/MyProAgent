@@ -1,32 +1,20 @@
+import json
+from datetime import datetime
+
 from local_backend.database.code.command.database_command import (
-    create_task,
-    get_task,
-    list_tasks_by_user,
-    update_task,
-    delete_task,
-    create_data,
-    create_category,
-    list_categories_by_user,
+    create_event,
+    get_event,
+    list_events_by_user,
+    update_event,
+    delete_event,
     upsert_sync_state,
     get_sync_state,
 )
-from datetime import datetime
 
 
 class TaskV2Operations:
     def __init__(self):
         pass
-
-    def _ensure_task_category(self, user_id: str) -> int:
-        categories = list_categories_by_user(user_id)
-        for cat in categories:
-            if cat["category_kind"] == "task":
-                return cat["category_id"]
-        now = datetime.utcnow().isoformat()
-        return create_category(
-            user_id=user_id, category_kind="task", category_title="任务",
-            category_content=None, category_link=None, category_created_at=now,
-        )
 
     def _update_sync_version(self, user_id: str) -> None:
         sync_state = get_sync_state(user_id)
@@ -49,54 +37,74 @@ class TaskV2Operations:
                 _priority = priority
             else:
                 _priority = int(str(priority).lstrip("p") or "2")
-        task_id = create_task(
-            user_id=user_id, title=title, description=description,
-            priority=_priority, status="pending", due_date=due_date,
-            linked_schedule_id=linked_schedule_id, source="manual",
-            created_at=now,
-        )
-        update_task(task_id, updated_at=now)
 
-        cat_id = self._ensure_task_category(user_id)
-        create_data(
-            user_id=user_id, data_category_id=cat_id,
-            data_content_type="task", data_classification_code=3,
-            data_title=title, data_content_text=description,
-            data_link_url="task:{}".format(task_id),
-            data_release_time=None, data_ddl_time=due_date,
-            data_is_previewable=0, data_created_at=now,
-            data_linked_schedule_id=linked_schedule_id,
+        meta = {"status": "pending"}
+        if linked_schedule_id is not None:
+            meta["linked_schedule_id"] = linked_schedule_id
+
+        event_id = create_event(
+            user_id=user_id,
+            event_title=title,
+            event_type="task",
+            event_source="manual",
+            event_description=description,
+            event_end_time=due_date,
+            event_priority=_priority,
+            event_is_completed=0,
+            event_show_in_todo=1,
+            event_meta_json=json.dumps(meta, ensure_ascii=False),
+            event_created_at=now,
         )
         self._update_sync_version(user_id)
-        return task_id
+        return event_id
 
     def get_all(self, user_id: str) -> list[dict]:
-        return list_tasks_by_user(user_id)
+        return list_events_by_user(user_id, event_type="task")
 
     def update(self, user_id: str, task_id: int, title: str = None,
                description: str = None, due_date: str = None,
                priority: str = None, status: str = None,
                linked_schedule_id: int | None | object = None) -> None:
-        task = get_task(task_id)
-        if not task or task["user_id"] != user_id:
+        event = get_event(task_id)
+        if not event or event["user_id"] != user_id:
             raise ValueError("Task not found: {}".format(task_id))
+
         _priority = None
         if priority is not None:
             if isinstance(priority, int):
                 _priority = priority
             else:
                 _priority = int(str(priority).lstrip("p") or "2")
-        now = datetime.utcnow().isoformat()
-        update_task(task_id, title=title, description=description,
-                    due_date=due_date, priority=_priority, status=status,
-                    linked_schedule_id=linked_schedule_id,
-                    updated_at=now)
+
+        is_completed = None
+        meta = {}
+        if event.get("event_meta_json"):
+            try:
+                meta = json.loads(event["event_meta_json"])
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        if status is not None:
+            meta["status"] = status
+            is_completed = 1 if status == "completed" else 0
+        if linked_schedule_id is not None:
+            meta["linked_schedule_id"] = linked_schedule_id
+
+        update_event(
+            task_id,
+            event_title=title,
+            event_description=description,
+            event_end_time=due_date,
+            event_priority=_priority,
+            event_is_completed=is_completed,
+            event_meta_json=json.dumps(meta, ensure_ascii=False) if meta else None,
+        )
         self._update_sync_version(user_id)
 
     def delete(self, user_id: str, task_id: int) -> bool:
-        task = get_task(task_id)
-        if not task or task["user_id"] != user_id:
+        event = get_event(task_id)
+        if not event or event["user_id"] != user_id:
             return False
-        delete_task(task_id)
+        delete_event(task_id)
         self._update_sync_version(user_id)
         return True

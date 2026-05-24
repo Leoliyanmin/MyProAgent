@@ -56,6 +56,7 @@
             <button class="action-btn" type="button" @click="bindEmail">绑定邮箱</button>
           </div>
         </template>
+        <p v-if="emailError" class="status-text status-error" style="margin-top: 8px;">{{ emailError }}</p>
       </article>
 
       <article class="panel">
@@ -779,11 +780,14 @@ const syncEmail = async () => {
 const unbindEmail = async () => {
   try {
     await emailAPI.unbind()
+    emailError.value = ''
     await loadEmailStatus()
     const emailStore = useEmailStore()
+    emailStore.stopPolling()
+    emailStore.clearAll()
     await emailStore.fetchStatus()
   } catch (err) {
-    bindingError.value = err?.message || '解绑失败'
+    emailError.value = err?.message || '解绑失败'
   }
 }
 
@@ -826,6 +830,7 @@ const bindBb = async () => {
 }
 
 const bindingError = ref('')
+const emailError = ref('')
 const bindingProgress = reactive({ active: false, step: '' })
 const bbIcsUrl = ref('')
 

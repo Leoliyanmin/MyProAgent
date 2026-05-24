@@ -10,10 +10,7 @@ from typing import Any, Callable
 
 from .base import BaseTool
 
-try:
-    from local_backend.service.email_service import EmailService
-except Exception:  # pragma: no cover
-    EmailService = None
+from local_backend.service.email_service import EmailService
 
 
 class _EmailToolBase(BaseTool):
@@ -87,8 +84,8 @@ class GetEmailsTool(_EmailToolBase):
             },
             "max_results": {
                 "type": "integer",
-                "description": "Maximum number of emails to return (default 20, max 50).",
-                "default": 20,
+                "description": "Maximum number of emails to return (default 50, max 100).",
+                "default": 50,
             },
         },
         "required": [],
@@ -120,11 +117,11 @@ class GetEmailsTool(_EmailToolBase):
             if not messages:
                 return f"No emails found matching '{query}'."
 
-        max_results = int(kwargs.get("max_results") or 20)
+        max_results = int(kwargs.get("max_results") or 50)
         if max_results < 1:
-            max_results = 20
-        if max_results > 50:
             max_results = 50
+        if max_results > 100:
+            max_results = 100
         all_messages = messages
         messages = all_messages[:max_results]
         total = len(all_messages)
@@ -211,8 +208,8 @@ class AnalyzeEmailsTool(_EmailToolBase):
             },
             "max_results": {
                 "type": "integer",
-                "description": "Maximum number of recent emails to analyze (default 20, max 50).",
-                "default": 20,
+                "description": "Maximum number of recent emails to analyze (default 50, max 100).",
+                "default": 50,
             },
         },
         "required": [],
@@ -245,11 +242,11 @@ class AnalyzeEmailsTool(_EmailToolBase):
         if not messages:
             return "No synced emails to analyze. Please sync emails first in the Email page."
 
-        max_results = int(kwargs.get("max_results") or 20)
+        max_results = int(kwargs.get("max_results") or 50)
         if max_results < 1:
-            max_results = 20
-        if max_results > 50:
             max_results = 50
+        if max_results > 100:
+            max_results = 100
         messages = messages[:max_results]
 
         query = kwargs.get("query") or "重要的邮件"
@@ -377,6 +374,181 @@ class UnstarEmailTool(_EmailToolBase):
         if data.get("success"):
             return f"Email #{email_id} unstarred."
         return f"Error: {data.get('message', 'Failed to unstar email')}"
+
+
+class SyncEmailsTool(_EmailToolBase):
+    name = "sync_emails"
+    description = "触发邮件同步。调用此工具从绑定的邮箱拉取最新邮件。"
+    parameters = {
+        "type": "object",
+        "properties": {
+            "max_messages": {
+                "type": "integer",
+                "description": "最大同步邮件数（默认 50）",
+                "default": 50,
+            },
+        },
+        "required": [],
+    }
+
+    async def execute(self, **kwargs) -> str:
+        user_id, error = self._require_auth()
+        if error:
+            return error
+        max_messages = kwargs.get("max_messages") or 50
+        service = _get_service()
+        if service is None:
+            return "Error: Email service not available."
+        result = service.sync_email_data(user_id, max_messages=max_messages)
+        if result.get("success"):
+            data = result.get("data", {})
+            db_total = data.get("db_total", 0)
+            fetched = data.get("synced", 0)
+            new_count = data.get("new_count", 0)
+            if new_count > 0:
+                return f"邮件同步完成。本地共 {db_total} 封，本次新增 {new_count} 封。"
+            return f"邮件同步完成。本地共 {db_total} 封，无新邮件。"
+        return f"Error: {result.get('message', '同步失败')}"
+
+
+class DeleteEmailTool(_EmailToolBase):
+    name = "delete_email"
+    description = "将邮件移入垃圾箱（软删除）。用户说'删除邮件'时用这个。"
+    parameters = {
+        "type": "object",
+        "properties": {
+            "message_id": {"type": "integer", "description": "邮件 ID"},
+        },
+        "required": ["message_id"],
+    }
+
+    async def execute(self, **kwargs) -> str:
+        user_id, error = self._require_auth()
+        if error:
+            return error
+        message_id = kwargs.get("message_id")
+        if message_id is None:
+            return "Error: message_id is required."
+        service = _get_service()
+        if service is None:
+            return "Error: Email service not available."
+        result = service.delete_email_message(user_id, int(message_id))
+        if result.get("success"):
+            return result.get("message") or f"邮件 #{message_id} 已移入垃圾箱。"
+        return f"Error: {result.get('message', '删除失败')}"
+
+
+class GetTrashEmailsTool(_EmailToolBase):
+    name = "get_trash_emails"
+    description = "查看垃圾箱中的邮件列表。当用户问'垃圾箱里有什么'或'查看已删除的邮件'时使用。"
+    parameters = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+    }
+
+    async def execute(self, **kwargs) -> str:
+        user_id, error = self._require_auth()
+        if error:
+            return error
+        service = _get_service()
+        if service is None:
+            return "Error: Email service not available."
+        result = service.get_trash_messages(user_id)
+
+        if not result.get("success"):
+            return f"Error: {result.get('message', 'Failed to get trash messages')}"
+
+        messages = result.get("messages", [])
+        if not messages:
+            return "垃圾箱为空。"
+
+        lines = [f"垃圾箱中共有 {len(messages)} 封邮件：", ""]
+        for i, msg in enumerate(messages, 1):
+            title = msg.get("title") or "(No subject)"
+            sender = msg.get("sender") or ""
+            time = (msg.get("release_time") or "")[:16].replace("T", " ")
+            msg_id = msg.get("id") or msg.get("message_id") or ""
+            lines.append(f"{i}. [#{msg_id}] \"{title}\"")
+            lines.append(f"   From: {sender}  |  {time}")
+            lines.append("")
+        return "\n".join(lines).strip()
+
+
+class RestoreEmailTool(_EmailToolBase):
+    name = "restore_email"
+    description = "从垃圾箱恢复一封邮件到收件箱。当用户说'恢复那封邮件'或'撤销删除'时使用。"
+    parameters = {
+        "type": "object",
+        "properties": {
+            "message_id": {"type": "integer", "description": "邮件 ID"},
+        },
+        "required": ["message_id"],
+    }
+
+    async def execute(self, **kwargs) -> str:
+        user_id, error = self._require_auth()
+        if error:
+            return error
+        message_id = kwargs.get("message_id")
+        if message_id is None:
+            return "Error: message_id is required."
+        service = _get_service()
+        if service is None:
+            return "Error: Email service not available."
+        result = service.restore_email_message(user_id, int(message_id))
+        if result.get("success"):
+            return result.get("message") or f"邮件 #{message_id} 已恢复。"
+        return f"Error: {result.get('message', '恢复失败')}"
+
+
+class PermanentDeleteEmailTool(_EmailToolBase):
+    name = "permanent_delete_email"
+    description = "永久删除一封邮件。此操作不可撤销。当用户明确说'永久删除'时使用。"
+    parameters = {
+        "type": "object",
+        "properties": {
+            "message_id": {"type": "integer", "description": "邮件 ID"},
+        },
+        "required": ["message_id"],
+    }
+
+    async def execute(self, **kwargs) -> str:
+        user_id, error = self._require_auth()
+        if error:
+            return error
+        message_id = kwargs.get("message_id")
+        if message_id is None:
+            return "Error: message_id is required."
+        service = _get_service()
+        if service is None:
+            return "Error: Email service not available."
+        result = service.permanent_delete_email(user_id, int(message_id))
+        if result.get("success"):
+            return result.get("message") or f"邮件 #{message_id} 已永久删除。"
+        return f"Error: {result.get('message', '永久删除失败')}"
+
+
+class EmptyTrashTool(_EmailToolBase):
+    name = "empty_trash"
+    description = "清空垃圾箱，永久删除垃圾箱中的所有邮件。此操作不可撤销。"
+    parameters = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+    }
+
+    async def execute(self, **kwargs) -> str:
+        user_id, error = self._require_auth()
+        if error:
+            return error
+        service = _get_service()
+        if service is None:
+            return "Error: Email service not available."
+        result = service.empty_trash(user_id)
+        if result.get("success"):
+            return result.get("message") or "垃圾箱已清空。"
+        return f"Error: {result.get('message', '清空垃圾箱失败')}"
 
 
 def _build_analysis_prompt(

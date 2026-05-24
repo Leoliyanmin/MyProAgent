@@ -55,3 +55,22 @@ async def sync_from_server(sync_data: SyncRequest, user_id: str = Depends(get_cu
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+
+
+@router.get("/tasks")
+async def sync_tasks(user_id: str = Depends(get_current_user_id)):
+    """拉取 Agent 创建的任务，返回给前端"""
+    try:
+        from service.task_service import TaskService
+        task_service = TaskService()
+        result = task_service.get_tasks(user_id)
+        if not result.get('success'):
+            raise HTTPException(status_code=400, detail=result.get('message', '获取任务失败'))
+        return {
+            'success': True,
+            'tasks': result.get('tasks', [])
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"任务同步失败: {str(e)}")

@@ -660,17 +660,24 @@ const saveEvent = async () => {
       }
     }
   } else {
-    calendarStore.addEvent(draftEvent.value)
     try {
+      // 先创建后端日程，拿到真实 schedule_id
       const result = await calendarStore.createScheduleOnBackend(draftEvent.value)
-      if (result && result.schedule_id) {
-        const idx = calendarStore.basicEvents.findIndex(e => e.id === draftEvent.value.id)
+      const scheduleId = result?.schedule_id || draftEvent.value.id
+
+      // 用真实 ID 创建本地事件和关联 TODO
+      calendarStore.addEvent({ ...draftEvent.value, id: scheduleId })
+
+      if (result?.schedule_id) {
+        const idx = calendarStore.basicEvents.findIndex(e => e.id === scheduleId)
         if (idx !== -1) {
-          calendarStore.basicEvents[idx] = { ...calendarStore.basicEvents[idx], id: result.schedule_id, source: 'remote' }
+          calendarStore.basicEvents[idx] = { ...calendarStore.basicEvents[idx], source: 'remote' }
         }
       }
     } catch (err) {
       console.error('Failed to sync new schedule to backend:', err)
+      // 后端失败时用本地 ID 兜底
+      calendarStore.addEvent(draftEvent.value)
     }
   }
   closeModal()

@@ -54,84 +54,6 @@ CREATE TABLE IF NOT EXISTS account (
     UNIQUE (user_id, account_platform_type)
 );
 
-CREATE TABLE IF NOT EXISTS category (
-    category_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT NOT NULL,
-    category_kind TEXT NOT NULL,
-    category_title TEXT NOT NULL,
-    category_content TEXT,
-    category_link TEXT,
-    category_source TEXT,
-    category_external_id TEXT,
-    category_term TEXT,
-    category_meta_json TEXT,
-    category_updated_at TEXT,
-    category_created_at TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_category_user_kind_link
-ON category (
-    user_id,
-    category_kind,
-    COALESCE(category_link, '')
-);
-
-CREATE TABLE IF NOT EXISTS data (
-    data_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT NOT NULL,
-    data_category_id INTEGER NOT NULL,
-    data_content_type TEXT NOT NULL,
-    data_classification_code INTEGER NOT NULL DEFAULT 1 CHECK (data_classification_code IN (1, 2, 3, 4)),
-    data_title TEXT NOT NULL,
-    data_content_text TEXT,
-    data_link_url TEXT,
-    data_release_time TEXT,
-    data_ddl_time TEXT,
-    data_is_previewable INTEGER NOT NULL CHECK (data_is_previewable IN (0, 1)),
-    data_source TEXT,
-    data_external_id TEXT,
-    data_term TEXT,
-    data_week TEXT,
-    data_weekday INTEGER,
-    data_period_start INTEGER,
-    data_period_end INTEGER,
-    data_start_time TEXT,
-    data_end_time TEXT,
-    data_meta_json TEXT,
-    data_raw_json TEXT,
-    data_updated_at TEXT,
-    data_created_at TEXT NOT NULL,
-    data_linked_schedule_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (data_category_id) REFERENCES category(category_id)
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_data_user_category_type_link
-ON data (
-    user_id,
-    data_category_id,
-    data_content_type,
-    COALESCE(data_link_url, '')
-);
-
-CREATE TABLE IF NOT EXISTS schedule (
-    schedule_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT NOT NULL,
-    schedule_event_type TEXT NOT NULL,
-    schedule_priority INTEGER NOT NULL DEFAULT 2 CHECK (schedule_priority IN (0, 1, 2, 3)),
-    schedule_is_completed INTEGER NOT NULL DEFAULT 0 CHECK (schedule_is_completed IN (0, 1)),
-    schedule_title TEXT NOT NULL,
-    schedule_start_time TEXT NOT NULL,
-    schedule_end_time TEXT NOT NULL,
-    schedule_location TEXT,
-    schedule_description TEXT,
-    schedule_related_link TEXT,
-    schedule_recurrence_rule TEXT,
-    schedule_color_tag TEXT,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
 CREATE TABLE IF NOT EXISTS session (
     session_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
@@ -162,7 +84,83 @@ CREATE TABLE IF NOT EXISTS perm (
     perm_call_method TEXT NOT NULL
 );
 
-COMMIT;
+CREATE TABLE IF NOT EXISTS event (
+    event_id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id           TEXT NOT NULL,
+    event_title       TEXT NOT NULL,
+    event_type        TEXT NOT NULL DEFAULT 'manual',
+    event_source      TEXT NOT NULL DEFAULT 'manual',
+    event_start_time  TEXT,
+    event_end_time    TEXT,
+    event_location    TEXT,
+    event_description TEXT,
+    event_link_url    TEXT,
+    event_is_completed INTEGER DEFAULT 0,
+    event_show_in_todo  INTEGER DEFAULT 1,
+    event_priority    INTEGER DEFAULT 2,
+    event_color_tag   TEXT DEFAULT '#007aff',
+    event_meta_json   TEXT,
+    event_created_at  TEXT NOT NULL,
+    event_updated_at  TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
--- Migration: for existing databases that lack the data_linked_schedule_id column,
+CREATE INDEX IF NOT EXISTS idx_event_user_type ON event(user_id, event_type);
+CREATE INDEX IF NOT EXISTS idx_event_user_todo ON event(user_id, event_show_in_todo);
+CREATE INDEX IF NOT EXISTS idx_event_user_source ON event(user_id, event_source);
+
+CREATE TABLE IF NOT EXISTS user_setting (
+    user_id              TEXT PRIMARY KEY,
+    avatar_url           TEXT,
+    bio                  TEXT,
+    current_focus        TEXT,
+    work_preference      TEXT,
+    skills               TEXT,
+    theme_config         TEXT,
+    notification_enabled INTEGER NOT NULL DEFAULT 1,
+    privacy_share_data   INTEGER NOT NULL DEFAULT 0,
+    updated_at           TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS email_account (
+    account_id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id             TEXT NOT NULL,
+    email_address       TEXT NOT NULL,
+    encrypted_password  TEXT NOT NULL,
+    bind_time           TEXT,
+    last_sync_time      TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS email_message (
+    message_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id        TEXT NOT NULL,
+    account_id     INTEGER NOT NULL,
+    mail_uid       TEXT NOT NULL,
+    subject        TEXT NOT NULL,
+    sender         TEXT NOT NULL,
+    recipients     TEXT,
+    body_text      TEXT,
+    body_html      TEXT,
+    received_at    TEXT,
+    is_read        INTEGER DEFAULT 0,
+    status         INTEGER DEFAULT 0,
+    created_at     TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (account_id) REFERENCES email_account(account_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS starred_emails (
+    star_id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id        TEXT NOT NULL,
+    email_id       INTEGER NOT NULL,
+    reason         TEXT,
+    source         TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('ai', 'manual')),
+    starred_at     TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (email_id) REFERENCES email_message(message_id) ON DELETE CASCADE
+);
+
+COMMIT;
 -- run this manually: ALTER TABLE data ADD COLUMN data_linked_schedule_id INTEGER;

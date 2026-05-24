@@ -8,43 +8,41 @@ router = APIRouter(prefix="/api/v1", tags=["courses"])
 @router.get("/courses")
 async def get_courses(user_id: str = Depends(get_current_user_id)):
     """获取已同步的TIS课程列表（从DB读取）"""
-    from local_backend.database.code.command.database_command import list_tis_courses_by_user, list_tis_events_by_user
+    import json
+    from local_backend.database.code.command.database_command import list_events_by_user
 
-    courses_raw = list_tis_courses_by_user(user_id)
-    events = list_tis_events_by_user(user_id)
-
-    events_by_course = {}
-    for ev in events:
-        cid = ev.get('course_id')
-        if cid not in events_by_course:
-            events_by_course[cid] = []
-        events_by_course[cid].append(ev)
+    events = list_events_by_user(user_id, event_type="course", event_source="tis")
 
     courses = []
-    for c in courses_raw:
-        cid = c.get('course_id')
-        c_events = events_by_course.get(cid, [])
+    for ev in events:
+        meta = {}
+        if ev.get("event_meta_json"):
+            try:
+                meta = json.loads(ev["event_meta_json"])
+            except (json.JSONDecodeError, TypeError):
+                pass
 
-        if c_events:
-            ps = min(e.get('period_start', 0) for e in c_events)
-            pe = max(e.get('period_end', 0) for e in c_events)
-            starts = [e.get('start_time', '') for e in c_events if e.get('start_time')]
-            ends = [e.get('end_time', '') for e in c_events if e.get('end_time')]
-            periods = f"{ps}-{pe}节" if ps and pe else ''
-            start = min(starts) if starts else ''
-            end = max(ends) if ends else ''
+        schedule_events = meta.get("schedule_events", [])
+        if schedule_events:
+            ps = min(e.get("period_start", 0) for e in schedule_events)
+            pe = max(e.get("period_end", 0) for e in schedule_events)
+            starts = [e.get("start_time", "") for e in schedule_events if e.get("start_time")]
+            ends = [e.get("end_time", "") for e in schedule_events if e.get("end_time")]
+            periods = f"{ps}-{pe}节" if ps and pe else ""
+            start = min(starts) if starts else ""
+            end = max(ends) if ends else ""
         else:
-            periods = start = end = ''
+            periods = start = end = ""
 
         courses.append({
-            'category_title': c.get('course_name', ''),
-            'teacher': c.get('teacher', ''),
-            'weeks': c.get('weeks', ''),
-            'location': c.get('location', ''),
-            'periods': periods,
-            'start': start,
-            'end': end,
-            'category_term': c.get('term', ''),
+            "category_title": ev.get("event_title", ""),
+            "teacher": meta.get("teacher", ""),
+            "weeks": meta.get("weeks", ""),
+            "location": ev.get("event_location", meta.get("location", "")),
+            "periods": periods,
+            "start": start,
+            "end": end,
+            "category_term": meta.get("term", ""),
         })
 
-    return {'success': True, 'courses': courses}
+    return {"success": True, "courses": courses}

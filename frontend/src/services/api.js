@@ -168,6 +168,25 @@ export const tasksAPI = {
   }
 }
 
+// ==================== Events API (unified) ====================
+
+export const eventsAPI = {
+  list: async (params = {}) => {
+    const qs = new URLSearchParams(params).toString()
+    return fetchWithAuth(`/events/${qs ? '?' + qs : ''}`)
+  },
+  get: async (eventId) => fetchWithAuth(`/events/${eventId}`),
+  create: async (data) => fetchWithAuth('/events/', {
+    method: 'POST', body: JSON.stringify(data)
+  }),
+  update: async (eventId, data) => fetchWithAuth(`/events/${eventId}`, {
+    method: 'PUT', body: JSON.stringify(data)
+  }),
+  delete: async (eventId) => fetchWithAuth(`/events/${eventId}`, {
+    method: 'DELETE'
+  }),
+}
+
 // ==================== Schedules API ====================
 
 export const schedulesAPI = {

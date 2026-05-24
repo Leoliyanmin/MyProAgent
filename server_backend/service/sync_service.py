@@ -23,21 +23,15 @@ class SyncService:
         if not user:
             return {"success": False, "message": "User not found"}
 
-        if data_type == "task":
-            db.delete_server_tasks_by_user(user_id)
-            for row in sync_data:
+        if data_type == "event":
+            db.delete_events_by_user(user_id)
+            synced = 0
+            for row in (sync_data if isinstance(sync_data, list) else []):
                 if not isinstance(row, dict):
                     continue
-                db.create_server_task(
-                    user_id=user_id,
-                    title=row.get("title", ""),
-                    description=row.get("description"),
-                    priority=row.get("priority", 2),
-                    status=row.get("status", "pending"),
-                    due_date=row.get("due_date"),
-                    created_at=row.get("created_at"),
-                )
-            return {"success": True, "message": "Synced", "synced_count": len(sync_data)}
+                db.upsert_event(user_id, row)
+                synced += 1
+            return {"success": True, "message": "Synced", "synced_count": synced}
 
         if data_type == "user_setting":
             if isinstance(sync_data, list) and sync_data:
@@ -46,34 +40,7 @@ class SyncService:
                 db.upsert_user_setting(user_id, **sync_data)
             return {"success": True, "message": "Synced", "synced_count": 1}
 
-        if data_type == "tis":
-            db.delete_server_tis_by_user(user_id)
-            courses = sync_data if isinstance(sync_data, list) else []
-            synced = 0
-            for row in courses:
-                if not isinstance(row, dict):
-                    continue
-                cid = db.create_server_tis_course(
-                    user_id=user_id, course_name=row.get("course_name", ""),
-                    teacher=row.get("teacher"), location=row.get("location"),
-                    weeks=row.get("weeks"), term=row.get("term"),
-                    raw_data=row.get("raw_data"),
-                )
-                events = row.get("events", [])
-                if isinstance(events, list):
-                    for ev in events:
-                        db.create_server_tis_event(
-                            course_id=cid, user_id=user_id,
-                            day_of_week=ev.get("day_of_week", 0),
-                            week_num=ev.get("week_num", 1),
-                            period_start=ev.get("period_start", 1),
-                            period_end=ev.get("period_end", 1),
-                            start_time=ev.get("start_time"),
-                            end_time=ev.get("end_time"),
-                        )
-                synced += 1
-            return {"success": True, "message": "Synced", "synced_count": synced}
-
+        # fallback: generic sync
         push_payload = {
             "user": {
                 "user_id": user_id,
@@ -106,6 +73,10 @@ class SyncService:
         logger.info(f"开始向客户端同步数据: user_id={user_id}, data_type={data_type}")
         
         try:
+            if data_type == "event":
+                events = db.list_events_by_user(user_id)
+                return {"success": True, "data": events, "synced_count": len(events)}
+
             result = self.sync_handle.handle_pull(user_id)
             if not result.get('ok'):
                 logger.error(f"向客户端同步数据失败: {result.get('message', 'Sync failed')}, user_id={user_id}")

@@ -65,7 +65,7 @@ export const useEmailStore = defineStore('email', () => {
   function startPolling() {
     if (_pollTimer) return
     fetchStatus()
-    _pollTimer = setInterval(checkNewEmails, 5000)
+    _pollTimer = setInterval(checkNewEmails, 60000)
   }
 
   function stopPolling() {
@@ -80,6 +80,13 @@ export const useEmailStore = defineStore('email', () => {
   })
 
   // store 创建时自动启动
+
+  function clearAll() {
+    messages.value = []
+    notifications.value = []
+    _knownIds.clear()
+    _firstRun = true
+  }
 
   // ---- 原有方法 ----
   async function fetchStatus() {
@@ -291,7 +298,7 @@ export const useEmailStore = defineStore('email', () => {
     bindStatus, messages, loading, syncing, sending, error,
     fetchStatus, fetchMessages, sync, send, deleteMessage,
     trashMessages, trashLoading, fetchTrash, restoreMessage, permanentDelete, emptyTrash,
-    notifications, checkNewEmails, dismissNotification, startPolling, stopPolling,
+    notifications, checkNewEmails, dismissNotification, startPolling, stopPolling, clearAll,
     prioritizedEmails, prioritizing, priorityStrategy, prioritize, clearPrioritized,
     starredEmails, starredLoading, fetchStarred, toggleStar, isStarred,
   }

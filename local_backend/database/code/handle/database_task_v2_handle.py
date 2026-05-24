@@ -6,15 +6,17 @@ class TaskV2Handle:
         self.operations = TaskV2Operations()
 
     def create_task(self, user_id: str, title: str, description: str = None,
-                    due_date: str = None, linked_schedule_id: int = None) -> dict:
+                    due_date: str = None, linked_schedule_id: int = None,
+                    priority: str = None) -> dict:
         if not user_id or not title:
             return {"ok": False, "status": 400, "message": "user_id 和 title 不能为空"}
         try:
-            task_id = self.operations.create(
+            event_id = self.operations.create(
                 user_id=user_id, title=title, description=description,
                 due_date=due_date, linked_schedule_id=linked_schedule_id,
+                priority=priority,
             )
-            return {"ok": True, "status": 201, "data": {"task_id": task_id}}
+            return {"ok": True, "status": 201, "data": {"event_id": event_id}}
         except Exception as e:
             return {"ok": False, "status": 500, "message": "创建任务失败: {}".format(e)}
 

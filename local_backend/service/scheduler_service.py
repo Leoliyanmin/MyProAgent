@@ -3,14 +3,9 @@ from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from database.code.operations.database_user_operations import list_users
-from database.code.operations.database_task_operations import TaskOperations
-from database.code.operations.database_task_v2_operations import TaskV2Operations
 from database.code.operations.database_user_setting_operations import UserSettingOperations
-from database.code.operations.database_schedule_operations import ScheduleOperations
-from database.code.command.database_command import list_tis_courses_by_user, list_tis_events_by_user
+from database.code.command.database_command import list_events_by_user
 
-schedule_ops = ScheduleOperations()
-task_v2_ops = TaskV2Operations()
 setting_ops = UserSettingOperations()
 from config import settings
 from service.agent_service import is_user_active
@@ -85,69 +80,29 @@ class SchedulerService:
                     continue
 
                 try:
-                    tasks = TaskOperations.get_tasks_by_user(user_id)
-                    schedules = schedule_ops.get_schedules_by_user(user_id)
-                    tasks_v2 = task_v2_ops.get_all(user_id)
+                    events = list_events_by_user(user_id)
                     user_setting = setting_ops.get(user_id)
 
-                    if not tasks and not schedules and not tasks_v2 and not user_setting:
+                    if not events and not user_setting:
                         continue
                     
                     headers = {"X-User-ID": str(user_id)}
                     all_ok = True
 
-                    if tasks:
+                    if events:
                         resp = requests.post(
                             f"{settings.SERVER_BACKEND_URL}/sync/from-client",
-                            json={"data_type": "data", "data": tasks},
+                            json={"data_type": "event", "data": [dict(r) for r in events]},
                             headers=headers,
                         )
                         if resp.status_code != 200:
                             all_ok = False
-                            logger.error(f"用户 {user_id} 任务同步HTTP错误: {resp.status_code}")
-
-                    if schedules:
-                        resp = requests.post(
-                            f"{settings.SERVER_BACKEND_URL}/sync/from-client",
-                            json={"data_type": "schedule", "data": schedules},
-                            headers=headers,
-                        )
-                        if resp.status_code != 200:
-                            all_ok = False
-                            logger.error(f"用户 {user_id} 日程同步HTTP错误: {resp.status_code}")
-
-                    if tasks_v2:
-                        resp = requests.post(
-                            f"{settings.SERVER_BACKEND_URL}/sync/from-client",
-                            json={"data_type": "task", "data": tasks_v2},
-                            headers=headers,
-                        )
-                        if resp.status_code != 200:
-                            all_ok = False
+                            logger.error(f"用户 {user_id} event同步HTTP错误: {resp.status_code}")
 
                     if user_setting:
                         resp = requests.post(
                             f"{settings.SERVER_BACKEND_URL}/sync/from-client",
                             json={"data_type": "user_setting", "data": [user_setting]},
-                            headers=headers,
-                        )
-                        if resp.status_code != 200:
-                            all_ok = False
-
-                    tis_courses = list_tis_courses_by_user(user_id)
-                    if tis_courses:
-                        tis_events = list_tis_events_by_user(user_id)
-                        event_map = {}
-                        for ev in tis_events:
-                            cid = ev.get("course_id")
-                            if cid not in event_map:
-                                event_map[cid] = []
-                            event_map[cid].append(ev)
-                        for c in tis_courses:
-                            c["events"] = event_map.get(c["course_id"], [])
-                        resp = requests.post(
-                            f"{settings.SERVER_BACKEND_URL}/sync/from-client",
-                            json={"data_type": "tis", "data": tis_courses},
                             headers=headers,
                         )
                         if resp.status_code != 200:

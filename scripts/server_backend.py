@@ -88,26 +88,15 @@ def init_database():
     try:
         bundle_root = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else bundle_dir
         schema_path = bundle_root / "server_backend" / "database" / "code" / "init" / "database_init.sql"
-        schema_v2_path = bundle_root / "server_backend" / "database" / "code" / "init" / "database_init_v2.sql"
         print(f"[server] Schema: {schema_path}", flush=True)
 
         from database.code.init.database_init import init_database as run_init
-        from database.code.init.database_init import _run_migrations_v2
 
         def init_one(db_path):
             db_path = Path(db_path)
             db_path.parent.mkdir(parents=True, exist_ok=True)
             print(f"[server] DB: {db_path}", flush=True)
             run_init(db_path=str(db_path), schema_path=schema_path)
-            import sqlite3
-            if schema_v2_path.exists():
-                v2_sql = schema_v2_path.read_text(encoding="utf-8")
-                with sqlite3.connect(str(db_path)) as conn:
-                    conn.execute("PRAGMA foreign_keys = ON;")
-                    conn.executescript(v2_sql)
-                    _run_migrations_v2(conn)
-                    conn.commit()
-                print(f"[server] v2 migration applied", flush=True)
 
         import server_backend.database.code.command.database_command as db_cmd
         init_one(db_cmd.DEFAULT_DB_PATH)

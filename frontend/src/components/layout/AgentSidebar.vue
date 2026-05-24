@@ -635,6 +635,8 @@ const refreshPanelsIfNeeded = async (toolNames = []) => {
 
   if (hasEmailMutation) {
     promises.push(emailStore.fetchStarred())
+    promises.push(emailStore.fetchMessages())
+    promises.push(emailStore.fetchTrash())
   }
 
   if (promises.length === 0) return
@@ -811,7 +813,7 @@ const sendMessage = async () => {
 
   const useFileContext = fmStore.isDirectorySet
 
-  if (!useFileContext && wsRef.value && wsRef.value.readyState === WebSocket.OPEN) {
+  if (wsRef.value && wsRef.value.readyState === WebSocket.OPEN) {
     wsRef.value.send(JSON.stringify({ type: 'chat', message }))
     // Don't set isSending to false here - the 'done' event will handle that
   } else {
@@ -1374,7 +1376,8 @@ watch(() => route.path, () => {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.message.agent {
+.message.agent,
+.message.assistant {
   background: white;
   color: #1d1d1f;
   align-self: flex-start;

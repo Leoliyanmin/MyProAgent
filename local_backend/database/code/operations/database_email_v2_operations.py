@@ -86,6 +86,10 @@ class EmailMessageV2Operations:
         for msg in self.list_trash(user_id):
             permanent_delete_email_message(msg["message_id"])
 
+    def delete_all_for_user(self, user_id: str) -> None:
+        from local_backend.database.code.command.database_command import delete_email_messages_by_user
+        delete_email_messages_by_user(user_id)
+
 
 class StarredEmailV2Operations:
     def add_star(self, user_id: str, email_id: int, reason: str | None = None, source: str = 'manual') -> tuple[int, bool]:

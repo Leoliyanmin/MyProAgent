@@ -4,6 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from business.task_logic import TaskLogic
 from database.code.handle.database_task_v2_handle import TaskV2Handle
+from database.code.command.database_command import get_event
 from logging_config import get_logger
 
 # 创建日志器
@@ -33,10 +34,10 @@ class TaskService:
             logger.error(f"创建任务失败: {result['message']}, user_id={user_id}")
             return {'success': False, 'message': result['message']}
         
-        logger.info(f"任务创建成功: user_id={user_id}, task_id={result['data']['task_id']}")
+        logger.info(f"任务创建成功: user_id={user_id}, event_id={result['data']['event_id']}")
         return {
             'success': True,
-            'task_id': result['data']['task_id']
+            'event_id': result['data']['event_id']
         }
 
     def get_tasks(self, user_id: str):
@@ -73,6 +74,20 @@ class TaskService:
 
     def delete_task(self, user_id: str, task_id: int):
         logger.info(f"删除任务: user_id={user_id}, task_id={task_id}")
+
+        # 获取关联的 schedule ID（在删除任务之前）
+        linked_schedule_id = None
+        try:
+            import json
+            event = get_event(task_id)
+            if event and event.get('user_id') == user_id and event.get('event_meta_json'):
+                try:
+                    meta = json.loads(event['event_meta_json'])
+                    linked_schedule_id = meta.get('linked_schedule_id')
+                except (json.JSONDecodeError, TypeError):
+                    pass
+        except Exception as e:
+            logger.warning(f"获取任务信息失败: {e}")
         
         result = self.task_handle.delete_task(user_id, task_id)
         if not result['ok']:
@@ -83,6 +98,16 @@ class TaskService:
             logger.warning(f"删除任务目标不存在，按幂等删除处理: user_id={user_id}, task_id={task_id}")
             return {'success': True, 'message': result['message']}
         
+        # 如果任务关联了日程，也删除日程
+        if linked_schedule_id:
+            try:
+                from service.schedule_service import ScheduleService
+                schedule_service = ScheduleService()
+                schedule_service.delete_schedule(user_id, linked_schedule_id)
+                logger.info(f"关联日程已删除: schedule_id={linked_schedule_id}")
+            except Exception as e:
+                logger.warning(f"删除关联日程 {linked_schedule_id} 失败: {e}")
+
         logger.info(f"任务删除成功: user_id={user_id}, task_id={task_id}")
         return {'success': True, 'message': '任务删除成功'}
 

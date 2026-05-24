@@ -54,7 +54,7 @@
 
     <!-- Sync result -->
     <div v-if="syncResult" class="sync-result">
-      同步完成：共 {{ syncResult.data.total }} 封邮件，新增 {{ syncResult.data.synced }} 封
+      同步完成：本地共 {{ syncResult.data.db_total ?? syncResult.data.total }} 封，新增 {{ syncResult.data.new_count ?? 0 }} 封
     </div>
 
     <!-- Main content: two columns -->
@@ -198,7 +198,8 @@
           <div v-else class="messages-list">
             <div v-for="msg in trashMessages" :key="msg.id" class="message-item trash-item">
               <div class="message-header">
-                <span class="msg-title">{{ msg.title || '(无主题)' }}</span>
+              <span class="msg-id">#{{ msg.id }}</span>
+              <span class="msg-title">{{ msg.title || '(无主题)' }}</span>
                 <span class="msg-sender">{{ msg.sender || '' }}</span>
                 <span class="msg-time">{{ formatTime(msg.release_time) }}</span>
               </div>
@@ -215,7 +216,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useEmailStore } from '../stores/email.js'
 
 const store = useEmailStore()
@@ -231,7 +232,20 @@ const syncResult = ref(null)
 const sendSuccess = ref(false)
 const sortBy = ref('time-desc')
 const showTrash = ref(false)
-let autoRefreshTimer = null
+
+watch(() => store.bindStatus.is_bound, (isBound, wasBound) => {
+  if (wasBound && !isBound) {
+    store.stopPolling()
+    store.clearAll()
+    syncResult.value = null
+    sendSuccess.value = false
+    selectedIndex.value = null
+  }
+  if (!wasBound && isBound) {
+    store.fetchMessages()
+    store.fetchStarred()
+  }
+})
 
 const trashCount = computed(() => store.trashMessages.length)
 const trashMessages = computed(() => store.trashMessages)
@@ -436,13 +450,6 @@ onMounted(async () => {
     store.fetchMessages()
     store.fetchStarred()
   }
-  autoRefreshTimer = setInterval(() => {
-    if (store.bindStatus.is_bound) store.fetchMessages()
-  }, 30000)
-})
-
-onUnmounted(() => {
-  if (autoRefreshTimer) clearInterval(autoRefreshTimer)
 })
 </script>
 
@@ -762,6 +769,14 @@ onUnmounted(() => {
   align-items: center;
   gap: 10px;
   min-width: 0;
+}
+
+.msg-id {
+  font-size: 11px;
+  font-weight: 500;
+  color: #9ca3af;
+  font-family: ui-monospace, monospace;
+  flex-shrink: 0;
 }
 
 .msg-title {

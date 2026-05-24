@@ -38,42 +38,54 @@ class BlackboardIcsRequest(BaseModel):
 
 
 def _parse_due(due_str: str):
-    """Parse '2026-05-27 23:59' into (date, date, start_time, end_time).
-    Start time rounds down to the nearest hour."""
+    """Parse a due date string into (date, date, start_time, end_time).
+
+    Accepts multiple formats: 'YYYY-MM-DD HH:MM', 'YYYY-MM-DD',
+    'YYYY-MM-DDTHH:MM:SS', 'YYYY-MM-DD HH:MM:SS'.
+
+    Returns (date, date, start_time, end_time) on success,
+    or ('', '', '', '') if unparseable or empty.
+    """
     if not due_str:
         return '', '', '', ''
-    try:
-        from datetime import datetime
-        dt = datetime.strptime(due_str.strip(), '%Y-%m-%d %H:%M')
-        date = dt.strftime('%Y-%m-%d')
-        end_time = dt.strftime('%H:%M')
-        start_hour = dt.replace(minute=0).strftime('%H:%M')
-        return date, date, start_hour, end_time
-    except ValueError:
-        return due_str, '', '', ''
+    from datetime import datetime
+
+    due = due_str.strip()
+    formats = (
+        ('%Y-%m-%d %H:%M', True),
+        ('%Y-%m-%d', False),
+        ('%Y-%m-%dT%H:%M:%S', True),
+        ('%Y-%m-%d %H:%M:%S', True),
+    )
+    for fmt, has_time in formats:
+        try:
+            dt = datetime.strptime(due, fmt)
+            date = dt.strftime('%Y-%m-%d')
+            if has_time:
+                end_time = dt.strftime('%H:%M')
+                start_hour = dt.replace(minute=0).strftime('%H:%M')
+                return date, date, start_hour, end_time
+            return date, date, '23:00', '23:59'
+        except ValueError:
+            continue
+    return '', '', '', ''
 
 
 @router.get("/status")
 async def get_bb_status(user_id: str = Depends(get_current_user_id)):
     """获取Blackboard绑定状态（从DB读取）"""
-    from local_backend.database.code.command.database_command import list_categories_by_user, list_data_by_user
+    from local_backend.database.code.command.database_command import list_events_by_user
 
     result = blackboard_service.get_blackboard_status(user_id)
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '获取状态失败'))
 
-    categories = list_categories_by_user(user_id)
-    bb_courses = [c for c in categories
-                  if c.get('category_kind') == 'course' and c.get('category_source') == 'blackboard']
-    all_data = list_data_by_user(user_id)
-    bb_course_ids = {c['category_id'] for c in bb_courses}
-    assignments = [d for d in all_data
-                   if d.get('data_content_type') == 'assignment'
-                   and d.get('data_category_id') in bb_course_ids]
+    bb_courses = list_events_by_user(user_id, event_type="course", event_source="blackboard")
+    assignments = list_events_by_user(user_id, event_type="assignment", event_source="blackboard")
 
     result['courses_count'] = len(bb_courses)
     result['assignments_count'] = len(assignments)
-    result['course_names'] = [c.get('category_title', '') for c in bb_courses[:5]]
+    result['course_names'] = [c.get('event_title', '') for c in bb_courses[:5]]
     return result
 
 @router.post("/bind")
@@ -149,36 +161,35 @@ async def bind_with_ics(request: BlackboardIcsRequest, user_id: str = Depends(ge
 
 @router.get("/assignments")
 async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
-    """获取Blackboard作业列表，转换为日历事件+待办格式返回（从DB读取）"""
-    from local_backend.database.code.command.database_command import list_categories_by_user, list_data_by_user
+    """获取Blackboard作业列表（仅未来事件，去重）"""
+    import json
+    from datetime import datetime
+    from local_backend.database.code.command.database_command import list_events_by_user
 
-    categories = list_categories_by_user(user_id)
-    bb_course_map = {}
-    for c in categories:
-        if c.get('category_kind') == 'course' and c.get('category_source') == 'blackboard':
-            bb_course_map[c['category_id']] = c.get('category_title', '未知课程')
-
-    if not bb_course_map:
-        raise HTTPException(status_code=404, detail='未找到Blackboard课程数据，请先绑定Blackboard账号')
-
-    all_data = list_data_by_user(user_id)
-    assignments = [d for d in all_data
-                   if d.get('data_content_type') == 'assignment'
-                   and d.get('data_category_id') in bb_course_map]
-
-    if not assignments:
+    assignment_events = list_events_by_user(user_id, event_type="assignment", event_source="blackboard")
+    if not assignment_events:
         raise HTTPException(status_code=404, detail='Blackboard作业数据为空')
 
+    today = datetime.now().strftime('%Y-%m-%d')
     events = []
     todos = []
-    for item in assignments:
-        item_name = item.get('data_title', '未命名')
-        due_str = item.get('data_ddl_time', '')
+    for item in assignment_events:
+        item_name = item.get('event_title', '未命名')
+        due_str = item.get('event_end_time', '')
         start, end, start_time, end_time = _parse_due(due_str)
         if not start:
             continue
+        if start < today:
+            continue
 
-        course_name = bb_course_map.get(item.get('data_category_id'), '未知课程')
+        course_name = "Blackboard"
+        meta = {}
+        if item.get("event_meta_json"):
+            try:
+                meta = json.loads(item["event_meta_json"])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        course_name = meta.get("course_name", course_name)
 
         events.append({
             'title': item_name,
@@ -208,7 +219,7 @@ async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
         'success': True,
         'events': events,
         'todos': todos,
-        'total_courses': len(bb_course_map),
+        'total_courses': 1,
         'total_events': len(events),
         'total_todos': len(todos),
     }

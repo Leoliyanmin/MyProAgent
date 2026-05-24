@@ -36,8 +36,11 @@ class EmailV2Handle:
 
     def handle_unbind_email(self, user_id: str) -> dict:
         try:
+            from local_backend.database.code.command.database_command import delete_starred_emails_by_user
+            delete_starred_emails_by_user(user_id)
+            self.message_ops.delete_all_for_user(user_id)
             self.account_ops.delete(user_id)
-            return {"success": True, "message": "邮箱解绑成功"}
+            return {"success": True, "message": "邮箱解绑成功，已清除所有同步邮件"}
         except Exception as e:
             return {"success": False, "message": "解绑失败: {}".format(e)}
 
@@ -48,7 +51,9 @@ class EmailV2Handle:
                 return {"success": False, "message": "未绑定邮箱"}
             account_id = account["account_id"]
             recipient = account.get("email_address", "")
+            existing_ids = {m.get("mail_uid") for m in self.message_ops.list_all(user_id)}
             synced = 0
+            new_count = 0
             for msg in messages:
                 self.message_ops.upsert(
                     user_id=user_id, account_id=account_id,
@@ -61,8 +66,17 @@ class EmailV2Handle:
                     raw_html=msg.get("raw_html"),
                 )
                 synced += 1
+                if msg.get("mail_id", "") not in existing_ids:
+                    new_count += 1
             self.account_ops.update_sync_time(account_id)
-            return {"success": True, "message": "同步 {} 封邮件".format(synced)}
+            db_total = len(self.message_ops.list_all(user_id))
+            return {
+                "success": True,
+                "message": "同步 {} 封邮件（新增 {} 封）".format(synced, new_count),
+                "new_count": new_count,
+                "synced": synced,
+                "db_total": db_total,
+            }
         except Exception as e:
             return {"success": False, "message": "同步失败: {}".format(e)}
 

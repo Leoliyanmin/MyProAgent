@@ -4,8 +4,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from config import settings
 from presentation.auth_routes import router as auth_router
-from presentation.schedule_routes import router as schedule_router
-from presentation.task_routes import router as task_router
+# schedule_routes / task_routes / tis_routes — deprecated, replaced by event_routes
 from presentation.agent_routes import router as agent_router
 from presentation.sync_routes import router as sync_router
 from presentation.blackboard_routes import router as blackboard_router
@@ -13,6 +12,7 @@ from presentation.tis_routes import router as tis_router
 from presentation.scheduler_routes import router as scheduler_router
 from presentation.email_routes import router as email_router
 from presentation.courses_routes import router as courses_router
+from presentation.event_routes import router as event_router
 from logging_config import setup_logging
 from service.scheduler_service import scheduler_service
 
@@ -66,8 +66,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-app.include_router(schedule_router)
-app.include_router(task_router)
+# schedule_router / task_router — deprecated
 app.include_router(agent_router)
 app.include_router(sync_router)
 app.include_router(blackboard_router)
@@ -75,6 +74,7 @@ app.include_router(tis_router)
 app.include_router(scheduler_router)
 app.include_router(email_router)
 app.include_router(courses_router)
+app.include_router(event_router)
 
 
 @app.get("/")

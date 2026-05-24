@@ -30,10 +30,13 @@ from fastapi.middleware.gzip import GZipMiddleware
 try:
     from config import settings
     from presentation.auth_routes import router as auth_router
-    from presentation.schedule_routes import router as schedule_router
-    from presentation.task_routes import router as task_router
     from presentation.agent_routes import router as agent_router
     from presentation.sync_routes import router as sync_router
+    from presentation.blackboard_routes import router as blackboard_router
+    from presentation.tis_routes import router as tis_router
+    from presentation.courses_routes import router as courses_router
+    from presentation.event_routes import router as event_router
+    from presentation.scheduler_routes import router as scheduler_router
     from presentation.email_routes import router as email_router
     from logging_config import setup_logging
 except ImportError as e:
@@ -63,10 +66,13 @@ app.add_middleware(
 
 # 注册路由
 app.include_router(auth_router)
-app.include_router(schedule_router)
-app.include_router(task_router)
 app.include_router(agent_router)
 app.include_router(sync_router)
+app.include_router(blackboard_router)
+app.include_router(tis_router)
+app.include_router(courses_router)
+app.include_router(event_router)
+app.include_router(scheduler_router)
 app.include_router(email_router)
 
 
@@ -115,27 +121,15 @@ def init_database():
     try:
         bundle_root = Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else bundle_dir
         schema_path = bundle_root / "local_backend" / "database" / "code" / "init" / "database_init.sql"
-        schema_v2_path = bundle_root / "local_backend" / "database" / "code" / "init" / "database_init_v2.sql"
         print(f"[sidecar] Schema: {schema_path}", flush=True)
 
         from database.code.init.database_init import init_database as run_init
-        from database.code.init.database_init import _run_migrations_v2
 
         def init_one(db_path):
             db_path = Path(db_path)
             db_path.parent.mkdir(parents=True, exist_ok=True)
             print(f"[sidecar] DB: {db_path}", flush=True)
             run_init(db_path=str(db_path), schema_path=schema_path)
-            # PyInstaller 下 __file__ 路径与 --add-data 路径不一致，手动补 v2
-            import sqlite3
-            if schema_v2_path.exists():
-                v2_sql = schema_v2_path.read_text(encoding="utf-8")
-                with sqlite3.connect(str(db_path)) as conn:
-                    conn.execute("PRAGMA foreign_keys = ON;")
-                    conn.executescript(v2_sql)
-                    _run_migrations_v2(conn)
-                    conn.commit()
-                print(f"[sidecar] v2 migration applied", flush=True)
 
         import local_backend.database.code.command.database_command as db_cmd
         init_one(db_cmd.DEFAULT_DB_PATH)

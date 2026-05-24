@@ -3,8 +3,11 @@ import { setActivePinia, createPinia } from 'pinia'
 
 // Mock the API module
 vi.mock('@/services/api.js', () => ({
-  tasksAPI: {
-    getTasks: vi.fn(),
+  eventsAPI: {
+    list: vi.fn(() => Promise.resolve({ events: [] })),
+    create: vi.fn(() => Promise.resolve({ event_id: 1 })),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 

@@ -87,7 +87,7 @@ class EmailService:
             logger.error(f"绑定邮箱失败: {str(e)}")
             return {'success': False, 'message': f'绑定邮箱失败: {str(e)}'}
 
-    def sync_email_data(self, user_id: str, max_messages: int = 50) -> Dict:
+    def sync_email_data(self, user_id: str, max_messages: int = 50, incremental: bool = True) -> Dict:
         try:
             logger.info(f"同步邮件数据: user_id={user_id}")
 
@@ -100,7 +100,22 @@ class EmailService:
             app_password = self._decrypt_app_password(encrypted_password)
 
             scraper = MailScraper(email_address, app_password)
-            if max_messages:
+
+            # Incremental sync: use SINCE date if last_sync_time exists
+            if incremental:
+                last_sync = account_info.get('last_sync_time', '')
+                if last_sync:
+                    try:
+                        last_sync_dt = datetime.datetime.strptime(last_sync[:10], "%Y-%m-%d")
+                        days_since = max(1, (datetime.datetime.now() - last_sync_dt).days + 1)
+                        scrape_result = scraper.scrape_recent_mails(days=days_since)
+                        logger.info(f"增量同步: last_sync={last_sync}, days_since={days_since}, fetched={scrape_result['returned']}")
+                    except Exception:
+                        scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
+                else:
+                    # First sync: fetch all without limit, then subsequent syncs will be incremental
+                    scrape_result = scraper.scrape_mail_detail(max_messages=0)
+            elif max_messages:
                 scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
             else:
                 scrape_result = scraper.scrape_recent_mails(days=1)
@@ -113,12 +128,14 @@ class EmailService:
             )
 
             if sync_result['success']:
+                db_total = sync_result.get('db_total', len(sync_result.get('messages', [])))
                 return {
                     'success': True,
                     'message': sync_result['message'],
                     'data': {
-                        'total': scrape_result.get('total', 0),
+                        'db_total': db_total,
                         'synced': len(scrape_result.get('messages', [])),
+                        'new_count': sync_result.get('new_count', 0),
                     },
                 }
             else:

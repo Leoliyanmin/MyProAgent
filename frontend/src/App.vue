@@ -75,6 +75,9 @@ const loadInitialData = async () => {
       calendarStore.loadSchedules(),
       dashboardStore.loadTodosFromBackend()
     ])
+    try {
+      await calendarStore.importBlackboardAssignments()
+    } catch { /* user may not have Blackboard bound yet */ }
   } catch (err) {
     console.error('Failed to load initial data:', err)
   }

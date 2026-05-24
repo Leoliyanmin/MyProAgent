@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useDashboardStore } from './dashboard.js'
-import { schedulesAPI, tisAPI, blackboardAPI } from '../services/api.js'
+import { eventsAPI, tisAPI, blackboardAPI } from '../services/api.js'
 
 export const useCalendarStore = defineStore('calendar', () => {
   const dashboardStore = useDashboardStore()
@@ -87,7 +87,8 @@ export const useCalendarStore = defineStore('calendar', () => {
 
   const isLocalGeneratedId = (id) => {
     const numericId = Number(id)
-    return Number.isFinite(numericId) && numericId > 1000000000000
+    if (!Number.isFinite(numericId)) return true
+    return numericId > 1000000000000
   }
 
   const addEvent = (event) => {
@@ -130,37 +131,15 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
   }
 
-  const deleteTaskFromBackend = async (taskId) => {
-    try {
-      const { tasksAPI } = await import('../services/api.js')
-      await tasksAPI.deleteTask(taskId)
-    } catch (err) {
-      console.error('Failed to delete task from backend:', err)
-    }
-  }
-
   const removeEvent = async (id) => {
     const linkedTodo = dashboardStore.todos.find(t => t.linkedScheduleId === Number(id))
-
     if (linkedTodo) {
-      await deleteTaskFromBackend(linkedTodo.id)
-      dashboardStore.removeTodo(linkedTodo.id)
-    } else {
-      await deleteTaskFromBackend(id)
-      dashboardStore.removeTodo(id)
+      await dashboardStore.removeTodo(linkedTodo.id)
     }
 
-    const shouldDeleteRemote = !isLocalGeneratedId(id)
-    if (shouldDeleteRemote) {
-      try {
-        await schedulesAPI.deleteSchedule(id)
-      } catch (err) {
-        const message = String(err?.message || '').toLowerCase()
-        const isNotFound = message.includes('404') || message.includes('not found')
-        if (!isNotFound) {
-          console.error('Failed to delete schedule:', err)
-        }
-      }
+    const numericId = Number(id)
+    if (Number.isFinite(numericId)) {
+      try { await eventsAPI.delete(id) } catch (err) { /* ignore 404 */ }
     }
 
     basicEvents.value = basicEvents.value.filter(e => e.id !== id)
@@ -173,24 +152,23 @@ export const useCalendarStore = defineStore('calendar', () => {
     loading.value = true
     error.value = null
     try {
-      const schedules = await schedulesAPI.getSchedules()
-      const scheduleEvents = schedules.map(schedule => ({
-        id: schedule.id ?? schedule.schedule_id,
-        title: schedule.title ?? schedule.schedule_title,
-        start: toDateTimeParts(schedule.start_time ?? schedule.schedule_start_time).date,
-        end: toDateTimeParts(schedule.end_time ?? schedule.schedule_end_time).date,
-        startTime: toDateTimeParts(schedule.start_time ?? schedule.schedule_start_time).time,
-        endTime: toDateTimeParts(schedule.end_time ?? schedule.schedule_end_time).time,
-        isTodo: false,
-        source: schedule.source || 'remote',
-        color: schedule.color || schedule.color_tag || schedule.schedule_color_tag || priorityColors[schedule.schedule_priority] || '#ff9500',
-        priority: schedule.schedule_priority !== undefined ? schedule.schedule_priority : 2,
-        description: schedule.description || schedule.schedule_description || ''
+      const res = await eventsAPI.list()
+      const events = res.events || []
+      const scheduleEvents = events.map(e => ({
+        id: e.event_id,
+        title: e.event_title,
+        start: (e.event_start_time || '').slice(0, 10),
+        end: (e.event_end_time || '').slice(0, 10),
+        startTime: (e.event_start_time || '').slice(11, 16) || '',
+        endTime: (e.event_end_time || '').slice(11, 16) || '',
+        isTodo: !!e.event_show_in_todo,
+        source: e.event_source,
+        color: e.event_color_tag || '#007aff',
+        priority: e.event_priority ?? 2,
+        description: e.event_description || '',
+        completed: !!e.event_is_completed,
       }))
-      basicEvents.value = [
-        ...basicEvents.value.filter(e => e.source === 'tis' || e.source === 'blackboard'),
-        ...scheduleEvents
-      ]
+      basicEvents.value = scheduleEvents
     } catch (err) {
       error.value = err.message
       console.error('Failed to load schedules:', err)
@@ -201,34 +179,36 @@ export const useCalendarStore = defineStore('calendar', () => {
 
   const createScheduleOnBackend = async (eventData) => {
     try {
-      const result = await schedulesAPI.createSchedule({
-        title: eventData.title,
-        description: eventData.description || '',
-        start_time: combineDateAndTime(eventData.start, eventData.startTime, '00:00'),
-        end_time: combineDateAndTime(eventData.end || eventData.start, eventData.endTime, eventData.startTime || '23:59'),
-        color_tag: eventData.color || '#ff9500',
-        priority: normalizePriority(eventData.priority, 'p2')
+      const result = await eventsAPI.create({
+        event_title: eventData.title,
+        event_description: eventData.description || '',
+        event_start_time: combineDateAndTime(eventData.start, eventData.startTime, '00:00'),
+        event_end_time: combineDateAndTime(eventData.end || eventData.start, eventData.endTime, eventData.startTime || '23:59'),
+        event_color_tag: eventData.color || '#ff9500',
+        event_priority: normalizePriority(eventData.priority, 'p2'),
+        event_type: 'manual',
+        event_source: 'manual',
       })
       return result
     } catch (err) {
-      console.error('Failed to create schedule:', err)
+      console.error('Failed to create event:', err)
       throw err
     }
   }
 
   const updateScheduleOnBackend = async (scheduleId, eventData) => {
     try {
-      const result = await schedulesAPI.updateSchedule(scheduleId, {
-        title: eventData.title,
-        description: eventData.description,
-        start_time: combineDateAndTime(eventData.start, eventData.startTime, '00:00'),
-        end_time: combineDateAndTime(eventData.end || eventData.start, eventData.endTime, eventData.startTime || '23:59'),
-        color_tag: eventData.color,
-        priority: eventData.priority !== undefined ? normalizePriority(eventData.priority, 'p2') : undefined
+      const result = await eventsAPI.update(scheduleId, {
+        event_title: eventData.title,
+        event_description: eventData.description,
+        event_start_time: combineDateAndTime(eventData.start, eventData.startTime, '00:00'),
+        event_end_time: combineDateAndTime(eventData.end || eventData.start, eventData.endTime, eventData.startTime || '23:59'),
+        event_color_tag: eventData.color,
+        event_priority: eventData.priority !== undefined ? normalizePriority(eventData.priority, 'p2') : undefined,
       })
       return result
     } catch (err) {
-      console.error('Failed to update schedule:', err)
+      console.error('Failed to update event:', err)
       throw err
     }
   }

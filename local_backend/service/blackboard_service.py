@@ -226,27 +226,20 @@ class BlackboardService:
     
     def get_blackboard_status(self, user_id: str) -> Dict:
         try:
-            if user_id in self._bound_users:
-                bound_info = self._bound_users[user_id]
+            from database.code.command.database_command import list_accounts_by_user
+            accounts = list_accounts_by_user(user_id)
+            bb_account = None
+            for a in accounts:
+                if a.get('account_platform_type') == 'blackboard':
+                    bb_account = a
+                    break
+            if bb_account:
                 return {
                     'success': True,
                     'is_bound': True,
                     'username': user_id.split('@')[0] if '@' in user_id else user_id,
-                    'bind_time': bound_info.get('bind_time', ''),
-                    'last_sync_time': ''
-                }
-            json_path = os.path.join(_SAVE_DIR, f'{user_id}_blackboard_courses.json')
-            if os.path.exists(json_path):
-                import json as _json
-                with open(json_path, 'r', encoding='utf-8') as f:
-                    data = _json.load(f)
-                return {
-                    'success': True,
-                    'is_bound': True,
-                    'username': user_id.split('@')[0] if '@' in user_id else user_id,
-                    'bind_time': data.get('bind_time', ''),
-                    'last_sync_time': '',
-                    'courses_count': len(data.get('courses', [])),
+                    'bind_time': bb_account.get('account_bind_time', ''),
+                    'last_sync_time': bb_account.get('account_last_sync_time', ''),
                 }
             return {'success': True, 'is_bound': False, 'message': '未绑定Blackboard账号'}
         except Exception as e:
@@ -334,6 +327,23 @@ class BlackboardService:
                     'courses': courses_data,
                 }, f, ensure_ascii=False, indent=2)
             logger.info(f"Blackboard ICS 数据已保存: {json_path}")
+
+            try:
+                from database.code.command.database_command import create_account, list_accounts_by_user, delete_account
+                existing = list_accounts_by_user(user_id)
+                for a in existing:
+                    if a.get('account_platform_type') == 'blackboard':
+                        delete_account(a['account_id'])
+                create_account(
+                    user_id=user_id,
+                    account_platform_type='blackboard',
+                    account_platform_username=user_id.split('@')[0] if '@' in user_id else user_id,
+                    content=ics_url,
+                    account_bind_time=time.strftime('%Y-%m-%d %H:%M:%S'),
+                    account_last_sync_time=None,
+                )
+            except Exception as e:
+                logger.error(f"创建 Blackboard 账号记录失败: {e}")
 
             try:
                 from database.code.handle.database_bb_v2_handle import BbV2Handle

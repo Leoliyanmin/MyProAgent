@@ -31,12 +31,13 @@ class TisService:
                 del self._bound_users[user_id]
 
             from database.code.handle.database_tis_handle import TisHandle
-            from database.code.command.database_command import delete_tis_courses_by_user, delete_tis_events_by_user
+            from database.code.command.database_command import list_events_by_user, delete_event
 
             tis_handle = TisHandle()
             tis_handle.handle_unbind_tis(user_id)
-            delete_tis_events_by_user(user_id)
-            delete_tis_courses_by_user(user_id)
+            old_events = list_events_by_user(user_id, event_type="course", event_source="tis")
+            for ev in old_events:
+                delete_event(ev["event_id"])
 
             logger.info(f"TIS解绑成功，已清理数据库: user_id={user_id}")
             return {'success': True, 'message': 'TIS账号解绑成功'}

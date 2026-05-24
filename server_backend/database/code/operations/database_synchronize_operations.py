@@ -103,6 +103,26 @@ SCHEDULE_FIELDS = (
     "schedule_color_tag",
 )
 
+EVENT_FIELDS = (
+    "event_id",
+    "user_id",
+    "event_title",
+    "event_type",
+    "event_source",
+    "event_start_time",
+    "event_end_time",
+    "event_location",
+    "event_description",
+    "event_link_url",
+    "event_is_completed",
+    "event_show_in_todo",
+    "event_priority",
+    "event_color_tag",
+    "event_meta_json",
+    "event_created_at",
+    "event_updated_at",
+)
+
 SESSION_FIELDS = (
     "session_id",
     "user_id",
@@ -423,14 +443,8 @@ def _clear_user_data(user_id: str) -> None:
     for session in sessions:
         db.delete_session(session["session_id"])
 
-    for row in db.list_data_by_user(user_id):
-        db.delete_data(row["data_id"])
-
-    for row in db.list_categories_by_user(user_id):
-        db.delete_category(row["category_id"])
-
-    for row in db.list_schedule_by_user(user_id):
-        db.delete_schedule(row["schedule_id"])
+    for row in db.list_events_by_user(user_id):
+        db.delete_event(row["event_id"])
 
     for row in db.list_accounts_by_user(user_id):
         db.delete_account(row["account_id"])
@@ -458,9 +472,6 @@ class ServerSyncExporter:
         for sid in session_ids:
             chats.extend(db.list_chat_by_session(sid))
 
-        user_match_profile = db.get_user_match_profile(user_id)
-        match_results = db.list_match_results_by_user(user_id)
-
         payload = {
             "meta": {
                 "schema_version": 1,
@@ -468,16 +479,8 @@ class ServerSyncExporter:
                 "generated_at": _now_iso(),
             },
             "user": user_payload,
-            "user_match_profile": (
-                _pick(user_match_profile, USER_MATCH_PROFILE_FIELDS)
-                if user_match_profile is not None
-                else None
-            ),
-            "match_result": [_pick(row, MATCH_RESULT_FIELDS) for row in match_results],
             "account": [_pick(row, ACCOUNT_FIELDS) for row in db.list_accounts_by_user(user_id)],
-            "category": [_pick(row, CATEGORY_FIELDS) for row in db.list_categories_by_user(user_id)],
-            "data": [_pick(row, DATA_FIELDS) for row in db.list_data_by_user(user_id)],
-            "schedule": [_pick(row, SCHEDULE_FIELDS) for row in db.list_schedule_by_user(user_id)],
+            "event": [_pick(row, EVENT_FIELDS) for row in db.list_events_by_user(user_id)],
             "session": [_pick(row, SESSION_FIELDS) for row in sessions],
             "chat": [_pick(row, CHAT_FIELDS) for row in chats],
         }
@@ -550,51 +553,6 @@ class ServerSyncImporter:
                 user_source_device_id=user.get("user_source_device_id", existing_user.get("user_source_device_id")),
             )
 
-            user_match_profile = content.get("user_match_profile")
-            if "user_match_profile" in content and user_match_profile is None:
-                db.delete_user_match_profile(user_id)
-            elif isinstance(user_match_profile, dict):
-                answers = _normalize_answers_json(user_match_profile.get("answers"))
-                is_open = _normalize_binary_flag(user_match_profile.get("is_open"))
-                if is_open is None:
-                    is_open = 0
-                last_match_time = user_match_profile.get("last_match_time")
-                if _parse_iso_datetime(last_match_time) is None:
-                    last_match_time = None
-                if answers is not None:
-                    db.upsert_user_match_profile(
-                        user_id=user_id,
-                        answers=answers,
-                        is_open=is_open,
-                        last_match_time=last_match_time,
-                    )
-
-            if "match_result" in content:
-                db.delete_match_results_by_user(user_id)
-                match_results = content.get("match_result")
-                if isinstance(match_results, list):
-                    for row in match_results:
-                        if not isinstance(row, dict):
-                            continue
-                        if row.get("matched_user_id") is None:
-                            continue
-                        similarity_score = _coerce_float(row.get("similarity_score"))
-                        if similarity_score is None:
-                            continue
-                        created_at = row.get("created_at")
-                        if _parse_iso_datetime(created_at) is None:
-                            continue
-                        is_shared = _normalize_binary_flag(row.get("is_shared"))
-                        if is_shared is None:
-                            is_shared = 0
-                        db.create_match_result(
-                            user_id=user_id,
-                            matched_user_id=str(row.get("matched_user_id")),
-                            similarity_score=similarity_score,
-                            created_at=created_at,
-                            is_shared=is_shared,
-                        )
-
             _clear_user_data(user_id)
 
             for row in content.get("account", []):
@@ -614,80 +572,11 @@ class ServerSyncImporter:
                 )
 
             category_id_map: dict[int, int] = {}
-            for row in content.get("category", []):
-                if "category_id" not in row:
-                    continue
-                new_id = db.create_category(
-                    user_id=user_id,
-                    category_kind=row.get("category_kind", ""),
-                    category_title=row.get("category_title", ""),
-                    category_content=row.get("category_content"),
-                    category_link=row.get("category_link"),
-                    category_source=row.get("category_source"),
-                    category_external_id=row.get("category_external_id"),
-                    category_term=row.get("category_term"),
-                    category_meta_json=row.get("category_meta_json"),
-                    category_updated_at=row.get("category_updated_at"),
-                    category_created_at=row.get("category_created_at", _now_iso()),
-                )
-                category_id_map[int(row["category_id"])] = new_id
 
-            for row in content.get("data", []):
-                old_category_id = row.get("data_category_id")
-                if old_category_id is None:
-                    continue
-                new_category_id = category_id_map.get(int(old_category_id))
-                if new_category_id is None:
-                    continue
-                normalized_data_classification = _normalize_data_classification_code(
-                    row.get("data_classification_code")
-                )
-                if normalized_data_classification is None:
-                    normalized_data_classification = _default_data_classification_code(
-                        row.get("data_content_type")
-                    )
-                db.create_data(
-                    user_id=user_id,
-                    data_category_id=new_category_id,
-                    data_content_type=row.get("data_content_type", ""),
-                    data_classification_code=normalized_data_classification,
-                    data_title=row.get("data_title", ""),
-                    data_content_text=row.get("data_content_text"),
-                    data_link_url=row.get("data_link_url"),
-                    data_release_time=row.get("data_release_time"),
-                    data_ddl_time=row.get("data_ddl_time"),
-                    data_is_previewable=int(row.get("data_is_previewable", 0)),
-                    data_source=row.get("data_source"),
-                    data_external_id=row.get("data_external_id"),
-                    data_term=row.get("data_term"),
-                    data_week=row.get("data_week"),
-                    data_weekday=_coerce_int(row.get("data_weekday")),
-                    data_period_start=_coerce_int(row.get("data_period_start")),
-                    data_period_end=_coerce_int(row.get("data_period_end")),
-                    data_start_time=row.get("data_start_time"),
-                    data_end_time=row.get("data_end_time"),
-                    data_meta_json=row.get("data_meta_json"),
-                    data_raw_json=row.get("data_raw_json"),
-                    data_updated_at=row.get("data_updated_at"),
-                    data_created_at=row.get("data_created_at", _now_iso()),
-                )
+            for row in content.get("event", []):
+                user_id_str = str(user_id)
+                db.upsert_event(user_id_str, row)
 
-            for row in content.get("schedule", []):
-                db.create_schedule(
-                    user_id=user_id,
-                    schedule_event_type=row.get("schedule_event_type", ""),
-                    schedule_title=row.get("schedule_title", ""),
-                    schedule_start_time=row.get("schedule_start_time", _now_iso()),
-                    schedule_end_time=row.get("schedule_end_time", _now_iso()),
-                    schedule_location=row.get("schedule_location"),
-                    schedule_description=row.get("schedule_description"),
-                    schedule_related_link=row.get("schedule_related_link"),
-                    schedule_recurrence_rule=row.get("schedule_recurrence_rule"),
-                    schedule_color_tag=row.get("schedule_color_tag"),
-                    schedule_priority=_normalize_schedule_priority(row.get("schedule_priority")),
-                )
-
-            session_id_map: dict[int, int] = {}
             for row in content.get("session", []):
                 if "session_id" not in row:
                     continue

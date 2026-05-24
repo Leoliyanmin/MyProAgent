@@ -328,6 +328,14 @@ def permanent_delete_email_message(message_id: int, db_path: str | Path = DEFAUL
     _execute("UPDATE email_message SET status = 2 WHERE message_id = ?", (message_id,), db_path)
 
 
+def delete_email_messages_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM email_message WHERE user_id = ?", (user_id,), db_path)
+
+
+def delete_starred_emails_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM starred_emails WHERE user_id = ?", (user_id,), db_path)
+
+
 def create_starred_email(user_id, email_id, reason=None, source='manual', starred_at=None, db_path=DEFAULT_DB_PATH):
     import datetime
     if not starred_at:
@@ -1161,3 +1169,110 @@ def update_chat_trace(
 
 def delete_chat(chat_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM chat WHERE chat_id = ?", (chat_id,), db_path)
+
+
+# ==================== event ====================
+
+def create_event(
+    user_id: str, event_title: str,
+    event_type: str = "manual", event_source: str = "manual",
+    event_start_time: str | None = None, event_end_time: str | None = None,
+    event_location: str | None = None, event_description: str | None = None,
+    event_link_url: str | None = None,
+    event_is_completed: int = 0, event_show_in_todo: int = 1,
+    event_priority: int = 2, event_color_tag: str = "#007aff",
+    event_meta_json: str | None = None,
+    event_created_at: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> int:
+    import datetime
+    now = event_created_at or datetime.datetime.utcnow().isoformat()
+    return _execute(
+        """INSERT INTO event (user_id, event_title, event_type, event_source,
+           event_start_time, event_end_time, event_location, event_description,
+           event_link_url, event_is_completed, event_show_in_todo,
+           event_priority, event_color_tag, event_meta_json, event_created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, event_title, event_type, event_source,
+         event_start_time, event_end_time, event_location, event_description,
+         event_link_url, event_is_completed, event_show_in_todo,
+         event_priority, event_color_tag, event_meta_json, now),
+        db_path,
+    )
+
+
+def list_events_by_user(
+    user_id: str,
+    event_type: str | None = None,
+    event_source: str | None = None,
+    show_in_todo: int | None = None,
+    completed: int | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> list[dict]:
+    conditions = ["user_id = ?"]
+    params: list = [user_id]
+    if event_type is not None:
+        conditions.append("event_type = ?")
+        params.append(event_type)
+    if event_source is not None:
+        conditions.append("event_source = ?")
+        params.append(event_source)
+    if show_in_todo is not None:
+        conditions.append("event_show_in_todo = ?")
+        params.append(show_in_todo)
+    if completed is not None:
+        conditions.append("event_is_completed = ?")
+        params.append(completed)
+    where = " AND ".join(conditions)
+    return _fetch_all(
+        f"SELECT * FROM event WHERE {where} ORDER BY event_start_time ASC, event_id DESC",
+        tuple(params), db_path,
+    )
+
+
+def get_event(event_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    return _fetch_one("SELECT * FROM event WHERE event_id = ?", (event_id,), db_path)
+
+
+def update_event(
+    event_id: int,
+    event_title: str | None = None,
+    event_type: str | None = None,
+    event_start_time: str | None = None,
+    event_end_time: str | None = None,
+    event_location: str | None = None,
+    event_description: str | None = None,
+    event_link_url: str | None = None,
+    event_is_completed: int | None = None,
+    event_show_in_todo: int | None = None,
+    event_priority: int | None = None,
+    event_color_tag: str | None = None,
+    event_meta_json: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    import datetime
+    fields = []
+    params: list = []
+    mapping = {
+        "event_title": event_title, "event_type": event_type,
+        "event_start_time": event_start_time, "event_end_time": event_end_time,
+        "event_location": event_location, "event_description": event_description,
+        "event_link_url": event_link_url, "event_is_completed": event_is_completed,
+        "event_show_in_todo": event_show_in_todo, "event_priority": event_priority,
+        "event_color_tag": event_color_tag, "event_meta_json": event_meta_json,
+    }
+    for col, val in mapping.items():
+        if val is not None:
+            fields.append(f"{col} = ?")
+            params.append(val)
+    fields.append("event_updated_at = ?")
+    params.append(datetime.datetime.utcnow().isoformat())
+    params.append(event_id)
+    _execute(
+        f"UPDATE event SET {', '.join(fields)} WHERE event_id = ?",
+        tuple(params), db_path,
+    )
+
+
+def delete_event(event_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("DELETE FROM event WHERE event_id = ?", (event_id,), db_path)

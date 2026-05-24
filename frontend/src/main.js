@@ -9,13 +9,17 @@ const pinia = createPinia()
 app.use(pinia)
 
 async function startBackend() {
+  // Dev mode: backends already started by dev.js before Tauri opens
+  if (import.meta.env.DEV) {
+    console.log('[ProAgent] Dev mode: backends managed by dev.js, skipping spawn')
+    return
+  }
+
   try {
     const { Command } = await import('@tauri-apps/plugin-shell')
     const cmd = Command.sidecar('binaries/python-backend')
     cmd.spawn()
-    console.log('[ProAgent] Backend sidecar started')
-    // Wait for backend to be ready
-    await new Promise(resolve => setTimeout(resolve, 3000))
+    console.log('[ProAgent] Backend sidecar spawned')
   } catch (e) {
     // Not running in Tauri, skip (use external backend)
     console.log('[ProAgent] Not in Tauri environment, using external backend')
@@ -23,9 +27,13 @@ async function startBackend() {
 }
 
 async function init() {
-  await startBackend()
-  const authStore = useAuthStore()
-  await authStore.initAuth()
+  try {
+    await startBackend()
+    const authStore = useAuthStore()
+    await authStore.initAuth()
+  } catch (e) {
+    console.error('[ProAgent] Init error, mounting app anyway:', e)
+  }
   app.use(router)
   app.mount('#app')
 }

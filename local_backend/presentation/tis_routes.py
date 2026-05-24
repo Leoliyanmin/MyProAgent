@@ -32,12 +32,12 @@ class TisCookieRequest(BaseModel):
 async def get_tis_status(user_id: str = Depends(get_current_user_id)):
     """获取TIS绑定状态（从DB读取）"""
     from local_backend.database.code.handle.database_tis_handle import TisHandle
-    from local_backend.database.code.command.database_command import list_tis_courses_by_user
+    from local_backend.database.code.command.database_command import list_events_by_user
 
     tis_handle = TisHandle()
     db_status = tis_handle.handle_get_tis_status(user_id)
     if db_status.get('success') and db_status.get('is_bound'):
-        courses = list_tis_courses_by_user(user_id)
+        courses = list_events_by_user(user_id, event_type="course", event_source="tis")
         return {
             'success': True,
             'is_bound': True,
@@ -85,43 +85,54 @@ async def bind_with_cookie(request: TisCookieRequest, user_id: str = Depends(get
 
 @router.get("/schedule")
 async def get_tis_schedule(user_id: str = Depends(get_current_user_id), current_week: int = 1):
-    """获取TIS课表数据，转换为日历事件格式返回（整学期展开，从DB读取）"""
+    """获取TIS课表数据，转换为日历事件格式返回（从event表读取）"""
+    import json
     from datetime import datetime, timedelta
-    from local_backend.database.code.command.database_command import list_tis_events_by_user, list_tis_courses_by_user
+    from local_backend.database.code.command.database_command import list_events_by_user
 
-    courses_raw = list_tis_courses_by_user(user_id)
-    events_data = list_tis_events_by_user(user_id)
-
-    if not courses_raw and not events_data:
+    course_events = list_events_by_user(user_id, event_type="course", event_source="tis")
+    if not course_events:
         raise HTTPException(status_code=404, detail='未找到TIS课表数据，请先绑定TIS账号')
 
-    # Build course lookup
-    courses = {c['course_id']: c for c in courses_raw}
+    all_schedule_events = []
+    for ev in course_events:
+        meta = {}
+        if ev.get("event_meta_json"):
+            try:
+                meta = json.loads(ev["event_meta_json"])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        for se in meta.get("schedule_events", []):
+            se["course_name"] = ev.get("event_title", "")
+            se["teacher"] = meta.get("teacher", "")
+            se["location"] = ev.get("event_location", meta.get("location", ""))
+            se["weeks"] = meta.get("weeks", "")
+            all_schedule_events.append(se)
 
-    # Auto-detect current_week if not explicitly provided
-    if current_week == 1 and events_data:
-        weeks = [e.get('week_num', 1) for e in events_data]
+    if not all_schedule_events:
+        raise HTTPException(status_code=404, detail='TIS课表数据为空')
+
+    if current_week == 1:
         today = datetime.now()
         estimated_week = max(1, today.isocalendar()[1] - 8)
-        current_week = min(weeks, key=lambda w: abs(w - estimated_week)) if weeks else 1
+        all_weeks = [e.get("week_num", 1) for e in all_schedule_events]
+        current_week = min(all_weeks, key=lambda w: abs(w - estimated_week)) if all_weeks else 1
 
     today = datetime.now()
     semester_monday = today - timedelta(days=today.weekday() + (current_week - 1) * 7)
 
     events = []
-    for ev in events_data:
-        cid = ev.get('course_id')
-        course = courses.get(cid, {})
-        week_num = ev.get('week_num', 1)
-        dow = ev.get('day_of_week', 0)
+    for ev in all_schedule_events:
+        week_num = ev.get("week_num", 1)
+        dow = ev.get("day_of_week", 0)
         offset_days = (week_num - 1) * 7 + dow
         event_date = semester_monday + timedelta(days=offset_days)
 
-        teacher = course.get('teacher', '')
-        location = course.get('location', '')
-        weeks = course.get('weeks', '')
-        ps = ev.get('period_start', 0)
-        pe = ev.get('period_end', 0)
+        teacher = ev.get("teacher", "")
+        location = ev.get("location", "")
+        weeks = ev.get("weeks", "")
+        ps = ev.get("period_start", 0)
+        pe = ev.get("period_end", 0)
 
         desc_parts = []
         if teacher:
@@ -135,7 +146,7 @@ async def get_tis_schedule(user_id: str = Depends(get_current_user_id), current_
         description = '\n'.join(desc_parts)
 
         events.append({
-            'title': course.get('course_name', ev.get('course_name', '未知课程')),
+            'title': ev.get("course_name", "未知课程"),
             'start': event_date.strftime('%Y-%m-%d'),
             'end': event_date.strftime('%Y-%m-%d'),
             'startTime': ev.get('start_time', ''),
