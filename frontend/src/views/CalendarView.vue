@@ -59,8 +59,8 @@
           >
             <span class="date-num" :class="{ 'is-today-text': day.isToday }" @click.stop="openEventModal(day.date)">{{ day.dayNum }}</span>
             <div class="events-container" @click.self="openEventModal(day.date)">
-              <div 
-                v-for="event in day.events" 
+              <div
+                v-for="event in day.events.slice(0, 3)"
                 :key="event.id"
                 class="event-bar"
                 :class="{'is-completed': event.completed, 'multi-start': event.isStart, 'multi-mid': event.isMid, 'multi-end': event.isEnd}"
@@ -73,6 +73,13 @@
               >
                 {{ event.isStart || day.date === event.start ? event.title : '\u00A0' }}
               </div>
+              <div
+                v-if="day.events.length > 3"
+                class="more-events"
+                @click.stop="switchToDayView(day.date)"
+              >
+                +{{ day.events.length - 3 }} 更多
+              </div>
             </div>
           </div>
         </div>
@@ -81,7 +88,7 @@
 
     <div class="calendar-grid-container" v-else>
       <div class="week-timeline-body">
-        <div class="week-timeline-header">
+        <div class="week-timeline-header" ref="weekTimelineHeaderRef">
           <div class="time-axis-placeholder"></div>
           <div 
             v-for="(day, i) in visibleDays" 
@@ -94,7 +101,7 @@
             <span class="day-num" :class="{ 'is-today-bg': day.isToday }">{{ day.dayNum }}</span>
           </div>
         </div>
-        <div class="week-all-day-row">
+        <div class="week-all-day-row" ref="weekAllDayRowRef" :class="{'day-layout': calendarStore.viewType === 'day'}">
           <div class="time-axis-placeholder"><span class="all-day-label">全天</span></div>
           <div 
             v-for="(day, i) in visibleDays" 
@@ -103,8 +110,8 @@
             :class="{ 'is-today-col': day.isToday }"
             @click.self="openEventModal(day.date)"
           >
-            <div 
-              v-for="event in day.allDayEvents" 
+            <div
+              v-for="event in calendarStore.viewType === 'day' ? day.allDayEvents : day.allDayEvents.slice(0, 2)"
               :key="event.id"
               class="event-bar"
               :class="{'is-completed': event.completed}"
@@ -114,9 +121,16 @@
             >
               {{ event.title }}
             </div>
+            <div
+              v-if="calendarStore.viewType !== 'day' && day.allDayEvents.length > 2"
+              class="more-events"
+              @click.stop="switchToDayView(day.date)"
+            >
+              +{{ day.allDayEvents.length - 2 }} 更多
+            </div>
           </div>
         </div>
-        <div class="week-timeline-scroll">
+        <div class="week-timeline-scroll" ref="weekTimelineScrollRef">
           <div class="week-timeline-grid" :class="{'day-layout': calendarStore.viewType === 'day'}">
             <div class="time-axis">
               <div class="time-slot" v-for="h in hours" :key="'t'+h">
@@ -243,7 +257,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, nextTick } from 'vue'
+import { ref, reactive, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useCalendarStore } from '../stores/calendar.js'
 import { useDashboardStore } from '../stores/dashboard.js'
 
@@ -324,6 +338,10 @@ const showModal = ref(false)
 const isEditing = ref(false)
 const draftEvent = ref({ id: null, title: '', start: '', end: '', startTime: '', endTime: '', priority: 2, color: '#007aff' })
 const validationMessage = ref('')
+const weekTimelineHeaderRef = ref(null)
+const weekAllDayRowRef = ref(null)
+const weekTimelineScrollRef = ref(null)
+let weekScrollbarSyncRaf = 0
 
 // Drag-and-drop state
 const draggingEvent = ref(null)
@@ -510,7 +528,35 @@ const visibleDays = computed(() => {
 
 const hours = Array.from({ length: 24 }, (_, i) => i)
 
+const syncWeekGridColumns = () => {
+  const timelineScrollEl = weekTimelineScrollRef.value
+  const scrollbarWidth = timelineScrollEl ? Math.max(0, timelineScrollEl.offsetWidth - timelineScrollEl.clientWidth) : 0
+  const offsetPx = `${scrollbarWidth}px`
+  if (weekTimelineHeaderRef.value) {
+    weekTimelineHeaderRef.value.style.setProperty('--week-scrollbar-offset', offsetPx)
+  }
+  if (weekAllDayRowRef.value) {
+    weekAllDayRowRef.value.style.setProperty('--week-scrollbar-offset', offsetPx)
+  }
+}
+
+const scheduleWeekGridSync = () => {
+  if (typeof window === 'undefined') return
+  if (weekScrollbarSyncRaf) {
+    window.cancelAnimationFrame(weekScrollbarSyncRaf)
+  }
+  weekScrollbarSyncRaf = window.requestAnimationFrame(() => {
+    weekScrollbarSyncRaf = 0
+    syncWeekGridColumns()
+  })
+}
+
 const goToToday = () => { calendarStore.currentDate = new Date() }
+
+const switchToDayView = (dateStr) => {
+  calendarStore.currentDate = new Date(dateStr)
+  calendarStore.viewType = 'day'
+}
 
 const prevPeriod = () => {
   const c = calendarStore.currentDate
@@ -903,6 +949,28 @@ const onResizeStart = (e, event) => {
   document.addEventListener('mouseup', onMouseUp)
 }
 
+watch(
+  () => [calendarStore.viewType, visibleDays.value.length],
+  async () => {
+    await nextTick()
+    scheduleWeekGridSync()
+  }
+)
+
+onMounted(async () => {
+  await nextTick()
+  scheduleWeekGridSync()
+  window.addEventListener('resize', scheduleWeekGridSync)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', scheduleWeekGridSync)
+  if (weekScrollbarSyncRaf) {
+    window.cancelAnimationFrame(weekScrollbarSyncRaf)
+    weekScrollbarSyncRaf = 0
+  }
+})
+
 </script>
 
 <style scoped>
@@ -992,12 +1060,16 @@ const onResizeStart = (e, event) => {
   display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   text-align: right; padding: 8px 8px 4px 8px; font-size: 12px; font-weight: 600; color: #86868b;
 }
-.days-grid { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: 1fr; background: #fafafa;}
+.days-grid { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 100px); background: #fafafa; align-content: start;}
 
 .day-cell {
   border-right: 1px solid rgba(0, 0, 0, 0.04); border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   padding: 4px; text-align: right; display: flex; flex-direction: column; cursor: pointer;
-  background: var(--clr-bg-card, #ffffff); 
+  background: var(--clr-bg-card, #ffffff);
+  height: 100px;
+  min-height: 100px;
+  max-height: 100px;
+  overflow: hidden;
 }
 .day-cell.is-other-month { background: #fafafa; opacity: 0.6; }
 .day-cell.is-today { background: rgba(0, 122, 255, 0.03); }
@@ -1018,6 +1090,19 @@ const onResizeStart = (e, event) => {
 .event-bar.is-todo { background: rgba(52, 199, 89, 0.15); color: #248a3d; }
 .event-bar.is-completed { text-decoration: line-through; opacity: 0.5; }
 .event-bar:hover { filter: brightness(0.9); }
+
+.more-events {
+  font-size: 10px;
+  color: #86868b;
+  text-align: center;
+  cursor: pointer;
+  padding: 2px 0;
+  pointer-events: auto;
+}
+.more-events:hover {
+  color: #007aff;
+  text-decoration: underline;
+}
 
 /* 跨天条块 */
 .event-bar.multi-start { border-top-right-radius: 0; border-bottom-right-radius: 0; margin-right: -4px; width: calc(100% + 4px); z-index: 1;}
@@ -1042,7 +1127,8 @@ const onResizeStart = (e, event) => {
 
 /* Week and Day Timeline View */
 .week-timeline-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--clr-bg-card, #ffffff);}
-.week-timeline-header { display: flex; border-bottom: 1px solid rgba(0,0,0,0.08); background: #fafafa; padding-top: 8px; }
+.week-timeline-header { display: flex; border-bottom: 1px solid rgba(0,0,0,0.08); background: #fafafa; padding-top: 8px; padding-right: var(--week-scrollbar-offset, 0px); overflow-y: scroll; scrollbar-gutter: stable; scrollbar-width: none; }
+.week-timeline-header::-webkit-scrollbar { display: none; }
 .time-axis-placeholder { width: 50px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-right: 1px solid rgba(0,0,0,0.08); }
 .week-timeline-day-header { flex: 1; text-align: center; padding: 4px 0 8px; border-right: 1px solid rgba(0,0,0,0.04); cursor: pointer; }
 .week-timeline-day-header:last-child { border-right: none; }
@@ -1051,12 +1137,14 @@ const onResizeStart = (e, event) => {
 .is-today-text .day-name { color: #007aff; }
 .day-num.is-today-bg { background: #007aff; color: white; font-weight: 500; }
 
-.week-all-day-row { display: flex; border-bottom: 1px solid rgba(0,0,0,0.08); min-height: 40px; background: var(--clr-bg-card, #ffffff); }
+.week-all-day-row { display: flex; border-bottom: 1px solid rgba(0,0,0,0.08); height: 80px; min-height: 80px; overflow: hidden; background: var(--clr-bg-card, #ffffff); padding-right: var(--week-scrollbar-offset, 0px); overflow-y: scroll; scrollbar-gutter: stable; scrollbar-width: none; }
+.week-all-day-row::-webkit-scrollbar { display: none; }
+.week-all-day-row.day-layout { height: auto; min-height: 40px; overflow: visible; }
 .all-day-label { font-size: 11px; color: #86868b; font-weight: 500; }
-.week-all-day-cell { flex: 1; border-right: 1px solid rgba(0,0,0,0.04); padding: 4px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+.week-all-day-cell { flex: 1; border-right: 1px solid rgba(0,0,0,0.04); padding: 4px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; overflow: hidden; }
 .week-all-day-cell:last-child { border-right: none; }
 
-.week-timeline-scroll { flex: 1; overflow-y: auto; position: relative; }
+.week-timeline-scroll { flex: 1; overflow-y: auto; position: relative; scrollbar-gutter: stable; }
 .week-timeline-grid { display: flex; min-height: 1200px; }
 .time-axis { width: 50px; flex-shrink: 0; border-right: 1px solid rgba(0,0,0,0.08); background: var(--clr-bg-card, #ffffff); position: relative; padding-top: 16px;}
 .time-slot { height: 50px; position: relative; }
