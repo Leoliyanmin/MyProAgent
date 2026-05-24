@@ -146,7 +146,7 @@
                 </select>
                 <input v-else v-model.trim="editForm.model" class="text-input" type="text" placeholder="例如: deepseek-chat" />
                 <label class="field-label">API Key <span style="font-size:11px;color:#9ca3af;font-weight:400;">（留空则保留原 Key）</span></label>
-                <input v-model.trim="editForm.api_key" class="text-input" type="password" placeholder="留空则保留原 Key" />
+                <input v-model.trim="editForm.api_key" class="text-input" type="password" :placeholder="editingKey?.api_key_masked || '留空则保留原 Key'" />
                 <label class="field-label">API Base URL</label>
                 <input v-model.trim="editForm.api_base" class="text-input" type="text" placeholder="https://..." />
                 <p v-if="editNotice" class="password-notice" :class="'status-' + editNoticeType">{{ editNotice }}</p>
@@ -284,7 +284,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { tisAPI, blackboardAPI, emailAPI, settingsAPI } from '../services/api.js'
 import { useCalendarStore } from '../stores/calendar.js'
 import { useAuthStore } from '../stores/auth.js'
@@ -458,11 +458,11 @@ const testAddKey = async () => {
 const startEditKey = (item) => {
   editingKey.value = item
   editForm.model = item.model || ''
-  editForm.api_key = item.api_key_masked || ''
+  editForm.api_key = ''
   editForm.api_base = item.api_base || defaultBases[item.provider] || ''
   editNotice.value = ''
   editNoticeType.value = 'info'
-  editTestPassed.value = true
+  nextTick(() => { editTestPassed.value = true })
 }
 
 const cancelEditKey = () => {
