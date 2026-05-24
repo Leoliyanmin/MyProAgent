@@ -617,7 +617,6 @@ jobs:
   tauri-build-macos:
     name: Build Tauri Desktop App (macOS)
     runs-on: macos-latest
-    if: github.actor == 'lsz-asd'
     needs: [test-local, test-server, test-frontend]
     steps:
       - uses: actions/checkout@v4
