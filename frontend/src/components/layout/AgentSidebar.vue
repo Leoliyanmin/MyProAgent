@@ -100,9 +100,9 @@
           v-model="inputText"
           class="message-input"
           placeholder="输入你的问题... (Shift+Enter 换行)"
-          @keydown.enter.exact="handleEnterKey"
-          @compositionstart="isComposingIME = true"
-          @compositionend="isComposingIME = false"
+          @keydown.enter.exact="onEnterKeyDown"
+          @keyup.enter="onEnterKeyUp"
+          @input="onTextInput"
           rows="3"
         ></textarea>
         <div class="input-actions">
@@ -743,14 +743,24 @@ const disconnectWebSocket = () => {
   }
 }
 
-// IME 输入法组合状态：自己跟踪，比 e.isComposing 更可靠（不同浏览器/输入法下可能不准）
-const isComposingIME = ref(false)
+// IME 回车误触检测
+// 原理：正常回车 keydown→keyup 之间不会有 input 事件，
+// 但 IME 确认文字时会在中间触发 input（文字从"带下划线"变成"落实"）
+let enterPending = false
 
-// 处理 Enter 键提交，过滤 IME 输入法组合事件
-// 注意：不能用 .prevent 修饰符，因为 preventDefault 在 IME 组合期间会干扰输入法正常工作
-const handleEnterKey = (e) => {
-  if (isComposingIME.value || e.isComposing) return
-  e.preventDefault()  // 只有非 IME 状态才阻止默认换行行为
+const onEnterKeyDown = (e) => {
+  enterPending = true
+  e.preventDefault()
+}
+
+const onTextInput = () => {
+  // keydown 后 keyup 前触发了 input → IME 正在确认文字 → 取消发送
+  enterPending = false
+}
+
+const onEnterKeyUp = () => {
+  if (!enterPending) return
+  enterPending = false
   sendMessage()
 }
 
