@@ -73,7 +73,7 @@
 
         <!-- 已绑定列表 -->
         <ul class="binding-list">
-          <li v-for="item in apiKeys" :key="item.provider" class="binding-item">
+          <li v-for="item in apiKeys" :key="item.key_id" class="binding-item">
             <div class="binding-main">
               <p class="binding-title">{{ item.provider }}</p>
               <p v-if="item.model" class="binding-meta" style="font-size:11px;color:#6b7280;">模型: {{ item.model }}</p>
@@ -86,12 +86,12 @@
             <div class="action-group">
               <label class="toggle-label" :title="item.is_active ? '点击停用' : '点击激活'" style="display:flex;align-items:center;gap:4px;cursor:pointer;">
                 <span style="font-size:11px;color:#6b7280;">{{ item.is_active ? '已激活' : '未激活' }}</span>
-                <div class="toggle-switch" :class="{ active: item.is_active }" @click="toggleApiKey(item.provider)">
+                <div class="toggle-switch" :class="{ active: item.is_active }" @click="toggleApiKey(item.key_id)">
                   <div class="toggle-knob"></div>
                 </div>
               </label>
               <button class="text-btn" type="button" @click="startEditKey(item)">编辑</button>
-              <button class="text-btn" type="button" @click="unbindApiKey(item.provider)">解绑</button>
+              <button class="text-btn" type="button" @click="unbindApiKey(item.key_id)">解绑</button>
             </div>
           </li>
         </ul>
@@ -145,13 +145,13 @@
                   <option v-for="m in providerModels[editingKey.provider]" :key="m" :value="m">{{ m }}</option>
                 </select>
                 <input v-else v-model.trim="editForm.model" class="text-input" type="text" placeholder="例如: deepseek-chat" />
-                <label class="field-label">API Key</label>
-                <input v-model.trim="editForm.api_key" class="text-input" type="password" placeholder="sk-..." />
+                <label class="field-label">API Key <span style="font-size:11px;color:#9ca3af;font-weight:400;">（留空则保留原 Key）</span></label>
+                <input v-model.trim="editForm.api_key" class="text-input" type="password" placeholder="留空则保留原 Key" />
                 <label class="field-label">API Base URL</label>
                 <input v-model.trim="editForm.api_base" class="text-input" type="text" placeholder="https://..." />
                 <p v-if="editNotice" class="password-notice" :class="'status-' + editNoticeType">{{ editNotice }}</p>
                 <div class="password-actions">
-                  <button class="action-btn" type="button" :disabled="saving || !editTestPassed" @click="saveEditKey">{{ saving ? '保存中...' : '保存' }}</button>
+                  <button class="action-btn" type="button" :disabled="saving" @click="saveEditKey">{{ saving ? '保存中...' : '保存' }}</button>
                   <button class="action-btn ghost" type="button" @click="testEditKey">测试连接</button>
                   <button class="action-btn ghost" type="button" @click="cancelEditKey">取消</button>
                 </div>
@@ -346,6 +346,7 @@ const addForm = reactive({
 const addNotice = ref('')
 const addNoticeType = ref('info')
 const addTestPassed = ref(false)
+const addSavedKeyId = ref(null)
 
 const editingKey = ref(null)
 const editForm = reactive({
@@ -362,7 +363,7 @@ const defaultBases = {
 }
 
 const providerModels = {
-  deepseek: ['deepseek-chat', 'deepseek-reasoner', 'deepseek-v4-flash', 'deepseek-v4-pro'],
+  deepseek: ['deepseek-v4-flash', 'deepseek-v4-pro', 'deepseek-chat', 'deepseek-reasoner'],
 }
 
 const defaultBaseFor = (provider) => {
@@ -391,7 +392,7 @@ watch(() => addForm.provider, (p) => {
 
 // 任何表单字段变化 → 必须重新测试
 watch([() => addForm.provider, () => addForm.model, () => addForm.api_key, () => addForm.api_base],
-  () => { addTestPassed.value = false }
+  () => { addTestPassed.value = false; addSavedKeyId.value = null }
 )
 watch([() => editForm.model, () => editForm.api_key, () => editForm.api_base],
   () => { editTestPassed.value = false }
@@ -406,6 +407,7 @@ const closeAddKeyModal = () => {
   addNotice.value = ''
   addNoticeType.value = 'info'
   addTestPassed.value = false
+  addSavedKeyId.value = null
 }
 
 const submitAddKey = async () => {
@@ -415,7 +417,7 @@ const submitAddKey = async () => {
   addNotice.value = ''
   try {
     const apiBase = addForm.api_base || defaultBaseFor(addForm.provider)
-    await settingsAPI.saveApiKey(provider, addForm.api_key, apiBase, addForm.model)
+    await settingsAPI.saveApiKey(provider, addForm.api_key, apiBase, addForm.model, addSavedKeyId.value)
     closeAddKeyModal()
     await loadApiKeys()
   } catch (e) {
@@ -436,7 +438,8 @@ const testAddKey = async () => {
   addNoticeType.value = 'info'
   try {
     const apiBase = addForm.api_base || defaultBaseFor(addForm.provider)
-    const result = await settingsAPI.testApiKey(addForm.provider, addForm.api_key, apiBase, addForm.model)
+    const result = await settingsAPI.testApiKey(addForm.provider, addForm.api_key, apiBase, addForm.model, addSavedKeyId.value)
+    if (result.key_id) addSavedKeyId.value = result.key_id
     addTestPassed.value = result.success
     if (result.success) {
       addNotice.value = '连接成功！'
@@ -455,18 +458,18 @@ const testAddKey = async () => {
 const startEditKey = (item) => {
   editingKey.value = item
   editForm.model = item.model || ''
-  editForm.api_key = ''
+  editForm.api_key = item.api_key_masked || ''
   editForm.api_base = item.api_base || defaultBases[item.provider] || ''
   editNotice.value = ''
   editNoticeType.value = 'info'
-  editTestPassed.value = false
+  editTestPassed.value = true
 }
 
 const cancelEditKey = () => {
   editingKey.value = null
   editNotice.value = ''
   editNoticeType.value = 'info'
-  editTestPassed.value = false
+  editTestPassed.value = true
 }
 
 const saveEditKey = async () => {
@@ -476,7 +479,7 @@ const saveEditKey = async () => {
   try {
     const apiBase = editForm.api_base || editingKey.value.api_base
     const model = editForm.model || editingKey.value.model || ''
-    await settingsAPI.saveApiKey(editingKey.value.provider, editForm.api_key, apiBase, model)
+    await settingsAPI.saveApiKey(editingKey.value.provider, editForm.api_key, apiBase, model, editingKey.value.key_id)
     editNotice.value = '保存成功'
     editNoticeType.value = 'success'
     await loadApiKeys()
@@ -497,7 +500,7 @@ const testEditKey = async () => {
     const apiBase = editForm.api_base || editingKey.value.api_base
     const apiKey = editForm.api_key || ''
     const model = editForm.model || editingKey.value.model || ''
-    const result = await settingsAPI.testApiKey(editingKey.value.provider, apiKey, apiBase, model)
+    const result = await settingsAPI.testApiKey(editingKey.value.provider, apiKey, apiBase, model, editingKey.value.key_id)
     editTestPassed.value = result.success
     if (result.success) {
       editNotice.value = '连接成功！'
@@ -513,13 +516,13 @@ const testEditKey = async () => {
   }
 }
 
-const toggleApiKey = async (provider) => {
+const toggleApiKey = async (key_id) => {
   try {
-    const result = await settingsAPI.toggleApiKey(provider)
+    const result = await settingsAPI.toggleApiKey(key_id)
     if (result.success) {
       apiKeys.value = apiKeys.value.map(k => ({
         ...k,
-        is_active: k.provider === provider ? result.is_active : k.is_active
+        is_active: k.key_id === key_id ? result.is_active : k.is_active
       }))
     }
   } catch (e) {
@@ -527,9 +530,9 @@ const toggleApiKey = async (provider) => {
   }
 }
 
-const unbindApiKey = async (provider) => {
+const unbindApiKey = async (key_id) => {
   try {
-    await settingsAPI.deleteApiKey(provider)
+    await settingsAPI.deleteApiKey(key_id)
     await loadApiKeys()
   } catch (e) {
     console.error('[UserSettings] Failed to delete API key:', e)

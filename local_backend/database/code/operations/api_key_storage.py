@@ -1,11 +1,13 @@
 """JSONL-based API key storage for user settings.
 
-Stores API keys per-user, per-provider in local_backend/data/api_keys.jsonl.
-Designed for later migration to the database.
+Stores API keys per-user, per-provider, per-model in local_backend/data/api_keys.jsonl.
+Supports multiple keys for the same provider with different models.
+Each entry has a unique key_id for stable referencing.
 """
 
 import json
 import datetime
+import uuid
 from pathlib import Path
 from typing import Optional
 
@@ -52,17 +54,39 @@ def _mask_api_key(key: str) -> str:
     return key[:4] + "••••" + key[-4:]
 
 
+def _generate_key_id() -> str:
+    """Generate a unique, short, sortable key ID."""
+    ts_hex = hex(int(datetime.datetime.utcnow().timestamp() * 1000))[2:]
+    rand_hex = uuid.uuid4().hex[:8]
+    return f"{ts_hex}_{rand_hex}"
+
+
+def _migrate_entries(entries: list[dict]) -> list[dict]:
+    """Ensure all entries have a key_id. Writes back if migration occurred."""
+    needs_write = False
+    now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    for entry in entries:
+        if "key_id" not in entry:
+            entry["key_id"] = _generate_key_id()
+            entry["updated_at"] = entry.get("updated_at") or now
+            needs_write = True
+    if needs_write:
+        _write_all_lines(entries)
+    return entries
+
+
 def list_api_keys(user_id: str) -> list[dict]:
     """List all API keys for a given user, with masked keys for safe display.
 
-    Returns a list of dicts with: provider, api_key_masked, api_base,
+    Returns a list of dicts with: key_id, provider, api_key_masked, api_base,
     model, is_active, updated_at, last_test_success.
     """
-    all_entries = _read_all_lines()
+    all_entries = _migrate_entries(_read_all_lines())
     results = []
     for entry in all_entries:
         if entry.get("user_id") == user_id:
             results.append({
+                "key_id": entry.get("key_id", ""),
                 "provider": entry.get("provider", ""),
                 "api_key_masked": _mask_api_key(entry.get("api_key", "")),
                 "api_base": entry.get("api_base", ""),
@@ -71,52 +95,67 @@ def list_api_keys(user_id: str) -> list[dict]:
                 "updated_at": entry.get("updated_at", ""),
                 "last_test_success": entry.get("last_test_success"),
             })
+    # Sort by updated_at descending (newest first)
+    results.sort(key=lambda r: r.get("updated_at", ""), reverse=True)
     return results
 
 
-def save_api_key(user_id: str, provider: str, api_key: str, api_base: str,
-                 model: str = "", last_test_success: Optional[bool] = None) -> None:
-    """Save or update an API key for a user+provider pair.
+def save_api_key(
+    user_id: str,
+    provider: str,
+    api_key: str,
+    api_base: str,
+    model: str = "",
+    key_id: str = "",
+    last_test_success: Optional[bool] = None,
+) -> str:
+    """Save or update an API key.
 
-    If an entry already exists for the same user_id+provider, it is replaced.
-    Otherwise a new entry is appended.
+    - If key_id is provided, update that specific entry (for editing);
+      if api_key is empty, keep the existing key unchanged.
+    - If key_id is empty, create a new entry.
+
+    Returns the key_id of the saved entry.
     """
     now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-    entries = _read_all_lines()
+    entries = _migrate_entries(_read_all_lines())
 
-    found = False
-    for i, entry in enumerate(entries):
-        if entry.get("user_id") == user_id and entry.get("provider") == provider:
-            entry["api_key"] = api_key
-            entry["api_base"] = api_base
-            entry["model"] = model
-            entry["updated_at"] = now
-            if last_test_success is not None:
-                entry["last_test_success"] = last_test_success
-            found = True
-            break
+    if key_id:
+        for entry in entries:
+            if entry.get("user_id") == user_id and entry.get("key_id") == key_id:
+                if api_key.strip():
+                    entry["api_key"] = api_key
+                entry["api_base"] = api_base
+                entry["model"] = model or entry.get("model", "")
+                entry["updated_at"] = now
+                if last_test_success is not None:
+                    entry["last_test_success"] = last_test_success
+                _write_all_lines(entries)
+                return key_id
+        key_id = ""
 
-    if not found:
-        entries.append({
-            "user_id": user_id,
-            "provider": provider,
-            "api_key": api_key,
-            "api_base": api_base,
-            "model": model,
-            "is_active": True,
-            "updated_at": now,
-            "last_test_success": last_test_success,
-        })
-
+    new_id = _generate_key_id()
+    entries.append({
+        "key_id": new_id,
+        "user_id": user_id,
+        "provider": provider,
+        "api_key": api_key,
+        "api_base": api_base,
+        "model": model,
+        "is_active": True,
+        "updated_at": now,
+        "last_test_success": last_test_success,
+    })
     _write_all_lines(entries)
+    return new_id
 
 
-def delete_api_key(user_id: str, provider: str) -> None:
-    """Delete an API key entry for a given user+provider."""
-    entries = _read_all_lines()
+def delete_api_key(user_id: str, key_id: str) -> None:
+    """Delete an API key entry by its unique key_id."""
+    entries = _migrate_entries(_read_all_lines())
     entries = [
         e for e in entries
-        if not (e.get("user_id") == user_id and e.get("provider") == provider)
+        if not (e.get("user_id") == user_id and e.get("key_id") == key_id)
     ]
     _write_all_lines(entries)
 
@@ -124,13 +163,14 @@ def delete_api_key(user_id: str, provider: str) -> None:
 def get_active_api_keys(user_id: str) -> list[dict]:
     """Return all active API keys for a user (with full unmasked keys).
 
-    Returns a list of dicts with: provider, api_key, api_base, model.
+    Returns a list of dicts with: key_id, provider, api_key, api_base, model.
     """
-    all_entries = _read_all_lines()
+    all_entries = _migrate_entries(_read_all_lines())
     results = []
     for entry in all_entries:
         if entry.get("user_id") == user_id and entry.get("is_active", False):
             results.append({
+                "key_id": entry.get("key_id", ""),
                 "provider": entry.get("provider", ""),
                 "api_key": entry.get("api_key", ""),
                 "api_base": entry.get("api_base", ""),
@@ -139,21 +179,21 @@ def get_active_api_keys(user_id: str) -> list[dict]:
     return results
 
 
-def toggle_api_key(user_id: str, provider: str) -> dict:
-    """Toggle the is_active flag for a given user+provider pair.
+def toggle_api_key(user_id: str, key_id: str) -> dict:
+    """Toggle the is_active flag for a given entry by key_id.
 
-    Multiple keys can be active simultaneously (non-mutual).
     Returns {"success": bool, "is_active": bool}.
     """
-    entries = _read_all_lines()
+    entries = _migrate_entries(_read_all_lines())
     target_found = False
     new_active = False
 
     for entry in entries:
-        if entry.get("user_id") == user_id and entry.get("provider") == provider:
+        if entry.get("user_id") == user_id and entry.get("key_id") == key_id:
             current = entry.get("is_active", False)
             new_active = not current
             entry["is_active"] = new_active
+            entry["updated_at"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             target_found = True
             break
 

@@ -99,11 +99,15 @@ class OpenAICompatProvider:
         stream: bool = False,
     ) -> dict[str, Any]:
         """Build the request payload."""
+        model_lower = self.model.lower()
+        is_reasoning = any(kw in model_lower for kw in ("deepseek-v4", "deepseek-r1", "reasoner", "o1", "o3"))
+
         payload: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
-            "temperature": self.temperature,
         }
+        if not is_reasoning:
+            payload["temperature"] = self.temperature
         if tools:
             payload["tools"] = tools
         if stream:

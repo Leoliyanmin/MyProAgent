@@ -56,10 +56,18 @@ async def get_current_user(user_id: str = Depends(get_current_user_id)):
                 "created_at": "2026-01-01T00:00:00"
             }
         raise HTTPException(status_code=404, detail="User not found")
+    full_name = user.get("username", user.get("full_name"))
+    if not full_name or "@" in str(full_name) or str(full_name).isdigit():
+        settings_data = setting_handle.get_settings(user_id)
+        if settings_data.get("ok"):
+            data = settings_data.get("data", {}) or {}
+            alt = data.get("full_name") or data.get("display_name")
+            if alt:
+                full_name = alt
     return {
         "id": user.get("user_id", user.get("id")),
         "email": user.get("user_email", user.get("email")),
-        "full_name": user.get("username", user.get("full_name")),
+        "full_name": full_name,
         "is_active": bool(user.get("user_is_active", user.get("is_active", True))),
         "created_at": user.get("user_created_at", user.get("created_at", ""))
     }
@@ -75,10 +83,27 @@ async def get_settings(user_id: str = Depends(get_current_user_id)):
 
 @router.put("/settings")
 async def update_settings(fields: dict = Body(...), user_id: str = Depends(get_current_user_id)):
-    result = setting_handle.update_settings(user_id, fields)
-    if not result["ok"]:
-        raise HTTPException(status_code=400, detail=result["message"])
-    return {"success": True, "message": result["message"]}
+    full_name = fields.pop("full_name", None)
+    username = fields.pop("username", None)
+    name_value = full_name or username
+    if name_value is not None:
+        from local_backend.database.code.command.database_command import upsert_user
+        existing = user_service.get_user_by_id(user_id)
+        if existing:
+            upsert_user(
+                user_id=user_id,
+                username=name_value,
+                user_email=existing.get("user_email", user_id),
+                user_is_active=existing.get("user_is_active", 1),
+                user_created_at=existing.get("user_created_at", ""),
+                user_last_login=existing.get("user_last_login"),
+                user_source_device_id=existing.get("user_source_device_id"),
+            )
+    if fields:
+        result = setting_handle.update_settings(user_id, fields)
+        if not result["ok"]:
+            raise HTTPException(status_code=400, detail=result["message"])
+    return {"success": True, "message": "保存成功"}
 
 
 # ==================== API Key Management ====================
@@ -97,26 +122,27 @@ async def save_api_key(
     body: dict = Body(...),
     user_id: str = Depends(get_current_user_id),
 ):
-    """Save or update an API key."""
-    from database.code.operations.api_key_storage import save_api_key
-    save_api_key(
+    """Save or update an API key. Pass key_id to edit existing."""
+    from database.code.operations.api_key_storage import save_api_key as storage_save
+    key_id = storage_save(
         user_id,
         body["provider"],
         body.get("api_key", ""),
         body.get("api_base", ""),
         model=body.get("model", ""),
+        key_id=body.get("key_id"),
     )
-    return {"success": True}
+    return {"success": True, "key_id": key_id}
 
 
-@router.delete("/settings/api-keys/{provider}")
+@router.delete("/settings/api-keys/{key_id}")
 async def delete_api_key(
-    provider: str,
+    key_id: str,
     user_id: str = Depends(get_current_user_id),
 ):
-    """Delete an API key."""
+    """Delete an API key by key_id."""
     from database.code.operations.api_key_storage import delete_api_key
-    delete_api_key(user_id, provider)
+    delete_api_key(user_id, key_id)
     return {"success": True}
 
 
@@ -126,26 +152,40 @@ async def test_api_key_connection(
     user_id: str = Depends(get_current_user_id),
 ):
     """Test an API key connection."""
-    from database.code.operations.api_key_storage import test_api_key, save_api_key
+    from database.code.operations.api_key_storage import test_api_key, save_api_key as storage_save
     provider = body.get("provider", "")
     api_key = body.get("api_key", "")
     api_base = body.get("api_base", "")
     model = body.get("model", "")
+    key_id = body.get("key_id")
     result = test_api_key(provider, api_key, api_base, model=model)
-    # 持久化测试结果
-    save_api_key(user_id, provider, api_key, api_base, model=model,
-                 last_test_success=result["success"])
+    saved_id = storage_save(user_id, provider, api_key, api_base, model=model,
+                 key_id=key_id, last_test_success=result["success"])
+    result["key_id"] = saved_id
     return result
 
 
-@router.post("/settings/api-keys/{provider}/toggle")
+@router.post("/settings/api-keys/{key_id}/toggle")
 async def toggle_api_key(
-    provider: str,
+    key_id: str,
     user_id: str = Depends(get_current_user_id),
 ):
-    """Toggle API key active state (only one active at a time)."""
+    """Toggle API key active state by key_id."""
     from database.code.operations.api_key_storage import toggle_api_key
-    result = toggle_api_key(user_id, provider)
+    result = toggle_api_key(user_id, key_id)
+    if not result["success"]:
+        raise HTTPException(status_code=404, detail="API key not found")
+    return result
+
+
+@router.post("/settings/api-keys/{key_id}/toggle")
+async def toggle_api_key(
+    key_id: str,
+    user_id: str = Depends(get_current_user_id),
+):
+    """Toggle API key active state."""
+    from database.code.operations.api_key_storage import toggle_api_key
+    result = toggle_api_key(user_id, key_id)
     if not result["success"]:
         raise HTTPException(status_code=404, detail="API key not found")
     return result
