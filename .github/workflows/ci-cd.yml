@@ -318,6 +318,8 @@ jobs:
   gen-docs:
     name: Generate API Documentation
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
     needs: [compile-local, compile-server]
     steps:
       - uses: actions/checkout@v4
