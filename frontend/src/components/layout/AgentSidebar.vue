@@ -101,8 +101,8 @@
           class="message-input"
           placeholder="输入你的问题... (Shift+Enter 换行)"
           @keydown.enter.exact="onEnterKeyDown"
-          @keyup.enter="onEnterKeyUp"
-          @input="onTextInput"
+          @compositionstart="onCompositionStart"
+          @compositionend="onCompositionEnd"
           rows="3"
         ></textarea>
         <div class="input-actions">
@@ -743,24 +743,26 @@ const disconnectWebSocket = () => {
   }
 }
 
-// IME 回车误触检测
-// 原理：正常回车 keydown→keyup 之间不会有 input 事件，
-// 但 IME 确认文字时会在中间触发 input（文字从"带下划线"变成"落实"）
-let enterPending = false
+// IME 回车误触保护（中/日/韩输入法）
+const isInputComposing = ref(false)
+
+const onCompositionStart = () => {
+  isInputComposing.value = true
+}
+
+const onCompositionEnd = () => {
+  isInputComposing.value = false
+}
+
+const isImeEnter = (e) => {
+  return e.isComposing || isInputComposing.value || e.keyCode === 229
+}
 
 const onEnterKeyDown = (e) => {
-  enterPending = true
+  if (isImeEnter(e)) {
+    return
+  }
   e.preventDefault()
-}
-
-const onTextInput = () => {
-  // keydown 后 keyup 前触发了 input → IME 正在确认文字 → 取消发送
-  enterPending = false
-}
-
-const onEnterKeyUp = () => {
-  if (!enterPending) return
-  enterPending = false
   sendMessage()
 }
 
