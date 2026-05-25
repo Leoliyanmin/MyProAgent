@@ -4,7 +4,7 @@
 
 import { getTokenSync, clearAuth } from './auth-storage.js'
 
-const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8002'
+const API_BASE_URL = import.meta.env.DEV ? '' : 'http://127.0.0.1:8002'
 
 // Helper to get token from auth-storage (supports both localStorage and Tauri store)
 const getToken = () => getTokenSync()
@@ -410,7 +410,7 @@ export const agentAPI = {
     }
 
     const wsUrl = import.meta.env.DEV
-      ? `ws://localhost:8002/agent/ws/${sessionId}?token=${token}`
+      ? `ws://127.0.0.1:8002/agent/ws/${sessionId}?token=${token}`
       : `wss://your-production-server.com/agent/ws/${sessionId}?token=${token}`
 
     const ws = new WebSocket(wsUrl)

@@ -88,7 +88,7 @@ async def update_settings(fields: dict = Body(...), user_id: str = Depends(get_c
     username = fields.pop("username", None)
     name_value = full_name or username
     if name_value is not None:
-        from local_backend.database.code.command.database_command import upsert_user
+        from local_backend.database.code.command.database_command import upsert_user, upsert_user_setting
         existing = user_service.get_user_by_id(user_id)
         if existing:
             upsert_user(
@@ -100,6 +100,7 @@ async def update_settings(fields: dict = Body(...), user_id: str = Depends(get_c
                 user_last_login=existing.get("user_last_login"),
                 user_source_device_id=existing.get("user_source_device_id"),
             )
+        upsert_user_setting(user_id, full_name=name_value)
     if fields:
         result = setting_handle.update_settings(user_id, fields)
         if not result["ok"]:
