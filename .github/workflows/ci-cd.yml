@@ -505,7 +505,7 @@ jobs:
 
       - name: Fix image registry in manifests
         run: |
-          sed -i "s|REPLACE_ME|Leoliyanmin|g" k8s/deployment-*.yaml
+          sed -i "s|REPLACE_ME|leoliyanmin|g" k8s/deployment-*.yaml
           grep "image:" k8s/deployment-*.yaml
 
       - name: Deploy to kind
