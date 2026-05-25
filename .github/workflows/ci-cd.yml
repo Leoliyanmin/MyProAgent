@@ -476,9 +476,9 @@ jobs:
 
       - name: Rebuild images for kind
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-server:latest -f docker/Dockerfile.server .
-          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-local:latest -f docker/Dockerfile.local .
-          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest -f docker/Dockerfile.frontend .
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-server:latest -f docker/Dockerfile.server .
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-local:latest -f docker/Dockerfile.local .
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-frontend:latest -f docker/Dockerfile.frontend .
 
       - name: Verify images exist
         run: |
@@ -486,13 +486,13 @@ jobs:
 
       - name: Load images into kind
         run: |
-          kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-server:latest --name proagent-test
-          kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-local:latest --name proagent-test
-          kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest --name proagent-test
+          kind load docker-image docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-server:latest --name proagent-test
+          kind load docker-image docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-local:latest --name proagent-test
+          kind load docker-image docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-frontend:latest --name proagent-test
 
       - name: Fix image registry in manifests
         run: |
-          sed -i "s|ghcr.io/lsz-asd/|ghcr.io/${{ github.repository_owner }}/|g" k8s/deployment-*.yaml
+          sed -i "s|REPLACE_ME|${{ secrets.DOCKERHUB_USERNAME }}|g" k8s/deployment-*.yaml
           grep "image:" k8s/deployment-*.yaml
 
       - name: Deploy to kind
@@ -553,6 +553,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
           files: |
             proagent-local-*/proagent-local-*.zip
             proagent-server-*/proagent-server-*.zip
@@ -728,12 +729,15 @@ jobs:
       - name: Rename sidecar for Tauri
         run: |
           cd frontend/src-tauri/binaries
+          set -e
           for f in python-backend-*; do
-            [ -f "$f" ] && ln -sf "$f" python-backend || true
+            [ -f "$f" ] && ln -sf "$f" python-backend
           done
           for f in server-backend-*; do
-            [ -f "$f" ] && ln -sf "$f" server-backend || true
+            [ -f "$f" ] && ln -sf "$f" server-backend
           done
+          [ -f python-backend ] || { echo "ERROR: python-backend sidecar not found"; exit 1; }
+          [ -f server-backend ] || { echo "ERROR: server-backend sidecar not found"; exit 1; }
           ls -la
 
       - name: Generate icon

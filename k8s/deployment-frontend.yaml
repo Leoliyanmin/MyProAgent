@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/lsz-asd/proagent-frontend:latest
+          image: docker.io/REPLACE_ME/proagent-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80

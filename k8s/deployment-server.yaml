@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: ghcr.io/lsz-asd/proagent-server:latest
+          image: docker.io/REPLACE_ME/proagent-server:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8001

@@ -23,10 +23,11 @@ services:
       - DATABASE_URL=sqlite:///./local_app.db
       - SERVER_BACKEND_URL=http://server:8001
     volumes:
-      - local_data:/app/local_backend
+      - local_data:/app/local_backend/database/db
     restart: unless-stopped
     depends_on:
-      - server
+      server:
+        condition: service_healthy
 
   frontend:
     build:
@@ -36,7 +37,8 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - local
+      local:
+        condition: service_healthy
 
 volumes:
   server_data:
