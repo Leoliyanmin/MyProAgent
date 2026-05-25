@@ -5,6 +5,12 @@ on:
     branches: [main, integration, integration_mac]
   pull_request:
     branches: [main, integration, integration_mac]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: false
+        type: string
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -364,20 +370,27 @@ jobs:
   # ============================================================
 
   docker-build:
-    name: Build Docker Images
+    name: Build & Push Docker Images
     runs-on: ubuntu-latest
     needs: [test-local, test-server, test-frontend]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build local backend image
-        run: docker build -t proagent-local:latest -f docker/Dockerfile.local .
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build server backend image
-        run: docker build -t proagent-server:latest -f docker/Dockerfile.server .
-
-      - name: Build frontend image
-        run: docker build -t proagent-frontend:latest -f docker/Dockerfile.frontend .
+      - name: Build and push images
+        run: |
+          DOCKERHUB="${{ secrets.DOCKERHUB_USERNAME }}"
+          docker build -t ${DOCKERHUB}/proagent-local:latest -f docker/Dockerfile.local .
+          docker build -t ${DOCKERHUB}/proagent-server:latest -f docker/Dockerfile.server .
+          docker build -t ${DOCKERHUB}/proagent-frontend:latest -f docker/Dockerfile.frontend .
+          docker push ${DOCKERHUB}/proagent-local:latest
+          docker push ${DOCKERHUB}/proagent-server:latest
+          docker push ${DOCKERHUB}/proagent-frontend:latest
 
   docker-test:
     name: Test Docker Compose
@@ -520,7 +533,36 @@ jobs:
         run: kind delete cluster --name proagent-test
 
   # ============================================================
-  # 阶段七：Tauri 桌面应用构建
+  # 阶段七：GitHub Release（CD）
+  # ============================================================
+
+  github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [package-local, package-server, package-server-macos]
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: List downloaded files
+        run: find . -type f | head -50
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            proagent-local-*/proagent-local-*.zip
+            proagent-server-*/proagent-server-*.zip
+            proagent-server-macos
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================
+  # 阶段八：Tauri 桌面应用构建
   # ============================================================
 
   tauri-build:
