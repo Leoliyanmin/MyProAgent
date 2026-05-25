@@ -384,21 +384,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push images
         run: |
-          DOCKERHUB="${{ secrets.DOCKERHUB_USERNAME }}"
-          docker build -t ${DOCKERHUB}/proagent-local:latest -f docker/Dockerfile.local .
-          docker build -t ${DOCKERHUB}/proagent-server:latest -f docker/Dockerfile.server .
-          docker build -t ${DOCKERHUB}/proagent-frontend:latest -f docker/Dockerfile.frontend .
-          docker push ${DOCKERHUB}/proagent-local:latest
-          docker push ${DOCKERHUB}/proagent-server:latest
-          docker push ${DOCKERHUB}/proagent-frontend:latest
+          IMG="ghcr.io/${{ github.repository_owner }}"
+          docker build -t ${IMG}/proagent-local:latest -f docker/Dockerfile.local .
+          docker build -t ${IMG}/proagent-server:latest -f docker/Dockerfile.server .
+          docker build -t ${IMG}/proagent-frontend:latest -f docker/Dockerfile.frontend .
+          docker push ${IMG}/proagent-local:latest
+          docker push ${IMG}/proagent-server:latest
+          docker push ${IMG}/proagent-frontend:latest
 
   docker-test:
     name: Test Docker Compose
@@ -484,9 +485,9 @@ jobs:
 
       - name: Rebuild images for kind
         run: |
-          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-server:latest -f docker/Dockerfile.server .
-          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-local:latest -f docker/Dockerfile.local .
-          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-frontend:latest -f docker/Dockerfile.frontend .
+          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-server:latest -f docker/Dockerfile.server .
+          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-local:latest -f docker/Dockerfile.local .
+          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest -f docker/Dockerfile.frontend .
 
       - name: Verify images exist
         run: |
@@ -494,13 +495,13 @@ jobs:
 
       - name: Load images into kind
         run: |
-          kind load docker-image docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-server:latest --name proagent-test
-          kind load docker-image docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-local:latest --name proagent-test
-          kind load docker-image docker.io/${{ secrets.DOCKERHUB_USERNAME }}/proagent-frontend:latest --name proagent-test
+          kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-server:latest --name proagent-test
+          kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-local:latest --name proagent-test
+          kind load docker-image ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest --name proagent-test
 
       - name: Fix image registry in manifests
         run: |
-          sed -i "s|REPLACE_ME|${{ secrets.DOCKERHUB_USERNAME }}|g" k8s/deployment-*.yaml
+          sed -i "s|REPLACE_ME|${{ github.repository_owner }}|g" k8s/deployment-*.yaml
           grep "image:" k8s/deployment-*.yaml
 
       - name: Deploy to kind

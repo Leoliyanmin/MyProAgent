@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     APP_NAME: str = "SUSTech Student Productivity Agent (Server)"
     APP_VERSION: str = "0.1.0"
     DEBUG: bool = True
-    TEST_MODE: bool = True
-    SKIP_VERIFICATION: bool = True
+    TEST_MODE: bool = False
+    SKIP_VERIFICATION: bool = False
     SKIP_RATE_LIMIT: bool = True
     LOG_LEVEL: str = "INFO"
 
