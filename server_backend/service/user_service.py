@@ -104,7 +104,9 @@ class UserService:
         return {
             'success': True,
             'message': '验证码已生成',
-            'code_context': code_context
+            'code_context': code_context,
+            'test_code': code,
+            'expires_in': 300,
         }
 
     def get_user_info(self, user_id: str):

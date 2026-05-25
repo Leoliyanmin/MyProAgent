@@ -43,6 +43,7 @@ class VerificationCodeResponse(BaseModel):
     success: bool
     message: str
     code_context: Optional[str] = None
+    test_code: Optional[str] = None
     expires_in: Optional[int] = None
     retry_after: Optional[int] = None
 

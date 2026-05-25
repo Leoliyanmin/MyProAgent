@@ -82,6 +82,7 @@ class AuthService:
                 'success': True,
                 'message': 'TEST MODE: 验证码已发送（任意验证码均可使用）',
                 'test_code': '123456',
+                'code_context': 'test_mode',
                 'expires_in': 300,
                 'retry_after': 60
             }
