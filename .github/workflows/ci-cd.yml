@@ -16,6 +16,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   # ============================================================
   # 阶段一：编译 (Compile)
