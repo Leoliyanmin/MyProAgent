@@ -34,11 +34,25 @@ async def get_stats():
                 }
                 break
 
+        # 检查加密数据
+        personality = db.get_user_personality(uid)
+        events = db.list_events_by_user(uid)
+
+        encrypted_preview = None
+        if personality and personality.get("encrypted_data"):
+            ed = personality["encrypted_data"]
+            encrypted_preview = ed[:80] + ("..." if len(ed) > 80 else "")
+
         user_list.append({
             "user_id": uid,
             "email": email,
             "created_at": created,
             "sync": sync_info,
+            "encrypted": {
+                "has_personality": personality is not None,
+                "personality_preview": encrypted_preview,
+                "event_count": len(events),
+            },
         })
 
     activities = db.list_activities(limit=50)
