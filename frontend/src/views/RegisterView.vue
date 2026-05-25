@@ -20,7 +20,7 @@
         </div>
 
         <div class="form-group">
-          <label for="email" class="mac-label">Email <span class="label-hint">(Only for SUSTech email)</span></label>
+          <label for="email" class="mac-label">Email</label>
           <div class="email-input-wrapper">
             <input
               id="email"
