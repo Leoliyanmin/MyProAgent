@@ -206,6 +206,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
       todos.value.unshift(newTodo)
       saveTodosToStorage(todos.value)
+      await loadTodosFromBackend()
     } catch (err) {
       console.error('Failed to create todo:', err)
     }
@@ -233,6 +234,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       await eventsAPI.update(id, {
         event_is_completed: task.completed ? 1 : 0
       })
+      await loadTodosFromBackend()
     } catch (err) {
       console.error('Failed to sync todo status:', err)
     }

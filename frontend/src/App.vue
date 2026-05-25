@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
 import { useCalendarStore } from './stores/calendar.js'
@@ -68,6 +68,30 @@ const router = useRouter()
 
 const isAuthReady = ref(true)
 
+let pollTimer = null
+
+const startPolling = () => {
+  if (pollTimer) return
+  pollTimer = setInterval(async () => {
+    if (!authStore.isAuthenticated) return
+    try {
+      await Promise.all([
+        calendarStore.loadSchedules(),
+        dashboardStore.loadTodosFromBackend()
+      ])
+    } catch {
+      // silent — polling runs in background
+    }
+  }, 60000)
+}
+
+const stopPolling = () => {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+}
+
 const loadInitialData = async () => {
   if (!authStore.isAuthenticated) return
   try {
@@ -88,6 +112,7 @@ onMounted(() => {
   if (authStore.isAuthenticated) {
     loadInitialData()
     emailStore.fetchStatus()
+    startPolling()
   }
 
   window.addEventListener('auth:required', () => {
@@ -96,9 +121,16 @@ onMounted(() => {
   })
 })
 
+onBeforeUnmount(() => {
+  stopPolling()
+})
+
 watch(() => authStore.isAuthenticated, (newVal) => {
   if (newVal) {
     loadInitialData()
+    startPolling()
+  } else {
+    stopPolling()
   }
 })
 

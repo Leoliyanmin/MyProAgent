@@ -697,6 +697,9 @@ const saveEvent = async () => {
     }
   }
   closeModal()
+
+  await calendarStore.loadSchedules()
+  await dashboardStore.loadTodosFromBackend()
 }
 
 const deleteEvent = () => {
@@ -987,6 +990,8 @@ onMounted(async () => {
   await nextTick()
   scheduleWeekGridSync()
   window.addEventListener('resize', scheduleWeekGridSync)
+  await calendarStore.loadSchedules()
+  await dashboardStore.loadTodosFromBackend()
 })
 
 onBeforeUnmount(() => {
