@@ -35,7 +35,7 @@ class AuthService:
             return None
 
     def validate_email(self, email: str) -> bool:
-        return "@" in email and "." in email.split("@")[-1]
+        return email.endswith("@mail.sustech.edu.cn")
     
     def validate_password(self, password: str) -> dict:
         if len(password) < 8:
