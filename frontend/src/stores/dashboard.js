@@ -206,7 +206,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
       todos.value.unshift(newTodo)
       saveTodosToStorage(todos.value)
-      await loadTodosFromBackend()
     } catch (err) {
       console.error('Failed to create todo:', err)
     }
