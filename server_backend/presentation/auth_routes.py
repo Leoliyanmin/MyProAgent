@@ -77,10 +77,11 @@ async def get_stats():
 
 @router.post("/verification/send", response_model=VerificationCodeResponse)
 async def send_verification_code(request: VerificationCodeRequest):
-    result = auth_service.send_verification_code(request.email, request.purpose)
+    result = await user_service.send_verification_code(request.email)
     return VerificationCodeResponse(
         success=result['success'],
         message=result['message'],
+        code_context=result.get('code_context'),
         expires_in=result.get('expires_in'),
         retry_after=result.get('retry_after')
     )

@@ -33,6 +33,7 @@ class CodeOperations:
         create_code(
             user_id=user_id,
             code_email=email,
+            code_value=code,
             code_context=code_context,
             code_purpose=purpose,
             code_is_used=0,
@@ -60,7 +61,7 @@ class CodeOperations:
         # 检查验证码是否匹配
         # 注意：实际存储的是验证码本身，需要比较
         # 这里假设 code 字段存储的是验证码
-        return code_record.get('code') == code
+        return code_record.get('code_value') == code
 
     @staticmethod
     def mark_code_as_used(code_context: str) -> None:

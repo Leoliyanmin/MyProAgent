@@ -964,6 +964,7 @@ def delete_chat(chat_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
 def create_code(
     user_id: str,
     code_email: str,
+    code_value: str,
     code_context: str,
     code_purpose: str,
     code_is_used: int,
@@ -974,13 +975,14 @@ def create_code(
     return _execute(
         """
         INSERT INTO code (
-            user_id, code_email, code_context, code_purpose,
+            user_id, code_email, code_value, code_context, code_purpose,
             code_is_used, code_expires_at, code_created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
             code_email,
+            code_value,
             code_context,
             code_purpose,
             code_is_used,

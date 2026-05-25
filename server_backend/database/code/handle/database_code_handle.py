@@ -30,8 +30,9 @@ class CodeHandle:
                 'ok': True,
                 'status': 200,
                 'data': {
+                    'code': code,
                     'code_context': code_context,
-                    'message': '验证码已发送'
+                    'message': '验证码已创建'
                 }
             }
         except Exception as e:

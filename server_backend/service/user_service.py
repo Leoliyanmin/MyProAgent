@@ -1,5 +1,6 @@
 import sys
 import os
+import asyncio
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from database.code.handle.database_user_handle import ServerUserHandle
@@ -35,11 +36,12 @@ class UserService:
             return {'success': False, 'message': '两次输入的密码不一致'}
         
         # 验证验证码
-        # 这里需要从请求中获取 code_context
-        # 简化实现，假设验证通过
-        # code_result = self.code_handle.verify_verification_code(code_context, verification_code)
-        # if not code_result['ok']:
-        #     return {'success': False, 'message': code_result['message']}
+        code_context = user_data.get('code_context', '')
+        if not code_context:
+            return {'success': False, 'message': '缺少验证码上下文（code_context），请先获取验证码'}
+        code_result = self.code_handle.verify_verification_code(code_context, verification_code)
+        if not code_result['ok']:
+            return {'success': False, 'message': code_result['message']}
         
         # 使用 username 或 email 作为用户名
         user_name = username if username else email.split('@')[0]
@@ -75,20 +77,34 @@ class UserService:
             'user': result['data']
         }
 
-    def send_verification_code(self, email: str):
+    async def send_verification_code(self, email: str):
         logger.info(f"发送验证码请求: email={email}")
-        
-        # 使用邮箱作为临时 user_id
-        result = self.code_handle.send_verification_code(email, email, 'register')
+
+        # 使用占位 user_id（用户尚未注册）
+        result = self.code_handle.send_verification_code("_pending_registration", email, 'register')
         if not result['ok']:
             logger.error(f"发送验证码失败: {result['message']}, email={email}")
             return {'success': False, 'message': result['message']}
-        
-        logger.info(f"验证码发送成功: email={email}")
+
+        code = result['data']['code']
+        code_context = result['data']['code_context']
+
+        # 异步发送邮件（TEST_MODE 跳过）
+        from config import settings
+        if not settings.TEST_MODE:
+            try:
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(
+                    None, self.email_service.send_verification_email, email, code, 'register'
+                )
+                logger.info(f"验证码邮件已发送: email={email}")
+            except Exception as e:
+                logger.warning(f"验证码邮件发送失败（非致命）: {email} - {e}")
+
         return {
             'success': True,
-            'message': '验证码已发送到您的邮箱',
-            'code_context': result['data']['code_context']
+            'message': '验证码已生成',
+            'code_context': code_context
         }
 
     def get_user_info(self, user_id: str):

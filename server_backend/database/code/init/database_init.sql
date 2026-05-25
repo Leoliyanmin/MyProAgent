@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS code (
     code_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
     code_email TEXT NOT NULL,
+    code_value TEXT NOT NULL DEFAULT '',
     code_context TEXT NOT NULL UNIQUE,
     code_purpose TEXT NOT NULL,
     code_is_used INTEGER NOT NULL CHECK (code_is_used IN (0, 1)),

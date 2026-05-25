@@ -17,6 +17,7 @@ class UserRegisterWithCode(UserBase):
     password: str = Field(..., min_length=8, description="密码长度至少为8位")
     confirm_password: str = Field(..., min_length=8, description="确认密码")
     verification_code: str = Field(..., min_length=6, max_length=6, description="6位验证码")
+    code_context: str = Field(..., description="从 /verification/send 返回的 code_context")
 
 
 class UserLogin(BaseModel):
@@ -41,6 +42,7 @@ class VerificationCodeRequest(BaseModel):
 class VerificationCodeResponse(BaseModel):
     success: bool
     message: str
+    code_context: Optional[str] = None
     expires_in: Optional[int] = None
     retry_after: Optional[int] = None
 
