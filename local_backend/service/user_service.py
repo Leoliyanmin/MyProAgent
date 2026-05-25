@@ -69,6 +69,7 @@ class UserService:
                 'password': password,
                 'confirm_password': confirm_password,
                 'verification_code': verification_code,
+                'code_context': user_data.get('code_context', ''),
                 'full_name': full_name,
                 'student_id': user_data.get('student_id')
             }
