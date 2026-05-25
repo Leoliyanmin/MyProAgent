@@ -507,6 +507,7 @@ class ServerSyncExporter:
 
         return payload
 
+
 class ServerSyncImporter:
     def apply_user_sync_json(self, payload: dict[str, Any] | str | Path) -> dict[str, Any]:
         validation = validate_sync_packet(payload)
@@ -593,6 +594,7 @@ class ServerSyncImporter:
                 user_id_str = str(user_id)
                 db.upsert_event(user_id_str, row)
 
+            session_id_map: dict[int, int] = {}
             for row in content.get("session", []):
                 if "session_id" not in row:
                     continue
