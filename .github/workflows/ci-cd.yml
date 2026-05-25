@@ -398,9 +398,9 @@ jobs:
       - name: Build and push images
         run: |
           IMG="ghcr.io/leoliyanmin"
-          docker build -t ${IMG}/proagent-local:latest -f docker/Dockerfile.local .
-          docker build -t ${IMG}/proagent-server:latest -f docker/Dockerfile.server .
-          docker build -t ${IMG}/proagent-frontend:latest -f docker/Dockerfile.frontend .
+          docker build --no-cache -t ${IMG}/proagent-local:latest -f docker/Dockerfile.local .
+          docker build --no-cache -t ${IMG}/proagent-server:latest -f docker/Dockerfile.server .
+          docker build --no-cache -t ${IMG}/proagent-frontend:latest -f docker/Dockerfile.frontend .
           docker push ${IMG}/proagent-local:latest
           docker push ${IMG}/proagent-server:latest
           docker push ${IMG}/proagent-frontend:latest
