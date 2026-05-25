@@ -27,66 +27,98 @@ class ConsolidationResult:
     summary: str | None = None
 
 
+def _sanitize_user_id(user_id: str | None) -> str:
+    """Sanitize user_id for use as a directory name."""
+    if user_id is None:
+        return ""
+    return user_id.replace("/", "_").replace("\\", "_").replace(":", "_").replace("@", "_at_")
+
+
 class MemoryStore:
-    """Stores memory and history for consolidation."""
+    """Stores memory and history for consolidation.
+
+    When ``user_id`` is provided, all files are stored under
+    ``.memory/{user_id}/`` for per-user isolation.
+    When ``user_id`` is None, the root ``.memory/`` is used (backward compatible).
+    """
 
     def __init__(self, workspace: Path):
         self.workspace = Path(workspace).resolve()
-        self.memory_dir = self.workspace / ".memory"
-        self.memory_dir.mkdir(parents=True, exist_ok=True)
 
-        self.history_file = self.memory_dir / "history.jsonl"
-        self.cursor_file = self.memory_dir / "cursor.txt"
-        self.memory_file = self.memory_dir / "MEMORY.md"
+    def _user_dir(self, user_id: str | None) -> Path:
+        """Return the per-user memory directory, creating it if needed."""
+        base = self.workspace / ".memory"
+        if user_id:
+            d = base / _sanitize_user_id(user_id)
+        else:
+            d = base
+        d.mkdir(parents=True, exist_ok=True)
+        return d
 
-    def add_entry(self, content: str) -> None:
+    def _history_file(self, user_id: str | None) -> Path:
+        return self._user_dir(user_id) / "history.jsonl"
+
+    def _cursor_file(self, user_id: str | None) -> Path:
+        return self._user_dir(user_id) / "cursor.txt"
+
+    def _memory_file(self, user_id: str | None) -> Path:
+        return self._user_dir(user_id) / "MEMORY.md"
+
+    def add_entry(self, content: str, user_id: str | None = None) -> None:
         """Add an entry to history."""
-        cursor = self._get_next_cursor()
+        uf = self._cursor_file(user_id)
+        cursor = self._get_next_cursor(uf)
         entry = MemoryEntry(
             timestamp=datetime.now().isoformat(),
             content=content,
-            cursor=cursor
+            cursor=cursor,
         )
-
-        with open(self.history_file, "a", encoding="utf-8") as f:
+        hf = self._history_file(user_id)
+        with open(hf, "a", encoding="utf-8") as f:
             f.write(json.dumps({
                 "timestamp": entry.timestamp,
                 "content": entry.content,
-                "cursor": entry.cursor
+                "cursor": entry.cursor,
             }, ensure_ascii=False) + "\n")
 
-    def _get_next_cursor(self) -> int:
+    @staticmethod
+    def _get_next_cursor(cursor_file: Path) -> int:
         """Get next cursor value."""
-        if not self.cursor_file.exists():
+        if not cursor_file.exists():
             return 0
         try:
-            with open(self.cursor_file, encoding="utf-8") as f:
+            with open(cursor_file, encoding="utf-8") as f:
                 return int(f.read().strip()) + 1
         except Exception:
             return 0
 
-    def get_last_cursor(self) -> int:
+    def get_last_cursor(self, user_id: str | None = None) -> int:
         """Get the last processed cursor."""
-        if not self.cursor_file.exists():
+        uf = self._cursor_file(user_id)
+        if not uf.exists():
             return 0
         try:
-            with open(self.cursor_file, encoding="utf-8") as f:
+            with open(uf, encoding="utf-8") as f:
                 return int(f.read().strip())
         except Exception:
             return 0
 
-    def update_cursor(self, cursor: int) -> None:
+    def update_cursor(self, cursor: int, user_id: str | None = None) -> None:
         """Update the last processed cursor."""
-        with open(self.cursor_file, "w", encoding="utf-8") as f:
+        uf = self._cursor_file(user_id)
+        with open(uf, "w", encoding="utf-8") as f:
             f.write(str(cursor))
 
-    def read_unprocessed_history(self, since_cursor: int = 0) -> list[dict[str, Any]]:
+    def read_unprocessed_history(
+        self, since_cursor: int = 0, user_id: str | None = None
+    ) -> list[dict[str, Any]]:
         """Read unprocessed history entries."""
-        if not self.history_file.exists():
+        hf = self._history_file(user_id)
+        if not hf.exists():
             return []
 
         entries = []
-        with open(self.history_file, encoding="utf-8") as f:
+        with open(hf, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -100,15 +132,17 @@ class MemoryStore:
 
         return sorted(entries, key=lambda x: x.get("cursor", 0))
 
-    def get_memory(self) -> str:
+    def get_memory(self, user_id: str | None = None) -> str:
         """Get current memory content."""
-        if not self.memory_file.exists():
+        mf = self._memory_file(user_id)
+        if not mf.exists():
             return "# Memory\n\nNo memory yet."
-        return self.memory_file.read_text(encoding="utf-8")
+        return mf.read_text(encoding="utf-8")
 
-    def update_memory(self, content: str) -> None:
+    def update_memory(self, content: str, user_id: str | None = None) -> None:
         """Update memory content."""
-        self.memory_file.write_text(content, encoding="utf-8")
+        mf = self._memory_file(user_id)
+        mf.write_text(content, encoding="utf-8")
 
 
 class Dream:
@@ -154,10 +188,12 @@ Rules:
         self.max_iterations = max_iterations
         self.tools = tool_registry
 
-    async def run(self) -> ConsolidationResult:
+    async def run(self, user_id: str | None = None) -> ConsolidationResult:
         """Process unprocessed history entries."""
-        last_cursor = self.store.get_last_cursor()
-        entries = self.store.read_unprocessed_history(since_cursor=last_cursor)
+        last_cursor = self.store.get_last_cursor(user_id=user_id)
+        entries = self.store.read_unprocessed_history(
+            since_cursor=last_cursor, user_id=user_id
+        )
 
         if not entries:
             return ConsolidationResult(success=False, entries_processed=0)
@@ -236,8 +272,7 @@ Please analyze this history and update MEMORY.md accordingly."""
                             "content": f"Error: {e}",
                         })
 
-        # Update cursor
-        self.store.update_cursor(final_cursor)
+        self.store.update_cursor(final_cursor, user_id=user_id)
 
         return ConsolidationResult(
             success=True,

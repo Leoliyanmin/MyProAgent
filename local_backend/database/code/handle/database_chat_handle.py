@@ -31,6 +31,10 @@ class ChatHandle:
         except Exception as e:
             return {'ok': False, 'status': 500, 'message': f'获取会话失败: {str(e)}'}
 
+    def get_session(self, session_id: int) -> dict | None:
+        """获取单个会话"""
+        return self.operations.get_session(session_id)
+
     def create_chat_message(self, session_id: int, role: str, message: str, **kwargs) -> dict:
         """创建聊天消息入口"""
         # 验证输入

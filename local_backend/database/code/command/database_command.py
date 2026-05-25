@@ -1102,6 +1102,11 @@ def list_sessions_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -
     return _fetch_all("SELECT * FROM session WHERE user_id = ? ORDER BY session_id DESC", (user_id,), db_path)
 
 
+def get_session(session_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    rows = _fetch_all("SELECT * FROM session WHERE session_id = ?", (session_id,), db_path)
+    return rows[0] if rows else None
+
+
 def update_session_last_visited(session_id: int, session_last_visited_at: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute(
         "UPDATE session SET session_last_visited_at = ? WHERE session_id = ?",

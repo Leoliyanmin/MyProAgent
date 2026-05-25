@@ -29,8 +29,8 @@ class Settings(BaseSettings):
     BLACKBOARD_CALLBACK_URL: str = "http://localhost:8002/api/v1/blackboard/callback"
     ENCRYPTION_KEY: str = "your-encryption-key-here-123456789012345678901234"
     SYNC_INTERVAL_SECONDS: int = 10  # 本地到服务器定时同步间隔（秒）
-    EMAIL_SYNC_INTERVAL_SECONDS: int = 5  # 邮件定时同步间隔（秒）
-    EMAIL_SYNC_MAX_MESSAGES: int = 500  # 每次最多同步邮件数（首次全量）
+    EMAIL_SYNC_INTERVAL_SECONDS: int = 300  # 邮件定时同步间隔（秒）
+    EMAIL_SYNC_MAX_MESSAGES: int = 20  # 每次最多同步邮件数
     
     model_config = {"env_file": ".env", "extra": "allow"}
 

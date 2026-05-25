@@ -966,6 +966,7 @@ const loadFromBackendSession = async () => {
   loadActiveModels()
   loadCurrentModel()
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('agent-api-keys-changed', loadActiveModels)
 
   if (chatList.value.length === 0) {
     await loadFromBackendSession()
@@ -987,6 +988,7 @@ onUnmounted(() => {
   saveCurrentChat()
   disconnectWebSocket()
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('agent-api-keys-changed', loadActiveModels)
 })
 
 watch(() => authStore.isAuthenticated, (isAuth) => {

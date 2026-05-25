@@ -253,16 +253,16 @@ async def clear_agent_session(session_id: str, _: str = Depends(get_current_user
 
 
 @router.get("/memory")
-async def get_agent_memory(_: str = Depends(get_current_user_id)):
+async def get_agent_memory(user_id: str = Depends(get_current_user_id)):
     """获取 LocalAgent 记忆内容"""
-    result = agent_service.get_memory_content()
+    result = agent_service.get_memory_content(user_id=user_id)
     return result
 
 
 @router.post("/memory/consolidate")
-async def consolidate_agent_memory(_: str = Depends(get_current_user_id)):
+async def consolidate_agent_memory(user_id: str = Depends(get_current_user_id)):
     """运行 LocalAgent 记忆整合"""
-    result = await agent_service.consolidate_memory()
+    result = await agent_service.consolidate_memory(user_id=user_id)
     return result
 
 

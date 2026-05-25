@@ -6,7 +6,8 @@ from server_backend.database.code.command.database_command import (
     delete_code,
     delete_expired_codes,
 )
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from config import settings
 import random
 import string
 
@@ -26,9 +27,9 @@ class CodeOperations:
         code = CodeOperations.generate_verification_code()
         code_context = ''.join(random.choices(string.ascii_letters + string.digits, k=32))
         
-        # 设置过期时间（5分钟）
-        expires_at = (datetime.utcnow() + timedelta(minutes=5)).isoformat()
-        created_at = datetime.utcnow().isoformat()
+        expire_minutes = getattr(settings, 'VERIFICATION_CODE_EXPIRE_MINUTES', 5)
+        expires_at = (datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)).isoformat()
+        created_at = datetime.now(timezone.utc).isoformat()
         
         create_code(
             user_id=user_id,
@@ -55,7 +56,7 @@ class CodeOperations:
             return False
         
         # 检查是否过期
-        if datetime.utcnow().isoformat() > code_record['code_expires_at']:
+        if datetime.now(timezone.utc).isoformat() > code_record['code_expires_at']:
             return False
         
         # 检查验证码是否匹配
@@ -72,8 +73,7 @@ class CodeOperations:
 
     @staticmethod
     def cleanup_expired_codes() -> None:
-        """清理过期验证码"""
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         delete_expired_codes(now)
 
     @staticmethod

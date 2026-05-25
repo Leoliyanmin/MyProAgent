@@ -1,11 +1,13 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 
 class UserBase(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     email: EmailStr
-    full_name: Optional[str] = None
+    full_name: Optional[str] = Field(default=None, alias="fullName")
     student_id: Optional[str] = None
 
 
@@ -44,6 +46,7 @@ class VerificationCodeResponse(BaseModel):
     message: str
     expires_in: Optional[int] = None
     retry_after: Optional[int] = None
+    code_context: Optional[str] = None
     test_code: Optional[str] = None
 
 

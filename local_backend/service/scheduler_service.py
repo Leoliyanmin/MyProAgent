@@ -41,7 +41,8 @@ class SchedulerService:
             trigger=IntervalTrigger(seconds=email_sync_interval_seconds),
             id="email_sync",
             name="邮件定时同步",
-            max_instances=2,
+            max_instances=1,
+            coalesce=True,
             misfire_grace_time=120,
             replace_existing=True
         )

@@ -137,7 +137,11 @@ class AgentService:
             session_id_int = int(session_id)
         except ValueError:
             return {'success': False, 'message': 'Invalid session ID'}
-        
+
+        session = self.chat_handle.get_session(session_id_int)
+        if not session or session.get("user_id") != user_id:
+            return {'success': False, 'message': 'Session not found'}
+
         result = self.chat_handle.get_chat_history(session_id_int)
         if not result['ok']:
             return {'success': False, 'message': result['message']}
@@ -321,7 +325,7 @@ class AgentService:
             session.add_message("assistant", result.content)
         await asyncio.gather(
             asyncio.to_thread(self.session_manager.save, session),
-            asyncio.to_thread(self.memory_store.add_entry, message),
+            asyncio.to_thread(self.memory_store.add_entry, message, user_id),
         )
 
         pending_deletions = self._extract_pending_deletions(result.content)
@@ -655,14 +659,14 @@ class AgentService:
         self.session_manager.save(session)
         return {'success': True, 'message': f'Session {session_id} cleared'}
 
-    def get_memory_content(self):
+    def get_memory_content(self, user_id: str | None = None):
         """获取当前记忆内容"""
         return {
             'success': True,
-            'content': self.memory_store.get_memory()
+            'content': self.memory_store.get_memory(user_id=user_id)
         }
 
-    async def consolidate_memory(self):
+    async def consolidate_memory(self, user_id: str | None = None):
         """运行记忆整合"""
         from localagent.memory import Dream
         dream = Dream(
@@ -670,7 +674,7 @@ class AgentService:
             provider=self.agent.provider,
             tool_registry=self.agent.tools,
         )
-        result = await dream.run()
+        result = await dream.run(user_id=user_id)
         return {
             'success': result.success,
             'entries_processed': result.entries_processed,

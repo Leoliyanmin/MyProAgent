@@ -98,13 +98,15 @@ class UserService:
             except Exception as e:
                 logger.warning(f"邮件发送调度失败（非致命）: {email} - {e}")
 
-        return {
+        response = {
             'success': True,
             'message': '验证码已生成',
             'code_context': code_context,
-            'test_code': code,
-            'expires_in': 300,
+            'expires_in': settings.VERIFICATION_CODE_EXPIRE_MINUTES * 60,
         }
+        if settings.TEST_MODE:
+            response['test_code'] = code
+        return response
 
     async def _send_email_async(self, email: str, code: str):
         """Fire-and-forget 邮件发送，不阻塞主请求"""

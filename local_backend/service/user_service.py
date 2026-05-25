@@ -63,13 +63,22 @@ class UserService:
                 }
             }
 
+        code_context = user_data.get('code_context', '')
+        verification_code_val = user_data.get('verification_code', '')
+        if not code_context:
+            logger.warning(f"用户注册失败: 缺少验证码上下文（code_context），请先获取验证码, email={email}")
+            return {'success': False, 'message': '缺少验证码上下文（code_context），请先获取验证码'}
+        if not verification_code_val or len(verification_code_val.strip()) == 0:
+            logger.warning(f"用户注册失败: 验证码不能为空, email={email}")
+            return {'success': False, 'message': '验证码不能为空'}
+
         try:
             server_data = {
                 'email': email,
                 'password': password,
                 'confirm_password': confirm_password,
-                'verification_code': verification_code,
-                'code_context': user_data.get('code_context', ''),
+                'verification_code': verification_code_val,
+                'code_context': code_context,
                 'full_name': full_name,
                 'student_id': user_data.get('student_id')
             }

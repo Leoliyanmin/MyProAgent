@@ -407,6 +407,10 @@ const closeAddKeyModal = () => {
   addSavedKeyId.value = null
 }
 
+const notifyAgentModelRefresh = () => {
+  window.dispatchEvent(new CustomEvent('agent-api-keys-changed'))
+}
+
 const submitAddKey = async () => {
   const provider = addForm.provider
   if (!provider || !addForm.api_key) return
@@ -417,6 +421,7 @@ const submitAddKey = async () => {
     await settingsAPI.saveApiKey(provider, addForm.api_key, apiBase, addForm.model, addSavedKeyId.value)
     closeAddKeyModal()
     await loadApiKeys()
+    notifyAgentModelRefresh()
   } catch (e) {
     addNotice.value = '保存失败: ' + e.message
     addNoticeType.value = 'error'
@@ -480,6 +485,7 @@ const saveEditKey = async () => {
     editNotice.value = '保存成功'
     editNoticeType.value = 'success'
     await loadApiKeys()
+    notifyAgentModelRefresh()
     setTimeout(() => cancelEditKey(), 800)
   } catch (e) {
     editNotice.value = '保存失败: ' + e.message
@@ -521,6 +527,7 @@ const toggleApiKey = async (key_id) => {
         ...k,
         is_active: k.key_id === key_id ? result.is_active : k.is_active
       }))
+      notifyAgentModelRefresh()
     }
   } catch (e) {
     console.error('[UserSettings] Failed to toggle API key:', e)
@@ -531,6 +538,7 @@ const unbindApiKey = async (key_id) => {
   try {
     await settingsAPI.deleteApiKey(key_id)
     await loadApiKeys()
+    notifyAgentModelRefresh()
   } catch (e) {
     console.error('[UserSettings] Failed to delete API key:', e)
   }
@@ -770,8 +778,12 @@ const bindEmail = async () => {
 
 const syncEmail = async () => {
   try {
-    await emailAPI.sync()
+    const emailStore = useEmailStore()
+    const result = await emailStore.sync()
     await loadEmailStatus()
+    if (!result?.success) {
+      bindingError.value = result?.message || '同步失败'
+    }
   } catch (err) {
     bindingError.value = err?.message || '同步失败'
   }

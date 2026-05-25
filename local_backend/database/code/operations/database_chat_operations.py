@@ -1,6 +1,7 @@
 from local_backend.database.code.command.database_command import (
     create_session,
     list_sessions_by_user,
+    get_session,
     update_session_last_visited,
     delete_session,
     create_chat,
@@ -32,6 +33,11 @@ class ChatOperations:
     def get_sessions_by_user(user_id: str) -> list[dict]:
         """获取用户的所有会话"""
         return list_sessions_by_user(user_id)
+
+    @staticmethod
+    def get_session(session_id: int) -> dict | None:
+        """获取单个会话"""
+        return get_session(session_id)
 
     @staticmethod
     def update_session_last_visited(session_id: int) -> None:

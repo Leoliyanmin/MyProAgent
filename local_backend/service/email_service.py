@@ -113,8 +113,7 @@ class EmailService:
                     except Exception:
                         scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
                 else:
-                    # First sync: fetch all without limit, then subsequent syncs will be incremental
-                    scrape_result = scraper.scrape_mail_detail(max_messages=0)
+                    scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
             elif max_messages:
                 scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
             else:

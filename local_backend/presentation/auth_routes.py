@@ -19,13 +19,14 @@ async def send_verification_code(request: VerificationCodeRequest):
         message=result['message'],
         expires_in=result.get('expires_in'),
         retry_after=result.get('retry_after'),
+        code_context=result.get('code_context'),
         test_code=result.get('test_code')
     )
 
 
 @router.post("/register")
 async def register(user_data: UserRegisterWithCode):
-    result = await user_service.register_user(user_data.dict())
+    result = await user_service.register_user(user_data.model_dump(by_alias=False))
     if not result['success']:
         raise HTTPException(status_code=400, detail=result['message'])
     return result
