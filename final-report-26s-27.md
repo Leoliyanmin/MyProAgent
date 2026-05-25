@@ -208,3 +208,62 @@ macOS PyInstaller bundles write to temporary directories that are deleted on exi
 
 ### 3.5 Agent Workspace Dynamics
 The LocalAgent's workspace (file operations, session storage, memory) is dynamically switchable per request via the `working_directory` parameter. When a user selects a folder in the frontend, the agent's tool resolution base changes to that directory, allowing the AI to operate in the correct context.
+
+---
+
+## 4. macOS Desktop Deployment
+
+The macOS version differs significantly from the Linux and Windows builds, with dedicated CI jobs and platform-specific optimizations.
+
+### 4.1 Tauri Desktop Application
+
+The macOS build (`tauri-build-macos`) runs on `macos-latest` (Apple Silicon) and produces a `.dmg` installer. It bundles two Python sidecars compiled with PyInstaller:
+
+| Sidecar | Port | Description |
+|---------|------|-------------|
+| `python-backend` | 8002 | Local backend (FastAPI + SQLite) |
+| `server-backend` | 8001 | Server backend (FastAPI + SQLite) |
+
+Both sidecars are built with comprehensive `--hidden-import` and `--collect-submodules` flags to ensure all dependency modules (including `jose`, `cryptography`, `redis`, `passlib`, `email`, `sqlite3`) are included in the binary. A smoke-test step in CI verifies the binary starts without crashing.
+
+### 4.2 Persistent Data Storage
+
+PyInstaller extracts files to a temporary `/var/folders/.../T/_MEI*/` directory that macOS deletes on process exit. We resolved this across the entire application:
+
+| Data | Persistent Path |
+|------|----------------|
+| Databases | `~/Library/Application Support/proagent-local/local.db` |
+| | `~/Library/Application Support/proagent-server/server.db` |
+| Personality Profiles | `~/Library/Application Support/proagent-local/personality/` |
+| Interaction Logs | `~/Library/Application Support/proagent-local/personality/interactions/` |
+| Agent Sessions & Memory | `~/Library/Application Support/proagent-local/.sessions/`, `.memory/` |
+
+The `database_command.py` module's `DEFAULT_DB_PATH` is monkey-patched at startup; `agent_service.py` resolves its `personal_base` directory against the persistent path on macOS.
+
+### 4.3 Server Backend Observability
+
+The server backend exposes a `GET /auth/stats` endpoint for monitoring:
+
+- **User registry**: lists all registered users with email, creation time, and sync status
+- **Activity log**: records every `register`, `sync_in`, and `sync_out` event with timestamps, stored in the `activity_log` table
+- **Encryption evidence**: displays encrypted personality data previews (Fernet AES, `gAAAAAB...` prefix), demonstrating data-at-rest encryption
+
+### 4.4 Verification Code System
+
+The server backend implements a complete verification code flow:
+
+1. `POST /auth/verification/send` — generates a 6-digit code, stores it in the `code` table with a unique `code_context`, returns `code_context` to the client
+2. `POST /auth/register` — validates the provided `verification_code` against the stored `code_context`, rejects with "验证码无效或已过期" on mismatch
+
+Codes expire after 5 minutes and are marked as used after successful verification. Email sending is asynchronous (`run_in_executor`) to avoid blocking the event loop; in `TEST_MODE`, email sending is skipped but the code is still stored and validated.
+
+### 4.5 GitHub Release Distribution
+
+Pushing a git tag (e.g., `v1.0.0`) triggers the `github-release` job which collects all artifacts:
+
+- `proagent-macos-dmg/*.dmg` — macOS desktop installer
+- `proagent-server-macos` — standalone server binary
+- `proagent-local-*.zip` — local backend package
+- `proagent-server-*.zip` — server backend package
+
+Releases are created automatically with release notes via `softprops/action-gh-release@v2`. The DMG can be downloaded, mounted, and run directly on any macOS Apple Silicon machine with no additional dependencies.
