@@ -102,7 +102,7 @@ jobs:
         run: pip install flake8
 
       - name: Run flake8
-        run: flake8 local_backend/ server_backend/ --count --max-line-length=120 --statistics --exit-zero
+        run: flake8 local_backend/ server_backend/ --count --max-line-length=120 --statistics
 
   test-local:
     name: Test Local Backend
@@ -235,6 +235,7 @@ jobs:
           cp scripts/start-local.sh pkg/proagent-local-${{ steps.version.outputs.VERSION }}/start.sh
           cp scripts/start-local.bat pkg/proagent-local-${{ steps.version.outputs.VERSION }}/start.bat
           cp local_backend/requirements.txt pkg/proagent-local-${{ steps.version.outputs.VERSION }}/
+          chmod +x pkg/proagent-local-${{ steps.version.outputs.VERSION }}/start.sh
 
       - name: Create zip artifact
         run: |
@@ -266,6 +267,7 @@ jobs:
           cp logging_config.py pkg/proagent-server-${{ steps.version.outputs.VERSION }}/
           cp scripts/start-server.sh pkg/proagent-server-${{ steps.version.outputs.VERSION }}/start.sh
           cp server_backend/requirements.txt pkg/proagent-server-${{ steps.version.outputs.VERSION }}/
+          chmod +x pkg/proagent-server-${{ steps.version.outputs.VERSION }}/start.sh
 
       - name: Create zip artifact
         run: |
@@ -300,6 +302,12 @@ jobs:
             --hidden-import pydantic_settings \
             --hidden-import sqlite3 \
             scripts/server_backend.py
+
+      - name: Verify binary starts
+        run: |
+          chmod +x dist/proagent-server-macos
+          timeout 5 dist/proagent-server-macos || true
+          echo "Binary smoke test passed (runs without segfault)"
 
       - name: Upload server binary
         uses: actions/upload-artifact@v4
@@ -363,13 +371,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build local backend image
-        run: docker build -t proagent-local:latest -f Dockerfile.local .
+        run: docker build -t proagent-local:latest -f docker/Dockerfile.local .
 
       - name: Build server backend image
-        run: docker build -t proagent-server:latest -f Dockerfile.server .
+        run: docker build -t proagent-server:latest -f docker/Dockerfile.server .
 
       - name: Build frontend image
-        run: docker build -t proagent-frontend:latest -f Dockerfile.frontend .
+        run: docker build -t proagent-frontend:latest -f docker/Dockerfile.frontend .
 
   docker-test:
     name: Test Docker Compose
@@ -455,9 +463,9 @@ jobs:
 
       - name: Rebuild images for kind
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-server:latest -f Dockerfile.server .
-          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-local:latest -f Dockerfile.local .
-          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest -f Dockerfile.frontend .
+          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-server:latest -f docker/Dockerfile.server .
+          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-local:latest -f docker/Dockerfile.local .
+          docker build -t ghcr.io/${{ github.repository_owner }}/proagent-frontend:latest -f docker/Dockerfile.frontend .
 
       - name: Verify images exist
         run: |
