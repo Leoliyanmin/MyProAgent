@@ -136,4 +136,17 @@ CREATE TABLE IF NOT EXISTS user_personality (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+CREATE TABLE IF NOT EXISTS activity_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    user_email TEXT NOT NULL DEFAULT '',
+    activity_type TEXT NOT NULL,
+    detail TEXT,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_type ON activity_log(activity_type);
+
 COMMIT;

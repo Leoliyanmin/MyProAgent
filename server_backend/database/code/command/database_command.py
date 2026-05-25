@@ -1166,3 +1166,34 @@ def get_user_personality(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) ->
 
 def delete_user_personality(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM user_personality WHERE user_id = ?", (user_id,), db_path)
+
+
+# ==================== Activity Log ====================
+
+def log_activity(user_id: str, user_email: str, activity_type: str, detail: str = "",
+                 db_path: str | Path = DEFAULT_DB_PATH) -> int:
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc).isoformat()
+    return _execute(
+        """INSERT INTO activity_log (user_id, user_email, activity_type, detail, created_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (user_id, user_email, activity_type, detail, now),
+        db_path,
+    )
+
+
+def list_activities(limit: int = 50, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all(
+        "SELECT * FROM activity_log ORDER BY created_at DESC LIMIT ?",
+        (limit,),
+        db_path,
+    )
+
+
+def list_activities_by_user(user_id: str, limit: int = 20,
+                            db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
+    return _fetch_all(
+        "SELECT * FROM activity_log WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+        (user_id, limit),
+        db_path,
+    )

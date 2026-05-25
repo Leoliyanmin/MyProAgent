@@ -21,7 +21,6 @@ try:
     from fastapi.middleware.gzip import GZipMiddleware
     from config import settings
     from presentation.auth_routes import router as auth_router
-    from presentation.email_routes import router as email_router
 except ImportError as e:
     print(f"Import error: {e}")
     print(f"Bundle dir: {bundle_dir}")
@@ -43,7 +42,6 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-app.include_router(email_router)
 
 
 @app.get("/")

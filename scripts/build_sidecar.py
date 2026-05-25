@@ -80,6 +80,10 @@ def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, s
 
     cmd += [
         "--add-data", f"{project_root / 'logging_config.py'}{sep}.",
+        "--collect-submodules", "passlib",
+        "--collect-submodules", "email",
+        "--collect-submodules", "jose",
+        "--collect-submodules", "cryptography",
         "--hidden-import", "passlib.handlers.bcrypt",
         "--hidden-import", "passlib.handlers.sha2_crypt",
         "--hidden-import", "passlib.handlers.pbkdf2",
@@ -88,6 +92,13 @@ def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, s
         "--hidden-import", "apscheduler.triggers.cron",
         "--hidden-import", "apscheduler.executors.asyncio",
         "--hidden-import", "apscheduler.executors.pool",
+        "--hidden-import", "jose",
+        "--hidden-import", "sqlite3",
+        "--hidden-import", "redis",
+        "--hidden-import", "aiosmtplib",
+        "--hidden-import", "python_multipart",
+        "--hidden-import", "dotenv",
+        "--hidden-import", "httpx",
         str(script)
     ]
 

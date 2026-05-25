@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Header
 from presentation.schemas import SyncRequest, SyncResponse, SyncToClientResponse
 from service.sync_service import SyncService
+from database.code.command import database_command as db
 import logging
 
 logger = logging.getLogger("server.sync")
@@ -18,6 +19,8 @@ async def sync_from_client(sync_data: SyncRequest, x_user_id: str = Header(...))
     
     result = sync_service.sync_from_client(user_id, sync_data.data_type, sync_data.data)
     logger.info(f"同步完成: user={x_user_id}, type={sync_data.data_type}, synced={result['synced_count']}")
+    db.log_activity(x_user_id, x_user_id, "sync_in",
+                    f"type={sync_data.data_type}, count={result['synced_count']}")
     return SyncResponse(
         success=result['success'],
         message=result['message'],
@@ -34,6 +37,8 @@ async def sync_to_client(data_type: str, x_user_id: str = Header(...)):
     
     result = sync_service.sync_to_client(user_id, data_type)
     logger.info(f"数据推送完成: user={x_user_id}, type={data_type}, count={result['synced_count']}")
+    db.log_activity(x_user_id, x_user_id, "sync_out",
+                    f"type={data_type}, count={result['synced_count']}")
     return SyncToClientResponse(
         success=result['success'],
         message=result['message'],

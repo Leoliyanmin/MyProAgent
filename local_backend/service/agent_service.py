@@ -11,6 +11,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import sys
+import platform
 
 localagent_path = Path(__file__).parent.parent.parent / "localagent"
 if str(localagent_path) not in sys.path:
@@ -88,7 +89,12 @@ class AgentService:
         self.agent = LocalAgent(workspace=self.workspace)
         print(f"[AgentService] LocalAgent initialized in {time.time() - start:.2f}s")
 
-        personal_base = Path(__file__).parent.parent.parent / "personality"
+        # 持久化 personality 目录（不在 PyInstaller 临时目录）
+        if sys.platform == "darwin":
+            data_dir = Path.home() / "Library" / "Application Support" / "proagent-local"
+        else:
+            data_dir = Path.cwd() / "data"
+        personal_base = data_dir / "personality"
         self.interaction_logger = InteractionLogger(personal_base / "interactions")
         self.profile_extractor = ProfileExtractor(llm_provider=self.agent.provider)
         self.mbti_inferencer = MBTIInferencer(llm_provider=self.agent.provider)
@@ -289,6 +295,11 @@ class AgentService:
         self.agent.set_runtime_context(user_id=user_id, token=token)
         self._apply_user_api_key(user_id)
 
+        # 动态切换 agent workspace 到用户指定的工作目录
+        old_workspace = self.agent.workspace
+        if effective_working_dir is not None:
+            self.agent.workspace = effective_working_dir
+
         try:
             result = await self.agent.run(agent_message, on_stream=on_stream)
         except RuntimeError as e:
@@ -302,6 +313,8 @@ class AgentService:
                     'pending_deletions': [],
                 }
             raise
+        finally:
+            self.agent.workspace = old_workspace
 
         session.add_message("user", message)
         if result.content:

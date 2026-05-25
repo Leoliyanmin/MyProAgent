@@ -305,8 +305,16 @@ jobs:
             --add-data "logging_config.py:." \
             --collect-submodules passlib \
             --collect-submodules email \
+            --collect-submodules jose \
+            --collect-submodules cryptography \
             --hidden-import pydantic_settings \
             --hidden-import sqlite3 \
+            --hidden-import redis \
+            --hidden-import aiosmtplib \
+            --hidden-import python_multipart \
+            --hidden-import dotenv \
+            --hidden-import email_validator \
+            --hidden-import httpx \
             scripts/server_backend.py
 
       - name: Verify binary starts
