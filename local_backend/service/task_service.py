@@ -4,7 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from business.task_logic import TaskLogic
 from database.code.handle.database_task_v2_handle import TaskV2Handle
-from database.code.command.database_command import get_event
+from local_backend.database.code.command.database_command import get_event
 from logging_config import get_logger
 
 # 创建日志器

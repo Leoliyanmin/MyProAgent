@@ -4,7 +4,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from database.code.operations.database_user_operations import list_users
 from database.code.operations.database_user_setting_operations import UserSettingOperations
-from database.code.command.database_command import list_events_by_user
+from local_backend.database.code.command.database_command import list_events_by_user
 
 setting_ops = UserSettingOperations()
 from config import settings

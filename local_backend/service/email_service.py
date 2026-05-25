@@ -12,7 +12,7 @@ from cryptography.fernet import Fernet, InvalidToken
 
 from service.scraper.mail_scraper import MailScraper, write_mail_result
 from database.code.handle.database_email_v2_handle import EmailV2Handle
-from database.code.command.database_command import upsert_user
+from local_backend.database.code.command.database_command import upsert_user
 from config import settings
 
 logging.basicConfig(level=logging.INFO)

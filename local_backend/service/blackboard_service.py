@@ -153,7 +153,7 @@ class BlackboardService:
                 logger.info(f"Blackboard课程数据已保存到: {json_path}")
 
                 try:
-                    from database.code.handle.database_bb_v2_handle import BbV2Handle
+                    from local_backend.database.code.handle.database_bb_v2_handle import BbV2Handle
                     bb_handle = BbV2Handle()
                     result = bb_handle.save_courses(user_id, courses_data)
                     logger.info(f"BB v2入库: {result}")
@@ -226,7 +226,7 @@ class BlackboardService:
     
     def get_blackboard_status(self, user_id: str) -> Dict:
         try:
-            from database.code.command.database_command import list_accounts_by_user
+            from local_backend.database.code.command.database_command import list_accounts_by_user
             accounts = list_accounts_by_user(user_id)
             bb_account = None
             for a in accounts:
@@ -248,7 +248,7 @@ class BlackboardService:
     
     def unbind_blackboard(self, user_id: str) -> Dict:
         try:
-            from database.code.command.database_command import list_events_by_user, delete_event, list_accounts_by_user, delete_account
+            from local_backend.database.code.command.database_command import list_events_by_user, delete_event, list_accounts_by_user, delete_account
 
             old_events = list_events_by_user(user_id, event_source="blackboard")
             for ev in old_events:
@@ -334,8 +334,9 @@ class BlackboardService:
                 }, f, ensure_ascii=False, indent=2)
             logger.info(f"Blackboard ICS 数据已保存: {json_path}")
 
+            bb_account_created = False
             try:
-                from database.code.command.database_command import create_account, list_accounts_by_user, delete_account
+                from local_backend.database.code.command.database_command import create_account, list_accounts_by_user, delete_account
                 existing = list_accounts_by_user(user_id)
                 for a in existing:
                     if a.get('account_platform_type') == 'blackboard':
@@ -348,11 +349,14 @@ class BlackboardService:
                     account_bind_time=time.strftime('%Y-%m-%d %H:%M:%S'),
                     account_last_sync_time=None,
                 )
+                bb_account_created = True
             except Exception as e:
                 logger.error(f"创建 Blackboard 账号记录失败: {e}")
+                import traceback
+                logger.error(f"错误堆栈: {traceback.format_exc()}")
 
             try:
-                from database.code.handle.database_bb_v2_handle import BbV2Handle
+                from local_backend.database.code.handle.database_bb_v2_handle import BbV2Handle
                 bb_handle = BbV2Handle()
                 result = bb_handle.save_courses(user_id, courses_data)
                 logger.info(f"BB v2入库: {result}")
