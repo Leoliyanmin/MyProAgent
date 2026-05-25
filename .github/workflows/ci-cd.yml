@@ -569,7 +569,7 @@ jobs:
   tauri-build:
     name: Build Tauri Desktop App (Linux)
     runs-on: ubuntu-22.04
-    if: github.actor == 'Leoliyanmin'
+    if: github.actor == 'lsz-asd'
     needs: [test-local, test-server, test-frontend]
     steps:
       - uses: actions/checkout@v4
@@ -634,7 +634,7 @@ jobs:
   tauri-build-windows:
     name: Build Tauri Desktop App (Windows)
     runs-on: windows-latest
-    if: github.actor == 'Leoliyanmin'
+    if: github.actor == 'lsz-asd'
     needs: [test-local, test-server, test-frontend]
     steps:
       - uses: actions/checkout@v4
