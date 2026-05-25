@@ -295,10 +295,9 @@ jobs:
           pyinstaller --onefile --name proagent-server-macos \
             --add-data "server_backend:server_backend" \
             --add-data "logging_config.py:." \
-            --hidden-import passlib.handlers.bcrypt \
+            --collect-submodules passlib \
+            --collect-submodules email \
             --hidden-import pydantic_settings \
-            --hidden-import email_validator \
-            --hidden-import aiosmtplib \
             --hidden-import sqlite3 \
             scripts/server_backend.py
 
