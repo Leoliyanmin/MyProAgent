@@ -6,6 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from database.code.handle.database_user_handle import ServerUserHandle
 from database.code.handle.database_code_handle import CodeHandle
 from business.email_service import EmailService
+from config import settings
 from datetime import datetime
 from logging_config import get_logger
 
