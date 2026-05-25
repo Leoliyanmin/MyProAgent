@@ -90,6 +90,14 @@ def init_database():
         schema_path = bundle_root / "server_backend" / "database" / "code" / "init" / "database_init.sql"
         print(f"[server] Schema: {schema_path}", flush=True)
 
+        # 持久化数据库路径（不放在 PyInstaller 临时目录）
+        if sys.platform == "darwin":
+            data_dir = Path.home() / "Library" / "Application Support" / "proagent-server"
+        else:
+            data_dir = Path.cwd() / "data"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        db_file = data_dir / "server.db"
+
         from database.code.init.database_init import init_database as run_init
 
         def init_one(db_path):
@@ -99,11 +107,8 @@ def init_database():
             run_init(db_path=str(db_path), schema_path=schema_path)
 
         import server_backend.database.code.command.database_command as db_cmd
-        init_one(db_cmd.DEFAULT_DB_PATH)
-
-        import database.code.command.database_command as db_cmd2
-        if db_cmd2.DEFAULT_DB_PATH != db_cmd.DEFAULT_DB_PATH:
-            init_one(db_cmd2.DEFAULT_DB_PATH)
+        db_cmd.DEFAULT_DB_PATH = db_file
+        init_one(db_file)
 
         print("[server] Database initialized", flush=True)
     except Exception as e:
