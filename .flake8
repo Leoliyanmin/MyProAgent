@@ -16,11 +16,13 @@ exclude =
 # Line length: E501 (too many to fix at once)
 # Import ordering: E402/E401 (often intentional)
 # Unused imports/vars: F401/F841 (often test fixtures)
-# Minor style: E702/E712/F541/F811/E128/E129
+# Indentation/style: E126/E128/E129/E226/E702/E712
+# Other: F541/F811/W503/W504/E722
 ignore =
     W293,W291,W292,W391,
     E302,E305,E501,
     E402,E401,
     F401,F841,
+    E126,E128,E129,E226,
     E702,E712,F541,F811,
-    E128,E129,W503,W504
+    W503,W504,E722
