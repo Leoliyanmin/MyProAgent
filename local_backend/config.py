@@ -12,9 +12,9 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080", "http://localhost:1420"]
-    SERVER_BACKEND_URL: str = "http://localhost:8001"
-    TEST_MODE: bool = True
-    SKIP_VERIFICATION: bool = True
+    SERVER_BACKEND_URL: str = "http://127.0.0.1:8001"
+    TEST_MODE: bool = False
+    SKIP_VERIFICATION: bool = False
 
     # Blackboard/TIS 配置
     

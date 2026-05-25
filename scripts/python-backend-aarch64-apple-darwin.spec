@@ -1,12 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_submodules
+
+hiddenimports = ['passlib.handlers.bcrypt', 'passlib.handlers.sha2_crypt', 'passlib.handlers.pbkdf2', 'email_validator', 'apscheduler.triggers.interval', 'apscheduler.triggers.cron', 'apscheduler.executors.asyncio', 'apscheduler.executors.pool', 'jose', 'sqlite3', 'redis', 'aiosmtplib', 'python_multipart', 'dotenv', 'httpx']
+hiddenimports += collect_submodules('passlib')
+hiddenimports += collect_submodules('email')
+hiddenimports += collect_submodules('jose')
+hiddenimports += collect_submodules('cryptography')
 
 
 a = Analysis(
     ['/Users/yanmin/Documents/SE Project/scripts/python_backend.py'],
-    pathex=[],
+    pathex=['/Users/yanmin/Documents/SE Project', '/Users/yanmin/Documents/SE Project/local_backend', '/Users/yanmin/Documents/SE Project/localagent', '/Users/yanmin/Documents/SE Project/personality'],
     binaries=[],
-    datas=[],
-    hiddenimports=[],
+    datas=[('/Users/yanmin/Documents/SE Project/local_backend', 'local_backend'), ('/Users/yanmin/Documents/SE Project/localagent', 'localagent'), ('/Users/yanmin/Documents/SE Project/personality', 'personality'), ('/Users/yanmin/Documents/SE Project/logging_config.py', '.')],
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

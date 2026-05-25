@@ -457,7 +457,7 @@ pub fn run() {
 
                     match spawn_backend(&app_handle, "python-backend", state.local_process.clone()) {
                         Ok(_) => {
-                            if let Err(e) = wait_for_backend("http://127.0.0.1:8002/health", 10).await {
+                            if let Err(e) = wait_for_backend("http://127.0.0.1:8002/health", 60).await {
                                 eprintln!("Local backend failed to start: {}", e);
                             }
                         }
@@ -468,7 +468,7 @@ pub fn run() {
 
                     match spawn_backend(&app_handle, "server-backend", state.server_process.clone()) {
                         Ok(_) => {
-                            if let Err(e) = wait_for_backend("http://127.0.0.1:8001/health", 10).await {
+                            if let Err(e) = wait_for_backend("http://127.0.0.1:8001/health", 60).await {
                                 eprintln!("Server backend failed to start: {}", e);
                             }
                         }

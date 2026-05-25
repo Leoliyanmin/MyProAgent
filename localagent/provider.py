@@ -112,6 +112,8 @@ class OpenAICompatProvider:
             payload["tools"] = tools
         if stream:
             payload["stream"] = True
+        if "deepseek" in model_lower:
+            payload["thinking"] = {"type": "disabled"}
         return payload
 
     @staticmethod
