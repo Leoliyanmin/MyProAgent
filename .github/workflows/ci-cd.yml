@@ -489,9 +489,9 @@ jobs:
 
       - name: Rebuild images for kind
         run: |
-          docker build -t ghcr.io/Leoliyanmin/proagent-server:latest -f docker/Dockerfile.server .
-          docker build -t ghcr.io/Leoliyanmin/proagent-local:latest -f docker/Dockerfile.local .
-          docker build -t ghcr.io/Leoliyanmin/proagent-frontend:latest -f docker/Dockerfile.frontend .
+          docker build -t ghcr.io/leoliyanmin/proagent-server:latest -f docker/Dockerfile.server .
+          docker build -t ghcr.io/leoliyanmin/proagent-local:latest -f docker/Dockerfile.local .
+          docker build -t ghcr.io/leoliyanmin/proagent-frontend:latest -f docker/Dockerfile.frontend .
 
       - name: Verify images exist
         run: |
@@ -499,9 +499,9 @@ jobs:
 
       - name: Load images into kind
         run: |
-          kind load docker-image ghcr.io/Leoliyanmin/proagent-server:latest --name proagent-test
-          kind load docker-image ghcr.io/Leoliyanmin/proagent-local:latest --name proagent-test
-          kind load docker-image ghcr.io/Leoliyanmin/proagent-frontend:latest --name proagent-test
+          kind load docker-image ghcr.io/leoliyanmin/proagent-server:latest --name proagent-test
+          kind load docker-image ghcr.io/leoliyanmin/proagent-local:latest --name proagent-test
+          kind load docker-image ghcr.io/leoliyanmin/proagent-frontend:latest --name proagent-test
 
       - name: Fix image registry in manifests
         run: |
