@@ -20,6 +20,10 @@
         {
           "name": "binaries/python-backend",
           "sidecar": true
+        },
+        {
+          "name": "binaries/server-backend",
+          "sidecar": true
         }
       ]
     }
