@@ -61,12 +61,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const register = async (email, password, full_name, verification_code) => {
+  const register = async (email, password, full_name, verification_code, code_context) => {
     loading.value = true
     error.value = null
 
     try {
-      const result = await authAPI.register(email, password, full_name, verification_code)
+      const result = await authAPI.register(email, password, full_name, verification_code, code_context)
       if (result.success) {
         return { success: true, message: result.message }
       } else {

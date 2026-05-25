@@ -126,6 +126,7 @@ const form = reactive({
   fullName: '',
   email: '',
   verificationCode: '',
+  codeContext: '',
   password: '',
   confirmPassword: ''
 })
@@ -205,6 +206,7 @@ const sendCode = async () => {
     const result = await auth.sendVerificationCode(form.email, 'register')
 
     if (result.success) {
+      form.codeContext = result.code_context || ''
       if (result.test_code) {
         successMsg.value = `Verification code sent. Test code: ${result.test_code}`
         form.verificationCode = result.test_code
@@ -233,7 +235,8 @@ const handleRegister = async () => {
     form.email, 
     form.password, 
     form.fullName, 
-    form.verificationCode
+    form.verificationCode,
+    form.codeContext
   )
   
   if (result.success) {

@@ -91,7 +91,7 @@ export const authAPI = {
   },
 
   // Register with verification code
-  register: async (email, password, full_name, verification_code) => {
+  register: async (email, password, full_name, verification_code, code_context) => {
     return fetchWithoutAuth('/auth/register', {
       method: 'POST',
       body: JSON.stringify({
@@ -99,7 +99,8 @@ export const authAPI = {
         password,
         confirm_password: password,
         full_name,
-        verification_code
+        verification_code,
+        code_context
       })
     })
   },
