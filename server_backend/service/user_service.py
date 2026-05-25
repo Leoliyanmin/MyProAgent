@@ -89,17 +89,13 @@ class UserService:
         code = result['data']['code']
         code_context = result['data']['code_context']
 
-        # 异步发送邮件（TEST_MODE 跳过）
-        from config import settings
+        # 异步发送邮件（失败不影响流程）
         if not settings.TEST_MODE:
             try:
                 loop = asyncio.get_running_loop()
-                await loop.run_in_executor(
-                    None, self.email_service.send_verification_email, email, code, 'register'
-                )
-                logger.info(f"验证码邮件已发送: email={email}")
+                asyncio.create_task(self._send_email_async(email, code))
             except Exception as e:
-                logger.warning(f"验证码邮件发送失败（非致命）: {email} - {e}")
+                logger.warning(f"邮件发送调度失败（非致命）: {email} - {e}")
 
         return {
             'success': True,
@@ -108,6 +104,17 @@ class UserService:
             'test_code': code,
             'expires_in': 300,
         }
+
+    async def _send_email_async(self, email: str, code: str):
+        """Fire-and-forget 邮件发送，不阻塞主请求"""
+        try:
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(
+                None, self.email_service.send_verification_email, email, code, 'register'
+            )
+            logger.info(f"验证码邮件已发送: email={email}")
+        except Exception as e:
+            logger.warning(f"验证码邮件发送失败（非致命）: {email} - {e}")
 
     def get_user_info(self, user_id: str):
         logger.debug(f"获取用户信息: user_id={user_id}")
