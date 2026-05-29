@@ -83,6 +83,7 @@ export function computeEventLayout(events, options = {}) {
 
   // Phase 3: build output
   const maxDepth = Math.max(...sorted.map(e => e._depth), 0)
+  const WIDTH_RATIOS = [1, 0.85, 0.78, 0.72, 0.67]
 
   return sorted.map((ev) => {
     const durationMinutes = Math.max(30, ev._endMin - ev._startMin)
@@ -100,10 +101,11 @@ export function computeEventLayout(events, options = {}) {
     if (ev._depth === 0) return base
 
     const leftPx = ev._depth * indentStep
+    const ratio = WIDTH_RATIOS[Math.min(ev._depth, WIDTH_RATIOS.length - 1)]
     return {
       ...base,
       left: `${leftPx}px`,
-      width: `calc(100% - ${leftPx + 3}px)`,
+      width: `calc(${ratio * 100}% - ${leftPx + 3}px)`,
     }
   })
 }

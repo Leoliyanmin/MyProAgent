@@ -76,8 +76,8 @@ const auth = useAuthStore()
 const emailStore = useEmailStore()
 
 const displayName = computed(() => {
-  const name = auth.user?.full_name || auth.user?.email?.split('@')[0] || ''
-  return name || 'User'
+  const name = auth.user?.full_name || 'User'
+  return name
 })
 
 const avatarLetters = computed(() => {

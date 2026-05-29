@@ -697,6 +697,9 @@ const connectWebSocket = () => {
 
       markLastAssistantDone(targetChatId)
 
+      // 通知画像页面有新交互
+      window.dispatchEvent(new CustomEvent('interaction-logged'))
+
       // 只有当前对话才需要保存和更新 UI
       if (targetChatId === currentChatId.value) {
         saveCurrentChat()
@@ -720,6 +723,9 @@ const connectWebSocket = () => {
           } catch (e) { /* ignore */ }
         }
       }
+
+      // 通知画像页面有新交互
+      window.dispatchEvent(new CustomEvent('interaction-logged'))
 
       const toolsUsed = Array.isArray(data?.tools_used) ? data.tools_used : []
       const pendingDeletions = Array.isArray(data?.pending_deletions) ? data.pending_deletions : []
@@ -861,6 +867,8 @@ const sendViaREST = async (message, chatId) => {
       done: true
     })
     if (chatId === currentChatId.value) scrollToBottom()
+    // 通知画像页面有新交互
+    window.dispatchEvent(new CustomEvent('interaction-logged'))
     console.log('[AgentSidebar] refreshPanelsIfNeeded with tools:', result?.tool_calls)
     await refreshPanelsIfNeeded(result?.tool_calls || [])
   } catch (err) {

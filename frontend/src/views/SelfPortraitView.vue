@@ -114,7 +114,7 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive, onMounted, onActivated } from 'vue'
+import { computed, ref, reactive, onMounted, onActivated, onUnmounted } from 'vue'
 import { profileAPI } from '../services/api.js'
 
 // AI analysis state
@@ -241,6 +241,11 @@ function formatTime(ts) {
 
 onMounted(() => {
   fetchProfile()
+  window.addEventListener('interaction-logged', fetchProfile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('interaction-logged', fetchProfile)
 })
 
 onActivated(() => {

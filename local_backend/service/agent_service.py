@@ -898,13 +898,13 @@ class AgentService:
                         "conversation_id": meta.get("conversation_id", ""),
                         "timestamp": meta.get("timestamp", ""),
                         "user_message_preview": (ui.get("raw_message", "") or "")[:80],
-                        "intent": ui.get("intent_category", ""),
+                        "intent_category": ui.get("intent_category", ""),
                         "language": ui.get("language", ""),
                         "sentiment": ui.get("sentiment", ""),
-                        "response_preview": (ao.get("raw_response", "") or "")[:80],
-                        "tools_used": len(tools),
+                        "agent_response_preview": (ao.get("raw_response", "") or "")[:80],
+                        "tools_used_count": len(tools),
                     })
-                return {"total": total, "limit": limit, "offset": offset, "items": items}
+                return {"total": total, "limit": limit, "offset": offset, "interactions": items}
         except Exception:
             logger.warning("Failed to list interactions from DB", exc_info=True)
         all_interactions = self.interaction_logger.get_user_interactions(user_id, limit=9999)

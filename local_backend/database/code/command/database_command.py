@@ -189,12 +189,13 @@ def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **k
         _execute(
             """INSERT INTO user_setting (user_id, avatar_url, bio, current_focus,
                work_preference, skills, theme_config, notification_enabled,
-               privacy_share_data, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               privacy_share_data, full_name, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (user_id, kwargs.get("avatar_url"), kwargs.get("bio"),
              kwargs.get("current_focus"), kwargs.get("work_preference"),
              kwargs.get("skills"), kwargs.get("theme_config"),
-             kwargs.get("notification_enabled", 1), kwargs.get("privacy_share_data", 0), now),
+             kwargs.get("notification_enabled", 1), kwargs.get("privacy_share_data", 0),
+             kwargs.get("full_name"), now),
             db_path,
         )
 

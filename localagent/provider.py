@@ -1,11 +1,16 @@
 """Minimal LLM provider abstraction with streaming support."""
 
+import logging
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 from typing import Any, Callable, Awaitable
 import httpx
 import json
 from functools import lru_cache
+
+# Suppress httpx INFO logging that leaks into agent responses
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 from .config import LocalAgentConfig, load_config
 
@@ -112,11 +117,8 @@ class OpenAICompatProvider:
             payload["tools"] = tools
         if stream:
             payload["stream"] = True
-        if "deepseek" in model_lower:
-            if is_reasoning:
-                payload["thinking"] = {"type": "enabled"}
-            else:
-                payload["thinking"] = {"type": "disabled"}
+        if "deepseek" in model_lower and not is_reasoning:
+            payload["thinking"] = {"type": "disabled"}
         return payload
 
     @staticmethod
@@ -255,9 +257,8 @@ class OpenAICompatProvider:
         except httpx.ConnectError as e:
             print(f"[ERROR] Stream connection failed to {self.api_base}")
             raise
-        except Exception as e:
+        except (json.JSONDecodeError, httpx.ReadTimeout) as e:
             print(f"[ERROR] Stream request failed: {type(e).__name__}: {e}")
-            # Fallback to non-streaming if streaming fails
             print("[INFO] Falling back to non-streaming request...")
             return await self.chat(messages, tools)
 

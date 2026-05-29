@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
       await fetchUser()
     } catch (err) {
       console.warn('Failed to fetch user info, continuing with cached token:', err.message)
-      user.value = { email: result.user_email || '', full_name: '' }
+      user.value = { email: result.user_email || '', full_name: null }
     }
   }
 
@@ -45,7 +45,7 @@ export const useAuthStore = defineStore('auth', () => {
           await fetchUser()
         } catch (userErr) {
           console.warn('Failed to fetch user info, but login succeeded:', userErr)
-          user.value = { email, full_name: '' }
+          user.value = { email, full_name: null }
         }
 
         return { success: true }

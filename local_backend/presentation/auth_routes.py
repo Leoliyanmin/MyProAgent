@@ -58,7 +58,7 @@ async def get_current_user(user_id: str = Depends(get_current_user_id)):
             }
         raise HTTPException(status_code=404, detail="User not found")
     full_name = user.get("username", user.get("full_name"))
-    if not full_name or "@" in str(full_name) or str(full_name).isdigit():
+    if not full_name or "@" in str(full_name):
         settings_data = setting_handle.get_settings(user_id)
         if settings_data.get("ok"):
             data = settings_data.get("data", {}) or {}
