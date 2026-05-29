@@ -704,9 +704,13 @@ const connectWebSocket = () => {
       const targetChatId = sentChatId.value || currentChatId.value
 
       if (data.isStream) {
+        isThinking.value = false
+        currentToolLabel.value = ''
         appendStreamToChat(targetChatId, data.content)
         if (targetChatId === currentChatId.value) scrollToBottom()
       } else if (data.role === 'assistant') {
+        isThinking.value = false
+        currentToolLabel.value = ''
         appendStreamToChat(targetChatId, data.content)
         if (targetChatId === currentChatId.value) scrollToBottom()
       }
@@ -716,6 +720,14 @@ const connectWebSocket = () => {
       if (targetChatId === currentChatId.value) {
         isThinking.value = true
         currentToolLabel.value = getToolLabel(toolInfo.tool)
+        // 在对话中插入工具调用记录
+        appendMessageToChat(targetChatId, {
+          role: 'tool',
+          text: `🔧 ${getToolLabel(toolInfo.tool)}`,
+          done: true,
+          toolName: toolInfo.tool,
+          toolArgs: toolInfo.args
+        })
       }
     },
     (error) => {
@@ -1439,6 +1451,19 @@ watch(() => route.path, () => {
   color: #1d1d1f;
   align-self: flex-start;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.message.tool {
+  background: transparent;
+  color: #6b7280;
+  align-self: flex-start;
+  font-size: 11px;
+  padding: 2px 14px;
+  border-radius: 4px;
+  opacity: 0.7;
+  border: none;
+  box-shadow: none;
+  max-width: 100%;
 }
 
 .message-content {
