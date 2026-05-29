@@ -720,14 +720,6 @@ const connectWebSocket = () => {
       if (targetChatId === currentChatId.value) {
         isThinking.value = true
         currentToolLabel.value = getToolLabel(toolInfo.tool)
-        // 在对话中插入工具调用记录
-        appendMessageToChat(targetChatId, {
-          role: 'tool',
-          text: `🔧 ${getToolLabel(toolInfo.tool)}`,
-          done: true,
-          toolName: toolInfo.tool,
-          toolArgs: toolInfo.args
-        })
       }
     },
     (error) => {
