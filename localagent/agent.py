@@ -73,7 +73,7 @@ from .config import (
 )
 from .template import TemplateLoader
 
-DEFAULT_MAX_HISTORY_MESSAGES = 40
+DEFAULT_MAX_HISTORY_MESSAGES = 80
 
 
 # Patterns to detect file creation claims in agent responses
@@ -360,6 +360,9 @@ class LocalAgent:
         profile_ctx = self._build_profile_context()
         if profile_ctx:
             msgs.append({"role": "system", "content": profile_ctx})
+        memory_ctx = self._build_memory_context()
+        if memory_ctx:
+            msgs.append({"role": "system", "content": memory_ctx})
         msgs.extend(self.messages)
         msgs.append({"role": "user", "content": user_input})
         return msgs
@@ -378,6 +381,20 @@ class LocalAgent:
             lines.append(f"MBTI description: {desc}")
         lines.append("Use this information when the user asks about their personality. Do NOT guess or invent a different MBTI type.")
         return " ".join(lines)
+
+    def _build_memory_context(self) -> str | None:
+        try:
+            from .memory import MemoryStore
+            store = MemoryStore(self.workspace)
+            memory = store.get_memory()
+            if not memory or memory == "# Memory\n\nNo memory yet.":
+                return None
+            max_len = 2000
+            if len(memory) > max_len:
+                memory = memory[:max_len] + "\n...(truncated)"
+            return f"[LONG-TERM MEMORY]\n{memory}"
+        except Exception:
+            return None
 
     async def _execute_tool(self, name: str, args: dict[str, Any]) -> str:
         tool = self.tools.get(name)
