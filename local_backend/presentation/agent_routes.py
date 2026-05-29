@@ -352,6 +352,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
 
             if data.get("type") == "chat":
                 message = data.get("message", "")
+                working_directory = data.get("working_directory", None)
 
                 await websocket.send_json({
                     "type": "message",
@@ -380,7 +381,9 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                         user_id=user_id,
                         message=message,
                         session_id=actual_session_id,
+                        working_directory=working_directory,
                         on_stream=on_stream,
+                        on_tool=on_tool,
                         token=token,
                     )
 

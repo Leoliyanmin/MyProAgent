@@ -877,8 +877,13 @@ const sendMessage = async () => {
 
   const useFileContext = fmStore.isDirectorySet
 
-  // 文件管理器模式：始终走 REST（需要工作目录上下文）
-  if (useFileContext || !wsRef.value || wsRef.value.readyState !== WebSocket.OPEN) {
+  if (wsRef.value && wsRef.value.readyState === WebSocket.OPEN) {
+    const wsPayload = { type: 'chat', message }
+    if (useFileContext) {
+      wsPayload.working_directory = fmStore.workingDirectory
+    }
+    wsRef.value.send(JSON.stringify(wsPayload))
+  } else {
     sendViaREST(message, sentChatId.value).finally(() => {
       isSending.value = false
       isThinking.value = false

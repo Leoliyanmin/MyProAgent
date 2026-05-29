@@ -279,6 +279,7 @@ class AgentService:
         session_id: str = "default",
         working_directory: Optional[str] = None,
         on_stream: Callable[[str], Awaitable[None]] | None = None,
+        on_tool: Callable[[str, dict], Awaitable[None]] | None = None,
         token: str | None = None,
     ):
         session = self.session_manager.get_or_create(session_id)
@@ -305,7 +306,7 @@ class AgentService:
             self.agent.workspace = effective_working_dir
 
         try:
-            result = await self.agent.run(agent_message, on_stream=on_stream)
+            result = await self.agent.run(agent_message, on_stream=on_stream, on_tool=on_tool)
         except RuntimeError as e:
             if "AI 服务响应超时" in str(e):
                 return {
