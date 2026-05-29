@@ -521,8 +521,8 @@ const getTimedEventStyle = (event) => {
   return {
     top: `${top}px`,
     height: `${height}px`,
-    left: event.left || '2px',
-    width: event.width || 'calc(100% - 8px)',
+    ...(event.left ? { left: event.left } : {}),
+    ...(event.width ? { width: event.width } : {}),
     backgroundColor: event.color ? event.color + '25' : '',
     color: event.priority >= 4 ? '#000000' : (event.color || ''),
     borderLeft: `3px solid ${event.color || '#007aff'}`
@@ -1203,6 +1203,8 @@ onBeforeUnmount(() => {
 
 .timed-event-card {
   position: absolute;
+  left: 3px;
+  right: 3px;
   border-radius: 4px;
   padding: 4px 6px;
   font-size: 11px;

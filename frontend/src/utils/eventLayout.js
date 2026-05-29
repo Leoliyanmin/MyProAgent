@@ -72,10 +72,6 @@ export function computeEventLayout(events, options = {}) {
   }
 
   const totalColumns = columns.length
-  const columnWidth = totalColumns > 0 ? (1 / totalColumns) * 100 : 100
-  const gapCompensation = totalColumns > 1
-    ? ((totalColumns - 1) * columnGap / totalColumns)
-    : 0
 
   return sorted.map((ev, i) => {
     const col = assignment[i]
@@ -83,22 +79,20 @@ export function computeEventLayout(events, options = {}) {
     const top = (ev._startMin / 60) * hourHeight
     const height = Math.max(minHeight, (durationMinutes / 60) * hourHeight)
 
-    const left = totalColumns > 1
-      ? `calc(${(col / totalColumns) * 100}% + ${col > 0 ? columnGap / 2 : 0}px)`
-      : '2px'
-
-    const width = totalColumns > 1
-      ? `calc(${columnWidth}% - ${gapCompensation + columnGap}px)`
-      : 'calc(100% - 8px)'
-
-    return {
+    const base = {
       ...ev,
       top: `${top}px`,
       height: `${height}px`,
-      left,
-      width,
       column: col,
       totalColumns,
+    }
+
+    if (totalColumns <= 1) return base
+
+    return {
+      ...base,
+      left: `${(col / totalColumns) * 100}%`,
+      width: `calc(${100 / totalColumns}% - ${columnGap + 2}px)`,
     }
   })
 }
