@@ -12,6 +12,11 @@ from functools import lru_cache
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 
+# Configure module logger
+logging.basicConfig(level=logging.WARNING, format="[%(name)s] %(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # Enable debug for this module only
+
 from .config import LocalAgentConfig, load_config
 
 
@@ -150,24 +155,25 @@ class OpenAICompatProvider:
         payload = self._build_payload(messages, tools, stream=False)
 
         try:
-            print(f"[DEBUG] API Request: {self.api_base}/chat/completions")
-            print(f"[DEBUG] Model: {self.model}")
+            logger.debug(f"API Request: {self.api_base}/chat/completions")
+            logger.debug(f"Model: {self.model}")
             resp = await client.post("/chat/completions", json=payload, timeout=120.0)
             resp.raise_for_status()
             data = resp.json()
         except httpx.HTTPStatusError as e:
-            print(f"[ERROR] HTTP {e.response.status_code}: {e.response.text}")
+            logger.error(f"HTTP {e.response.status_code}: {e.response.text}")
             raise
         except httpx.ConnectError as e:
-            print(f"[ERROR] Connection failed to {self.api_base}")
-            print(f"[ERROR] Check network connection and proxy settings")
-            print(f"[ERROR] Verify API key is valid: {self.api_key[:10]}...{self.api_key[-4:] if self.api_key else 'None'}")
+            logger.error(f"Connection failed to {self.api_base}")
+            logger.error("Check network connection and proxy settings")
+            masked = f"{self.api_key[:10]}...{self.api_key[-4:]}" if self.api_key else "None"
+            logger.error(f"Verify API key is valid: {masked}")
             raise
         except httpx.ReadTimeout as e:
-            print(f"[ERROR] Request timeout after 120s: {e}")
+            logger.error(f"Request timeout after 120s: {e}")
             raise RuntimeError("AI 服务响应超时，请稍后重试") from e
         except Exception as e:
-            print(f"[ERROR] Request failed: {type(e).__name__}: {e}")
+            logger.error(f"Request failed: {type(e).__name__}: {e}")
             raise
 
         choice = data["choices"][0]
@@ -195,8 +201,8 @@ class OpenAICompatProvider:
         client = self._get_client()
         payload = self._build_payload(messages, tools, stream=True)
 
-        print(f"[DEBUG] API Stream Request: {self.api_base}/chat/completions")
-        print(f"[DEBUG] Model: {self.model}")
+        logger.debug(f"API Stream Request: {self.api_base}/chat/completions")
+        logger.debug(f"Model: {self.model}")
 
         content_parts: list[str] = []
         tool_calls_map: dict[int, dict[str, Any]] = {}  # index -> accumulated tool call
@@ -256,14 +262,14 @@ class OpenAICompatProvider:
                                     tool_calls_map[idx]["function"]["arguments"] += func_delta["arguments"]
 
         except httpx.HTTPStatusError as e:
-            print(f"[ERROR] Stream HTTP {e.response.status_code}: {e.response.text}")
+            logger.error(f"Stream HTTP {e.response.status_code}: {e.response.text}")
             raise
         except httpx.ConnectError as e:
-            print(f"[ERROR] Stream connection failed to {self.api_base}")
+            logger.error(f"Stream connection failed to {self.api_base}")
             raise
         except (json.JSONDecodeError, httpx.ReadTimeout) as e:
-            print(f"[ERROR] Stream request failed: {type(e).__name__}: {e}")
-            print("[INFO] Falling back to non-streaming request...")
+            logger.error(f"Stream request failed: {type(e).__name__}: {e}")
+            logger.info("Falling back to non-streaming request...")
             return await self.chat(messages, tools)
 
         # Build final response

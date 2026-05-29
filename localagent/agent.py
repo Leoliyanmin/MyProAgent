@@ -402,9 +402,9 @@ class LocalAgent:
         if not tool:
             return f"Error: Unknown tool '{name}'"
         try:
-            print(f"[AgentTool] calling {name} with args: {json.dumps(args, ensure_ascii=False, default=str)[:200]}")
+            logger.debug(f"calling {name} with args: {json.dumps(args, ensure_ascii=False, default=str)[:200]}")
             result = await tool.execute(**args)
-            print(f"[AgentTool] {name} result: {result[:200]}")
+            logger.debug(f"{name} result: {result[:200]}")
             return result
         except Exception as e:
             return f"Error executing {name}: {e}"
