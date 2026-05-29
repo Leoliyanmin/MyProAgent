@@ -1,23 +1,16 @@
 /**
- * Apple Calendar containment layout.
+ * Apple Calendar / Google Calendar event packing layout.
  *
- * Long events act as containers. Shorter overlapping events are nested inside
- * with pixel indentation instead of being placed in separate columns.
- *
- * Visual output:
- *   ┌──────────────────────────┐  depth=0 (parent, full width)
- *   │  ┌──────────┐            │  depth=1 (child, 18px indent)
- *   │  │  ┌────┐  │            │  depth=2 (grandchild, 36px indent)
- *   │  │  └────┘  │            │
- *   │  └──────────┘            │
- *   └──────────────────────────┘
+ * Overlapping events are arranged horizontally in columns.
+ * Width = 1 / (concurrent events in the overlapping group).
+ * Non-overlapping events expand to full width.
  *
  * Algorithm:
- *   1. Sort by duration (longest first) — longest events are "containers"
- *   2. depth = count of longer events that strictly contain this event
- *   3. If siblings at same depth overlap → bump later one deeper
- *   4. left = depth * indentStep, width = 100% - depth * indentStep
- *   5. z-index proportional to depth (children render above parents)
+ *   1. Sort by start time, then duration (longer first)
+ *   2. Group into overlapping clusters (connected components)
+ *   3. Within each cluster, greedy column assignment:
+ *      place each event in the first column not occupied at its start time
+ *   4. Width = 100% / totalColumns, Left = colIndex * (100% / totalColumns)
  */
 
 const toMinutes = (time) => {
@@ -29,83 +22,96 @@ const toMinutes = (time) => {
 /**
  * @param {Array} events — { id, startTime, endTime }
  * @param {Object} options
- * @param {number} options.indentStep — px per nesting level (default 18)
  * @param {number} options.hourHeight — px per hour (default 50)
  * @param {number} options.minHeight — minimum event height in px (default 25)
  */
 export function computeEventLayout(events, options = {}) {
-  const {
-    indentStep = 18,
-    hourHeight = 50,
-    minHeight = 25,
-  } = options
+  const { hourHeight = 50, minHeight = 25 } = options
 
-  if (!events || events.length <= 1) return events || []
+  if (!events || events.length === 0) return []
 
-  const items = events.map((e) => ({
+  // Parse to internal format
+  const items = events.map(e => ({
     ...e,
-    _startMin: toMinutes(e.startTime),
-    _endMin: toMinutes(e.endTime || '23:59'),
-    _durationMin: toMinutes(e.endTime || '23:59') - toMinutes(e.startTime),
-    _depth: 0,
+    _start: toMinutes(e.startTime),
+    _end: toMinutes(e.endTime || '23:59'),
   }))
 
-  const sorted = [...items].sort((a, b) => b._durationMin - a._durationMin)
-
-  // Phase 1: compute depth by strict containment
-  for (let i = 0; i < sorted.length; i++) {
-    const ev = sorted[i]
-    for (let j = 0; j < i; j++) {
-      const longer = sorted[j]
-      if (longer._startMin <= ev._startMin && longer._endMin >= ev._endMin) {
-        ev._depth = Math.max(ev._depth, longer._depth + 1)
-      }
-    }
+  if (items.length === 1) {
+    const ev = items[0]
+    const dur = Math.max(0.5, (ev._end - ev._start) / 60)
+    return [{
+      ...ev,
+      top: `${(ev._start / 60) * hourHeight}px`,
+      height: `${Math.max(minHeight, dur * hourHeight)}px`,
+      totalColumns: 1,
+      column: 0,
+    }]
   }
 
-  // Phase 2: bump depth for overlapping siblings at same level
-  let changed = true
-  while (changed) {
-    changed = false
-    const maxD = Math.max(...sorted.map(e => e._depth), 0)
-    for (let d = 0; d <= maxD; d++) {
-      const siblings = sorted
-        .filter(e => e._depth === d)
-        .sort((a, b) => a._startMin - b._startMin)
-      for (let i = 1; i < siblings.length; i++) {
-        if (siblings[i]._startMin < siblings[i - 1]._endMin) {
-          siblings[i]._depth++
-          changed = true
+  // Sort: start time ascending, then duration descending (longer first)
+  const sorted = [...items].sort((a, b) => {
+    if (a._start !== b._start) return a._start - b._start
+    return (b._end - b._start) - (a._end - a._start)
+  })
+
+  // Phase 1: Group into overlapping clusters
+  // Two events overlap if one starts before the other ends
+  const clusters = []
+  for (const ev of sorted) {
+    let placed = false
+    for (const cluster of clusters) {
+      if (cluster.some(c => c._end > ev._start && c._start < ev._end)) {
+        cluster.push(ev)
+        placed = true
+        break
+      }
+    }
+    if (!placed) clusters.push([ev])
+  }
+
+  // Phase 2: Greedy column assignment within each cluster
+  for (const cluster of clusters) {
+    const columns = [] // columns[colIdx] = events in this column
+    for (const ev of cluster) {
+      let col = 0
+      while (col < columns.length) {
+        // Column is available if no event in it still runs when we start
+        if (!columns[col].some(e => e._end > ev._start)) {
+          break
         }
+        col++
       }
+      if (col >= columns.length) columns.push([])
+      columns[col].push(ev)
+      ev._col = col
     }
+    cluster._totalCols = columns.length
   }
 
-  // Phase 3: build output
-  const maxDepth = Math.max(...sorted.map(e => e._depth), 0)
-  const WIDTH_RATIOS = [1, 0.70, 0.63, 0.57, 0.52]
+  // Phase 3: Build output
+  return items.map(ev => {
+    const cluster = clusters.find(c => c.includes(ev))
+    const totalCols = cluster._totalCols || 1
+    const col = ev._col !== undefined ? ev._col : 0
 
-  return sorted.map((ev) => {
-    const durationMinutes = Math.max(30, ev._endMin - ev._startMin)
-    const top = (ev._startMin / 60) * hourHeight
-    const height = Math.max(minHeight, (durationMinutes / 60) * hourHeight)
+    const durHr = Math.max(0.5, (ev._end - ev._start) / 60)
+    const top = (ev._start / 60) * hourHeight
+    const height = Math.max(minHeight, durHr * hourHeight)
 
-    const base = {
+    const result = {
       ...ev,
       top: `${top}px`,
       height: `${height}px`,
-      depth: ev._depth,
-      maxDepth,
+      totalColumns: totalCols,
+      column: col,
     }
 
-    if (ev._depth === 0) return base
-
-    const leftPx = ev._depth * indentStep
-    const ratio = WIDTH_RATIOS[Math.min(ev._depth, WIDTH_RATIOS.length - 1)]
-    return {
-      ...base,
-      left: `${leftPx}px`,
-      width: `calc(${ratio * 100}% - ${leftPx + 3}px)`,
+    if (totalCols > 1) {
+      result.left = `${(col / totalCols) * 100}%`
+      result.width = `${100 / totalCols}%`
     }
+
+    return result
   })
 }

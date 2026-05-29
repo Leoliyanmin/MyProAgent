@@ -517,44 +517,7 @@ const getTimedEventStyle = (event) => {
   if (duration < 0.5) duration = 0.5; // min height 30 mins
   const height = duration * 50;
 
-  const isParent = event.depth === 0 && event.maxDepth > 0
-  const isChild = event.depth > 0
   const color = event.color || '#007aff'
-
-  if (isParent) {
-    return {
-      top: `${top}px`,
-      height: `${height}px`,
-      zIndex: 1,
-      backgroundColor: event.color ? event.color + '06' : 'rgba(0,0,0,0.02)',
-      borderLeft: `2px solid ${event.color ? event.color + '30' : 'rgba(0,0,0,0.08)'}`,
-      border: 'none',
-      borderRadius: '0',
-      boxShadow: 'none',
-      color: event.color ? event.color + '88' : '#bbb',
-      fontWeight: '400',
-      fontSize: '10px',
-      padding: '3px 8px',
-    }
-  }
-
-  if (isChild) {
-    return {
-      top: `${top}px`,
-      height: `${height}px`,
-      ...(event.left ? { left: event.left } : {}),
-      ...(event.width ? { width: event.width } : {}),
-      zIndex: (event.depth || 0) + 10,
-      backgroundColor: event.color ? event.color + '30' : '',
-      borderLeft: `3px solid ${color}`,
-      borderRadius: '5px',
-      boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-      color: event.priority >= 4 ? '#000000' : color,
-      fontWeight: '600',
-      fontSize: '11px',
-      padding: '4px 6px',
-    }
-  }
 
   return {
     top: `${top}px`,
@@ -565,11 +528,6 @@ const getTimedEventStyle = (event) => {
     backgroundColor: event.color ? event.color + '25' : '',
     color: event.priority >= 4 ? '#000000' : color,
     borderLeft: `3px solid ${color}`,
-    borderRadius: '4px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-    fontWeight: '600',
-    fontSize: '11px',
-    padding: '4px 6px',
   }
 }
 
