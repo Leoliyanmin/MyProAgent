@@ -8,7 +8,7 @@ from database.code.handle.database_code_handle import CodeHandle
 from business.email_service import EmailService
 from config import settings
 from datetime import datetime
-from logging_config import get_logger
+from utils.logging_config import get_logger
 
 # 创建日志器
 logger = get_logger("user_service")

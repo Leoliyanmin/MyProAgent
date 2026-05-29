@@ -4,7 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from database.code.handle.database_synchronize_handle import ServerSyncHandle
 from database.code.command import database_command as db
-from logging_config import get_logger
+from utils.logging_config import get_logger
 
 # 创建日志器
 logger = get_logger("sync_service")

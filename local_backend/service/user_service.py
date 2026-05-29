@@ -7,7 +7,7 @@ from database.code.handle.database_user_handle import UserHandle
 import httpx
 import requests
 from config import settings
-from logging_config import get_logger
+from utils.logging_config import get_logger
 
 logger = get_logger("local_user_service")
 

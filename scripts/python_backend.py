@@ -38,7 +38,7 @@ try:
     from presentation.event_routes import router as event_router
     from presentation.scheduler_routes import router as scheduler_router
     from presentation.email_routes import router as email_router
-    from logging_config import setup_logging
+    from local_backend.utils.logging_config import setup_logging
 except ImportError as e:
     print(f"Import error: {e}")
     print(f"Bundle dir: {bundle_dir}")

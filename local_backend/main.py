@@ -13,7 +13,7 @@ from presentation.scheduler_routes import router as scheduler_router
 from presentation.email_routes import router as email_router
 from presentation.courses_routes import router as courses_router
 from presentation.event_routes import router as event_router
-from logging_config import setup_logging
+from utils.logging_config import setup_logging
 from service.scheduler_service import scheduler_service
 
 # 初始化日志系统
