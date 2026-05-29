@@ -50,6 +50,17 @@
             <span class="info-label">行为模式</span>
             <div class="preference-text">{{ behaviorPattern || '暂无数据' }}</div>
           </div>
+
+          <div class="info-section" v-if="Object.keys(personalityIndicators).length">
+            <span class="info-label">个性指标</span>
+            <div class="indicator-row" v-for="(val, key) in personalityIndicators" :key="key">
+              <span class="indicator-name">{{ indicatorLabel(key) }}</span>
+              <div class="indicator-track">
+                <div class="indicator-fill" :style="{ width: (val * 100) + '%' }"></div>
+              </div>
+              <span class="indicator-val">{{ Math.round(val * 100) }}%</span>
+            </div>
+          </div>
         </template>
 
         <div v-if="error.ai" class="error-banner">{{ error.ai }}</div>
@@ -84,6 +95,25 @@
         <div v-if="!loading.ai && mbtiDescription" class="mbti-desc">
           <strong>类型描述</strong>
           <p>{{ mbtiDescription }}</p>
+        </div>
+
+        <!-- 活跃时间热力图 -->
+        <div class="heatmap-section" v-if="activeHours.length">
+          <h4>活跃时段</h4>
+          <div class="heatmap-grid">
+            <div
+              v-for="h in 24" :key="h"
+              class="heatmap-cell"
+              :class="{ active: activeHours.includes(h - 1) }"
+              :title="`${h - 1}:00 - ${h}:00`"
+            >{{ h - 1 }}</div>
+          </div>
+          <div class="heatmap-legend">
+            <span class="legend-label">凌晨</span>
+            <span class="legend-label">上午</span>
+            <span class="legend-label">下午</span>
+            <span class="legend-label">晚上</span>
+          </div>
         </div>
 
         <div class="action-bar">
@@ -130,6 +160,8 @@ const analysisSkills = ref([])
 const workPreference = ref('')
 const behaviorPattern = ref('')
 const interactions = ref([])
+const activeHours = ref([])
+const personalityIndicators = ref({})
 
 const dimensionPairs = computed(() => {
   const s = mbtiScores.value
@@ -195,6 +227,8 @@ async function fetchProfile() {
       `工作风格: ${patterns.work_style || 'flexible'}`,
       topicStr ? `关注领域: ${topicStr}` : ''
     ].filter(Boolean).join('；')
+    activeHours.value = patterns.active_hours || []
+    personalityIndicators.value = p.personality_indicators || {}
 
     const hist = await profileAPI.getInteractions(5, 0)
     interactions.value = hist.interactions || []
@@ -237,6 +271,15 @@ function formatTime(ts) {
   } catch {
     return ts
   }
+}
+
+function indicatorLabel(key) {
+  const labels = {
+    detail_oriented: '注重细节',
+    proactive: '积极主动',
+    collaborative: '协作倾向',
+  }
+  return labels[key] || key
 }
 
 onMounted(() => {
@@ -574,5 +617,90 @@ onActivated(() => {
   color: #6b7280;
   text-align: right;
   flex-shrink: 0;
+}
+
+/* 个性指标条 */
+.indicator-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.indicator-name {
+  width: 65px;
+  font-size: 11px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.indicator-track {
+  flex: 1;
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.indicator-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  transition: width 0.4s ease;
+}
+
+.indicator-val {
+  width: 34px;
+  font-size: 10px;
+  color: #6b7280;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* 活跃时间热力图 */
+.heatmap-section {
+  margin-top: 20px;
+}
+
+.heatmap-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: #1d1d1f;
+}
+
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  gap: 2px;
+}
+
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: #f3f4f6;
+  font-size: 8px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.heatmap-cell.active {
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+  color: #fff;
+  font-weight: 600;
+}
+
+.heatmap-legend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.legend-label {
+  font-size: 10px;
+  color: #9ca3af;
 }
 </style>
