@@ -43,6 +43,18 @@ from .task_tools import (
     UpdateTaskTool,
     DeleteTaskTool,
 )
+from .blackboard_tools import (
+    GetBlackboardStatusTool,
+    SyncBlackboardTool,
+    GetBlackboardAssignmentsTool,
+)
+from .tis_tools import (
+    GetTisStatusTool,
+    GetTisScheduleTool,
+)
+from .course_tools import (
+    ListCoursesTool,
+)
 
 __all__ = [
     "BaseTool",
