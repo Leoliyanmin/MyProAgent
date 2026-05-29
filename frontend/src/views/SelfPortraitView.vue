@@ -61,6 +61,26 @@
               <span class="indicator-val">{{ Math.round(val * 100) }}%</span>
             </div>
           </div>
+
+          <!-- 活跃时间热力图 -->
+          <div class="info-section" v-if="activeHours.length">
+            <span class="info-label">活跃时段</span>
+            <div class="heatmap-grid">
+              <div
+                v-for="h in 24" :key="h"
+                class="heatmap-cell"
+                :class="{ active: activeHours.includes(h - 1) }"
+                :title="`${h - 1}:00 - ${h}:00`"
+              >{{ h - 1 }}</div>
+            </div>
+            <div class="heatmap-legend">
+              <span class="legend-label">0</span>
+              <span class="legend-label">6</span>
+              <span class="legend-label">12</span>
+              <span class="legend-label">18</span>
+              <span class="legend-label">23</span>
+            </div>
+          </div>
         </template>
 
         <div v-if="error.ai" class="error-banner">{{ error.ai }}</div>
@@ -95,25 +115,6 @@
         <div v-if="!loading.ai && mbtiDescription" class="mbti-desc">
           <strong>类型描述</strong>
           <p>{{ mbtiDescription }}</p>
-        </div>
-
-        <!-- 活跃时间热力图 -->
-        <div class="heatmap-section" v-if="activeHours.length">
-          <h4>活跃时段</h4>
-          <div class="heatmap-grid">
-            <div
-              v-for="h in 24" :key="h"
-              class="heatmap-cell"
-              :class="{ active: activeHours.includes(h - 1) }"
-              :title="`${h - 1}:00 - ${h}:00`"
-            >{{ h - 1 }}</div>
-          </div>
-          <div class="heatmap-legend">
-            <span class="legend-label">凌晨</span>
-            <span class="legend-label">上午</span>
-            <span class="legend-label">下午</span>
-            <span class="legend-label">晚上</span>
-          </div>
         </div>
 
         <div class="action-bar">
@@ -658,17 +659,6 @@ onActivated(() => {
 }
 
 /* 活跃时间热力图 */
-.heatmap-section {
-  margin-top: 20px;
-}
-
-.heatmap-section h4 {
-  font-size: 14px;
-  font-weight: 600;
-  margin: 0 0 10px;
-  color: #1d1d1f;
-}
-
 .heatmap-grid {
   display: grid;
   grid-template-columns: repeat(24, 1fr);
