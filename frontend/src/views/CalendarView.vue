@@ -979,7 +979,7 @@ const onResizeStart = (e, event) => {
 }
 
 watch(
-  () => [calendarStore.viewType, visibleDays.value.length],
+  () => [calendarStore.viewType, visibleDays.value.length, calendarStore.basicEvents, dashboardStore.todos],
   async () => {
     await nextTick()
     scheduleWeekGridSync()
