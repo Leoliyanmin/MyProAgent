@@ -229,6 +229,10 @@ def update_email_account_sync_time(account_id: int, sync_time: str, db_path: str
     _execute("UPDATE email_account SET last_sync_time = ? WHERE account_id = ?", (sync_time, account_id), db_path)
 
 
+def update_email_account_sync_uid(account_id: int, last_uid: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
+    _execute("UPDATE email_account SET last_sync_uid = ? WHERE account_id = ?", (last_uid, account_id), db_path)
+
+
 def delete_email_account(account_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM email_account WHERE account_id = ?", (account_id,), db_path)
 

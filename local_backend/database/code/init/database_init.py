@@ -125,6 +125,13 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
         )""")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_interaction_log_user ON interaction_log(user_id, timestamp)")
 
+    # email_account last_sync_uid migration
+    email_account_uid_check = conn.execute(
+        "SELECT COUNT(*) FROM pragma_table_info('email_account') WHERE name='last_sync_uid'"
+    ).fetchone()
+    if email_account_uid_check[0] == 0:
+        conn.execute("ALTER TABLE email_account ADD COLUMN last_sync_uid INTEGER DEFAULT 0")
+
 
 def init_database(db_path: str | Path = DEFAULT_DB_PATH, schema_path: str | Path = DEFAULT_SCHEMA_PATH) -> None:
     if not schema_path.exists():

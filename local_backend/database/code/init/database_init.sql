@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS email_account (
     encrypted_password  TEXT NOT NULL,
     bind_time           TEXT,
     last_sync_time      TEXT,
+    last_sync_uid       INTEGER DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 

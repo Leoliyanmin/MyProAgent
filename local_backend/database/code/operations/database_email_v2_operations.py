@@ -6,6 +6,7 @@ from local_backend.database.code.command.database_command import (
     create_email_account,
     get_email_account,
     update_email_account_sync_time,
+    update_email_account_sync_uid,
     delete_email_account,
     create_email_message,
     list_email_messages_by_user,
@@ -38,6 +39,9 @@ class EmailAccountV2Operations:
         if not sync_time:
             sync_time = time.strftime("%Y-%m-%d %H:%M:%S")
         update_email_account_sync_time(account_id, sync_time)
+
+    def update_sync_uid(self, account_id: int, last_uid: int) -> None:
+        update_email_account_sync_uid(account_id, last_uid)
 
     def delete(self, user_id: str) -> None:
         existing = get_email_account(user_id)
