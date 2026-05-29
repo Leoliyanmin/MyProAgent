@@ -254,6 +254,9 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
     todos.value = todos.value.filter(t => t.id !== id)
     saveTodosToStorage(todos.value)
+
+    const calendarStore = useCalendarStore()
+    calendarStore.basicEvents = calendarStore.basicEvents.filter(e => e.id !== id)
   }
 
   const loadTodosFromBackend = async () => {
