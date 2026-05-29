@@ -422,6 +422,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         try:
             await websocket.close(code=4000, reason=str(e))
         except Exception:
+            pass
     finally:
         disconnect_user(user_id)
 
