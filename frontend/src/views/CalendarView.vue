@@ -256,12 +256,6 @@
             <span>已完成</span>
           </label>
         </div>
-        <div class="mac-checkbox-row">
-          <label class="mac-checkbox-label">
-            <input type="checkbox" v-model="draftEvent.completed" class="mac-checkbox" />
-            <span>标记为已完成</span>
-          </label>
-        </div>
         <label>备注</label>
         <textarea v-model="draftEvent.description" class="mac-input" placeholder="添加备注..." rows="2"></textarea>
         <p v-if="validationMessage" class="form-validation-message">{{ validationMessage }}</p>

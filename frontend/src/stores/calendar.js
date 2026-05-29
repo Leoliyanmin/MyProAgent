@@ -206,7 +206,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         event_start_time: combineDateAndTime(eventData.start, eventData.startTime, '00:00'),
         event_end_time: combineDateAndTime(eventData.end || eventData.start, eventData.endTime, eventData.startTime || '23:59'),
         event_color_tag: eventData.color || priorityColors[eventData.priority] || '#007aff',
-        event_priority: normalizePriority(eventData.priority, 'p2'),
+        event_priority: eventData.priority ?? 2,
         event_type: 'manual',
         event_source: 'manual',
         event_show_in_todo: eventData.showInTodo !== false ? 1 : 0,
@@ -227,7 +227,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         event_start_time: combineDateAndTime(eventData.start, eventData.startTime, '00:00'),
         event_end_time: combineDateAndTime(eventData.end || eventData.start, eventData.endTime, eventData.startTime || '23:59'),
         event_color_tag: eventData.color,
-        event_priority: eventData.priority !== undefined ? normalizePriority(eventData.priority, 'p2') : undefined,
+        event_priority: typeof eventData.priority === 'number' ? eventData.priority : undefined,
         event_show_in_todo: eventData.showInTodo !== undefined ? (eventData.showInTodo ? 1 : 0) : undefined,
         event_is_completed: eventData.completed !== undefined ? (eventData.completed ? 1 : 0) : undefined,
       })
