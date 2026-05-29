@@ -115,7 +115,6 @@ class OpenAICompatProvider:
             "reasoner", "reasoning", "deepseek-r1",
             "o1-", "o3-", "o4-",
         ))
-        ))
 
         payload: dict[str, Any] = {
             "model": self.model,
