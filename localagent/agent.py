@@ -384,9 +384,10 @@ class LocalAgent:
 
     def _build_memory_context(self) -> str | None:
         try:
+            user_id = self._runtime_context.get("user_id")
             from .memory import MemoryStore
             store = MemoryStore(self.workspace)
-            memory = store.get_memory()
+            memory = store.get_memory(user_id=user_id)
             if not memory or memory == "# Memory\n\nNo memory yet.":
                 return None
             max_len = 2000
