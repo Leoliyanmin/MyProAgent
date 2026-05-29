@@ -357,9 +357,27 @@ class LocalAgent:
     def _build_messages(self, user_input: str) -> list[dict[str, Any]]:
         self._trim_history()
         msgs = [{"role": "system", "content": self.system_prompt}]
+        profile_ctx = self._build_profile_context()
+        if profile_ctx:
+            msgs.append({"role": "system", "content": profile_ctx})
         msgs.extend(self.messages)
         msgs.append({"role": "user", "content": user_input})
         return msgs
+
+    def _build_profile_context(self) -> str | None:
+        profile = self._get_user_profile()
+        if not profile:
+            return None
+        mbti = profile.get("mbti_inference", {})
+        if not mbti or not mbti.get("mbti_type"):
+            return None
+        mbti_type = mbti["mbti_type"]
+        desc = mbti.get("description", "")
+        lines = [f"[SYSTEM CONTEXT] Current user profile: MBTI type is {mbti_type}."]
+        if desc:
+            lines.append(f"MBTI description: {desc}")
+        lines.append("Use this information when the user asks about their personality. Do NOT guess or invent a different MBTI type.")
+        return " ".join(lines)
 
     async def _execute_tool(self, name: str, args: dict[str, Any]) -> str:
         tool = self.tools.get(name)
