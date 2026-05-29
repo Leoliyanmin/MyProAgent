@@ -877,10 +877,8 @@ const sendMessage = async () => {
 
   const useFileContext = fmStore.isDirectorySet
 
-  if (wsRef.value && wsRef.value.readyState === WebSocket.OPEN) {
-    wsRef.value.send(JSON.stringify({ type: 'chat', message }))
-    // Don't set isSending to false here - the 'done' event will handle that
-  } else {
+  // 文件管理器模式：始终走 REST（需要工作目录上下文）
+  if (useFileContext || !wsRef.value || wsRef.value.readyState !== WebSocket.OPEN) {
     sendViaREST(message, sentChatId.value).finally(() => {
       isSending.value = false
       isThinking.value = false
@@ -909,6 +907,17 @@ const sendViaREST = async (message, chatId) => {
     if (controller.signal.aborted) return
 
     const pendingDeletions = result?.pending_deletions || []
+    const toolCalls = result?.tool_calls || []
+
+    // 在对话中插入工具调用链
+    if (toolCalls.length > 0) {
+      const toolNames = toolCalls.map(t => `🔧 ${getToolLabel(t)}`).join('\n')
+      appendMessageToChat(chatId, {
+        role: 'tool',
+        text: toolNames,
+        done: true
+      })
+    }
 
     let responseText = result.response || '没有响应'
 
