@@ -83,7 +83,7 @@ export function computeEventLayout(events, options = {}) {
 
   // Phase 3: build output
   const maxDepth = Math.max(...sorted.map(e => e._depth), 0)
-  const WIDTH_RATIOS = [1, 0.85, 0.78, 0.72, 0.67]
+  const WIDTH_RATIOS = [1, 0.70, 0.63, 0.57, 0.52]
 
   return sorted.map((ev) => {
     const durationMinutes = Math.max(30, ev._endMin - ev._startMin)
