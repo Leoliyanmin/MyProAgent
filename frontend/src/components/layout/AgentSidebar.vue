@@ -91,7 +91,7 @@
             <span class="dot"></span>
             <span class="dot"></span>
           </span>
-          <span class="thinking-text">Agent 正在思考</span>
+          <span class="thinking-text">{{ currentToolLabel || 'Agent 正在思考' }}</span>
         </div>
       </div>
 
@@ -234,11 +234,54 @@ const inputText = ref('')
 const wsRef = ref(null)
 const isSending = ref(false)
 const isThinking = ref(false)
+const currentToolLabel = ref('')
 const hasInitialized = ref(false)
 const messagesContainer = ref(null)
 const chatListCollapsed = ref(false)
 const abortControllerRef = ref(null)
 const isStopping = ref(false)
+
+// 工具名 → 中文显示映射
+const TOOL_LABELS = {
+  get_user_profile: '正在读取用户画像...',
+  create_schedule_event: '正在创建日程...',
+  update_schedule_event: '正在更新日程...',
+  update_schedule_event_time: '正在调整日程时间...',
+  delete_schedule_event: '正在删除日程...',
+  read_file: '正在读取文件...',
+  write_file: '正在写入文件...',
+  edit_file: '正在编辑文件...',
+  list_dir: '正在浏览目录...',
+  create_dir: '正在创建目录...',
+  search_files: '正在搜索文件...',
+  grep: '正在搜索内容...',
+  move_file: '正在移动文件...',
+  copy_file: '正在复制文件...',
+  delete_file: '正在删除文件...',
+  exec: '正在执行命令...',
+  check_email_status: '正在检查邮箱状态...',
+  get_emails: '正在获取邮件...',
+  send_email: '正在发送邮件...',
+  analyze_emails: '正在分析邮件...',
+  sync_emails: '正在同步邮件...',
+  list_tasks: '正在加载任务...',
+  create_task: '正在创建任务...',
+  update_task: '正在更新任务...',
+  delete_task: '正在删除任务...',
+  get_blackboard_status: '正在检查Blackboard...',
+  sync_blackboard: '正在同步Blackboard...',
+  get_blackboard_assignments: '正在获取作业...',
+  get_tis_status: '正在检查TIS...',
+  get_tis_schedule: '正在读取课表...',
+  list_courses: '正在加载课程...',
+  get_starred_emails: '正在获取星标邮件...',
+  star_email: '正在标记星标...',
+  unstar_email: '正在取消星标...',
+}
+
+function getToolLabel(toolName) {
+  return TOOL_LABELS[toolName] || `正在执行 ${toolName}...`
+}
 
 // 模型选择
 const activeModels = ref([])
@@ -672,11 +715,13 @@ const connectWebSocket = () => {
       const targetChatId = sentChatId.value || currentChatId.value
       if (targetChatId === currentChatId.value) {
         isThinking.value = true
+        currentToolLabel.value = getToolLabel(toolInfo.tool)
       }
     },
     (error) => {
       const targetChatId = sentChatId.value || currentChatId.value
       isThinking.value = false
+      currentToolLabel.value = ''
 
       if (isStopping.value) {
         isStopping.value = false
@@ -693,6 +738,7 @@ const connectWebSocket = () => {
     (data) => {
       const targetChatId = sentChatId.value || currentChatId.value
       isThinking.value = false
+      currentToolLabel.value = ''
       isSending.value = false
 
       markLastAssistantDone(targetChatId)
