@@ -313,13 +313,3 @@ class ScheduleHandle:
             )
 
         return _error(400, "SCHEDULE_ACTION_INVALID", f"unsupported action: {action}")
-
-
-def handle_schedule_request(request: dict[str, Any] | str | Path) -> dict[str, Any]:
-    content = _load_request(request)
-    action = content.get("action")
-    if not action:
-        return _error(400, "SCHEDULE_ACTION_REQUIRED", "action is required")
-
-    handler = ScheduleHandle()
-    return handler.handle(action=str(action), payload=content.get("payload"))

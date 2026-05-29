@@ -148,14 +148,6 @@ def create_task(
     )
 
 
-def get_task(task_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
-    return _fetch_one("SELECT * FROM task WHERE task_id = ?", (task_id,), db_path)
-
-
-def list_tasks_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
-    return _fetch_all("SELECT * FROM task WHERE user_id = ? ORDER BY created_at DESC", (user_id,), db_path)
-
-
 def update_task(task_id: int, db_path: str | Path = DEFAULT_DB_PATH, **kwargs) -> None:
     if not kwargs:
         return
@@ -170,51 +162,6 @@ def update_task(task_id: int, db_path: str | Path = DEFAULT_DB_PATH, **kwargs) -
 
 def delete_task(task_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM task WHERE task_id = ?", (task_id,), db_path)
-
-
-# tis_course
-
-def create_tis_course(user_id: str, course_name: str, teacher: str = None,
-                      location: str = None, weeks: str = None,
-                      term: str = None, raw_data: str = None,
-                      db_path: str | Path = DEFAULT_DB_PATH) -> int:
-    import datetime
-    now = datetime.datetime.utcnow().isoformat()
-    return _execute(
-        "INSERT INTO tis_course (user_id, course_name, teacher, location, weeks, term, raw_data, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (user_id, course_name, teacher, location, weeks, term, raw_data, now),
-        db_path,
-    )
-
-
-def list_tis_courses_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
-    return _fetch_all("SELECT * FROM tis_course WHERE user_id = ?", (user_id,), db_path)
-
-
-def delete_tis_courses_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
-    _execute("DELETE FROM tis_course WHERE user_id = ?", (user_id,), db_path)
-
-
-def create_tis_event(course_id: int, user_id: str, day_of_week: int,
-                     week_num: int, period_start: int, period_end: int,
-                     start_time: str = None, end_time: str = None,
-                     db_path: str | Path = DEFAULT_DB_PATH) -> int:
-    return _execute(
-        "INSERT INTO tis_schedule_event (course_id, user_id, day_of_week, week_num, period_start, period_end, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (course_id, user_id, day_of_week, week_num, period_start, period_end, start_time, end_time),
-        db_path,
-    )
-
-
-def list_tis_events_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
-    return _fetch_all(
-        "SELECT e.*, c.course_name FROM tis_schedule_event e JOIN tis_course c ON e.course_id = c.course_id WHERE e.user_id = ?",
-        (user_id,), db_path,
-    )
-
-
-def delete_tis_events_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
-    _execute("DELETE FROM tis_schedule_event WHERE user_id = ?", (user_id,), db_path)
 
 
 # user_setting
@@ -1510,8 +1457,6 @@ def delete_interaction_log(conversation_id: str, db_path: str | Path = DEFAULT_D
     _execute("DELETE FROM interaction_log WHERE conversation_id = ?", (conversation_id,), db_path)
 
 
-def delete_interaction_logs_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
-    _execute("DELETE FROM interaction_log WHERE user_id = ?", (user_id,), db_path)
 
 
 def count_interaction_logs_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> int:

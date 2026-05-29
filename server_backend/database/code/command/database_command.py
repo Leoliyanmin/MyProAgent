@@ -125,25 +125,11 @@ def delete_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM users WHERE user_id = ?", (user_id,), db_path)
 
 
-def create_server_task(user_id: str, title: str, description: str = None,
-                       priority: int = 2, status: str = "pending",
-                       due_date: str = None, created_at: str = None,
-                       db_path: str | Path = DEFAULT_DB_PATH) -> int:
-    import datetime
-    now = created_at or datetime.datetime.utcnow().isoformat()
-    return _execute(
-        "INSERT INTO task (user_id, title, description, priority, status, due_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (user_id, title, description, priority, status, due_date, now, now),
-        db_path,
-    )
 
 
-def list_server_tasks_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
-    return _fetch_all("SELECT * FROM task WHERE user_id = ?", (user_id,), db_path)
 
 
-def delete_server_tasks_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
-    _execute("DELETE FROM task WHERE user_id = ?", (user_id,), db_path)
+
 
 
 def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **kwargs) -> None:
@@ -170,33 +156,12 @@ def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **k
         )
 
 
-def delete_server_tis_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
-    _execute("DELETE FROM tis_schedule_event WHERE user_id = ?", (user_id,), db_path)
-    _execute("DELETE FROM tis_course WHERE user_id = ?", (user_id,), db_path)
 
 
-def create_server_tis_course(user_id: str, course_name: str, teacher: str = None,
-                             location: str = None, weeks: str = None,
-                             term: str = None, raw_data: str = None,
-                             db_path: str | Path = DEFAULT_DB_PATH) -> int:
-    import datetime
-    now = datetime.datetime.utcnow().isoformat()
-    return _execute(
-        "INSERT INTO tis_course (user_id, course_name, teacher, location, weeks, term, raw_data, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (user_id, course_name, teacher, location, weeks, term, raw_data, now),
-        db_path,
-    )
 
 
-def create_server_tis_event(course_id: int, user_id: str, day_of_week: int,
-                            week_num: int, period_start: int, period_end: int,
-                            start_time: str = None, end_time: str = None,
-                            db_path: str | Path = DEFAULT_DB_PATH) -> int:
-    return _execute(
-        "INSERT INTO tis_schedule_event (course_id, user_id, day_of_week, week_num, period_start, period_end, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (course_id, user_id, day_of_week, week_num, period_start, period_end, start_time, end_time),
-        db_path,
-    )
+
+
 
 
 # user_match_profile
@@ -492,22 +457,7 @@ def list_accounts_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -
     return _fetch_all("SELECT * FROM account WHERE user_id = ? ORDER BY account_id DESC", (user_id,), db_path)
 
 
-def update_account_credentials(
-    account_id: int,
-    account_mail_password: str | None,
-    account_cookie: str | None,
-    account_last_sync_time: str | None,
-    db_path: str | Path = DEFAULT_DB_PATH,
-) -> None:
-    _execute(
-        """
-        UPDATE account
-        SET account_mail_password = ?, account_cookie = ?, account_last_sync_time = ?
-        WHERE account_id = ?
-        """,
-        (account_mail_password, account_cookie, account_last_sync_time, account_id),
-        db_path,
-    )
+
 
 
 def delete_account(account_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
@@ -1188,14 +1138,5 @@ def list_activities(limit: int = 50, db_path: str | Path = DEFAULT_DB_PATH) -> l
     return _fetch_all(
         "SELECT * FROM activity_log ORDER BY created_at DESC LIMIT ?",
         (limit,),
-        db_path,
-    )
-
-
-def list_activities_by_user(user_id: str, limit: int = 20,
-                            db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
-    return _fetch_all(
-        "SELECT * FROM activity_log WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
-        (user_id, limit),
         db_path,
     )

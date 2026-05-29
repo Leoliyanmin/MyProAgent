@@ -80,23 +80,3 @@ class ChatOperations:
     def get_chat_history(session_id: int) -> list[dict]:
         """获取会话的聊天历史"""
         return list_chat_by_session(session_id)
-
-    @staticmethod
-    def update_chat_message(
-        chat_id: int,
-        thought_trace: str = None,
-        tool_calls: str = None,
-        tokens_usage: str = None,
-    ) -> None:
-        """更新聊天消息"""
-        update_chat_trace(
-            chat_id=chat_id,
-            thought_trace=thought_trace,
-            chat_tool_calls=tool_calls,
-            chat_tokens_usage=tokens_usage,
-        )
-
-    @staticmethod
-    def delete_chat_message(chat_id: int) -> None:
-        """删除聊天消息"""
-        delete_chat(chat_id)

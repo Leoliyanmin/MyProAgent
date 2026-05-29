@@ -75,8 +75,3 @@ class CodeOperations:
     def cleanup_expired_codes() -> None:
         now = datetime.now(timezone.utc).isoformat()
         delete_expired_codes(now)
-
-    @staticmethod
-    def get_codes_by_user(user_id: str) -> list[dict]:
-        """获取用户的所有验证码记录"""
-        return list_codes_by_user(user_id)
