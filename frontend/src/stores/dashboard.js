@@ -232,9 +232,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
       await eventsAPI.update(id, {
         event_is_completed: task.completed ? 1 : 0
       })
-      await loadTodosFromBackend()
     } catch (err) {
       console.error('Failed to sync todo status:', err)
+      task.completed = !task.completed
+      saveTodosToStorage(todos.value)
     }
   }
 
