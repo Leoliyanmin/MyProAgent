@@ -418,8 +418,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         print(f"WebSocket error: {e}")
         try:
             await websocket.close(code=4000, reason=str(e))
-        except:
-            pass
+        except Exception:
     finally:
         disconnect_user(user_id)
 

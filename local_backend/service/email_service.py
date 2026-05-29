@@ -279,7 +279,7 @@ class EmailService:
             from local_backend.database.code.command.database_command import delete_starred_emails_by_email_id
             try:
                 delete_starred_emails_by_email_id(message_id)
-            except:
+            except Exception:
                 pass
         return result
 
@@ -312,7 +312,7 @@ class EmailService:
             from local_backend.database.code.command.database_command import delete_starred_emails_by_email_id
             try:
                 delete_starred_emails_by_email_id(message_id)
-            except:
+            except Exception:
                 pass
         return result
 
