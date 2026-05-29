@@ -274,6 +274,7 @@
 import { ref, reactive, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useCalendarStore } from '../stores/calendar.js'
 import { useDashboardStore } from '../stores/dashboard.js'
+import { computeEventLayout } from '../utils/eventLayout.js'
 
 const calendarStore = useCalendarStore()
 const dashboardStore = useDashboardStore()
@@ -473,9 +474,10 @@ const createDayObject = (d, isCurrentMonth) => {
     isCurrentMonth,
     isToday: iso === todayISO,
     events: events,
-    timedEvents: events.filter(e => !e.isAllDay),
+    timedEvents: computeEventLayout(events.filter(e => !e.isAllDay)),
     allDayEvents: events.filter(e => e.isAllDay)
   }
+}
 }
 
 const getEventsForDay = (isoDate) => {
@@ -507,18 +509,20 @@ const getEventsForDay = (isoDate) => {
 const getTimedEventStyle = (event) => {
   const start = event.startTime || "00:00";
   const end = event.endTime || "23:59";
-  
+
   const [sh, sm] = start.split(':').map(Number);
   const [eh, em] = end.split(':').map(Number);
-  
+
   const top = sh * 50 + (sm / 60) * 50;
   let duration = (eh + em / 60) - (sh + sm / 60);
   if (duration < 0.5) duration = 0.5; // min height 30 mins
   const height = duration * 50;
-  
+
   return {
     top: `${top}px`,
     height: `${height}px`,
+    left: event.left || '2px',
+    width: event.width || 'calc(100% - 8px)',
     backgroundColor: event.color ? event.color + '25' : '',
     color: event.priority >= 4 ? '#000000' : (event.color || ''),
     borderLeft: `3px solid ${event.color || '#007aff'}`
@@ -1199,8 +1203,6 @@ onBeforeUnmount(() => {
 
 .timed-event-card {
   position: absolute;
-  left: 2px;
-  right: 6px;
   border-radius: 4px;
   padding: 4px 6px;
   font-size: 11px;
