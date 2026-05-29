@@ -108,12 +108,15 @@ class OpenAICompatProvider:
         }
         if not is_reasoning:
             payload["temperature"] = self.temperature
-        if tools:
+        if tools and not is_reasoning:
             payload["tools"] = tools
         if stream:
             payload["stream"] = True
         if "deepseek" in model_lower:
-            payload["thinking"] = {"type": "disabled"}
+            if is_reasoning:
+                payload["thinking"] = {"type": "enabled"}
+            else:
+                payload["thinking"] = {"type": "disabled"}
         return payload
 
     @staticmethod

@@ -478,7 +478,6 @@ const createDayObject = (d, isCurrentMonth) => {
     allDayEvents: events.filter(e => e.isAllDay)
   }
 }
-}
 
 const getEventsForDay = (isoDate) => {
     return calendarStore.allEvents.filter(e => {
