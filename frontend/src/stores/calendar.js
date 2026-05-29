@@ -145,6 +145,7 @@ export const useCalendarStore = defineStore('calendar', () => {
           endTime: updatedEvent.endTime,
           priority: updatedEvent.priority,
           color: updatedEvent.color,
+          completed: updatedEvent.completed,
         })
       }
     }
@@ -209,6 +210,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         event_type: 'manual',
         event_source: 'manual',
         event_show_in_todo: eventData.showInTodo !== false ? 1 : 0,
+        event_is_completed: eventData.completed ? 1 : 0,
       })
       return result
     } catch (err) {
@@ -227,6 +229,7 @@ export const useCalendarStore = defineStore('calendar', () => {
         event_color_tag: eventData.color,
         event_priority: eventData.priority !== undefined ? normalizePriority(eventData.priority, 'p2') : undefined,
         event_show_in_todo: eventData.showInTodo !== undefined ? (eventData.showInTodo ? 1 : 0) : undefined,
+        event_is_completed: eventData.completed !== undefined ? (eventData.completed ? 1 : 0) : undefined,
       })
       return result
     } catch (err) {
