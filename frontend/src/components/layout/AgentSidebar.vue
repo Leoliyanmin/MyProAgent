@@ -235,6 +235,7 @@ const wsRef = ref(null)
 const isSending = ref(false)
 const isThinking = ref(false)
 const currentToolLabel = ref('')
+const _toolMessagesInFlight = new Set()  // dedup tool blocks in current interaction
 const hasInitialized = ref(false)
 const messagesContainer = ref(null)
 const chatListCollapsed = ref(false)
@@ -745,12 +746,15 @@ const connectWebSocket = () => {
       if (targetChatId === currentChatId.value) {
         isThinking.value = true
         currentToolLabel.value = getToolLabel(toolInfo.tool)
-        // 在对话中插入工具调用记录块
-        appendMessageToChat(targetChatId, {
-          role: 'tool',
-          text: `🔧 ${getToolChatLabel(toolInfo.tool)}`,
-          done: true
-        })
+        // Dedup: only insert tool block once per tool name per interaction
+        if (!_toolMessagesInFlight.has(toolInfo.tool)) {
+          _toolMessagesInFlight.add(toolInfo.tool)
+          appendMessageToChat(targetChatId, {
+            role: 'tool',
+            text: `🔧 ${getToolChatLabel(toolInfo.tool)}`,
+            done: true
+          })
+        }
       }
     },
     (error) => {
@@ -886,6 +890,7 @@ const sendMessage = async () => {
 
   isSending.value = true
   isThinking.value = true
+  _toolMessagesInFlight.clear()
   const message = inputText.value.trim()
 
   // 记住发送时所在的对话 ID，用于回复路由
