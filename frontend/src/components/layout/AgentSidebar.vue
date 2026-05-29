@@ -734,7 +734,7 @@ const connectWebSocket = () => {
 
       appendMessageToChat(targetChatId, {
         role: 'agent',
-        text: `· 错误: ${error.message || '连接失败'}`,
+        text: `· 错误: ${error.content || error.message || 'WebSocket 连接异常，请刷新页面重试'}`,
         done: true
       })
       if (targetChatId === currentChatId.value) scrollToBottom()

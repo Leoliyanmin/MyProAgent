@@ -378,7 +378,7 @@ export const agentAPI = {
     ws.onclose = (event) => {
       console.log('[Agent] WebSocket closed:', event.code, event.reason)
       if (event.code !== 1000) {
-        onError?.({ message: '连接断开' })
+        onError?.({ message: '连接断开，正在自动重连...' })
       }
     }
 
