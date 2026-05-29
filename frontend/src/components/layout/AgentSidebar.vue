@@ -283,6 +283,31 @@ function getToolLabel(toolName) {
   return TOOL_LABELS[toolName] || `正在执行 ${toolName}...`
 }
 
+// 工具名 → 对话记录标签（非进行时，用于已完成的工具调用展示）
+const TOOL_CHAT_LABELS = {
+  get_user_profile: '读取用户画像',
+  list_dir: '浏览目录',
+  read_file: '读取文件',
+  write_file: '写入文件',
+  grep: '搜索内容',
+  search_files: '搜索文件',
+  create_schedule_event: '创建日程',
+  update_schedule_event: '更新日程',
+  delete_schedule_event: '删除日程',
+  list_tasks: '加载任务',
+  create_task: '创建任务',
+  update_task: '更新任务',
+  delete_task: '删除任务',
+  get_emails: '获取邮件',
+  send_email: '发送邮件',
+  sync_emails: '同步邮件',
+  exec: '执行命令',
+}
+
+function getToolChatLabel(toolName) {
+  return TOOL_CHAT_LABELS[toolName] || toolName
+}
+
 // 模型选择
 const activeModels = ref([])
 const currentProvider = ref('')
@@ -720,6 +745,12 @@ const connectWebSocket = () => {
       if (targetChatId === currentChatId.value) {
         isThinking.value = true
         currentToolLabel.value = getToolLabel(toolInfo.tool)
+        // 在对话中插入工具调用记录块
+        appendMessageToChat(targetChatId, {
+          role: 'tool',
+          text: `🔧 ${getToolChatLabel(toolInfo.tool)}`,
+          done: true
+        })
       }
     },
     (error) => {
