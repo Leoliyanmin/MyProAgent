@@ -1468,6 +1468,25 @@ watch(() => route.path, () => {
 
 .message-content {
   word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.message-content :deep(pre) {
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-x: auto;
+  max-width: 100%;
+  background: #f5f5f7;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  line-height: 1.4;
+  margin: 6px 0;
+}
+
+.message-content :deep(code) {
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 11px;
 }
 
 .placeholder-text {
