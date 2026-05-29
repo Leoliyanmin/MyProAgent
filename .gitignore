@@ -194,11 +194,7 @@ frontend/src-tauri/*.AppImage
 frontend/src-tauri/target/release/bundle/
 frontend/src-tauri/target/debug/bundle/
 
-# Data and config files
-*.json
-*.jsonl
-*.md
-*.txt
+# Data and config files (specific paths only, NOT glob patterns)
 config.json
 server_backend/config.py
 local/database/test_db/sync_packet_from_server.json
@@ -209,11 +205,24 @@ mock_frontend/
 
 # Standalone CAS demo app (not for production)
 cas-demo/
-*.yaml
-!k8s/*.yaml
-*.spec
 
 # metrics tool generated report
 metrics_tool/metrics_report.md
+
+# ----------------------------------------
+# Agent / IDE artifacts (local only)
+# ----------------------------------------
+.sisyphus/
+.trae/
+.playwright-mcp/
+
+# Personal directory (non-project files)
+_personal/
+
+# Archive directory (deprecated code)
+archive/
+
+# MacOS
+.DS_Store
 
 .claude
