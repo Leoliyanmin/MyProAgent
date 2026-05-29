@@ -35,9 +35,11 @@ class SyncService:
 
         if data_type == "user_setting":
             if isinstance(sync_data, list) and sync_data:
-                db.upsert_user_setting(user_id, **sync_data[0])
+                setting_data = {k: v for k, v in sync_data[0].items() if k != 'user_id'}
+                db.upsert_user_setting(user_id, **setting_data)
             elif isinstance(sync_data, dict):
-                db.upsert_user_setting(user_id, **sync_data)
+                setting_data = {k: v for k, v in sync_data.items() if k != 'user_id'}
+                db.upsert_user_setting(user_id, **setting_data)
             return {"success": True, "message": "Synced", "synced_count": 1}
 
         # fallback: generic sync
