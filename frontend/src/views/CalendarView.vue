@@ -1,5 +1,5 @@
 <template>
-  <div class="calendar-wrapper">
+  <div class="calendar-wrapper" :class="{ 'is-timed-dragging': manualDragging }">
     <div class="calendar-toolbar">
       <div class="toolbar-left">
         <button class="mac-btn" @click="goToToday">今天</button>
@@ -145,7 +145,7 @@
                 class="week-day-column"
                 :data-date="day.date"
                 :class="{ 'is-today-col': day.isToday, 'drag-over-col': timedDragOverDate === day.date }"
-                @click.self="openEventModal(day.date)"
+                @click.self="onTimedColumnClick(day.date)"
                 @dragover.prevent="onTimedColumnDragOver($event, day)"
                 @drop="onTimedColumnDrop($event, day)"
               >
@@ -153,7 +153,7 @@
                   class="hour-slot"
                   v-for="h in hours"
                   :key="'ts'+h"
-                  @click.self="openEventModal(day.date, h)"
+                  @click.self="onTimedHourSlotClick(day.date, h)"
                   @dragover.prevent.stop="onTimedColumnDragOver($event, day)"
                   @drop.prevent.stop="onTimedColumnDrop($event, day)"
                 ></div>
@@ -162,15 +162,18 @@
                   v-for="event in day.timedEvents"
                   :key="event.id"
                   class="timed-event-card"
-                  :class="{'is-completed': event.completed}"
+                  :class="{
+                    'is-completed': event.completed,
+                    'is-selected': selectedTimedEventId === event.id,
+                    'is-manual-dragging': manualDragEvent?.id === event.id && manualDragging,
+                    'is-week-compact': calendarStore.viewType === 'week'
+                  }"
                   :style="getTimedEventStyle(event)"
                   @click.stop="onTimedCardClick(event)"
+                  @dblclick.stop="onTimedCardDoubleClick(event)"
                   @mousedown.stop="onTimedMouseDragStart($event, event)"
-                  draggable="true"
-                  @dragstart="onTimedDragStart($event, event)"
                   @dragover.prevent.stop="onTimedColumnDragOver($event, day)"
                   @drop.prevent.stop="onTimedColumnDrop($event, day)"
-                  @dragend="onTimedDragEnd"
                 >
                   <div class="timed-event-title">{{ event.title }}</div>
                   <div class="timed-event-time">{{ event.startTime }} - {{ event.endTime || '23:59' }}</div>
@@ -181,6 +184,15 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div
+      v-if="manualDragging && manualDragPreview"
+      class="timed-event-drag-ghost"
+      :style="getManualDragGhostStyle()"
+    >
+      <div class="timed-event-title">{{ manualDragPreview.title }}</div>
+      <div class="timed-event-time">{{ manualDragPreview.startTime }} - {{ manualDragPreview.endTime }}</div>
     </div>
 
     <!-- Event Edit Modal -->
@@ -366,7 +378,13 @@ const manualDragEvent = ref(null)
 const manualDragging = ref(false)
 const manualDragStartX = ref(0)
 const manualDragStartY = ref(0)
+const manualDragGrabOffsetX = ref(0)
+const manualDragGrabOffsetY = ref(0)
+const manualDragCardWidth = ref(0)
+const manualDragPreview = ref(null)
+const selectedTimedEventId = ref(null)
 const suppressNextCardClick = ref(false)
+const suppressNextTimedGridClick = ref(false)
 const isResizing = ref(false)
 const resizeStartY = ref(0)
 const resizeOriginalEnd = ref('')
@@ -382,6 +400,7 @@ const priorityOptions = [
 
 const hours24 = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
 const minutes60 = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
+const timedDragSnapMinutes = 5
 
 const startTimeHour = computed({
   get: () => (draftEvent.value.startTime || '').split(':')[0] || '',
@@ -518,16 +537,57 @@ const getTimedEventStyle = (event) => {
   const height = duration * 50;
 
   const color = event.color || '#007aff'
+  const isBackgroundContainer = Boolean(event.isBackgroundContainer)
+  const isForegroundOverlap = Boolean(event.width)
+  const isNeutralColor = ['#8e8e93', '#9ca3af', '#6b7280'].includes(color.toLowerCase())
+  const foregroundLineColor = isNeutralColor ? '#6e6e73' : color
+  const backgroundColor = isForegroundOverlap
+    ? color + (isNeutralColor ? 'cc' : '35')
+    : event.color
+      ? event.color + (isBackgroundContainer ? '18' : '25')
+      : ''
+  const textColor = isForegroundOverlap
+    ? isNeutralColor ? '#ffffff' : color
+    : event.priority >= 4
+      ? '#000000'
+      : color
+  const isWeekView = calendarStore.viewType === 'week'
+  const laneOuterGap = isForegroundOverlap ? isWeekView ? 6 : 12 : 0
+  const laneInnerGap = isForegroundOverlap ? isWeekView ? 4 : 10 : 0
+  const overlapLeft = isForegroundOverlap
+    ? event.column === 0
+      ? `${laneOuterGap}px`
+      : `calc(${event.left} + ${laneInnerGap / 2}px)`
+    : event.left
+  const overlapWidth = isForegroundOverlap
+    ? `calc(${event.width} - ${event.column === 0 ? laneOuterGap + laneInnerGap / 2 : laneInnerGap / 2 + 4}px)`
+    : event.width
 
   return {
     top: `${top}px`,
     height: `${height}px`,
-    ...(event.left ? { left: event.left } : {}),
-    ...(event.width ? { width: event.width } : {}),
-    zIndex: 10,
-    backgroundColor: event.color ? event.color + '25' : '',
-    color: event.priority >= 4 ? '#000000' : color,
-    borderLeft: `3px solid ${color}`,
+    ...(overlapLeft ? { left: overlapLeft } : {}),
+    ...(overlapWidth ? { width: overlapWidth } : {}),
+    zIndex: event.zIndex || 10,
+    backgroundColor,
+    color: textColor,
+    borderLeft: `${isForegroundOverlap ? 5 : 3}px solid ${isForegroundOverlap ? foregroundLineColor : color}`,
+  }
+}
+
+const getManualDragGhostStyle = () => {
+  const preview = manualDragPreview.value
+  if (!preview) return {}
+  return {
+    position: 'fixed',
+    top: `${preview.top}px`,
+    left: `${preview.left}px`,
+    width: `${preview.width}px`,
+    height: `${preview.height}px`,
+    zIndex: 1000,
+    backgroundColor: preview.backgroundColor,
+    color: preview.color,
+    borderLeft: preview.borderLeft,
   }
 }
 
@@ -833,8 +893,39 @@ const minutesToTime = (minutes) => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
-const onTimedColumnDrop = (e, day) => {
+const getEventDurationMinutes = (event) => {
+  const [sh, sm] = (event.startTime || '00:00').split(':').map(Number)
+  const [eh, em] = (event.endTime || '23:59').split(':').map(Number)
+  const startBase = Number.isNaN(sh) || Number.isNaN(sm) ? 0 : sh * 60 + sm
+  const endBase = Number.isNaN(eh) || Number.isNaN(em) ? 23 * 60 + 59 : eh * 60 + em
+  return Math.max(30, endBase - startBase)
+}
+
+const getDropStartMinutes = (columnRect, clientY, grabOffsetY = 0) => {
+  const relativeY = Math.max(0, Math.min(columnRect.height - 1, clientY - columnRect.top - grabOffsetY))
+  const rawMinutes = Math.round((relativeY / 50) * 60 / timedDragSnapMinutes) * timedDragSnapMinutes
+  return Math.max(0, Math.min(23 * 60 + 30, rawMinutes))
+}
+
+const getTimedEventColors = (event) => {
+  const color = event.color || '#007aff'
+  const isForegroundOverlap = Boolean(event.width)
+  const isNeutralColor = ['#8e8e93', '#9ca3af', '#6b7280'].includes(color.toLowerCase())
+  const foregroundLineColor = isNeutralColor ? '#6e6e73' : color
+  return {
+    backgroundColor: isForegroundOverlap
+      ? color + (isNeutralColor ? 'cc' : '35')
+      : color + '30',
+    color: isForegroundOverlap
+      ? isNeutralColor ? '#ffffff' : color
+      : event.priority >= 4 ? '#000000' : color,
+    borderLeft: `${isForegroundOverlap ? 5 : 3}px solid ${isForegroundOverlap ? foregroundLineColor : color}`
+  }
+}
+
+const onTimedColumnDrop = async (e, day) => {
   e.preventDefault()
+  suppressNextTimedGridClick.value = true
   if (!draggingEvent.value) {
     timedDragOverDate.value = null
     return
@@ -851,7 +942,7 @@ const onTimedColumnDrop = (e, day) => {
 
   const columnRect = columnEl.getBoundingClientRect()
   const event = draggingEvent.value
-  applyTimedDrop(event, day.date, columnRect, e.clientY)
+  await applyTimedDrop(event, day.date, columnRect, e.clientY)
 
   draggingEvent.value = null
   timedDragOverDate.value = null
@@ -867,35 +958,81 @@ const onTimedCardClick = (event) => {
     suppressNextCardClick.value = false
     return
   }
+  selectedTimedEventId.value = event.id
+}
+
+const onTimedCardDoubleClick = (event) => {
+  selectedTimedEventId.value = event.id
   editEvent(event)
 }
 
-const applyTimedDrop = (event, targetDate, columnRect, clientY) => {
-  const relativeY = Math.max(0, Math.min(columnRect.height - 1, clientY - columnRect.top))
-  const rawMinutes = Math.round((relativeY / 50) * 60 / 30) * 30
-  const startMinutes = Math.max(0, Math.min(23 * 60 + 30, rawMinutes))
+const onTimedColumnClick = (dateStr) => {
+  if (suppressNextTimedGridClick.value) {
+    suppressNextTimedGridClick.value = false
+    return
+  }
+  selectedTimedEventId.value = null
+  openEventModal(dateStr)
+}
 
-  const [sh, sm] = (event.startTime || '00:00').split(':').map(Number)
-  const [eh, em] = (event.endTime || '23:59').split(':').map(Number)
-  const startBase = Number.isNaN(sh) || Number.isNaN(sm) ? 0 : sh * 60 + sm
-  const endBase = Number.isNaN(eh) || Number.isNaN(em) ? 23 * 60 + 59 : eh * 60 + em
-  const durationMinutes = Math.max(30, endBase - startBase)
+const onTimedHourSlotClick = (dateStr, hour) => {
+  if (suppressNextTimedGridClick.value) {
+    suppressNextTimedGridClick.value = false
+    return
+  }
+  selectedTimedEventId.value = null
+  openEventModal(dateStr, hour)
+}
+
+const applyTimedDrop = async (event, targetDate, columnRect, clientY, grabOffsetY = 0) => {
+  const startMinutes = getDropStartMinutes(columnRect, clientY, grabOffsetY)
+  const durationMinutes = getEventDurationMinutes(event)
 
   const safeStartMinutes = Math.min(startMinutes, 23 * 60 + 59)
   const safeEndMinutes = Math.min(23 * 60 + 59, safeStartMinutes + durationMinutes)
 
-  calendarStore.updateEvent({
-    ...event,
+  const updatedData = {
+    id: event.id,
+    title: event.title,
     start: targetDate,
     end: targetDate,
     startTime: minutesToTime(safeStartMinutes),
-    endTime: minutesToTime(safeEndMinutes)
-  })
+    endTime: minutesToTime(safeEndMinutes),
+    color: event.color,
+    priority: event.priority,
+    description: event.description,
+    source: event.source,
+    isTodo: event.isTodo || false,
+    completed: event.completed || false,
+    linkedScheduleId: event.linkedScheduleId,
+    showInTodo: event.showInTodo
+  }
+
+  const isStandaloneTodo = event.isTodo && !event.linkedScheduleId
+  if (isStandaloneTodo) {
+    dashboardStore.updateTodo(updatedData)
+    return
+  }
+
+  calendarStore.updateEvent(updatedData)
+
+  const existingInBasic = calendarStore.basicEvents.find(e => e.id === event.id)
+  if (existingInBasic) {
+    try {
+      await calendarStore.updateScheduleOnBackend(event.id, updatedData)
+    } catch (err) {
+      console.error('Failed to sync dragged schedule to backend:', err)
+    }
+  }
 }
 
 const clearManualDragState = () => {
   manualDragEvent.value = null
   manualDragging.value = false
+  manualDragGrabOffsetX.value = 0
+  manualDragGrabOffsetY.value = 0
+  manualDragCardWidth.value = 0
+  manualDragPreview.value = null
   timedDragOverDate.value = null
   document.removeEventListener('mousemove', onTimedMouseMove)
   document.removeEventListener('mouseup', onTimedMouseUp)
@@ -917,9 +1054,36 @@ const onTimedMouseMove = (e) => {
   const target = document.elementFromPoint(e.clientX, e.clientY)
   const column = target?.closest('.week-day-column')
   timedDragOverDate.value = column?.dataset?.date || null
+
+  if (column) {
+    const columnRect = column.getBoundingClientRect()
+    const durationMinutes = getEventDurationMinutes(manualDragEvent.value)
+    const eventHeight = Math.max(25, (durationMinutes / 60) * 50)
+    const startMinutes = getDropStartMinutes(columnRect, e.clientY, manualDragGrabOffsetY.value)
+    const topInColumn = Math.max(0, Math.min(columnRect.height - eventHeight, (startMinutes / 60) * 50))
+    const safeEndMinutes = Math.min(23 * 60 + 59, startMinutes + durationMinutes)
+    const colors = getTimedEventColors(manualDragEvent.value)
+    const cardWidth = Math.max(80, Math.min(columnRect.width - 8, manualDragCardWidth.value || columnRect.width * 0.5))
+    const left = Math.max(
+      columnRect.left + 4,
+      Math.min(columnRect.right - cardWidth - 4, e.clientX - manualDragGrabOffsetX.value)
+    )
+    manualDragPreview.value = {
+      eventId: manualDragEvent.value.id,
+      title: manualDragEvent.value.title,
+      targetDate: column.dataset?.date || manualDragEvent.value.start,
+      startTime: minutesToTime(startMinutes),
+      endTime: minutesToTime(safeEndMinutes),
+      left,
+      top: columnRect.top + topInColumn,
+      width: cardWidth,
+      height: eventHeight,
+      ...colors
+    }
+  }
 }
 
-const onTimedMouseUp = (e) => {
+const onTimedMouseUp = async (e) => {
   if (!manualDragEvent.value) {
     clearManualDragState()
     return
@@ -930,7 +1094,8 @@ const onTimedMouseUp = (e) => {
     const column = target?.closest('.week-day-column')
     const targetDate = column?.dataset?.date
     if (column && targetDate) {
-      applyTimedDrop(manualDragEvent.value, targetDate, column.getBoundingClientRect(), e.clientY)
+      suppressNextTimedGridClick.value = true
+      void applyTimedDrop(manualDragEvent.value, targetDate, column.getBoundingClientRect(), e.clientY, manualDragGrabOffsetY.value)
       suppressNextCardClick.value = true
     }
   }
@@ -947,10 +1112,22 @@ const onTimedMouseDragStart = (e, event) => {
     return
   }
 
+  e.preventDefault()
+  selectedTimedEventId.value = event.id
   manualDragEvent.value = event
   manualDragging.value = false
   manualDragStartX.value = e.clientX
   manualDragStartY.value = e.clientY
+  manualDragGrabOffsetX.value = e.currentTarget?.getBoundingClientRect
+    ? e.clientX - e.currentTarget.getBoundingClientRect().left
+    : 0
+  manualDragGrabOffsetY.value = e.currentTarget?.getBoundingClientRect
+    ? e.clientY - e.currentTarget.getBoundingClientRect().top
+    : 0
+  manualDragCardWidth.value = e.currentTarget?.getBoundingClientRect
+    ? e.currentTarget.getBoundingClientRect().width
+    : 0
+  manualDragPreview.value = null
   document.addEventListener('mousemove', onTimedMouseMove)
   document.addEventListener('mouseup', onTimedMouseUp)
 }
@@ -1049,6 +1226,11 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+.calendar-wrapper.is-timed-dragging,
+.calendar-wrapper.is-timed-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
 }
 
 .calendar-toolbar {
@@ -1215,10 +1397,49 @@ onBeforeUnmount(() => {
   z-index: 10;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   transition: filter 0.15s;
+  user-select: none;
+  will-change: top, left, width;
 }
 .timed-event-card:hover { filter: brightness(0.95); z-index: 15; }
+.timed-event-card.is-selected {
+  opacity: 1;
+  filter: saturate(1.08) brightness(1.02);
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.22), 0 6px 14px rgba(0,0,0,0.14);
+}
+.timed-event-card.is-manual-dragging {
+  cursor: grabbing;
+  pointer-events: none;
+  opacity: 0.55;
+  filter: brightness(0.98);
+}
+.timed-event-drag-ghost {
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 11px;
+  overflow: hidden;
+  pointer-events: none;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+  box-sizing: border-box;
+}
 .timed-event-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
 .timed-event-time { font-size: 9px; opacity: 0.8; }
+.timed-event-card.is-week-compact {
+  padding: 3px 4px;
+  font-size: 10px;
+  line-height: 1.15;
+}
+.timed-event-card.is-week-compact .timed-event-title {
+  display: block;
+  font-size: 10px;
+  margin-bottom: 1px;
+}
+.timed-event-card.is-week-compact .timed-event-time {
+  display: block;
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .timed-event-card.is-completed { opacity: 0.6; }
 .timed-event-card.is-completed .timed-event-title { text-decoration: line-through; }
 
