@@ -47,7 +47,7 @@ When user asks to create/update/delete schedule-related data, call the calendar 
 - **Delete task** (delete_task) - Delete a task by task_id or title keyword. Always confirm deletion with the user before calling.
 
 ### Profile Operations
-- **Get user profile** (get_user_profile) - Read AI-inferred personality profile including MBTI type, interests, skills, and work patterns. Use when the user asks about their personality, MBTI, interests, or what kind of person they are.
+- **Get user profile** (get_user_profile) - Read AI-inferred personality profile including MBTI type, interests, skills, and work patterns. **MANDATORY**: You MUST call this tool whenever the user asks about their personality, MBTI type, traits, interests, or "what kind of person I am". NEVER guess MBTI — always fetch it first.
 
 ### Blackboard Operations
 - **Check Blackboard status** (get_blackboard_status) - Check if Blackboard account is bound
