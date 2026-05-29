@@ -1,18 +1,25 @@
 /**
- * Apple Calendar-style event layout algorithm.
+ * Apple Calendar containment layout.
  *
- * Input: array of { id, startTime, endTime }
- * Output: each event gets { top, height, left, width, column, totalColumns }
+ * Long events act as containers. Shorter overlapping events are nested inside
+ * with pixel indentation instead of being placed in separate columns.
  *
- * Strategy: greedy column assignment on sorted intervals.
- * Each column = one horizontal lane. Events that don't overlap can share a column.
- * Width = 100% / totalColumns.
+ * Visual output:
+ *   ┌──────────────────────────┐  depth=0 (parent, full width)
+ *   │  ┌──────────┐            │  depth=1 (child, 18px indent)
+ *   │  │  ┌────┐  │            │  depth=2 (grandchild, 36px indent)
+ *   │  │  └────┘  │            │
+ *   │  └──────────┘            │
+ *   └──────────────────────────┘
  *
- * Complexity: O(n log n) from sorting, O(n * columns) for assignment.
- * For calendar views, n ≤ 50, columns ≤ 10 — negligible.
+ * Algorithm:
+ *   1. Sort by duration (longest first) — longest events are "containers"
+ *   2. depth = count of longer events that strictly contain this event
+ *   3. If siblings at same depth overlap → bump later one deeper
+ *   4. left = depth * indentStep, width = 100% - depth * indentStep
+ *   5. z-index proportional to depth (children render above parents)
  */
 
-/** "HH:MM" → minutes from midnight */
 const toMinutes = (time) => {
   if (!time) return 0
   const [h, m] = time.split(':').map(Number)
@@ -20,61 +27,64 @@ const toMinutes = (time) => {
 }
 
 /**
- * @param {Array} events — raw event objects with at least { id, startTime, endTime }
+ * @param {Array} events — { id, startTime, endTime }
  * @param {Object} options
+ * @param {number} options.indentStep — px per nesting level (default 18)
  * @param {number} options.hourHeight — px per hour (default 50)
- * @param {number} options.columnGap — px gap between columns (default 4)
  * @param {number} options.minHeight — minimum event height in px (default 25)
- * @returns {Array} same events augmented with layout props:
- *   { top, height, left, width, column, totalColumns }
  */
 export function computeEventLayout(events, options = {}) {
   const {
+    indentStep = 18,
     hourHeight = 50,
-    columnGap = 4,
     minHeight = 25,
   } = options
 
-  if (!events || events.length === 0) return []
+  if (!events || events.length <= 1) return events || []
 
   const items = events.map((e) => ({
     ...e,
     _startMin: toMinutes(e.startTime),
     _endMin: toMinutes(e.endTime || '23:59'),
+    _durationMin: toMinutes(e.endTime || '23:59') - toMinutes(e.startTime),
+    _depth: 0,
   }))
 
-  const sorted = [...items].sort((a, b) => {
-    const d = a._startMin - b._startMin
-    if (d !== 0) return d
-    return b._endMin - a._endMin
-  })
+  const sorted = [...items].sort((a, b) => b._durationMin - a._durationMin)
 
-  const columns = []
-  const assignment = new Array(sorted.length)
-
+  // Phase 1: compute depth by strict containment
   for (let i = 0; i < sorted.length; i++) {
     const ev = sorted[i]
-    let placed = false
-
-    for (let col = 0; col < columns.length; col++) {
-      if (columns[col] <= ev._startMin) {
-        columns[col] = ev._endMin
-        assignment[i] = col
-        placed = true
-        break
+    for (let j = 0; j < i; j++) {
+      const longer = sorted[j]
+      if (longer._startMin <= ev._startMin && longer._endMin >= ev._endMin) {
+        ev._depth = Math.max(ev._depth, longer._depth + 1)
       }
-    }
-
-    if (!placed) {
-      assignment[i] = columns.length
-      columns.push(ev._endMin)
     }
   }
 
-  const totalColumns = columns.length
+  // Phase 2: bump depth for overlapping siblings at same level
+  let changed = true
+  while (changed) {
+    changed = false
+    const maxD = Math.max(...sorted.map(e => e._depth), 0)
+    for (let d = 0; d <= maxD; d++) {
+      const siblings = sorted
+        .filter(e => e._depth === d)
+        .sort((a, b) => a._startMin - b._startMin)
+      for (let i = 1; i < siblings.length; i++) {
+        if (siblings[i]._startMin < siblings[i - 1]._endMin) {
+          siblings[i]._depth++
+          changed = true
+        }
+      }
+    }
+  }
 
-  return sorted.map((ev, i) => {
-    const col = assignment[i]
+  // Phase 3: build output
+  const maxDepth = Math.max(...sorted.map(e => e._depth), 0)
+
+  return sorted.map((ev) => {
     const durationMinutes = Math.max(30, ev._endMin - ev._startMin)
     const top = (ev._startMin / 60) * hourHeight
     const height = Math.max(minHeight, (durationMinutes / 60) * hourHeight)
@@ -83,16 +93,17 @@ export function computeEventLayout(events, options = {}) {
       ...ev,
       top: `${top}px`,
       height: `${height}px`,
-      column: col,
-      totalColumns,
+      depth: ev._depth,
+      maxDepth,
     }
 
-    if (totalColumns <= 1) return base
+    if (ev._depth === 0) return base
 
+    const leftPx = ev._depth * indentStep
     return {
       ...base,
-      left: `${(col / totalColumns) * 100}%`,
-      width: `calc(${100 / totalColumns}% - ${columnGap + 2}px)`,
+      left: `${leftPx}px`,
+      width: `calc(100% - ${leftPx + 3}px)`,
     }
   })
 }

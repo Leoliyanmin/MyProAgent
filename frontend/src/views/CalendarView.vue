@@ -522,6 +522,7 @@ const getTimedEventStyle = (event) => {
     height: `${height}px`,
     ...(event.left ? { left: event.left } : {}),
     ...(event.width ? { width: event.width } : {}),
+    zIndex: (event.depth || 0) + 10,
     backgroundColor: event.color ? event.color + '25' : '',
     color: event.priority >= 4 ? '#000000' : (event.color || ''),
     borderLeft: `3px solid ${event.color || '#007aff'}`
