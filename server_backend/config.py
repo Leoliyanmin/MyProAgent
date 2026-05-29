@@ -23,9 +23,9 @@ class Settings(BaseSettings):
 
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
-    SMTP_USER: str = ""
-    SMTP_PASSWORD: str = ""
-    SMTP_FROM_EMAIL: str = ""
+    SMTP_USER: str = "bdkk9211@gmail.com"
+    SMTP_PASSWORD: str = "fhrt vzfx tfmo vplm"
+    SMTP_FROM_EMAIL: str = "bdkk9211@gmail.com"
     SMTP_FROM_NAME: str = "SUSTech Student Productivity Agent"
 
     VERIFICATION_CODE_LENGTH: int = 6
