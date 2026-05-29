@@ -54,12 +54,13 @@ async def bind_email(request: EmailBindRequest, user_id: str = Depends(get_curre
 @router.post("/sync")
 async def sync_email_data(
     max_messages: int = Query(default=None, ge=1, le=200, description="最大同步邮件数"),
+    full_sync: bool = Query(default=False, description="是否全量同步(忽略增量记录)"),
     user_id: str = Depends(get_current_user_id),
 ):
     if max_messages is None:
         from config import settings
         max_messages = settings.EMAIL_SYNC_MAX_MESSAGES
-    result = email_service.sync_email_data(user_id, max_messages=max_messages)
+    result = email_service.sync_email_data(user_id, max_messages=max_messages, full_sync=full_sync)
     if not result.get('success'):
         raise HTTPException(status_code=400, detail=result.get('message', '同步失败'))
     return result
