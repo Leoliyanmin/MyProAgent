@@ -110,10 +110,11 @@ class OpenAICompatProvider:
     ) -> dict[str, Any]:
         """Build the request payload."""
         model_lower = self.model.lower()
-        # Reasoning model detection: matches known naming conventions across providers
+        # Reasoning model detection: only explicit reasoner/reasoning models, NOT chat variants
         is_reasoning = any(kw in model_lower for kw in (
-            "reasoner", "reasoning", "deepseek-r1", "deepseek-v4",
-            "o1", "o3", "o4", "o1-", "o3-", "o4-",
+            "reasoner", "reasoning", "deepseek-r1",
+            "o1-", "o3-", "o4-",
+        ))
         ))
 
         payload: dict[str, Any] = {
