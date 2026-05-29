@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { eventsAPI } from '../services/api.js'
+import { useCalendarStore } from './calendar.js'
 
 const LAYOUT_STORAGE_KEY = 'proagent_layout'
 
