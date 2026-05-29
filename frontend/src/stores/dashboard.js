@@ -239,29 +239,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
       return
     }
 
-    // Sync completion to calendarStore's basicEvents
     const calendarStore = useCalendarStore()
     const idx = calendarStore.basicEvents.findIndex(e => e.id === id)
     if (idx !== -1) {
       calendarStore.basicEvents[idx] = { ...calendarStore.basicEvents[idx], completed: task.completed }
-    }
-  }
-    saveTodosToStorage(todos.value)
-
-    try {
-      await eventsAPI.update(id, {
-        event_is_completed: task.completed ? 1 : 0
-      })
-      const { useCalendarStore } = await import('./calendar.js')
-      const calendarStore = useCalendarStore()
-      const eventInCalendar = calendarStore.basicEvents.find(e => e.id === id)
-      if (eventInCalendar) {
-        eventInCalendar.completed = task.completed
-      }
-    } catch (err) {
-      console.error('Failed to sync todo status:', err)
-      task.completed = !task.completed
-      saveTodosToStorage(todos.value)
     }
   }
 
