@@ -24,36 +24,36 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       proxy: {
         '/auth': {
-          target: 'http://localhost:8002',
+          target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true
         },
         '/events': {
-          target: 'http://localhost:8002',
+          target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true
         },
         '/tasks': {
-          target: 'http://localhost:8002',
+          target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true
         },
         '/agent': {
-          target: 'http://localhost:8002',
+          target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true,
           ws: true
         },
         '/sync': {
-          target: 'http://localhost:8002',
+          target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true
         },
         '/api/v1/tis': {
-          target: 'http://localhost:8002',
+          target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true
         },
         '/api/v1/blackboard': {
-          target: 'http://localhost:8002',
+          target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true
         },
         '/api/v1/email': {
-          target: 'http://localhost:8002',
+          target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true
         }
       },

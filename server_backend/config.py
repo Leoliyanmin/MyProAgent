@@ -1,41 +1,64 @@
-from pydantic_settings import BaseSettings
-from typing import List
-import os
+"""Server backend configuration.
+
+Single source of truth: .env file in the same directory.
+config.py defines schema, types, and validation only.
+All runtime values come from .env — no business defaults here.
+"""
+
 from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    APP_NAME: str = "SUSTech Student Productivity Agent (Server)"
-    APP_VERSION: str = "0.1.0"
-    DEBUG: bool = True
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).parent / ".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    # ---- Application ----
+    APP_NAME: str
+    APP_VERSION: str
+    DEBUG: bool = False
     TEST_MODE: bool = False
     SKIP_VERIFICATION: bool = False
-    SKIP_RATE_LIMIT: bool = True
+    SKIP_RATE_LIMIT: bool = False
     LOG_LEVEL: str = "INFO"
 
-    DATABASE_URL: str = "sqlite:///./database/db/server.db"
+    # ---- Database ----
+    DATABASE_URL: str
 
-    SECRET_KEY: str = "your-secret-key-here"
+    # ---- JWT ----
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080
 
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    # ---- CORS ----
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8080"]
 
+    # ---- SMTP ----
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
-    SMTP_USER: str = "bdkk9211@gmail.com"
-    SMTP_PASSWORD: str = "fhrt vzfx tfmo vplm"
-    SMTP_FROM_EMAIL: str = "bdkk9211@gmail.com"
-    SMTP_FROM_NAME: str = "SUSTech Student Productivity Agent"
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
+    SMTP_FROM_NAME: str = ""
 
+    # ---- Verification Code ----
     VERIFICATION_CODE_LENGTH: int = 6
     VERIFICATION_CODE_EXPIRE_MINUTES: int = 5
     VERIFICATION_CODE_MAX_ATTEMPTS: int = 3
 
+    # ---- Rate Limiting ----
     RATE_LIMIT_MAX_REQUESTS: int = 5
-    RATE_LIMIT_WINDOW_MINUTES: int = 60
+    RATE_LIMIT_WINDOW_MINUTES: int = 15
 
-    model_config = {"env_file": os.path.join(os.path.dirname(__file__), ".env"), "extra": "allow"}
+    # ---- Redis (optional) ----
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_PASSWORD: str = ""
 
 
 settings = Settings()
