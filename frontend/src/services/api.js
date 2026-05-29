@@ -119,56 +119,6 @@ export const authAPI = {
   }
 }
 
-// ==================== Tasks API ====================
-
-export const tasksAPI = {
-  // Get all tasks
-  getTasks: async () => {
-    return fetchWithAuth('/tasks/')
-  },
-  
-  // Create new task
-  createTask: async (taskData) => {
-    return fetchWithAuth('/tasks/', {
-      method: 'POST',
-      body: JSON.stringify(taskData)
-    })
-  },
-  
-  // Update task
-  updateTask: async (taskId, taskData) => {
-    return fetchWithAuth(`/tasks/${taskId}`, {
-      method: 'PUT',
-      body: JSON.stringify(taskData)
-    })
-  },
-  
-  // Delete task
-  deleteTask: async (taskId) => {
-    const token = getToken()
-    const numericId = Number(taskId)
-    const isLocalGeneratedId = Number.isFinite(numericId) && numericId > 1000000000000
-
-    // 本地临时任务（Date.now()）或未登录场景不触发后端删除，避免 401 噪音
-    if (!token || isLocalGeneratedId) {
-      return {
-        success: true,
-        message: 'Skip remote delete for local task',
-        skipped: true,
-      }
-    }
-
-    return fetchWithAuth(`/tasks/${taskId}`, {
-      method: 'DELETE'
-    })
-  },
-  
-  // Get AI study plan
-  getStudyPlan: async () => {
-    return fetchWithAuth('/tasks/study-plan')
-  }
-}
-
 // ==================== Events API (unified) ====================
 
 const isLocalEventId = (id) => {
@@ -206,38 +156,6 @@ export const eventsAPI = {
       method: 'DELETE'
     })
   },
-}
-
-// ==================== Schedules API ====================
-
-export const schedulesAPI = {
-  // Get all schedules
-  getSchedules: async () => {
-    return fetchWithAuth('/schedules/')
-  },
-  
-  // Create new schedule
-  createSchedule: async (scheduleData) => {
-    return fetchWithAuth('/schedules/', {
-      method: 'POST',
-      body: JSON.stringify(scheduleData)
-    })
-  },
-  
-  // Update schedule
-  updateSchedule: async (scheduleId, scheduleData) => {
-    return fetchWithAuth(`/schedules/${scheduleId}`, {
-      method: 'PUT',
-      body: JSON.stringify(scheduleData)
-    })
-  },
-  
-  // Delete schedule
-  deleteSchedule: async (scheduleId) => {
-    return fetchWithAuth(`/schedules/${scheduleId}`, {
-      method: 'DELETE'
-    })
-  }
 }
 
 // ==================== AI Agent API ====================
@@ -677,8 +595,6 @@ export const profileAPI = {
 
 export default {
   auth: authAPI,
-  tasks: tasksAPI,
-  schedules: schedulesAPI,
   agent: agentAPI,
   sync: syncAPI,
   profile: profileAPI,

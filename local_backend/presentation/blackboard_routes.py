@@ -9,7 +9,6 @@ from service.blackboard_service import BlackboardService
 from presentation.dependencies import get_current_user_id
 import json
 import os
-import logging
 
 router = APIRouter(prefix="/api/v1/blackboard", tags=["blackboard"])
 security = HTTPBearer()

@@ -3,7 +3,6 @@ import { ref, computed } from 'vue'
 import { eventsAPI } from '../services/api.js'
 
 const LAYOUT_STORAGE_KEY = 'proagent_layout'
-const PINNED_EMAILS_KEY = 'proagent_pinned_emails'
 
 const TODOS_STORAGE_KEY = 'proagent_todos'
 
@@ -287,46 +286,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const resetLayout = () => {
     layoutConfig.value = DEFAULT_LAYOUT
     saveLayoutToStorage(layoutConfig.value)
-  }
-
-  // ==============================
-  // 4. 主页置顶邮件 (Pinned Emails)
-  // ==============================
-  const pinnedEmails = ref(loadPinnedEmailsFromStorage())
-
-  function loadPinnedEmailsFromStorage() {
-    try {
-      const stored = localStorage.getItem(PINNED_EMAILS_KEY)
-      return stored ? JSON.parse(stored) : []
-    } catch { return [] }
-  }
-
-  function savePinnedEmails() {
-    localStorage.setItem(PINNED_EMAILS_KEY, JSON.stringify(pinnedEmails.value))
-  }
-
-  function pinEmail(email) {
-    const exists = pinnedEmails.value.some(e => e.id === email.id)
-    if (!exists) {
-      pinnedEmails.value.unshift({ ...email, pinnedAt: new Date().toISOString() })
-      savePinnedEmails()
-    }
-  }
-
-  function unpinEmail(id) {
-    pinnedEmails.value = pinnedEmails.value.filter(e => e.id !== id)
-    savePinnedEmails()
-  }
-
-  function isEmailPinned(id) {
-    return pinnedEmails.value.some(e => e.id === id)
-  }
-
-  return {
-    activityLog, heatmapData, recordActivity,
-    todos, sortedTodos, pendingTodosCount, addTodo, updateTodo, toggleTodo, removeTodo, loadTodosFromBackend,
-    layoutConfig, saveLayout, resetLayout,
-    pinnedEmails, pinEmail, unpinEmail, isEmailPinned,
   }
 
   return {

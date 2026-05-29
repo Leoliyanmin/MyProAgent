@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Callable
 from .base import BaseTool
 from local_backend.database.code.command.database_command import list_events_by_user
 
