@@ -134,7 +134,6 @@ debug.html
 # ----------------------------------------
 # Temporary / Generated files
 # ----------------------------------------
-.DS_Store
 *.jpg
 *.jpeg
 *.gif
@@ -194,23 +193,15 @@ frontend/src-tauri/*.AppImage
 frontend/src-tauri/target/release/bundle/
 frontend/src-tauri/target/debug/bundle/
 
-# Data and config files (specific paths only, NOT glob patterns)
-config.json
+# Data and config files (specific paths only)
+local_backend/config.json
 server_backend/config.py
-local/database/test_db/sync_packet_from_server.json
-local/database/test_db/sync_packet_to_server.json
-
-# mock data (moved to archive/)
-# Standalone CAS demo app (moved to archive/)
 
 # Cas-demo Rust build artifacts in archive
 archive/cas-demo/node_modules/
 archive/cas-demo/dist/
 archive/cas-demo/package-lock.json
 archive/cas-demo/src-tauri/target/
-
-# metrics tool generated report
-metrics_tool/metrics_report.md
 
 # ----------------------------------------
 # Agent / IDE artifacts (local only)
@@ -225,8 +216,6 @@ _personal/
 # User interaction data (personality module)
 personality/interactions/
 personality/profiles/
-
-
 
 # MacOS
 .DS_Store
