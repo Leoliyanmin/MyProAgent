@@ -517,15 +517,58 @@ const getTimedEventStyle = (event) => {
   if (duration < 0.5) duration = 0.5; // min height 30 mins
   const height = duration * 50;
 
+  const isParent = event.depth === 0 && event.maxDepth > 0
+  const isChild = event.depth > 0
+  const color = event.color || '#007aff'
+
+  if (isParent) {
+    return {
+      top: `${top}px`,
+      height: `${height}px`,
+      zIndex: 1,
+      backgroundColor: event.color ? event.color + '08' : 'rgba(0,0,0,0.03)',
+      border: `1px solid ${event.color ? event.color + '20' : 'rgba(0,0,0,0.06)'}`,
+      borderRadius: '6px',
+      boxShadow: 'none',
+      color: event.color ? event.color + '88' : '#999',
+      fontWeight: '400',
+      fontSize: '10px',
+      padding: '3px 8px',
+    }
+  }
+
+  if (isChild) {
+    return {
+      top: `${top}px`,
+      height: `${height}px`,
+      ...(event.left ? { left: event.left } : {}),
+      ...(event.width ? { width: event.width } : {}),
+      zIndex: (event.depth || 0) + 10,
+      backgroundColor: event.color ? event.color + '30' : '',
+      borderLeft: `3px solid ${color}`,
+      borderRadius: '5px',
+      boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+      color: event.priority >= 4 ? '#000000' : color,
+      fontWeight: '600',
+      fontSize: '11px',
+      padding: '4px 6px',
+    }
+  }
+
   return {
     top: `${top}px`,
     height: `${height}px`,
     ...(event.left ? { left: event.left } : {}),
     ...(event.width ? { width: event.width } : {}),
-    zIndex: (event.depth || 0) + 10,
+    zIndex: 10,
     backgroundColor: event.color ? event.color + '25' : '',
-    color: event.priority >= 4 ? '#000000' : (event.color || ''),
-    borderLeft: `3px solid ${event.color || '#007aff'}`
+    color: event.priority >= 4 ? '#000000' : color,
+    borderLeft: `3px solid ${color}`,
+    borderRadius: '4px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    fontWeight: '600',
+    fontSize: '11px',
+    padding: '4px 6px',
   }
 }
 
