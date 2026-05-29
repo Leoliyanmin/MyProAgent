@@ -205,10 +205,10 @@ archive/cas-demo/src-tauri/target/
 
 # ----------------------------------------
 # Agent / IDE artifacts (local only)
-# ----------------------------------------
 .sisyphus/
 .trae/
 .playwright-mcp/
+.opencode/
 
 # Personal directory (non-project files)
 _personal/
@@ -216,6 +216,12 @@ _personal/
 # User interaction data (personality module)
 personality/interactions/
 personality/profiles/
+
+# Local database data (may contain API keys)
+local_backend/database/data/
+
+# PyInstaller build specs
+scripts/*.spec
 
 # MacOS
 .DS_Store
