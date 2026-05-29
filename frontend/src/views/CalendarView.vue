@@ -702,12 +702,14 @@ const saveEvent = async () => {
   await dashboardStore.loadTodosFromBackend()
 }
 
-const deleteEvent = () => {
+const deleteEvent = async () => {
   validationMessage.value = ''
   if (draftEvent.value.id) {
-    calendarStore.removeEvent(draftEvent.value.id)
+    await calendarStore.removeEvent(draftEvent.value.id)
   }
   closeModal()
+  await calendarStore.loadSchedules()
+  await dashboardStore.loadTodosFromBackend()
 }
 
 // Month view drag-and-drop handlers
