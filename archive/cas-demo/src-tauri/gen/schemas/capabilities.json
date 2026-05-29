@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Default capabilities for CAS Cookie Demo","local":true,"windows":["main","cas-login"],"permissions":["core:default","core:window:allow-create","core:window:allow-close","core:window:allow-set-focus","core:webview:allow-create-webview-window"]}}

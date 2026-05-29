@@ -200,11 +200,14 @@ server_backend/config.py
 local/database/test_db/sync_packet_from_server.json
 local/database/test_db/sync_packet_to_server.json
 
-# mock data
-mock_frontend/
+# mock data (moved to archive/)
+# Standalone CAS demo app (moved to archive/)
 
-# Standalone CAS demo app (not for production)
-cas-demo/
+# Cas-demo Rust build artifacts in archive
+archive/cas-demo/node_modules/
+archive/cas-demo/dist/
+archive/cas-demo/package-lock.json
+archive/cas-demo/src-tauri/target/
 
 # metrics tool generated report
 metrics_tool/metrics_report.md
@@ -219,8 +222,11 @@ metrics_tool/metrics_report.md
 # Personal directory (non-project files)
 _personal/
 
-# Archive directory (deprecated code)
-archive/
+# User interaction data (personality module)
+personality/interactions/
+personality/profiles/
+
+
 
 # MacOS
 .DS_Store

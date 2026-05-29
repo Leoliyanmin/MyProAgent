@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUSTech CAS Cookie Extractor</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <h1>🎓 SUSTech CAS 绑定</h1>
+      <p class="subtitle">CAS 登录 → 提取 Cookie → 绑定 TIS / BB</p>
+    </header>
+
+    <main class="main">
+      <section class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h2>CAS 登录</h2>
+          <p>打开 CAS 登录窗口，输入 SUSTech 账号密码</p>
+          <button id="btn-open" class="btn btn-primary" onclick="openCasLogin()">
+            🔐 打开 CAS 登录
+          </button>
+        </div>
+      </section>
+
+      <section class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h2>收集 Cookie</h2>
+          <p>登录成功后跳转到 TIS，然后可选跳转 BB</p>
+          <div class="btn-group">
+            <button id="btn-extract" class="btn btn-primary" onclick="extractCookies()">
+              🍪 提取 Cookie
+            </button>
+            <button id="btn-bb" class="btn btn-secondary" onclick="navigateTo('https://bb.sustech.edu.cn/')">
+              📚 跳转 BB
+            </button>
+            <button id="btn-close" class="btn btn-danger" onclick="closeCasWindow()">
+              ❌ 关闭窗口
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h2>绑定服务</h2>
+          <p>后端: <code>http://localhost:8002</code> · Token 自动从 localStorage 读取</p>
+          <div class="btn-group" style="margin-top: 12px;">
+            <button id="btn-bind-tis" class="btn btn-primary" onclick="bindTis()" disabled>
+              🎓 绑定 TIS
+            </button>
+            <button id="btn-bind-bb" class="btn btn-secondary" onclick="bindBlackboard()" disabled>
+              📚 绑定 BB
+            </button>
+          </div>
+          <p class="hint" style="margin-top: 8px;">⚠️ 先提取 Cookie 才能绑定</p>
+        </div>
+      </section>
+
+      <section class="result-card" id="result-section" style="display: none;">
+        <div class="result-header">
+          <h2>📦 Cookie 提取结果</h2>
+          <div class="result-actions">
+            <button class="btn btn-small" onclick="copyCookies()">📋 复制</button>
+            <button class="btn btn-small" onclick="saveCookies()">💾 保存</button>
+          </div>
+        </div>
+        <div class="result-summary" id="result-summary"></div>
+        <div id="cookie-list"></div>
+      </section>
+    </main>
+
+    <div id="status" class="status-bar" style="display: none;"></div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
