@@ -44,7 +44,7 @@ class EmailV2Handle:
         except Exception as e:
             return {"success": False, "message": "解绑失败: {}".format(e)}
 
-    def handle_sync_messages(self, user_id: str, messages: list) -> dict:
+    def handle_sync_messages(self, user_id: str, messages: list, max_uid: int = 0) -> dict:
         try:
             account = self.account_ops.get(user_id)
             if not account:
@@ -69,6 +69,8 @@ class EmailV2Handle:
                 if msg.get("mail_id", "") not in existing_ids:
                     new_count += 1
             self.account_ops.update_sync_time(account_id)
+            if max_uid > 0:
+                self.account_ops.update_sync_uid(account_id, max_uid)
             db_total = len(self.message_ops.list_all(user_id))
             return {
                 "success": True,

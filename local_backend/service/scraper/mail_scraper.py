@@ -269,7 +269,7 @@ class MailScraper:
             "messages": messages,
         }
 
-    def scrape_recent_mails(self, days: int = 7, folder: str = "INBOX") -> Dict[str, Any]:
+    def scrape_recent_mails(self, days: int = 7, max_messages: int = 0, folder: str = "INBOX") -> Dict[str, Any]:
         conn = self._connect()
         status, _ = conn.select(folder, readonly=True)
         if status != "OK":
@@ -278,6 +278,9 @@ class MailScraper:
         since_date = (datetime.now() - timedelta(days=days)).strftime("%d-%b-%Y")
         _, search_data = conn.uid('search', None, f"SINCE {since_date}")
         message_ids = search_data[0].split() if search_data[0] else []
+
+        if max_messages and max_messages > 0 and len(message_ids) > max_messages:
+            message_ids = message_ids[-max_messages:]
 
         messages = []
         for msg_id in message_ids:
@@ -303,4 +306,50 @@ class MailScraper:
             "total": len(messages),
             "returned": len(messages),
             "messages": messages,
+        }
+
+    def scrape_mails_since_uid(self, last_uid: int, max_messages: int = 0, folder: str = "INBOX") -> Dict[str, Any]:
+        conn = self._connect()
+        status, _ = conn.select(folder, readonly=True)
+        if status != "OK":
+            raise RuntimeError(f"Failed to select folder: {folder}")
+
+        _, search_data = conn.uid('search', None, f"UID {last_uid + 1}:*")
+        message_ids = search_data[0].split() if search_data[0] else []
+
+        if max_messages and max_messages > 0 and len(message_ids) > max_messages:
+            message_ids = message_ids[-max_messages:]
+
+        messages = []
+        max_uid = last_uid
+        for msg_id in message_ids:
+            _, msg_data = conn.uid('fetch', msg_id, "(FLAGS BODY.PEEK[])")
+            raw_email = msg_data[0][1] if msg_data and len(msg_data[0]) > 1 else b""
+            msg = message_from_bytes(raw_email)
+            sender = _decode_mime_header(msg.get("From", ""))
+            subject = _decode_mime_header(msg.get("Subject", ""))
+            date_str = _parse_email_date(msg.get("Date", ""))
+            body = _extract_email_body(msg)
+            raw_html = _extract_raw_html(msg)
+            uid_str = msg_id.decode() if isinstance(msg_id, bytes) else str(msg_id)
+            try:
+                uid_int = int(uid_str)
+                max_uid = max(max_uid, uid_int)
+            except ValueError:
+                pass
+            messages.append({
+                "mail_id": uid_str,
+                "subject": subject,
+                "sender": sender,
+                "time": date_str,
+                "body": body,
+                "raw_html": raw_html,
+            })
+
+        conn.close()
+        return {
+            "total": len(messages),
+            "returned": len(messages),
+            "messages": messages,
+            "max_uid": max_uid,
         }

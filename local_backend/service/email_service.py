@@ -87,9 +87,9 @@ class EmailService:
             logger.error(f"绑定邮箱失败: {str(e)}")
             return {'success': False, 'message': f'绑定邮箱失败: {str(e)}'}
 
-    def sync_email_data(self, user_id: str, max_messages: int = 50, incremental: bool = True) -> Dict:
+    def sync_email_data(self, user_id: str, max_messages: int = 50, full_sync: bool = False) -> Dict:
         try:
-            logger.info(f"同步邮件数据: user_id={user_id}")
+            logger.info(f"同步邮件数据: user_id={user_id}, full_sync={full_sync}")
 
             account_info = self.email_handle.account_ops.get(user_id)
             if not account_info:
@@ -101,29 +101,31 @@ class EmailService:
 
             scraper = MailScraper(email_address, app_password)
 
-            # Incremental sync: use SINCE date if last_sync_time exists
-            if incremental:
-                last_sync = account_info.get('last_sync_time', '')
-                if last_sync:
+            max_uid = 0
+            if not full_sync:
+                last_sync_uid = account_info.get('last_sync_uid', 0) or 0
+                if last_sync_uid > 0:
                     try:
-                        last_sync_dt = datetime.datetime.strptime(last_sync[:10], "%Y-%m-%d")
-                        days_since = max(1, (datetime.datetime.now() - last_sync_dt).days + 1)
-                        scrape_result = scraper.scrape_recent_mails(days=days_since)
-                        logger.info(f"增量同步: last_sync={last_sync}, days_since={days_since}, fetched={scrape_result['returned']}")
+                        scrape_result = scraper.scrape_mails_since_uid(last_sync_uid, max_messages=max_messages)
+                        max_uid = scrape_result.get('max_uid', last_sync_uid)
+                        logger.info(
+                            f"UID增量同步: last_uid={last_sync_uid}, max_uid={max_uid}, fetched={scrape_result['returned']}"
+                        )
                     except Exception:
-                        scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
+                        logger.info("UID增量同步失败，回退到时间增量")
+                        scrape_result = self._scrape_incremental_or_full(scraper, account_info, max_messages)
                 else:
-                    scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
-            elif max_messages:
-                scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
+                    scrape_result = self._scrape_incremental_or_full(scraper, account_info, max_messages)
             else:
-                scrape_result = scraper.scrape_recent_mails(days=1)
+                scrape_result = scraper.scrape_mail_detail(max_messages=max_messages)
+                logger.info(f"全量同步: fetched={scrape_result['returned']}")
 
             write_mail_result(scrape_result)
 
             sync_result = self.email_handle.handle_sync_messages(
                 user_id=user_id,
                 messages=scrape_result.get('messages', []),
+                max_uid=max_uid,
             )
 
             if sync_result['success']:
@@ -143,6 +145,21 @@ class EmailService:
         except Exception as e:
             logger.error(f"同步邮件数据失败: {str(e)}")
             return {'success': False, 'message': f'同步邮件数据失败: {str(e)}'}
+
+    def _scrape_incremental_or_full(self, scraper, account_info: dict, max_messages: int):
+        last_sync = account_info.get('last_sync_time', '')
+        if last_sync:
+            try:
+                last_sync_dt = datetime.datetime.strptime(last_sync[:10], "%Y-%m-%d")
+                days_since = max(1, (datetime.datetime.now() - last_sync_dt).days + 1)
+                result = scraper.scrape_recent_mails(days=days_since, max_messages=max_messages)
+                logger.info(f"时间增量同步: last_sync={last_sync}, days_since={days_since}, fetched={result['returned']}")
+                return result
+            except Exception:
+                pass
+        result = scraper.scrape_mail_detail(max_messages=max_messages)
+        logger.info(f"全量同步(无历史): fetched={result['returned']}")
+        return result
 
     def unbind_email(self, user_id: str) -> Dict:
         try:
