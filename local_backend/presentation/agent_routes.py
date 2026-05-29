@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from pathlib import Path
 from typing import List
 import asyncio
+import logging
 from presentation.schemas import (
     AgentChatMessage,
     AgentFileManagerDirectoryCreateRequest,
@@ -25,6 +26,8 @@ from presentation.schemas import (
 )
 from presentation.dependencies import get_current_user_id, get_current_user_id_with_token, get_current_user_id_websocket
 from service.agent_service import AgentService, connect_user, disconnect_user
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
 agent_service = AgentService()
@@ -459,7 +462,7 @@ async def get_interaction_detail(
     try:
         interaction = agent_service.db_interaction_ops.get(conversation_id)
     except Exception:
-        pass
+        logger.warning("Failed to get interaction from DB", exc_info=True)
     if not interaction:
         interaction = agent_service.interaction_logger.get_interaction(conversation_id)
     if not interaction:
@@ -481,7 +484,7 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
     try:
         interactions = agent_service.db_interaction_ops.list_for_user(user_id, limit=9999)
     except Exception:
-        pass
+        logger.warning("Failed to list interactions from DB", exc_info=True)
     if not interactions:
         interactions = agent_service.interaction_logger.get_user_interactions(user_id, limit=9999)
     if not interactions:
@@ -518,7 +521,7 @@ async def reanalyze_profile(user_id: str = Depends(get_current_user_id)):
     try:
         profile = agent_service.db_personality_ops.get_profile(user_id)
     except Exception:
-        pass
+        logger.warning("Failed to get profile from DB", exc_info=True)
     if not profile:
         profile = agent_service.profile_store.get_profile(user_id)
     raw_messages = [

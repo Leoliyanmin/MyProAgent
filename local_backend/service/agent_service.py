@@ -341,7 +341,7 @@ class AgentService:
                     tool_calls=str(result.tools_used),
                 )
         except Exception:
-            pass
+            logger.warning("Failed to log agent event to DB", exc_info=True)
 
         return {
             'response': result.content,
@@ -365,7 +365,7 @@ class AgentService:
                     detail = json.loads(json_str)
                     deletions.append(detail)
                 except (json.JSONDecodeError, ValueError):
-                    pass
+                    logger.warning("Failed to parse JSON deletion detail", exc_info=True)
         return deletions
 
     @classmethod
@@ -869,7 +869,7 @@ class AgentService:
             if db_profile:
                 return db_profile
         except Exception:
-            pass
+            logger.warning("Failed to get profile from DB", exc_info=True)
         return self.profile_store.get_profile(user_id)
 
     def get_user_mbti(self, user_id: str) -> dict:
@@ -878,7 +878,7 @@ class AgentService:
             if db_profile and db_profile.get("mbti_inference"):
                 return db_profile["mbti_inference"]
         except Exception:
-            pass
+            logger.warning("Failed to get MBTI from DB", exc_info=True)
         profile = self.profile_store.get_profile(user_id)
         return profile.get("mbti_inference", {})
 
@@ -906,7 +906,7 @@ class AgentService:
                     })
                 return {"total": total, "limit": limit, "offset": offset, "items": items}
         except Exception:
-            pass
+            logger.warning("Failed to list interactions from DB", exc_info=True)
         all_interactions = self.interaction_logger.get_user_interactions(user_id, limit=9999)
         total = len(all_interactions)
         page = all_interactions[offset:offset + limit]

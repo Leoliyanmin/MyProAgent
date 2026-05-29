@@ -2,11 +2,14 @@
 
 import asyncio
 import json
+import logging
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Awaitable
+
+logger = logging.getLogger(__name__)
 
 from .provider import OpenAICompatProvider, LLMResponse
 from .tools.base import BaseTool, ToolRegistry
@@ -292,10 +295,11 @@ class LocalAgent:
             if db_profile:
                 return db_profile
         except Exception:
-            pass
+            logger.warning("Profile lookup in DB failed", exc_info=True)
         try:
             return self._profile_store.get_profile(user_id)
         except Exception:
+            logger.warning("Profile store lookup failed", exc_info=True)
             return {}
 
     def update_model(self, model: str) -> None:
