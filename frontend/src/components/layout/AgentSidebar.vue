@@ -160,6 +160,7 @@ import { useCalendarStore } from '../../stores/calendar.js'
 import { useDashboardStore } from '../../stores/dashboard.js'
 import { useFileManagerStore } from '../../stores/fileManager.js'
 import { useEmailStore } from '../../stores/email.js'
+import { useAgentChatStore } from '../../stores/agentChat.js'
 import { useMessageParser } from '../../composables/useMessageParser.js'
 import { agentAPI } from '../../services/api.js'
 import { marked } from 'marked'
@@ -181,6 +182,7 @@ const calendarStore = useCalendarStore()
 const dashboardStore = useDashboardStore()
 const fmStore = useFileManagerStore()
 const emailStore = useEmailStore()
+const chatStore = useAgentChatStore()
 const { parse: parseMessage } = useMessageParser()
 
 const shortDir = computed(() => {
@@ -228,8 +230,11 @@ const EMAIL_TOOL_NAMES = new Set([
   'empty_trash',
 ])
 
-// 状态
-const messages = ref([])
+// 状态 - 桥接到共享 store，和 AgentMini 同步
+const messages = computed({
+  get: () => chatStore.messages,
+  set: (val) => { chatStore.setMessages(val) }
+})
 const inputText = ref('')
 const wsRef = ref(null)
 const isSending = ref(false)
@@ -403,8 +408,14 @@ const markThemeDismissed = (chatId, msgIdx) => {
 }
 
 // 聊天记录列表
-const chatList = ref([])
-const currentChatId = ref('')
+const chatList = computed({
+  get: () => chatStore.chatList,
+  set: (val) => { chatStore.chatList = val }
+})
+const currentChatId = computed({
+  get: () => chatStore.currentChatId,
+  set: (val) => { chatStore.currentChatId = val }
+})
 const STORAGE_KEY = 'proagent_chat_history'
 
 const renderMarkdown = (text) => {

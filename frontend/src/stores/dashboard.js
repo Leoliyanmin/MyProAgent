@@ -2,8 +2,16 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { eventsAPI } from '../services/api.js'
 import { useCalendarStore } from './calendar.js'
+import {
+  DEFAULT_DASHBOARD_LAYOUT_PRESETS,
+  applyLayoutPreset,
+  arrangeDashboardLayout,
+  createLayoutKey,
+  createLayoutPreset
+} from '../utils/dashboardLayout.js'
 
 const LAYOUT_STORAGE_KEY = 'proagent_layout'
+const LAYOUT_PRESETS_STORAGE_KEY = 'proagent_layout_presets'
 
 const TODOS_STORAGE_KEY = 'proagent_todos'
 
@@ -30,19 +38,56 @@ const DEFAULT_LAYOUT = [
   { x: 0, y: 5, w: 12, h: 8, i: '5', type: 'markdown', minW: 6, minH: 4 }
 ]
 
+export const HEATMAP_LAYOUT_PRESETS = [
+  { name: 'compact', w: 2, h: 1 },
+  { name: 'wide', w: 4, h: 1 },
+  { name: 'tall', w: 2, h: 2 },
+  { name: 'full', w: 6, h: 1 },
+  { name: 'banner', w: 8, h: 1 }
+]
+
+export const getHeatmapLayoutPreset = (w = 4, h = 1) => {
+  return HEATMAP_LAYOUT_PRESETS.reduce((best, preset) => {
+    const bestScore = Math.abs(best.w - w) + Math.abs(best.h - h) * 1.5
+    const score = Math.abs(preset.w - w) + Math.abs(preset.h - h) * 1.5
+    return score < bestScore ? preset : best
+  }, HEATMAP_LAYOUT_PRESETS[1])
+}
+
+const normalizeLayoutItem = (item) => {
+  if (item?.type !== 'heatmap' && item?.i !== 'mini-heatmap') {
+    return item
+  }
+  const preset = getHeatmapLayoutPreset(item.w, item.h)
+  return {
+    ...item,
+    minW: 2,
+    minH: 1,
+    maxW: 12,
+    maxH: 2,
+    w: preset.w,
+    h: preset.h,
+    heatmapVariant: preset.name
+  }
+}
+
 const loadLayoutFromStorage = () => {
   try {
     const stored = localStorage.getItem(LAYOUT_STORAGE_KEY)
     if (stored) {
       const parsed = JSON.parse(stored)
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const savedTypes = new Set(parsed.map(item => item.type))
+        // Clean stale types that no longer have components
+        const cleaned = parsed
+          .filter(item => item.type !== 'inbox-mini')
+          .map(normalizeLayoutItem)
+        const savedTypes = new Set(cleaned.map(item => item.type))
         const newItems = DEFAULT_LAYOUT.filter(item => !savedTypes.has(item.type))
         if (newItems.length > 0) {
-          const merged = [...parsed, ...newItems]
+          const merged = [...cleaned, ...newItems]
           return merged
         }
-        return parsed
+        return cleaned
       }
     }
   } catch (err) {
@@ -56,6 +101,24 @@ const saveLayoutToStorage = (layout) => {
     localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layout))
   } catch (err) {
     console.error('Failed to save layout to localStorage:', err)
+  }
+}
+
+const loadLayoutPresetsFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(LAYOUT_PRESETS_STORAGE_KEY)
+    return stored ? JSON.parse(stored) : {}
+  } catch (err) {
+    console.error('Failed to load layout presets from localStorage:', err)
+    return {}
+  }
+}
+
+const saveLayoutPresetsToStorage = (presets) => {
+  try {
+    localStorage.setItem(LAYOUT_PRESETS_STORAGE_KEY, JSON.stringify(presets))
+  } catch (err) {
+    console.error('Failed to save layout presets to localStorage:', err)
   }
 }
 
@@ -118,31 +181,58 @@ export const useDashboardStore = defineStore('dashboard', () => {
   // ==============================
   // 1. 活动热力图状态 (Heatmap)
   // ==============================
-  // 记录每天的"贡献值"，格式：{ '2026-03-10': 5, '2026-03-11': 2 }
-  const activityLog = ref({
-    '2026-03-08': 3,
-    '2026-03-09': 8 // 伪造的历史数据
-  })
+  // 记录每天每小时的活跃度：{ '2026-05-29': { 9: 2, 14: 3 } }
+  const activityLog = ref({})
 
-  // 获取今天的日期字符串 (YYYY-MM-DD)
   const getTodayString = () => {
     const d = new Date()
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
 
-  // 核心 Action：记录一次有效操作（如勾选 Todo、保存笔记）
   const recordActivity = (points = 1) => {
     const today = getTodayString()
-    if (activityLog.value[today]) {
-      activityLog.value[today] += points
-    } else {
-      activityLog.value[today] = points
-    }
+    const hour = new Date().getHours()
+    if (!activityLog.value[today]) activityLog.value[today] = {}
+    if (!activityLog.value[today][hour]) activityLog.value[today][hour] = 0
+    activityLog.value[today][hour] += points
   }
 
-  // 转换为 ECharts 需要的数据格式：[['2026-03-10', 5], ...]
-  const heatmapData = computed(() => {
-    return Object.entries(activityLog.value).map(([date, count]) => [date, count])
+  // 今日 24 小时分布 [count0, count1, ... count23]
+  const todayHourly = computed(() => {
+    const today = getTodayString()
+    const hours = activityLog.value[today] || {}
+    return Array.from({ length: 24 }, (_, h) => hours[h] || 0)
+  })
+
+  // 过去 7 天，每天的总量 [{ date, dayLabel, total }]
+  const weeklyHeatmap = computed(() => {
+    const result = []
+    const now = new Date()
+    const DAYS = ['日', '一', '二', '三', '四', '五', '六']
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(d.getDate() - i)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      const hours = activityLog.value[key] || {}
+      const total = Object.values(hours).reduce((s, v) => s + v, 0)
+      result.push({ date: key, dayLabel: DAYS[d.getDay()], short: `${d.getMonth() + 1}/${d.getDate()}`, total })
+    }
+    return result
+  })
+
+  // 过去 30 天，每天的总量 [{ date, total }]
+  const monthlyHeatmap = computed(() => {
+    const result = []
+    const now = new Date()
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(d.getDate() - i)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      const hours = activityLog.value[key] || {}
+      const total = Object.values(hours).reduce((s, v) => s + v, 0)
+      result.push({ date: key, short: `${d.getMonth() + 1}/${d.getDate()}`, total })
+    }
+    return result
   })
 
   // ==============================
@@ -290,19 +380,186 @@ export const useDashboardStore = defineStore('dashboard', () => {
   // 3. 布局配置状态 (本地存储)
   // ==============================
   const layoutConfig = ref(loadLayoutFromStorage())
+  const customLayoutPresets = ref(loadLayoutPresetsFromStorage())
 
   const saveLayout = () => {
     saveLayoutToStorage(layoutConfig.value)
   }
 
-  const resetLayout = () => {
-    layoutConfig.value = DEFAULT_LAYOUT
+  const autoArrangeLayout = () => {
+    const normalized = layoutConfig.value.map(normalizeLayoutItem)
+    const key = createLayoutKey(normalized)
+    const preset = customLayoutPresets.value[key] || DEFAULT_DASHBOARD_LAYOUT_PRESETS[key]
+    const arranged = applyLayoutPreset(normalized, preset) || arrangeDashboardLayout(normalized)
+    layoutConfig.value.splice(0, layoutConfig.value.length, ...arranged)
     saveLayoutToStorage(layoutConfig.value)
+  }
+
+  const saveCurrentLayoutAsPreset = () => {
+    const normalized = layoutConfig.value.map(normalizeLayoutItem)
+    const preset = createLayoutPreset(normalized)
+    customLayoutPresets.value = {
+      ...customLayoutPresets.value,
+      [preset.key]: preset
+    }
+    saveLayoutPresetsToStorage(customLayoutPresets.value)
+    return preset
+  }
+
+  const resetLayout = () => {
+    layoutConfig.value.splice(0, layoutConfig.value.length, ...DEFAULT_LAYOUT)
+    saveLayoutToStorage(layoutConfig.value)
+  }
+
+  // ── Mini widgets ──
+  const miniWidgets = ref(new Set())
+
+  const MINI_LAYOUT_MAP = {
+    'compose': { w: 4, h: 7, i: 'mini-compose', type: 'compose-mini', minW: 3, minH: 5 },
+    'inbox':   { w: 5, h: 6, i: 'mini-inbox',   type: 'messages',    minW: 4, minH: 4 },
+    'note':    { w: 6, h: 8, i: 'mini-note',    type: 'markdown',    minW: 6, minH: 4 },
+    'todo':    { w: 4, h: 6, i: 'mini-todo',    type: 'todo',        minW: 3, minH: 4 },
+    'heatmap': { w: 4, h: 1, i: 'mini-heatmap', type: 'heatmap',     minW: 2, minH: 1, maxW: 12, maxH: 2, heatmapVariant: 'wide' },
+    'agent':   { w: 5, h: 6, i: 'mini-agent',   type: 'agent-mini',  minW: 4, minH: 4 },
+  }
+
+  const _removedCache = new Map()
+
+  function _findBestPosition(w, h) {
+    const items = layoutConfig.value
+    if (items.length === 0) return { x: 0, y: 0 }
+
+    const occupied = items.map(it => ({ x: it.x, y: it.y, w: it.w, h: it.h }))
+
+    // Try position by position, prefer top-left
+    for (let row = 0; row < 20; row++) {
+      for (let col = 0; col <= 12 - w; col++) {
+        const overlaps = occupied.some(r =>
+          col < r.x + r.w && col + w > r.x && row < r.y + r.h && row + h > r.y
+        )
+        if (!overlaps) return { x: col, y: row }
+      }
+    }
+    // fallback: below everything
+    const maxBottom = Math.max(0, ...occupied.map(r => r.y + r.h))
+    return { x: 0, y: maxBottom }
+  }
+
+  function isMiniWidgetActive(type) {
+    return miniWidgets.value.has(type)
+  }
+
+  function toggleMiniWidget(type) {
+    const next = new Set(miniWidgets.value)
+    const isVisible = type === 'inbox'
+      ? layoutConfig.value.some(item => item.type === 'messages')
+      : type === 'note'
+        ? layoutConfig.value.some(item => item.type === 'markdown')
+        : type === 'todo'
+          ? layoutConfig.value.some(item => item.type === 'todo')
+          : layoutConfig.value.some(item => item.i === MINI_LAYOUT_MAP[type]?.i)
+
+    if (isVisible) {
+      next.delete(type)
+      _removeMiniFromLayout(type)
+    } else {
+      next.add(type)
+      _addMiniToLayout(type)
+      recordActivity(1)
+    }
+    recordActivity(1)
+    miniWidgets.value = next
+  }
+
+  function _addMiniToLayout(type) {
+    const cached = _removedCache.get(type)
+    if (type === 'inbox') {
+      if (!layoutConfig.value.some(item => item.type === 'messages')) {
+        if (cached) {
+          layoutConfig.value.push({ ...cached })
+          _removedCache.delete('inbox')
+        } else {
+          const pos = _findBestPosition(6, 5)
+          layoutConfig.value.push({ x: pos.x, y: pos.y, w: 6, h: 5, i: '4', type: 'messages', minW: 4, minH: 3 })
+        }
+      }
+      return
+    }
+    if (type === 'note') {
+      if (!layoutConfig.value.some(item => item.type === 'markdown')) {
+        if (cached) {
+          layoutConfig.value.push({ ...cached })
+          _removedCache.delete('note')
+        } else {
+          const pos = _findBestPosition(6, 8)
+          layoutConfig.value.push({ x: pos.x, y: pos.y, w: 6, h: 8, i: '5', type: 'markdown', minW: 6, minH: 4 })
+        }
+      }
+      return
+    }
+    if (type === 'todo') {
+      if (!layoutConfig.value.some(item => item.type === 'todo')) {
+        if (cached) {
+          layoutConfig.value.push({ ...cached })
+          _removedCache.delete('todo')
+        } else {
+          const pos = _findBestPosition(4, 6)
+          layoutConfig.value.push({ x: pos.x, y: pos.y, w: 4, h: 6, i: '3', type: 'todo', minW: 3, minH: 4 })
+        }
+      }
+      return
+    }
+    const def = MINI_LAYOUT_MAP[type]
+    if (!def) return
+    if (layoutConfig.value.some(item => item.i === def.i)) return
+    if (cached) {
+      layoutConfig.value.push({ ...cached })
+      _removedCache.delete(type)
+    } else {
+      const pos = _findBestPosition(def.w, def.h)
+      layoutConfig.value.push({ ...def, x: pos.x, y: pos.y })
+    }
+  }
+
+  function _removeMiniFromLayout(type) {
+    if (type === 'inbox') {
+      const idx = layoutConfig.value.findIndex(item => item.type === 'messages')
+      if (idx !== -1) {
+        _removedCache.set('inbox', { ...layoutConfig.value[idx] })
+        layoutConfig.value.splice(idx, 1)
+      }
+      return
+    }
+    if (type === 'note') {
+      const idx = layoutConfig.value.findIndex(item => item.type === 'markdown')
+      if (idx !== -1) {
+        _removedCache.set('note', { ...layoutConfig.value[idx] })
+        layoutConfig.value.splice(idx, 1)
+      }
+      return
+    }
+    if (type === 'todo') {
+      const idx = layoutConfig.value.findIndex(item => item.type === 'todo')
+      if (idx !== -1) {
+        _removedCache.set('todo', { ...layoutConfig.value[idx] })
+        layoutConfig.value.splice(idx, 1)
+      }
+      return
+    }
+    const def = MINI_LAYOUT_MAP[type]
+    if (!def) return
+    const idx = layoutConfig.value.findIndex(item => item.i === def.i)
+    if (idx !== -1) {
+      _removedCache.set(type, { ...layoutConfig.value[idx] })
+      layoutConfig.value.splice(idx, 1)
+    }
   }
 
   return {
     activityLog,
-    heatmapData,
+    todayHourly,
+    weeklyHeatmap,
+    monthlyHeatmap,
     recordActivity,
     
     todos,
@@ -315,7 +572,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
     loadTodosFromBackend,
 
     layoutConfig,
+    customLayoutPresets,
     saveLayout,
-    resetLayout
+    autoArrangeLayout,
+    saveCurrentLayoutAsPreset,
+    resetLayout,
+
+    miniWidgets,
+    isMiniWidgetActive,
+    toggleMiniWidget,
   }
 })

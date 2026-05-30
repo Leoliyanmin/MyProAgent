@@ -11,16 +11,21 @@
       :app-mode="appMode"
       @setAppMode="setAppMode"
       @update:currentView="currentView = $event"
+      @toggleAgent="toggleAgent"
     />
 
     <div class="macos-main-column">
-      <TopBar
-        v-if="appMode !== 'settings'"
-        :current-view="currentView"
-        :is-agent-open="isAgentOpen"
-        @update:currentView="currentView = $event"
-        @toggleAgent="toggleAgent"
-      />
+      <header v-if="appMode !== 'settings'" class="macos-topbar macos-mini-bar">
+        <div class="mini-bar-spacer"></div>
+        <button
+          class="mini-bar-agent-btn"
+          :class="{ 'is-active': isAgentOpen }"
+          @click="toggleAgent"
+          title="切换 Agent 助手"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M15 3v18"/></svg>
+        </button>
+      </header>
 
       <main class="macos-content-area">
         <router-view v-slot="{ Component }">
@@ -42,6 +47,11 @@
       v-if="appMode === 'theme'"
       @exit="setAppMode('main')"
     />
+
+    <ThemeOverlayEditor
+      v-if="appMode === 'theme'"
+      @exit="setAppMode('main')"
+    />
   </div>
 </template>
 
@@ -52,7 +62,6 @@ import { useAuthStore } from './stores/auth.js'
 import { useCalendarStore } from './stores/calendar.js'
 import { useDashboardStore } from './stores/dashboard.js'
 import SidebarLeft from './components/layout/SidebarLeft.vue'
-import TopBar from './components/layout/TopBar.vue'
 import AgentSidebar from './components/layout/AgentSidebar.vue'
 import ThemeOverlayEditor from './components/layout/ThemeOverlayEditor.vue'
 import { useThemeStore } from './stores/theme.js'
@@ -225,10 +234,55 @@ html, body, #app {
 
 /* 中部核心区：垂直 Flexbox */
 .macos-main-column {
-  flex: 1; /* 占据除左右侧边栏外的所有剩余空间 */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* 关键：防止内部 Grid/Flex 子元素撑破容器宽度 */
+  min-width: 0;
+}
+
+/* 窄顶栏 — 仅用于 Agent 切换按钮 */
+.macos-mini-bar {
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 12px;
+  background-color: var(--clr-bg-topbar, rgba(235, 235, 235, 0.65));
+  background-image: var(--clr-bg-topbar-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mini-bar-spacer {
+  flex: 1;
+}
+
+.mini-bar-agent-btn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.mini-bar-agent-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #1d1d1f;
+}
+
+.mini-bar-agent-btn.is-active {
+  background: rgba(0, 0, 0, 0.08);
+  color: #1d1d1f;
 }
 
 /* 动态内容注入区：自适应高度并允许内部滚动 */
@@ -248,7 +302,7 @@ html, body, #app {
 /* ── Theme Editing Mode ── */
 /* Hide all content inside layout zones, keeping only their backgrounds visible */
 .theme-editing-mode .left-sidebar > *,
-.theme-editing-mode .macos-topbar > *,
+.theme-editing-mode .macos-mini-bar > *,
 .theme-editing-mode .right-sidebar > * {
   visibility: hidden;
 }

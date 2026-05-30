@@ -62,23 +62,42 @@
             </div>
           </div>
 
-          <!-- 活跃时间热力图 -->
-          <div class="info-section" v-if="activeHours.length">
-            <span class="info-label">活跃时段</span>
-            <div class="heatmap-grid">
-              <div
-                v-for="h in 24" :key="h"
-                class="heatmap-cell"
-                :class="{ active: activeHours.includes(h - 1) }"
-                :title="`${h - 1}:00 - ${h}:00`"
-              >{{ h - 1 }}</div>
+          <!-- 活跃热力 -->
+          <div class="info-section">
+            <div class="heatmap-tabs">
+              <button class="hm-tab" :class="{ active: heatmapView === 'today' }" @click="heatmapView = 'today'">今日</button>
+              <button class="hm-tab" :class="{ active: heatmapView === 'week' }" @click="heatmapView = 'week'">本周</button>
+              <button class="hm-tab" :class="{ active: heatmapView === 'month' }" @click="heatmapView = 'month'">本月</button>
             </div>
-            <div class="heatmap-legend">
-              <span class="legend-label">0</span>
-              <span class="legend-label">6</span>
-              <span class="legend-label">12</span>
-              <span class="legend-label">18</span>
-              <span class="legend-label">23</span>
+            <div v-if="heatmapView === 'today'" class="hourly-bars-compact">
+              <div
+                v-for="(count, h) in dashboardStore.todayHourly"
+                :key="h"
+                class="hourly-bar-compact"
+                :class="hourlyBarClass(count)"
+                :style="{ height: hourlyBarPct(count) + '%' }"
+                :title="`${h}:00 ${count} 次`"
+              ></div>
+            </div>
+            <div v-if="heatmapView === 'week'" class="week-heat-grid">
+              <div
+                v-for="day in dashboardStore.weeklyHeatmap"
+                :key="day.date"
+                class="week-heat-cell"
+                :class="weekCellClass(day.total)"
+                :title="`${day.short} ${day.dayLabel}: ${day.total} 次`"
+              >
+                <span class="week-cell-day">{{ day.dayLabel }}</span>
+              </div>
+            </div>
+            <div v-if="heatmapView === 'month'" class="month-heat-grid">
+              <div
+                v-for="day in dashboardStore.monthlyHeatmap"
+                :key="day.date"
+                class="month-heat-cell"
+                :class="monthCellClass(day.total)"
+                :title="`${day.short}: ${day.total} 次`"
+              ></div>
             </div>
           </div>
         </template>
@@ -147,6 +166,7 @@
 <script setup>
 import { computed, ref, reactive, onMounted, onActivated, onUnmounted } from 'vue'
 import { profileAPI } from '../services/api.js'
+import { useDashboardStore } from '../stores/dashboard.js'
 
 // AI analysis state
 const loading = reactive({ ai: false })
@@ -163,6 +183,32 @@ const behaviorPattern = ref('')
 const interactions = ref([])
 const activeHours = ref([])
 const personalityIndicators = ref({})
+const dashboardStore = useDashboardStore()
+const heatmapView = ref('today')
+
+const maxHourly = computed(() => Math.max(1, ...dashboardStore.todayHourly))
+const hourlyBarPct = (count) => Math.max(count > 0 ? 6 : 2, (count / maxHourly.value) * 100)
+const hourlyBarClass = (count) => count > 0 ? 'active' : ''
+
+const maxWeekly = computed(() => Math.max(1, ...dashboardStore.weeklyHeatmap.map(d => d.total)))
+const weekCellClass = (total) => {
+  if (total === 0) return 'l0'
+  const pct = total / maxWeekly.value
+  if (pct <= 0.25) return 'l1'
+  if (pct <= 0.5) return 'l2'
+  if (pct <= 0.75) return 'l3'
+  return 'l4'
+}
+
+const maxMonthly = computed(() => Math.max(1, ...dashboardStore.monthlyHeatmap.map(d => d.total)))
+const monthCellClass = (total) => {
+  if (total === 0) return 'l0'
+  const pct = total / maxMonthly.value
+  if (pct <= 0.25) return 'l1'
+  if (pct <= 0.5) return 'l2'
+  if (pct <= 0.75) return 'l3'
+  return 'l4'
+}
 
 const dimensionPairs = computed(() => {
   const s = mbtiScores.value
@@ -658,39 +704,30 @@ onActivated(() => {
   flex-shrink: 0;
 }
 
-/* 活跃时间热力图 */
-.heatmap-grid {
-  display: grid;
-  grid-template-columns: repeat(24, 1fr);
-  gap: 2px;
-}
+/* 热力 tab 切换 */
+.heatmap-tabs { display: flex; gap: 2px; background: rgba(0,0,0,0.04); padding: 3px; border-radius: 7px; margin-bottom: 8px; }
+.hm-tab { flex: 1; border: none; border-radius: 5px; padding: 4px 0; font-size: 11px; cursor: pointer; background: transparent; color: rgba(0,0,0,0.4); font-weight: 500; transition: all 0.15s; }
+.hm-tab:hover { color: rgba(0,0,0,0.6); }
+.hm-tab.active { background: #fff; color: #1d1d1f; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 
-.heatmap-cell {
-  aspect-ratio: 1;
-  border-radius: 3px;
-  background: #f3f4f6;
-  font-size: 8px;
-  color: #9ca3af;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
+/* 今日每小时柱状图 */
+.hourly-bars-compact { display: flex; align-items: flex-end; gap: 1px; height: 40px; margin-top: 4px; }
+.hourly-bar-compact { flex: 1; border-radius: 2px 2px 0 0; background: rgba(0,0,0,0.04); transition: height 0.3s; min-width: 0; }
+.hourly-bar-compact.active { background: #30a14e; }
 
-.heatmap-cell.active {
-  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-  color: #fff;
-  font-weight: 600;
-}
+/* 周热力 */
+.week-heat-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 4px; }
+.week-heat-cell { aspect-ratio: 1; border-radius: 6px; background: rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(0,0,0,0.3); }
+.week-heat-cell.l1 { background: #9be9a8; color: rgba(0,0,0,0.4); }
+.week-heat-cell.l2 { background: #40c463; color: rgba(255,255,255,0.7); }
+.week-heat-cell.l3 { background: #30a14e; color: #fff; }
+.week-heat-cell.l4 { background: #216e39; color: #fff; }
 
-.heatmap-legend {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
-}
-
-.legend-label {
-  font-size: 10px;
-  color: #9ca3af;
-}
+/* 月热力 */
+.month-heat-grid { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 4px; }
+.month-heat-cell { width: 14px; height: 14px; border-radius: 2px; background: rgba(0,0,0,0.04); }
+.month-heat-cell.l1 { background: #9be9a8; }
+.month-heat-cell.l2 { background: #40c463; }
+.month-heat-cell.l3 { background: #30a14e; }
+.month-heat-cell.l4 { background: #216e39; }
 </style>

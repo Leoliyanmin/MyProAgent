@@ -167,7 +167,7 @@ const fileInput = ref(null)
 
 const layoutMetrics = ref({
   sidebarWidth: 240,
-  topbarHeight: 52,
+  topbarHeight: 36,
   agentWidth: 300
 })
 
@@ -352,7 +352,7 @@ const updateLayoutMetrics = () => {
   const agentEl = document.querySelector('.right-sidebar')
 
   const sidebarWidth = Math.round(sidebarEl?.getBoundingClientRect().width ?? 240)
-  const topbarHeight = Math.round(topbarEl?.getBoundingClientRect().height ?? 52)
+  const topbarHeight = Math.round(topbarEl?.getBoundingClientRect().height ?? 36)
   const agentWidthRaw = Math.round(agentEl?.getBoundingClientRect().width ?? 0)
 
   layoutMetrics.value = {

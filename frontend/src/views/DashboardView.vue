@@ -2,19 +2,29 @@
   <div class="dashboard-engine">
     <div class="dashboard-toolbar">
       <h2 class="view-title">工作台概览</h2>
-      <button class="mac-btn-primary" :class="{ 'is-active': isEditing }" @click="toggleEditMode">
-        {{ isEditing ? '保存布局配置' : '自定义布局' }}
-      </button>
+      <div class="toolbar-actions">
+        <button class="mac-btn-secondary" @click="autoArrangeDashboard">
+          自动整理
+        </button>
+        <button v-if="isEditing" class="mac-btn-secondary" @click="saveLayoutPreset">
+          保存为模板
+        </button>
+        <button class="mac-btn-primary" :class="{ 'is-active': isEditing }" @click="toggleEditMode">
+          {{ isEditing ? '保存布局配置' : '自定义布局' }}
+        </button>
+      </div>
     </div>
 
     <div class="grid-wrapper">
       <grid-layout v-model:layout="layoutConfig" :col-num="12" :row-height="50" :is-draggable="isEditing"
         :is-resizable="isEditing" :vertical-compact="true" :margin="[16, 16]" :use-css-transforms="true">
         <grid-item v-for="item in layoutConfig" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-          :i="item.i" :min-w="item.minW" :min-h="item.minH" class="mac-panel grid-item"
-          :class="{ 'editing-mode': isEditing }">
+          :i="item.i" :min-w="item.minW" :min-h="item.minH" :max-w="item.maxW" :max-h="item.maxH"
+          class="mac-panel grid-item"
+          :class="{ 'editing-mode': isEditing, 'heatmap-grid-item': item.type === 'heatmap' }"
+          @resized="onItemResized">
           <div class="widget-content">
-            <component :is="getComponentByType(item.type)" />
+            <component :is="getComponentByType(item.type)" v-bind="getWidgetProps(item)" />
           </div>
 
           <div v-if="isEditing" class="drag-overlay">
@@ -29,21 +39,32 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import VueGridLayout from 'vue3-grid-layout'
-import { useDashboardStore } from '../stores/dashboard'
+import { getHeatmapLayoutPreset, useDashboardStore } from '../stores/dashboard'
 
 const { GridLayout, GridItem } = VueGridLayout
 
 import WidgetTodo from '../components/widgets/WidgetTodo.vue'
 import WidgetMessages from '../components/widgets/WidgetMessages.vue'
 import WidgetMarkdownEditor from '../components/widgets/WidgetMarkdownEditor.vue'
+import ComposeMini from '../components/mini/ComposeMini.vue'
+import WidgetHeatmap from '../components/widgets/WidgetHeatmap.vue'
+import AgentMini from '../components/mini/AgentMini.vue'
 
 const componentMap = {
   'todo': WidgetTodo,
   'messages': WidgetMessages,
-  'markdown': WidgetMarkdownEditor
+  'markdown': WidgetMarkdownEditor,
+  'compose-mini': ComposeMini,
+  'heatmap': WidgetHeatmap,
+  'agent-mini': AgentMini
 }
 
 const getComponentByType = (type) => componentMap[type]
+
+const getWidgetProps = (item) => {
+  if (item.type !== 'heatmap') return {}
+  return { heatmapVariant: item.heatmapVariant || 'wide' }
+}
 
 const dashboardStore = useDashboardStore()
 const layoutConfig = dashboardStore.layoutConfig
@@ -52,20 +73,57 @@ const isEditing = ref(false)
 const toggleEditMode = () => {
   isEditing.value = !isEditing.value
   if (!isEditing.value) {
+    snapHeatmapLayouts()
     dashboardStore.saveLayout()
   }
+}
+
+const autoArrangeDashboard = () => {
+  snapHeatmapLayouts()
+  dashboardStore.autoArrangeLayout()
+}
+
+const saveLayoutPreset = () => {
+  snapHeatmapLayouts()
+  dashboardStore.saveCurrentLayoutAsPreset()
+}
+
+const applyHeatmapPreset = (item, width = item.w, height = item.h) => {
+  if (!item || item.type !== 'heatmap') return
+
+  const preset = getHeatmapLayoutPreset(Number(width) || item.w, Number(height) || item.h)
+  item.w = preset.w
+  item.h = preset.h
+  item.minW = 2
+  item.minH = 1
+  item.maxW = 12
+  item.maxH = 2
+  item.heatmapVariant = preset.name
+}
+
+const snapHeatmapLayouts = () => {
+  layoutConfig.forEach(item => applyHeatmapPreset(item))
+}
+
+const onItemResized = (itemId, newHeight, newWidth) => {
+  const item = layoutConfig.find(entry => entry.i === itemId)
+  if (!item || item.type !== 'heatmap') return
+
+  applyHeatmapPreset(item, newWidth, newHeight)
+  dashboardStore.saveLayout()
 }
 
 // Ensure markdown widget is present in layout (Pinia auto-unwraps refs)
 onMounted(() => {
   const cfg = dashboardStore.layoutConfig
+  snapHeatmapLayouts()
   const hasMarkdown = cfg.some(item => item.type === 'markdown')
   if (!hasMarkdown) {
     cfg.push({
       x: 0, y: 5, w: 12, h: 8, i: '5', type: 'markdown', minW: 6, minH: 4
     })
-    dashboardStore.saveLayout()
   }
+  dashboardStore.saveLayout()
 })
 </script>
 
@@ -83,6 +141,12 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 16px;
   padding: 0 4px;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 
@@ -104,6 +168,24 @@ onMounted(() => {
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
+}
+
+.mac-btn-secondary {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s;
+}
+
+.mac-btn-secondary:hover {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 .mac-btn-primary.is-active {
@@ -135,6 +217,11 @@ onMounted(() => {
 .widget-content {
   width: 100%;
   height: 100%;
+}
+
+.heatmap-grid-item,
+.heatmap-grid-item .widget-content {
+  overflow: visible;
 }
 
 /* 编辑模式视觉增强 */
@@ -215,4 +302,3 @@ onMounted(() => {
   box-shadow: none !important; 
 }
 </style>
-
