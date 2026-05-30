@@ -171,7 +171,14 @@ async def get_bb_assignments(user_id: str = Depends(get_current_user_id)):
 
     assignment_events = list_events_by_user(user_id, event_type="assignment", event_source="blackboard")
     if not assignment_events:
-        raise HTTPException(status_code=404, detail='已绑定但暂无作业数据，请同步后查看')
+        return {
+            'success': True,
+            'events': [],
+            'todos': [],
+            'total_courses': 0,
+            'total_events': 0,
+            'total_todos': 0,
+        }
 
     today = datetime.now().strftime('%Y-%m-%d')
     events = []
