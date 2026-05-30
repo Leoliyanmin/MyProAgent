@@ -159,4 +159,37 @@ describe('dashboard store', () => {
       expect(newSize).toBeGreaterThanOrEqual(initialSize)
     })
   })
+
+  describe('autoArrangeLayout', () => {
+    it('keeps the layout array reference so grid bindings update', () => {
+      const dashboard = useDashboardStore()
+      const originalLayout = dashboard.layoutConfig
+
+      dashboard.layoutConfig.push(
+        { x: 10, y: 8, w: 3, h: 1, i: 'mini-heatmap', type: 'heatmap', minW: 2, minH: 1, maxW: 4, maxH: 2 }
+      )
+
+      dashboard.autoArrangeLayout()
+
+      expect(dashboard.layoutConfig).toBe(originalLayout)
+      expect(dashboard.layoutConfig.some(item => item.i === 'mini-heatmap')).toBe(true)
+    })
+
+    it('uses a saved work mode template for the same widget combination', () => {
+      const dashboard = useDashboardStore()
+      dashboard.layoutConfig.splice(0, dashboard.layoutConfig.length,
+        { x: 8, y: 8, w: 4, h: 6, i: 'todo', type: 'todo', minW: 3, minH: 4 },
+        { x: 0, y: 8, w: 5, h: 6, i: 'messages', type: 'messages', minW: 4, minH: 4 }
+      )
+
+      dashboard.saveCurrentLayoutAsPreset()
+      dashboard.layoutConfig[0].x = 0
+      dashboard.layoutConfig[1].x = 7
+
+      dashboard.autoArrangeLayout()
+
+      expect(dashboard.layoutConfig.find(item => item.type === 'todo').x).toBe(8)
+      expect(dashboard.layoutConfig.find(item => item.type === 'messages').x).toBe(0)
+    })
+  })
 })
