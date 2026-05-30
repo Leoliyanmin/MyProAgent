@@ -43,17 +43,18 @@
 
           <div class="info-section">
             <span class="info-label">工作偏好</span>
-            <div class="preference-text">{{ workPreference || '暂无数据' }}</div>
+            <div class="preference-text">{{ displayWorkPreference || '暂无数据' }}</div>
+            <div v-if="behaviorProfileStore.hasBehaviorData" class="profile-source-hint">基于最近 30 天使用行为生成</div>
           </div>
 
           <div class="info-section">
             <span class="info-label">行为模式</span>
-            <div class="preference-text">{{ behaviorPattern || '暂无数据' }}</div>
+            <div class="preference-text">{{ displayBehaviorPattern || '暂无数据' }}</div>
           </div>
 
-          <div class="info-section" v-if="Object.keys(personalityIndicators).length">
-            <span class="info-label">个性指标</span>
-            <div class="indicator-row" v-for="(val, key) in personalityIndicators" :key="key">
+          <div class="info-section" v-if="Object.keys(displayPersonalityIndicators).length">
+            <span class="info-label">{{ behaviorProfileStore.hasBehaviorData ? '使用倾向' : '个性指标' }}</span>
+            <div class="indicator-row" v-for="(val, key) in displayPersonalityIndicators" :key="key">
               <span class="indicator-name">{{ indicatorLabel(key) }}</span>
               <div class="indicator-track">
                 <div class="indicator-fill" :style="{ width: (val * 100) + '%' }"></div>
@@ -76,7 +77,10 @@
                 class="hourly-bar-compact"
                 :class="hourlyBarClass(count)"
                 :style="{ height: hourlyBarPct(count) + '%' }"
-                :title="`${h}:00 ${count} 次`"
+                :aria-label="hourlyTooltipText(h, count)"
+                @mouseenter="showHeatmapTooltip($event, hourlyTooltipText(h, count))"
+                @mousemove="moveHeatmapTooltip($event)"
+                @mouseleave="hideHeatmapTooltip"
               ></div>
             </div>
             <div v-if="heatmapView === 'week'" class="week-heat-grid">
@@ -85,7 +89,10 @@
                 :key="day.date"
                 class="week-heat-cell"
                 :class="weekCellClass(day.total)"
-                :title="`${day.short} ${day.dayLabel}: ${day.total} 次`"
+                :aria-label="dayTooltipText(day)"
+                @mouseenter="showHeatmapTooltip($event, dayTooltipText(day))"
+                @mousemove="moveHeatmapTooltip($event)"
+                @mouseleave="hideHeatmapTooltip"
               >
                 <span class="week-cell-day">{{ day.dayLabel }}</span>
               </div>
@@ -96,8 +103,14 @@
                 :key="day.date"
                 class="month-heat-cell"
                 :class="monthCellClass(day.total)"
-                :title="`${day.short}: ${day.total} 次`"
+                :aria-label="dayTooltipText(day)"
+                @mouseenter="showHeatmapTooltip($event, dayTooltipText(day))"
+                @mousemove="moveHeatmapTooltip($event)"
+                @mouseleave="hideHeatmapTooltip"
               ></div>
+            </div>
+            <div v-if="heatmapTooltip.visible" class="profile-heatmap-tooltip" :style="heatmapTooltipStyle">
+              {{ heatmapTooltip.text }}
             </div>
           </div>
         </template>
@@ -166,6 +179,7 @@
 <script setup>
 import { computed, ref, reactive, onMounted, onActivated, onUnmounted } from 'vue'
 import { profileAPI } from '../services/api.js'
+import { useBehaviorProfileStore } from '../stores/behaviorProfile.js'
 import { useDashboardStore } from '../stores/dashboard.js'
 
 // AI analysis state
@@ -184,11 +198,65 @@ const interactions = ref([])
 const activeHours = ref([])
 const personalityIndicators = ref({})
 const dashboardStore = useDashboardStore()
+const behaviorProfileStore = useBehaviorProfileStore()
 const heatmapView = ref('today')
+const heatmapTooltip = reactive({ visible: false, text: '', x: 0, y: 0 })
+
+const displayWorkPreference = computed(() => {
+  if (behaviorProfileStore.hasBehaviorData) {
+    return behaviorProfileStore.profile.workPreferenceText
+  }
+  return workPreference.value
+})
+
+const displayBehaviorPattern = computed(() => {
+  if (behaviorProfileStore.hasBehaviorData) {
+    return behaviorProfileStore.profile.behaviorPatternText
+  }
+  return behaviorPattern.value
+})
+
+const displayPersonalityIndicators = computed(() => {
+  if (behaviorProfileStore.hasBehaviorData) {
+    return behaviorProfileStore.profile.indicators
+  }
+  return personalityIndicators.value
+})
 
 const maxHourly = computed(() => Math.max(1, ...dashboardStore.todayHourly))
 const hourlyBarPct = (count) => Math.max(count > 0 ? 6 : 2, (count / maxHourly.value) * 100)
 const hourlyBarClass = (count) => count > 0 ? 'active' : ''
+const formatHour = (hour) => `${String(hour).padStart(2, '0')}:00`
+const hourlyTooltipText = (hour, count) => `${formatHour(hour)}-${formatHour((hour + 1) % 24)} · ${count} 次活动`
+const dayTooltipText = (day) => `${day.short || day.date} · ${day.total} 次活动`
+const heatmapTooltipStyle = computed(() => ({
+  left: `${heatmapTooltip.x}px`,
+  top: `${heatmapTooltip.y}px`
+}))
+
+const placeHeatmapTooltip = (event) => {
+  const sectionRect = event.currentTarget.closest('.info-section')?.getBoundingClientRect()
+  if (!sectionRect) return
+  const relativeX = event.clientX - sectionRect.left
+  const relativeY = event.clientY - sectionRect.top
+  heatmapTooltip.x = Math.min(Math.max(relativeX, 76), Math.max(76, sectionRect.width - 76))
+  heatmapTooltip.y = Math.max(30, relativeY - 8)
+}
+
+const showHeatmapTooltip = (event, text) => {
+  heatmapTooltip.text = text
+  heatmapTooltip.visible = true
+  placeHeatmapTooltip(event)
+}
+
+const moveHeatmapTooltip = (event) => {
+  if (!heatmapTooltip.visible) return
+  placeHeatmapTooltip(event)
+}
+
+const hideHeatmapTooltip = () => {
+  heatmapTooltip.visible = false
+}
 
 const maxWeekly = computed(() => Math.max(1, ...dashboardStore.weeklyHeatmap.map(d => d.total)))
 const weekCellClass = (total) => {
@@ -325,6 +393,10 @@ function indicatorLabel(key) {
     detail_oriented: '注重细节',
     proactive: '积极主动',
     collaborative: '协作倾向',
+    visual_sensitive: '视觉反馈',
+    organization_driven: '组织驱动',
+    automation_preference: '自动化倾向',
+    iterative: '迭代优化',
   }
   return labels[key] || key
 }
@@ -442,6 +514,7 @@ onActivated(() => {
 }
 
 .info-section {
+  position: relative;
   margin-bottom: 16px;
 }
 
@@ -477,6 +550,12 @@ onActivated(() => {
   font-size: 13px;
   color: #374151;
   line-height: 1.5;
+}
+
+.profile-source-hint {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #8e8e93;
 }
 
 .mbti-desc {
@@ -712,12 +791,14 @@ onActivated(() => {
 
 /* 今日每小时柱状图 */
 .hourly-bars-compact { display: flex; align-items: flex-end; gap: 1px; height: 40px; margin-top: 4px; }
-.hourly-bar-compact { flex: 1; border-radius: 2px 2px 0 0; background: rgba(0,0,0,0.04); transition: height 0.3s; min-width: 0; }
+.hourly-bar-compact { flex: 1; border-radius: 2px 2px 0 0; background: rgba(0,0,0,0.04); transition: height 0.3s, box-shadow 0.12s ease, transform 0.12s ease; min-width: 0; cursor: default; }
 .hourly-bar-compact.active { background: #30a14e; }
+.hourly-bar-compact:hover { box-shadow: 0 0 0 2px rgba(31, 35, 40, 0.12); transform: scaleY(1.04); }
 
 /* 周热力 */
 .week-heat-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 4px; }
-.week-heat-cell { aspect-ratio: 1; border-radius: 6px; background: rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(0,0,0,0.3); }
+.week-heat-cell { aspect-ratio: 1; border-radius: 6px; background: rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(0,0,0,0.3); cursor: default; transition: box-shadow 0.12s ease, transform 0.12s ease; }
+.week-heat-cell:hover { box-shadow: 0 0 0 2px rgba(31, 35, 40, 0.12); transform: scale(1.02); }
 .week-heat-cell.l1 { background: #9be9a8; color: rgba(0,0,0,0.4); }
 .week-heat-cell.l2 { background: #40c463; color: rgba(255,255,255,0.7); }
 .week-heat-cell.l3 { background: #30a14e; color: #fff; }
@@ -725,9 +806,26 @@ onActivated(() => {
 
 /* 月热力 */
 .month-heat-grid { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 4px; }
-.month-heat-cell { width: 14px; height: 14px; border-radius: 2px; background: rgba(0,0,0,0.04); }
+.month-heat-cell { width: 14px; height: 14px; border-radius: 2px; background: rgba(0,0,0,0.04); cursor: default; transition: box-shadow 0.12s ease, transform 0.12s ease; }
+.month-heat-cell:hover { box-shadow: 0 0 0 2px rgba(31, 35, 40, 0.12); transform: scale(1.05); }
 .month-heat-cell.l1 { background: #9be9a8; }
 .month-heat-cell.l2 { background: #40c463; }
 .month-heat-cell.l3 { background: #30a14e; }
 .month-heat-cell.l4 { background: #216e39; }
+
+.profile-heatmap-tooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  max-width: min(180px, calc(100% - 12px));
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: rgba(31, 35, 40, 0.92);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.25;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 8;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+}
 </style>
