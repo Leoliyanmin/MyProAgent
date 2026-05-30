@@ -2,112 +2,140 @@
   <div class="widget-panel">
     <div class="widget-header">
       <span class="widget-title">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M15 3v18"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg>
         Agent
       </span>
       <div class="header-right">
-        <button class="new-chat-btn" @click="chatStore.createNewChat" title="新对话">+</button>
-        <button class="widget-close" @click="close" title="关闭">✕</button>
+        <button class="header-btn" type="button" title="收回到侧边栏" @click="retractToSidebar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="header-btn" type="button" title="新对话" @click="chat.createNewChat(isTempMode)">+</button>
+        <button class="header-btn close-btn" type="button" title="关闭" @click="close">×</button>
       </div>
     </div>
 
-    <!-- Chat list -->
     <div class="chat-list-bar" @click="showChats = !showChats">
       <span class="chat-title">{{ currentChatTitle }}</span>
       <svg class="arrow" :class="{ open: showChats }" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
     <div v-if="showChats" class="chat-list-drop">
       <div
-        v-for="chat in chatStore.chatList"
-        :key="chat.id"
+        v-for="c in chat.chatList"
+        :key="c.id"
         class="chat-item"
-        :class="{ active: chat.id === chatStore.currentChatId }"
-        @click="switchToChat(chat.id)"
+        :class="{ active: c.id === chat.currentChatId }"
+        @click="switchToChat(c.id)"
       >
-        <span class="chat-name">{{ chat.title }}</span>
-        <button class="del-btn" @click.stop="chatStore.deleteChat(chat.id)">×</button>
+        <span class="chat-name">{{ c.title }}</span>
+        <span v-if="c.isTemporary" class="temp-tag">临时</span>
+        <button class="del-btn" type="button" @click.stop="chat.deleteChat(c.id)">×</button>
       </div>
     </div>
 
-    <!-- Messages -->
     <div class="chat-body" ref="msgContainer">
-      <div v-if="chatStore.messages.length === 0 && !sending" class="placeholder">
-        输入消息开始对话...
+      <div v-if="chat.safeMessages.length === 0 && !chat.isThinking" class="placeholder">输入消息开始对话...</div>
+      <div v-for="(msg, idx) in chat.safeMessages" :key="idx" class="msg" :class="msg.role">
+        <div v-for="(segment, si) in chat.parseMessage(msg.text)" :key="si">
+          <div v-if="segment.type === 'text'" class="msg-text markdown-body" v-html="chat.renderMarkdown(segment.content)"></div>
+          <ThemeSuggestionWidget
+            v-else-if="segment.type === 'theme-suggestion'"
+            :tokens="segment.tokens"
+            :initially-dismissed="chat.isThemeDismissed(chat.currentChatId, idx)"
+            @accept="chat.applyThemeSuggestion(segment.tokens); chat.markThemeDismissed(chat.currentChatId, idx)"
+            @dismiss="chat.markThemeDismissed(chat.currentChatId, idx)"
+          />
+          <DeleteConfirmWidget
+            v-else-if="segment.type === 'delete-confirm'"
+            :files="segment.files"
+            :working-directory="chat.fmStore.workingDirectory"
+            @confirm="chat.onDeleteConfirmed(idx, segment.files)"
+            @dismiss="chat.onDeleteDismissed(idx)"
+          />
+        </div>
       </div>
-      <div v-for="(msg, idx) in chatStore.messages" :key="idx" class="msg" :class="msg.role">
-        <div class="msg-text" v-html="renderMd(msg.text)"></div>
-      </div>
-      <div v-if="sending" class="msg assistant">
-        <div class="thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div v-if="chat.isThinking" class="thinking-indicator">
+        <span class="thinking-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+        <span class="thinking-text">{{ chat.currentToolLabel || 'Agent 正在思考' }}</span>
       </div>
     </div>
 
-    <!-- Input + model selector -->
     <div class="chat-input-row">
-      <div class="model-pick" @click.stop="toggleModels">
-        <span class="model-label">{{ modelLabel }}</span>
+      <div class="model-pick" ref="modelRef" @click.stop="toggleModels">
+        <span class="model-label" :title="chat.currentModelLabel">{{ compactModelLabel }}</span>
         <div v-if="showModels" class="model-drop">
+          <div v-if="chat.activeModels.length === 0" class="model-empty">暂无可用模型</div>
           <div
-            v-for="m in models"
-            :key="m.provider"
+            v-for="m in chat.activeModels"
+            :key="`${m.provider}:${m.model}`"
             class="model-item"
-            :class="{ active: currentProvider === m.provider }"
+            :class="{ active: chat.currentProvider === m.provider && chat.currentModel === m.model }"
             @click.stop="switchModel(m)"
           >{{ m.provider }}/{{ m.model }}</div>
         </div>
       </div>
-      <textarea
-        v-model="input"
-        class="chat-input"
-        placeholder="输入..."
-        rows="1"
-        @keydown.enter.exact="handleSend"
-        :disabled="sending"
-      ></textarea>
-      <button class="send-btn" @click="handleSend" :disabled="sending || !input.trim()">
-        {{ sending ? '...' : '↑' }}
-      </button>
+      <div class="input-wrapper">
+        <textarea
+          v-model="chat.inputText"
+          class="chat-input"
+          rows="2"
+          :disabled="chat.isSending"
+          @keydown.enter.exact="onEnterKey"
+          @compositionstart="chat.onCompositionStart"
+          @compositionend="chat.onCompositionEnd"
+        ></textarea>
+      </div>
+      <div class="send-area">
+        <label class="temp-toggle" title="临时对话（7 天后自动清理）">
+          <input v-model="isTempMode" type="checkbox" />
+          <span class="temp-label">临时</span>
+        </label>
+        <button v-if="!chat.isSending && !chat.isThinking" class="send-btn" type="button" :disabled="!chat.inputText.trim()" @click="chat.sendMessage">↑</button>
+        <button v-else class="stop-btn" type="button" @click="chat.stopGenerating">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, nextTick, onMounted } from 'vue'
-import { useAgentChatStore } from '../../stores/agentChat.js'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { useAgentChat } from '../../composables/useAgentChat.js'
 import { useDashboardStore } from '../../stores/dashboard.js'
-import { agentAPI } from '../../services/api.js'
-import { marked } from 'marked'
+import ThemeSuggestionWidget from '../agent/ThemeSuggestionWidget.vue'
+import DeleteConfirmWidget from '../agent/DeleteConfirmWidget.vue'
 
-const chatStore = useAgentChatStore()
 const dashboardStore = useDashboardStore()
-const close = () => dashboardStore.toggleMiniWidget('agent')
+const chat = useAgentChat('dashboard-agent')
 
-const renderMd = (text) => {
-  if (!text) return ''
-  try { return marked.parse(text) } catch { return text }
-}
-
-const input = ref('')
-const sending = ref(false)
-const msgContainer = ref(null)
 const showChats = ref(false)
-const models = ref([])
-const currentProvider = ref('')
-const currentModel = ref('')
 const showModels = ref(false)
+const modelRef = ref(null)
+const msgContainer = ref(null)
+const isTempMode = ref(false)
 
 const currentChatTitle = computed(() => {
-  const c = chatStore.chatList.find(c => c.id === chatStore.currentChatId)
+  const c = chat.chatList.find(item => item.id === chat.currentChatId)
   return c?.title || '对话'
 })
 
-const modelLabel = computed(() => {
-  if (currentProvider.value) return currentProvider.value.split('/').pop()
-  return '模型'
+const compactModelLabel = computed(() => {
+  if (!chat.currentModel || chat.activeModels.length === 0) return chat.currentModelLabel
+  const model = String(chat.currentModel)
+  const suffix = model.split('/').pop() || model
+  const parts = suffix.split('-').filter(Boolean)
+  if (parts.length >= 2) return parts.slice(-2).join('-')
+  return suffix.length > 12 ? `...${suffix.slice(-12)}` : suffix
 })
 
+const close = () => dashboardStore.toggleMiniWidget('agent')
+
+const retractToSidebar = () => {
+  window.dispatchEvent(new CustomEvent('agent-retract-to-sidebar'))
+}
+
 const switchToChat = (id) => {
-  chatStore.switchChat(id)
+  chat.switchChat(id)
   showChats.value = false
 }
 
@@ -117,101 +145,104 @@ const scrollDown = () => {
   })
 }
 
-const handleSend = async () => {
-  const text = input.value.trim()
-  if (!text || sending.value) return
-  input.value = ''
-  chatStore.addMessage({ role: 'user', text, done: true })
-  scrollDown()
-  sending.value = true
-  try {
-    const result = await agentAPI.chatLocal(text, 'default')
-    const reply = result?.response || '没有响应'
-    chatStore.addMessage({ role: 'assistant', text: reply, done: true })
-  } catch (e) {
-    chatStore.addMessage({ role: 'assistant', text: '发送失败: ' + (e?.message || '未知错误'), done: true })
-  } finally {
-    sending.value = false
-    scrollDown()
-  }
-}
-
 const toggleModels = async () => {
-  if (!showModels.value) {
-    try {
-      const res = await agentAPI.backend.getActiveModels()
-      models.value = res.models || []
-      const status = await agentAPI.backend.getStatus()
-      currentProvider.value = status.provider || ''
-      currentModel.value = status.model || ''
-    } catch { models.value = [] }
-  }
+  if (!showModels.value) await chat.loadActiveModels()
   showModels.value = !showModels.value
 }
 
-const switchModel = async (m) => {
+const switchModel = async (modelConfig) => {
   showModels.value = false
-  try {
-    await agentAPI.backend.updateConfig({ provider: m.provider, model: m.model, api_key: m.api_key, api_base: m.api_base })
-    currentProvider.value = m.provider
-    currentModel.value = m.model
-  } catch {}
+  await chat.switchModel(modelConfig)
 }
 
-onMounted(() => { scrollDown() })
+const onEnterKey = (event) => {
+  if (chat.isImeEnter(event)) return
+  event.preventDefault()
+  chat.sendMessage()
+}
+
+const handleClickOutside = (event) => {
+  if (modelRef.value && !modelRef.value.contains(event.target)) showModels.value = false
+}
+
+const handlePopToDashboard = () => {
+  chat.connectWebSocket()
+}
+
+chat.setScrollContainer(scrollDown)
+chat.init()
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+  window.addEventListener('agent-pop-to-dashboard', handlePopToDashboard)
+  scrollDown()
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('agent-pop-to-dashboard', handlePopToDashboard)
+  chat.cleanup()
+})
 </script>
 
 <style scoped>
 .widget-panel { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
-.widget-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid rgba(0,0,0,0.06); flex-shrink: 0; }
+.widget-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid rgba(0,0,0,.06); flex-shrink: 0; }
 .widget-title { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #1d1d1f; }
-.header-right { display: flex; align-items: center; gap: 4px; }
-.new-chat-btn { width: 22px; height: 22px; border: none; border-radius: 5px; background: transparent; cursor: pointer; font-size: 16px; color: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; line-height: 1; }
-.new-chat-btn:hover { background: rgba(0,0,0,0.06); color: #1d1d1f; }
-.widget-close { width: 22px; height: 22px; border: none; border-radius: 5px; background: transparent; cursor: pointer; font-size: 13px; color: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
-.widget-close:hover { background: rgba(0,0,0,0.06); color: #ff3b30; }
-
-/* chat list */
-.chat-list-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; font-size: 11px; color: rgba(0,0,0,0.4); cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.04); flex-shrink: 0; }
-.chat-list-bar:hover { background: rgba(0,0,0,0.02); }
-.chat-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.arrow { flex-shrink: 0; transition: transform 0.2s; }
+.header-right { display: flex; align-items: center; gap: 2px; }
+.header-btn { width: 24px; height: 24px; border: none; border-radius: 6px; background: transparent; color: rgba(0,0,0,.42); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.header-btn:hover { background: rgba(0,0,0,.06); color: #1d1d1f; }
+.close-btn:hover { color: #ff3b30; }
+.chat-list-bar { display: flex; align-items: center; justify-content: space-between; padding: 5px 12px; font-size: 11px; color: rgba(0,0,0,.45); border-bottom: 1px solid rgba(0,0,0,.04); cursor: pointer; flex-shrink: 0; }
+.chat-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.arrow { transition: transform .2s; flex-shrink: 0; }
 .arrow.open { transform: rotate(180deg); }
-
-.chat-list-drop { max-height: 120px; overflow-y: auto; border-bottom: 1px solid rgba(0,0,0,0.04); flex-shrink: 0; }
-.chat-item { display: flex; align-items: center; padding: 5px 12px; font-size: 11px; cursor: pointer; }
-.chat-item:hover { background: rgba(0,0,0,0.03); }
-.chat-item.active { background: rgba(0,122,255,0.06); font-weight: 600; }
-.chat-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.del-btn { background: none; border: none; color: rgba(0,0,0,0.2); cursor: pointer; font-size: 14px; padding: 0 4px; }
+.chat-list-drop { max-height: 120px; overflow-y: auto; border-bottom: 1px solid rgba(0,0,0,.04); flex-shrink: 0; }
+.chat-item { display: flex; align-items: center; gap: 5px; padding: 5px 12px; font-size: 11px; cursor: pointer; }
+.chat-item:hover { background: rgba(0,0,0,.04); }
+.chat-item.active { background: rgba(0,122,255,.08); font-weight: 600; }
+.chat-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.temp-tag { font-size: 9px; color: #6b7280; background: rgba(0,0,0,.06); border-radius: 4px; padding: 1px 4px; }
+.del-btn { border: none; background: none; color: rgba(0,0,0,.25); cursor: pointer; }
 .del-btn:hover { color: #ff3b30; }
-
-/* messages */
-.chat-body { flex: 1; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
-.placeholder { color: rgba(0,0,0,0.3); font-size: 12px; text-align: center; padding: 20px 0; }
-.msg { padding: 6px 8px; border-radius: 7px; font-size: 11px; line-height: 1.4; max-width: 85%; word-break: break-word; }
-.msg.user { background: #007aff; color: #fff; align-self: flex-end; }
-.msg.assistant { background: rgba(0,0,0,0.04); color: #1d1d1f; align-self: flex-start; }
-.thinking { display: flex; gap: 3px; padding: 2px 0; }
-.dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,0,0,0.2); animation: pulse 1.4s ease-in-out infinite; }
-.dot:nth-child(2) { animation-delay: 0.2s; }
-.dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes pulse { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
-
-/* input */
-.chat-input-row { display: flex; gap: 4px; padding: 6px 10px; border-top: 1px solid rgba(0,0,0,0.06); flex-shrink: 0; align-items: flex-end; }
-
+.chat-body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 7px; }
+.placeholder { color: rgba(0,0,0,.32); font-size: 12px; text-align: center; padding: 20px 0; }
+.msg { max-width: 90%; padding: 6px 8px; border-radius: 8px; font-size: 11px; line-height: 1.45; word-break: break-word; }
+.msg.user { align-self: flex-end; background: #007aff; color: #fff; }
+.msg.assistant, .msg.agent { align-self: flex-start; background: rgba(0,0,0,.045); color: #1d1d1f; }
+.msg.tool { align-self: flex-start; background: transparent; color: #6b7280; padding: 2px 8px; font-size: 10px; }
+.markdown-body :deep(p) { margin: 0 0 4px; }
+.markdown-body :deep(p:last-child) { margin-bottom: 0; }
+.markdown-body :deep(ul) { margin: 4px 0 8px; padding-left: 0; list-style: none; }
+.markdown-body :deep(li) { position: relative; margin: 3px 0; padding-left: 14px; }
+.markdown-body :deep(li::before) { content: ''; position: absolute; left: 2px; top: 0.78em; width: 4px; height: 4px; border-radius: 50%; background: rgba(0,0,0,.32); transform: translateY(-50%); }
+.markdown-body :deep(li > p) { display: inline; margin: 0; }
+.markdown-body :deep(pre) { white-space: pre-wrap; background: #f5f5f7; border-radius: 6px; padding: 6px; overflow-x: auto; }
+.thinking-indicator { display: flex; align-items: center; gap: 6px; padding: 4px 8px; color: rgba(0,0,0,.45); }
+.thinking-dots { display: inline-flex; gap: 3px; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,122,255,.65); animation: pulse 1.4s ease-in-out infinite; }
+.dot:nth-child(2) { animation-delay: .2s; }
+.dot:nth-child(3) { animation-delay: .4s; }
+@keyframes pulse { 0%,80%,100% { opacity: .2; } 40% { opacity: 1; } }
+.chat-input-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 7px; padding: 6px 10px; border-top: 1px solid rgba(0,0,0,.06); flex-shrink: 0; align-items: stretch; }
 .model-pick { position: relative; flex-shrink: 0; }
-.model-label { display: block; padding: 4px 6px; font-size: 10px; color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.04); border-radius: 4px; cursor: pointer; white-space: nowrap; }
-.model-label:hover { background: rgba(0,0,0,0.08); }
-.model-drop { position: absolute; bottom: 100%; left: 0; margin-bottom: 4px; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 50; min-width: 120px; max-height: 160px; overflow-y: auto; }
-.model-item { padding: 4px 10px; font-size: 10px; cursor: pointer; white-space: nowrap; }
-.model-item:hover { background: rgba(0,0,0,0.04); }
-.model-item.active { background: rgba(0,122,255,0.06); font-weight: 600; }
-
-.chat-input { flex: 1; padding: 5px 7px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; font-size: 11px; outline: none; font-family: inherit; resize: none; background: rgba(255,255,255,0.8); color: #1d1d1f; }
-.chat-input:focus { border-color: #007aff; background: #fff; }
-.send-btn { width: 28px; height: 28px; background: #007aff; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.model-label { display: flex; align-items: center; width: 100%; height: 100%; min-height: 38px; box-sizing: border-box; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 7px; font-size: 11px; color: rgba(0,0,0,.48); background: rgba(0,0,0,.04); border-radius: 8px; cursor: pointer; }
+.model-drop { position: absolute; bottom: calc(100% + 5px); left: 0; min-width: 150px; max-height: 160px; overflow-y: auto; border: 1px solid rgba(0,0,0,.1); border-radius: 7px; background: #fff; box-shadow: 0 8px 22px rgba(0,0,0,.14); z-index: 40; padding: 4px; }
+.model-empty, .model-item { padding: 5px 8px; border-radius: 5px; font-size: 10px; white-space: nowrap; }
+.model-empty { color: #9ca3af; text-align: center; }
+.model-item { cursor: pointer; }
+.model-item:hover { background: rgba(0,0,0,.04); }
+.model-item.active { background: rgba(0,122,255,.08); font-weight: 600; }
+.input-wrapper { flex: 1; min-width: 0; }
+.chat-input { width: 100%; min-height: 38px; height: 38px; box-sizing: border-box; padding: 7px 9px; border: 1px solid rgba(0,0,0,.12); border-radius: 10px; font-size: 12px; line-height: 16px; outline: none; font-family: inherit; resize: none; overflow-y: auto; background: rgba(255,255,255,.85); color: #1d1d1f; }
+.chat-input:focus { border-color: #007aff; box-shadow: 0 0 0 2px rgba(0,122,255,.15); background: #fff; }
+.send-area { display: flex; align-items: stretch; gap: 6px; flex-shrink: 0; }
+.temp-toggle { display: inline-flex; align-items: center; cursor: pointer; }
+.temp-toggle input { display: none; }
+.temp-label { display: flex; align-items: center; justify-content: center; height: 100%; min-height: 38px; box-sizing: border-box; font-size: 11px; color: rgba(0,0,0,.42); border-radius: 8px; padding: 0 8px; background: rgba(0,0,0,.04); }
+.temp-toggle input:checked + .temp-label { color: #007aff; background: rgba(0,122,255,.1); font-weight: 600; }
+.send-btn { width: 40px; min-height: 38px; border-radius: 10px; border: none; background: #007aff; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; }
 .send-btn:hover { background: #0062cc; }
 .send-btn:disabled { background: #a0c4ff; cursor: not-allowed; }
+.stop-btn { width: 40px; min-height: 38px; border-radius: 10px; border: 1px solid rgba(255,59,48,.3); background: rgba(255,59,48,.1); color: #ff3b30; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 </style>

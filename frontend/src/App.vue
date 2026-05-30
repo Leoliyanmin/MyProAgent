@@ -34,18 +34,11 @@
           </KeepAlive>
         </router-view>
       </main>
-
-
     </div>
 
     <AgentSidebar
       :is-open="isAgentOpen && appMode !== 'settings'"
       @toggleFromSelf="toggleAgent"
-    />
-
-    <ThemeOverlayEditor
-      v-if="appMode === 'theme'"
-      @exit="setAppMode('main')"
     />
 
     <ThemeOverlayEditor
@@ -78,6 +71,9 @@ const router = useRouter()
 const isAuthReady = ref(true)
 
 let pollTimer = null
+const isAgentOpen = ref(!dashboardStore.layoutConfig.some(item => item.i === 'mini-agent'))
+const currentView = ref('dashboard')
+const appMode = ref('main')
 
 const startPolling = () => {
   if (pollTimer) return
@@ -118,20 +114,23 @@ const loadInitialData = async () => {
 
 onMounted(() => {
   themeStore.applyToRoot()
+  syncAgentShellWithLayout()
   if (authStore.isAuthenticated) {
     loadInitialData()
     emailStore.fetchStatus()
     startPolling()
   }
 
-  window.addEventListener('auth:required', () => {
-    authStore.token = null
-    router.push('/login')
-  })
+  window.addEventListener('auth:required', handleAuthRequired)
+  window.addEventListener('agent-pop-to-dashboard', popAgentToDashboard)
+  window.addEventListener('agent-retract-to-sidebar', retractAgentToSidebar)
 })
 
 onBeforeUnmount(() => {
   stopPolling()
+  window.removeEventListener('auth:required', handleAuthRequired)
+  window.removeEventListener('agent-pop-to-dashboard', popAgentToDashboard)
+  window.removeEventListener('agent-retract-to-sidebar', retractAgentToSidebar)
 })
 
 watch(() => authStore.isAuthenticated, (newVal) => {
@@ -142,10 +141,6 @@ watch(() => authStore.isAuthenticated, (newVal) => {
     stopPolling()
   }
 })
-
-const isAgentOpen = ref(true)
-const currentView = ref('dashboard')
-const appMode = ref('main')
 
 // Update currentView based on route
 watch(() => route.name, (newName) => {
@@ -183,8 +178,38 @@ watch(appMode, (newMode) => {
   }
 })
 
+const hasAgentMini = () => dashboardStore.layoutConfig.some(item => item.i === 'mini-agent')
+
+const syncAgentShellWithLayout = () => {
+  if (hasAgentMini()) isAgentOpen.value = false
+}
+
+const ensureAgentMini = () => {
+  if (!hasAgentMini()) dashboardStore.toggleMiniWidget('agent')
+}
+
+const removeAgentMini = () => {
+  if (hasAgentMini()) dashboardStore.toggleMiniWidget('agent')
+}
+
+const popAgentToDashboard = () => {
+  ensureAgentMini()
+  isAgentOpen.value = false
+}
+
+const retractAgentToSidebar = () => {
+  removeAgentMini()
+  isAgentOpen.value = true
+}
+
 const toggleAgent = () => {
   isAgentOpen.value = !isAgentOpen.value
+  if (isAgentOpen.value) removeAgentMini()
+}
+
+const handleAuthRequired = () => {
+  authStore.token = null
+  router.push('/login')
 }
 
 const setAppMode = (mode) => {

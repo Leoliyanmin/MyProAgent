@@ -268,9 +268,10 @@ const openHeatmap = () => {
 }
 
 const openAgent = () => {
-  dashboardStore.toggleMiniWidget('agent')
   emit('setAppMode', 'main')
   emit('update:currentView', 'dashboard')
+  const hasAgentMini = dashboardStore.layoutConfig.some(item => item.i === 'mini-agent')
+  window.dispatchEvent(new CustomEvent(hasAgentMini ? 'agent-retract-to-sidebar' : 'agent-pop-to-dashboard'))
 }
 </script>
 
