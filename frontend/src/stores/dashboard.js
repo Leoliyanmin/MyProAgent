@@ -581,7 +581,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const createNewPreset = (name) => {
     const normalized = layoutConfig.value.map(normalizeLayoutItem)
     const preset = createLayoutPreset(normalized)
-    const key = preset.key
+    const key = preset.key + '_' + Date.now()
     customLayoutPresets.value = {
       ...customLayoutPresets.value,
       [key]: { ...preset, name: name || '新模板' }
