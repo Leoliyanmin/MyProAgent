@@ -231,14 +231,19 @@
           </div>
           <p v-if="dailyQuoteNotice" class="status-text" :class="{ 'status-success': dailyQuoteNoticeType === 'success', 'status-error': dailyQuoteNoticeType === 'error' }">{{ dailyQuoteNotice }}</p>
         </div>
-        <button class="action-btn ghost" type="button" style="margin-top: 8px;" @click="showHistoryModal = true; dailyQuoteStore.loadHistory()">查看今日记录</button>
+        <button class="action-btn ghost" type="button" style="margin-top: 8px;" @click="historyDate = todayStr(); showHistoryModal = true; loadQuoteHistory()">查看历史记录</button>
       </article>
     </div>
 
     <Teleport to="body">
       <div v-if="showHistoryModal" class="password-modal-mask" @click.self="showHistoryModal = false">
-        <div class="password-modal" role="dialog" aria-modal="true" aria-label="今日名言记录" style="max-width: 480px;">
-          <h3 class="password-modal-title">今日名言记录</h3>
+        <div class="password-modal" role="dialog" aria-modal="true" aria-label="名言记录" style="max-width: 480px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <button class="action-btn ghost" type="button" @click="changeHistoryDate(-1)" title="前一天">&larr;</button>
+            <h3 class="password-modal-title" style="margin:0;">{{ historyDateLabel }}</h3>
+            <button class="action-btn ghost" type="button" @click="changeHistoryDate(1)" title="后一天" :disabled="isToday(historyDate)">&rarr;</button>
+          </div>
+          <button v-if="!isToday(historyDate)" class="action-btn ghost" type="button" style="margin-bottom:8px;font-size:11px;" @click="historyDate = todayStr(); loadQuoteHistory()">回到今天</button>
           <ul v-if="dailyQuoteStore.history.length" class="quote-history-list">
             <li v-for="(item, i) in dailyQuoteStore.history" :key="i" class="quote-history-item">
               <div class="quote-history-main">
@@ -250,7 +255,7 @@
               <span class="quote-history-source">{{ item.source === 'hitokoto' ? '一言' : '自定义' }}</span>
             </li>
           </ul>
-          <p v-else class="binding-meta" style="text-align: center; padding: 20px 0;">今天还没有记录</p>
+          <p v-else class="binding-meta" style="text-align: center; padding: 20px 0;">该日期还没有记录</p>
           <div class="no-key-modal-actions" style="margin-top: 16px;">
             <button class="no-key-modal-btn" type="button" @click="showHistoryModal = false">关闭</button>
           </div>
@@ -356,6 +361,25 @@ const settingsData = ref({})
 
 const isPasswordModalOpen = ref(false)
 const showHistoryModal = ref(false)
+const historyDate = ref('')
+const historyDateLabel = computed(() => {
+  const d = historyDate.value
+  const today = new Date().toISOString().slice(0, 10)
+  if (d === today) return '今日名言记录'
+  return `${d} 名言记录`
+})
+
+function todayStr() { return new Date().toISOString().slice(0, 10) }
+function isToday(d) { return d === todayStr() }
+function changeHistoryDate(delta) {
+  const d = new Date(historyDate.value)
+  d.setDate(d.getDate() + delta)
+  historyDate.value = d.toISOString().slice(0, 10)
+  loadQuoteHistory()
+}
+async function loadQuoteHistory() {
+  await dailyQuoteStore.loadHistory(historyDate.value)
+}
 const passwordNotice = ref('')
 const passwordNoticeType = ref('info')
 const passwordForm = reactive({

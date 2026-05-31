@@ -44,9 +44,9 @@ export const useDailyQuoteStore = defineStore('dailyQuote', () => {
     }
   }
 
-  async function loadHistory() {
+  async function loadHistory(date) {
     try {
-      history.value = await settingsAPI.getQuoteHistory()
+      history.value = await settingsAPI.getQuoteHistory(date)
     } catch {
       history.value = []
     }

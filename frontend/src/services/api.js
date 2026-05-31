@@ -529,8 +529,9 @@ export const settingsAPI = {
     })
   },
 
-  getQuoteHistory: async () => {
-    return fetchWithAuth('/auth/settings/daily-quote/history')
+  getQuoteHistory: async (date) => {
+    const params = date ? `?date=${encodeURIComponent(date)}` : ''
+    return fetchWithAuth(`/auth/settings/daily-quote/history${params}`)
   },
 
   // API Key management

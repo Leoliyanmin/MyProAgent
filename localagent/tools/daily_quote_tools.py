@@ -162,34 +162,42 @@ class GetDailyQuoteHistoryTool(BaseTool):
 
     name = "get_daily_quote_history"
     description = (
-        "Get today's daily quote history — a list of all quotes that have been "
-        "shown on the user's topbar today, including their source (custom, "
-        "hitokoto/一言, or agent) and author/attribution. Use this when the "
-        "user asks '今天换过哪些名言？', '看一下今天的历史', '之前显示了什么？', "
-        "or wants to review what quotes they've had today."
+        "Get daily quote history for a specific date (or today by default). "
+        "Returns all quotes shown on that date with their source and attribution. "
+        "Use this when the user asks '今天换过哪些名言？', '昨天的记录', "
+        "'2026-05-30 显示了什么？', or wants to review past quotes."
     )
     parameters = {
         "type": "object",
-        "properties": {},
+        "properties": {
+            "date": {
+                "type": "string",
+                "description": "Date in YYYY-MM-DD format (e.g. '2026-05-30'). "
+                               "Omit or leave empty for today's records.",
+            },
+        },
         "required": [],
     }
 
     def __init__(self, user_id_getter: Callable[[], str | None]):
         self._user_id_getter = user_id_getter
 
-    async def execute(self, **kwargs) -> str:
+    async def execute(self, date: str = "", **kwargs) -> str:
         user_id = self._user_id_getter()
         if not user_id:
             return "无法获取用户信息。"
         try:
             from local_backend.database.code.operations.database_quote_history_operations import (
-                get_today_history,
+                get_history_by_date,
             )
+            rows = get_history_by_date(user_id, date if date else None)
             rows = get_today_history(user_id)
             if not rows:
-                return "今天还没有记录过每日一句。"
+                label = date if date else "今天"
+                return f"{label}还没有记录过每日一句。"
 
-            lines = [f"## 今日名言记录（共 {len(rows)} 条）\n"]
+            label = date if date else "今日"
+            lines = [f"## {label}名言记录（共 {len(rows)} 条）\n"]
             for i, r in enumerate(rows, 1):
                 parts = [f"{i}. 「{r['quote_text']}」"]
                 if r.get("quote_author") or r.get("quote_from"):

@@ -117,8 +117,8 @@ async def update_settings(fields: dict = Body(...), user_id: str = Depends(get_c
 
 
 @router.get("/settings/daily-quote/history")
-async def get_daily_quote_history(user_id: str = Depends(get_current_user_id)):
-    result = quote_history_handle.get_today(user_id)
+async def get_daily_quote_history(date: str | None = None, user_id: str = Depends(get_current_user_id)):
+    result = quote_history_handle.get_by_date(user_id, date)
     if not result["ok"]:
         raise HTTPException(status_code=500, detail=result["message"])
     return result["data"]

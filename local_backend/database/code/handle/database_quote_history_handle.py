@@ -1,6 +1,6 @@
 from local_backend.database.code.operations.database_quote_history_operations import (
     insert_quote_history,
-    get_today_history,
+    get_history_by_date,
 )
 
 
@@ -14,9 +14,9 @@ class QuoteHistoryHandle:
         except Exception as e:
             return {"ok": False, "status": 500, "message": str(e)}
 
-    def get_today(self, user_id: str) -> dict:
+    def get_by_date(self, user_id: str, date: str | None = None) -> dict:
         try:
-            rows = get_today_history(user_id)
+            rows = get_history_by_date(user_id, date)
             return {"ok": True, "status": 200, "data": rows}
         except Exception as e:
             return {"ok": False, "status": 500, "message": str(e)}
