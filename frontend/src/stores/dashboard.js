@@ -616,6 +616,16 @@ export const useDashboardStore = defineStore('dashboard', () => {
     const preset = customLayoutPresets.value[key]
     if (!preset) return
 
+    const presetTypes = new Set(preset.items.map(item => item.type))
+    layoutConfig.value = layoutConfig.value.filter(item => {
+      if (!presetTypes.has(item.type)) {
+        const miniType = TYPE_TO_QUICK_TOGGLE[item.type]
+        if (miniType) miniWidgets.value = new Set([...miniWidgets.value].filter(t => t !== miniType))
+        return false
+      }
+      return true
+    })
+
     const presentTypes = new Set(layoutConfig.value.map(item => item.type))
     for (const presetItem of preset.items) {
       if (!presentTypes.has(presetItem.type)) {
