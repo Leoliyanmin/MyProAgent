@@ -96,35 +96,44 @@ class SetDailyQuoteTool(BaseTool):
 
 
 class RefreshDailyQuoteTool(BaseTool):
-    """Fetch a new random quote from the Hitokoto API and set it as the daily quote."""
+    """Fetch a new random quote from the Hitokoto API, optionally filtered by category."""
 
     name = "refresh_daily_quote"
     description = (
         "Fetch a random inspirational quote from the Hitokoto (一言) API "
-        "and set it as the daily quote. The Hitokoto API provides quotes from "
-        "anime, literature, poetry, philosophy, and more. Use this when the "
+        "and set it as the daily quote. You can optionally specify a category "
+        "type to get quotes matching the user's personality. Use this when the "
         "user wants a fresh quote, asks to '换一句', '来一句新的', "
         "or wants an auto-generated inspirational quote."
     )
     parameters = {
         "type": "object",
-        "properties": {},
+        "properties": {
+            "type": {
+                "type": "string",
+                "description": "Hitokoto category code: a=动画, b=漫画, c=游戏, "
+                               "d=文学, e=原创, f=网络, g=其他, h=影视, "
+                               "i=诗词, j=网易云, k=哲学, l=抖机灵. "
+                               "Omit for random. Match to user's MBTI when possible.",
+                "enum": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"],
+            },
+        },
         "required": [],
     }
 
-    def __init__(self, user_id_getter: Callable[[], str | None]):
+    def __init__(self, user_id_getter):
         self._user_id_getter = user_id_getter
 
-    async def execute(self, **kwargs) -> str:
+    async def execute(self, type: str = "", **kwargs) -> str:
         user_id = self._user_id_getter()
         if not user_id:
             return "无法获取用户信息。"
         try:
             import urllib.request
-            req = urllib.request.Request(
-                "https://v1.hitokoto.cn/",
-                headers={"User-Agent": "ProAgent/1.0"},
-            )
+            url = "https://v1.hitokoto.cn/"
+            if type:
+                url += f"?c={type}"
+            req = urllib.request.Request(url, headers={"User-Agent": "ProAgent/1.0"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
 
