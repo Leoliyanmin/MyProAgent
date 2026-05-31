@@ -268,8 +268,9 @@ onUnmounted(() => {
 }
 
 .mac-btn-primary {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #007aff;
+  color: #ffffff;
+  border: none;
   border-radius: 6px;
   padding: 6px 16px;
   font-size: 13px;
@@ -278,6 +279,7 @@ onUnmounted(() => {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
 }
+.mac-btn-primary:hover { background: #0069d9; }
 
 .mac-btn-secondary {
   background: rgba(255, 255, 255, 0.72);
