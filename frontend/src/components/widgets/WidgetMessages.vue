@@ -2,7 +2,7 @@
   <div class="widget-container">
     <!-- Menu Bar: sort dropdown + count -->
     <div class="menu-bar">
-      <span class="star-count">星标邮件 ({{ starredEmails.length }})</span>
+      <span class="star-count page-link" title="打开邮件管理" @click="openEmailPage">星标邮件 ({{ starredEmails.length }})</span>
       <select v-model="sortBy" class="sort-select">
         <option value="time-desc">时间 ↓</option>
         <option value="time-asc">时间 ↑</option>
@@ -42,11 +42,13 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useEmailStore } from '../../stores/email.js'
 
 const SORT_STORAGE_KEY = 'proagent_starred_sort'
 
 const emailStore = useEmailStore()
+const router = useRouter()
 const starredEmails = computed(() => emailStore.starredEmails)
 
 const expandedEmailId = ref(null)
@@ -97,6 +99,10 @@ function toggleExpand(id) {
   expandedEmailId.value = expandedEmailId.value === id ? null : id
 }
 
+function openEmailPage() {
+  router.push({ name: 'email' })
+}
+
 function formatEmailTime(item) {
   if (item.release_time) {
     const raw = String(item.release_time)
@@ -137,6 +143,8 @@ function sanitizeHtml(html) {
 .msg-sender { font-size: 11px; color: #1d1d1f; font-weight: 500; flex: 1; }
 .msg-time { font-size: 11px; color: #86868b; flex-shrink: 0; }
 .msg-content { font-size: 13px; color: #1d1d1f; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.page-link { cursor: pointer; }
+.page-link:hover { color: #007aff; }
 
 .star-toggle { background: none; border: none; font-size: 14px; cursor: pointer; color: #f59e0b; padding: 0 2px; flex-shrink: 0; line-height: 1; }
 .star-toggle:hover { color: #d97706; }

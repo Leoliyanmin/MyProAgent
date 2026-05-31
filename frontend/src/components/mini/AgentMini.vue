@@ -1,7 +1,7 @@
 <template>
   <div class="widget-panel">
     <div class="widget-header">
-      <span class="widget-title">
+      <span class="widget-title page-link" title="打开 Agent 助手" @click="retractToSidebar">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg>
         Agent
       </span>
@@ -189,6 +189,8 @@ onUnmounted(() => {
 .widget-panel { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
 .widget-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid rgba(0,0,0,.06); flex-shrink: 0; }
 .widget-title { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #1d1d1f; }
+.page-link { cursor: pointer; }
+.page-link:hover { color: #007aff; }
 .header-right { display: flex; align-items: center; gap: 2px; }
 .header-btn { width: 24px; height: 24px; border: none; border-radius: 6px; background: transparent; color: rgba(0,0,0,.42); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .header-btn:hover { background: rgba(0,0,0,.06); color: #1d1d1f; }

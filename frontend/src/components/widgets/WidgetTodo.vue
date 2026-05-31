@@ -1,7 +1,7 @@
 <template>
   <div class="widget-container">
     <div class="panel-header">
-      <h3 class="panel-title">TODO List</h3>
+      <h3 class="panel-title page-link" title="打开日程规划" @click="openCalendar">TODO List</h3>
       <span class="task-count">{{ store.pendingTodosCount }} pending</span>
     </div>
     <div class="panel-body">
@@ -108,16 +108,20 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useDashboardStore } from '../../stores/dashboard'
-import { useCalendarStore } from '../../stores/calendar'
 
 const store = useDashboardStore()
-const calendarStore = useCalendarStore()
+const router = useRouter()
 const newTaskTitle = ref('')
 const expandedId = ref(null)
 
 const toggleExpand = (id) => {
   expandedId.value = expandedId.value === id ? null : id
+}
+
+const openCalendar = () => {
+  router.push({ name: 'calendar' })
 }
 
 const formatDate = (dateStr) => {
@@ -232,6 +236,8 @@ const confirmAddTask = () => {
 .widget-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
 .panel-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.06); }
 .panel-title { font-size: 13px; font-weight: 600; margin: 0; color: #1d1d1f; }
+.page-link { cursor: pointer; }
+.page-link:hover { color: #007aff; }
 .task-count { font-size: 11px; color: #86868b; }
 .panel-body { flex: 1; padding: 12px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 

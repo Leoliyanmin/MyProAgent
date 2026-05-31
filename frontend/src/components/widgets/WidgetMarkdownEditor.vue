@@ -5,7 +5,7 @@
         <button class="header-icon-btn" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <h3 class="panel-title">Markdown 笔记</h3>
+        <h3 class="panel-title page-link" title="打开文件管理" @click="openFilesPage">Markdown 笔记</h3>
       </div>
       <div class="header-actions">
         <span class="status-text" :class="{ hidden: !statusMessage }">{{ statusMessage || '\u00A0' }}</span>
@@ -43,7 +43,7 @@
     <div v-if="!fileManagerStore.isDirectorySet" class="panel-body placeholder-state">
       <div class="placeholder-content">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        <p class="placeholder-text">请先在文件管理器中设置工作目录</p>
+        <p class="placeholder-text page-link" title="打开文件管理" @click="openFilesPage">请先在文件管理器中设置工作目录</p>
       </div>
     </div>
 
@@ -159,10 +159,12 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { useFileManagerStore } from '../../stores/fileManager.js'
 import { marked } from 'marked'
 
 const fileManagerStore = useFileManagerStore()
+const router = useRouter()
 
 const SAVE_MODE_KEY = 'proagent_md_save_mode'
 const SIDEBAR_COLLAPSED_KEY = 'proagent_md_sidebar'
@@ -228,6 +230,10 @@ function handleEntryClick(entry) {
   } else {
     loadFile(entry)
   }
+}
+
+function openFilesPage() {
+  router.push({ name: 'files' })
 }
 
 async function loadFile(entry) {
@@ -516,6 +522,14 @@ onUnmounted(() => {
   font-weight: 600;
   margin: 0;
   color: #1d1d1f;
+}
+
+.page-link {
+  cursor: pointer;
+}
+
+.page-link:hover {
+  color: #007aff;
 }
 
 .header-actions {
