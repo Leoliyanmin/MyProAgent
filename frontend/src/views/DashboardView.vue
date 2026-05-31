@@ -5,19 +5,34 @@
       <div class="toolbar-actions">
         <!-- Custom preset dropdown -->
         <div class="preset-dropdown" ref="presetDropdownRef">
-          <button class="preset-trigger" @click="showPresetMenu = !showPresetMenu">
+          <button class="preset-trigger" @click="togglePresetMenu">
             <span class="preset-trigger-text">{{ dashboardStore.activePresetName }}</span>
             <svg class="preset-trigger-arrow" :class="{ open: showPresetMenu }" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div v-if="showPresetMenu" class="preset-menu">
+          <div v-if="showPresetMenu" class="preset-menu" @click.stop>
             <div
               v-for="p in dashboardStore.namedPresets"
               :key="p.key"
               class="preset-menu-item"
               :class="{ active: p.key === dashboardStore.activePresetKey }"
-              @click="selectPreset(p.key)"
+              @click="editingPresetKey !== p.key && selectPreset(p.key)"
             >
-              <span class="preset-menu-name">{{ p.name }}</span>
+              <template v-if="editingPresetKey === p.key">
+                <input
+                  v-model="editingPresetName"
+                  class="preset-inline-input"
+                  @keydown.enter="commitRename(p.key)"
+                  @keydown.escape="cancelRename"
+                  @blur="commitRename(p.key)"
+                  ref="renameInputRef"
+                />
+              </template>
+              <span v-else class="preset-menu-name">{{ p.name }}</span>
+              <button
+                class="preset-rename-btn"
+                @click.stop="startRename(p)"
+                title="重命名"
+              >✎</button>
               <button
                 class="preset-delete-btn"
                 :class="{ disabled: dashboardStore.namedPresets.length <= 1 }"
@@ -31,10 +46,6 @@
             </div>
           </div>
         </div>
-        <template v-if="showNewPresetInput">
-          <input v-model="newPresetName" class="preset-name-input" placeholder="模板名称" @keydown.enter="commitNewPreset" @keydown.escape="cancelNewPreset" ref="presetNameInputRef" />
-          <button class="mac-btn-primary mac-btn-sm" @click="commitNewPreset">确认</button>
-        </template>
         <button class="mac-btn-secondary" @click="autoArrangeDashboard">
           自动整理
         </button>
@@ -67,7 +78,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import VueGridLayout from 'vue3-grid-layout'
 import { getHeatmapLayoutPreset, useDashboardStore } from '../stores/dashboard'
 
@@ -101,9 +112,13 @@ const layoutConfig = dashboardStore.layoutConfig
 
 const isEditing = ref(false)
 const showPresetMenu = ref(false)
-const showNewPresetInput = ref(false)
-const newPresetName = ref('')
+const editingPresetKey = ref(null)
+const editingPresetName = ref('')
 const presetDropdownRef = ref(null)
+const renameInputRef = ref(null)
+
+const togglePresetMenu = () => { showPresetMenu.value = !showPresetMenu.value }
+const closePresetMenu = () => { showPresetMenu.value = false; editingPresetKey.value = null }
 
 const toggleEditMode = () => {
   isEditing.value = !isEditing.value
@@ -123,7 +138,7 @@ const autoArrangeDashboard = () => {
 
 const selectPreset = (key) => {
   dashboardStore.applyPreset(key)
-  showPresetMenu.value = false
+  closePresetMenu()
 }
 
 const handleDeletePreset = (key) => {
@@ -132,19 +147,29 @@ const handleDeletePreset = (key) => {
 }
 
 const handleAddPreset = () => {
-  showNewPresetInput.value = true
-  newPresetName.value = ''
+  const count = dashboardStore.namedPresets.length + 1
+  dashboardStore.createNewPreset('未命名模板 ' + count)
 }
 
-const commitNewPreset = () => {
-  const name = newPresetName.value.trim()
-  if (!name) { showNewPresetInput.value = false; return }
-  dashboardStore.createNewPreset(name)
-  showNewPresetInput.value = false
+const startRename = (preset) => {
+  editingPresetKey.value = preset.key
+  editingPresetName.value = preset.name
+  nextTick(() => {
+    const inputs = presetDropdownRef.value?.querySelectorAll('.preset-inline-input')
+    if (inputs?.length) inputs[inputs.length - 1]?.focus()
+  })
 }
 
-const cancelNewPreset = () => {
-  showNewPresetInput.value = false
+const commitRename = (key) => {
+  const name = editingPresetName.value.trim()
+  if (name) {
+    dashboardStore.renamePreset(key, name)
+  }
+  editingPresetKey.value = null
+}
+
+const cancelRename = () => {
+  editingPresetKey.value = null
 }
 
 const TYPE_TO_MINI = {
@@ -161,30 +186,15 @@ const removeWidget = (item) => {
   dashboardStore.saveLayout()
 }
 
-const applyHeatmapPreset = (item, width = item.w, height = item.h) => {
-  if (!item || item.type !== 'heatmap') return
-
-  const preset = getHeatmapLayoutPreset(Number(width) || item.w, Number(height) || item.h)
-  item.w = preset.w
-  item.h = preset.h
-  item.minW = 2
-  item.minH = 1
-  item.maxW = 12
-  item.maxH = 2
-  item.heatmapVariant = preset.name
+// Click outside to close dropdown
+const handleClickOutside = (e) => {
+  if (presetDropdownRef.value && !presetDropdownRef.value.contains(e.target)) {
+    closePresetMenu()
+  }
 }
 
-const snapHeatmapLayouts = () => {
-  layoutConfig.forEach(item => applyHeatmapPreset(item))
-}
-
-const onItemResized = (itemId, newHeight, newWidth) => {
-  const item = layoutConfig.find(entry => entry.i === itemId)
-  if (!item || item.type !== 'heatmap') return
-
-  applyHeatmapPreset(item, newWidth, newHeight)
-  dashboardStore.saveLayout()
-}
+onMounted(() => { document.addEventListener('click', handleClickOutside) })
+onUnmounted(() => { document.removeEventListener('click', handleClickOutside) })
 
 // Ensure markdown widget is present in layout (Pinia auto-unwraps refs)
 onMounted(() => {
@@ -321,6 +331,27 @@ onUnmounted(() => {
 .preset-menu-item:hover { background: rgba(0,0,0,0.03); }
 .preset-menu-item.active { background: rgba(0,122,255,0.06); font-weight: 600; color: #007aff; }
 .preset-menu-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.preset-rename-btn {
+  background: none; border: none; font-size: 12px; color: rgba(0,0,0,0.15);
+  cursor: pointer; padding: 0 4px; flex-shrink: 0;
+  border-radius: 3px; transition: all 0.1s;
+}
+.preset-menu-item:hover .preset-rename-btn { color: rgba(0,0,0,0.35); }
+.preset-rename-btn:hover { color: #007aff !important; background: rgba(0,122,255,0.06); }
+
+.preset-inline-input {
+  flex: 1;
+  border: 1px solid #007aff;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #007aff;
+  outline: none;
+  font-family: inherit;
+  min-width: 0;
+}
 
 .preset-delete-btn {
   background: none; border: none; font-size: 16px; color: rgba(0,0,0,0.2);

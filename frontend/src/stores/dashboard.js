@@ -605,6 +605,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
     return true
   }
 
+  const renamePreset = (key, newName) => {
+    const p = customLayoutPresets.value[key]
+    if (!p) return
+    customLayoutPresets.value[key] = { ...p, name: newName }
+    saveLayoutPresetsToStorage(customLayoutPresets.value)
+  }
+
   const applyPreset = (key) => {
     const preset = customLayoutPresets.value[key]
     if (!preset) return
@@ -819,6 +826,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     activePresetName,
     createNewPreset,
     deletePreset,
+    renamePreset,
     applyPreset,
     ensureDefaultPreset,
     resetLayout,
