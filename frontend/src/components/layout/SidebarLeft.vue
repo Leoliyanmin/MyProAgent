@@ -1,5 +1,5 @@
 <template>
-  <aside class="macos-sidebar left-sidebar">
+  <aside class="macos-sidebar left-sidebar" :class="{ 'is-collapsed': !isOpen }">
     <div class="sidebar-content">
       <div class="sidebar-top-spacer"></div>
 
@@ -187,6 +187,10 @@ const handleLogout = () => {
 }
 
 const props = defineProps({
+  isOpen: {
+    type: Boolean,
+    default: true
+  },
   currentView: {
     type: String,
     default: 'dashboard'
@@ -290,6 +294,13 @@ const openAgent = () => {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-right: 1px solid rgba(0, 0, 0, 0.08);
+  transition: width 0.2s ease;
+}
+
+.left-sidebar.is-collapsed {
+  width: 0;
+  border-right: none;
+  overflow: hidden;
 }
 
 .sidebar-top-spacer {

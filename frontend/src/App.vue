@@ -7,6 +7,7 @@
   </div>
   <div v-else class="macos-app-container" :class="{ 'theme-editing-mode': appMode === 'theme' }">
     <SidebarLeft
+      :is-open="isSidebarOpen"
       :current-view="currentView"
       :app-mode="appMode"
       @setAppMode="setAppMode"
@@ -16,6 +17,14 @@
 
     <div class="macos-main-column">
       <header v-if="appMode !== 'settings'" class="macos-topbar macos-mini-bar">
+        <button
+          class="mini-bar-sidebar-btn"
+          :class="{ 'is-active': !isSidebarOpen }"
+          @click="toggleSidebar"
+          title="切换侧边栏"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </button>
         <div class="mini-bar-spacer"></div>
         <button
           class="mini-bar-agent-btn"
@@ -72,6 +81,7 @@ const isAuthReady = ref(true)
 
 let pollTimer = null
 const isAgentOpen = ref(!dashboardStore.layoutConfig.some(item => item.i === 'mini-agent'))
+const isSidebarOpen = ref(true)
 const currentView = ref('dashboard')
 const appMode = ref('main')
 
@@ -202,6 +212,10 @@ const retractAgentToSidebar = () => {
   isAgentOpen.value = true
 }
 
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+
 const toggleAgent = () => {
   isAgentOpen.value = !isAgentOpen.value
   if (isAgentOpen.value) removeAgentMini()
@@ -306,6 +320,29 @@ html, body, #app {
 }
 
 .mini-bar-agent-btn.is-active {
+  background: rgba(0, 0, 0, 0.08);
+  color: #1d1d1f;
+}
+
+.mini-bar-sidebar-btn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.mini-bar-sidebar-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #1d1d1f;
+}
+
+.mini-bar-sidebar-btn.is-active {
   background: rgba(0, 0, 0, 0.08);
   color: #1d1d1f;
 }
