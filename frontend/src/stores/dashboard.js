@@ -589,9 +589,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
     const key = preset.key
 
     if (activePresetKey.value) {
-      customLayoutPresets.value[activePresetKey.value] = { ...preset, name: name || '默认布局' }
+      const existing = customLayoutPresets.value[activePresetKey.value]
+      customLayoutPresets.value[activePresetKey.value] = { ...preset, name: name || '默认布局', _apiId: existing?._apiId }
       saveLayoutPresetsToStorage(customLayoutPresets.value)
-      savePresetToAPI(activePresetKey.value, { ...preset, name: name || '默认布局' })
+      savePresetToAPI(activePresetKey.value, customLayoutPresets.value[activePresetKey.value])
       return preset
     }
 
