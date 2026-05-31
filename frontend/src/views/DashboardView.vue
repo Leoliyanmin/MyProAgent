@@ -41,6 +41,7 @@
 
           <div v-if="isEditing" class="drag-overlay">
             <span class="overlay-text">{{ item.type }}</span>
+            <button class="widget-remove-btn" @click.stop="removeWidget(item)" title="移除此组件">×</button>
           </div>
         </grid-item>
       </grid-layout>
@@ -123,6 +124,20 @@ const handlePresetChange = (e) => {
   if (!key) return
   dashboardStore.applyPreset(key)
   activePresetKey.value = '' // reset to placeholder after applying
+}
+
+const TYPE_TO_MINI = {
+  todo: 'todo', messages: 'inbox', markdown: 'note',
+  heatmap: 'heatmap', 'compose-mini': 'compose', 'agent-mini': 'agent',
+}
+
+const removeWidget = (item) => {
+  const idx = layoutConfig.findIndex(it => it.i === item.i)
+  if (idx === -1) return
+  layoutConfig.splice(idx, 1)
+  const miniType = TYPE_TO_MINI[item.type]
+  if (miniType) dashboardStore.miniWidgets.delete(miniType)
+  dashboardStore.saveLayout()
 }
 
 const applyHeatmapPreset = (item, width = item.w, height = item.h) => {
@@ -324,6 +339,31 @@ onUnmounted(() => {
   color: #007aff;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.widget-remove-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 59, 48, 0.85);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  pointer-events: auto;
+  z-index: 20;
+}
+.widget-remove-btn:hover {
+  background: #ff3b30;
+  transform: scale(1.1);
 }
 
 /* =========================================
