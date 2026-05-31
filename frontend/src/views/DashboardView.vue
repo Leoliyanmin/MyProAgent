@@ -136,6 +136,10 @@ const autoArrangeDashboard = () => {
   dashboardStore.autoArrangeLayout()
 }
 
+const snapHeatmapLayouts = () => {
+  layoutConfig.forEach(item => applyHeatmapPreset(item))
+}
+
 const selectPreset = (key) => {
   dashboardStore.applyPreset(key)
   closePresetMenu()
