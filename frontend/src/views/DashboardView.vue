@@ -140,6 +140,22 @@ const snapHeatmapLayouts = () => {
   layoutConfig.forEach(item => applyHeatmapPreset(item))
 }
 
+const applyHeatmapPreset = (item, width = item.w, height = item.h) => {
+  if (!item || item.type !== 'heatmap') return
+  const preset = getHeatmapLayoutPreset(Number(width) || item.w, Number(height) || item.h)
+  item.w = preset.w; item.h = preset.h
+  item.minW = 2; item.minH = 1
+  item.maxW = 12; item.maxH = 2
+  item.heatmapVariant = preset.name
+}
+
+const onItemResized = (itemId, newHeight, newWidth) => {
+  const item = layoutConfig.find(entry => entry.i === itemId)
+  if (!item || item.type !== 'heatmap') return
+  applyHeatmapPreset(item, newWidth, newHeight)
+  dashboardStore.saveLayout()
+}
+
 const selectPreset = (key) => {
   dashboardStore.applyPreset(key)
   closePresetMenu()
