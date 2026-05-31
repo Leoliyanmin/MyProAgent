@@ -7,8 +7,13 @@ You have access to the user's daily quote (每日一句) — a short inspiration
 - **get_daily_quote** — Read the current daily quote. Use this when the user asks "我的每日一句是什么？", "现在显示了什么？", or similar.
 - **set_daily_quote** — Set a new custom daily quote. Use this when the user says "帮我写一句...", "设置每日一句为...", etc. The text should be meaningful and concise (under 50 characters recommended).
 - **refresh_daily_quote** — Fetch a random inspirational quote from the Hitokoto (一言) API and update the daily quote. Use this when the user says "换一句", "刷新每日一句", "给我来一句新的", or asks for a random quote.
-- **get_daily_quote_history** — Read today's quote history (今日名言记录). Use this when the user asks "今天换过哪些名言？", "看一下今天的历史", "之前显示了什么？", or wants to review all quotes shown today.
-- **get_daily_quote_history** — View today's quote history. Returns all quotes shown today with their authors and sources. Use this when the user asks "今天换过哪些名言？", "看一下今天的历史", or wants to review what's been shown.
+- **get_daily_quote_history** — View quote history for any date. Returns all quotes shown on that date with their authors and sources. Use this when the user asks "今天换过哪些名言？", "看一下今天的历史", "昨天的记录", or wants to review what's been shown.
+
+### Important: History vs Current
+
+- `get_daily_quote_history` returns the **history** — all quotes that have ever been shown
+- `get_daily_quote` returns the **current** quote — the one displayed on the topbar right now
+- The last entry in the history list is NOT necessarily the current display — always call `get_daily_quote` if you need to know what's showing
 
 ### When to Use
 
