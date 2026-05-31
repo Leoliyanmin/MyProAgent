@@ -50,7 +50,7 @@ const fetchWithAuth = async (url, options = {}) => {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
     if (response.status === 401) {
       // Clear stale/invalid token to force a clean re-login flow.
-      localStorage.removeItem('token')
+      await clearAuth()
       window.dispatchEvent(new CustomEvent('auth:required'))
       throw new Error('登录状态已失效，请重新登录')
     }
@@ -561,6 +561,31 @@ export const settingsAPI = {
   }
 }
 
+// ==================== Activity API (活动日志) ====================
+
+export const activityAPI = {
+  getLogs: async (fromDate, toDate) => {
+    const params = new URLSearchParams()
+    if (fromDate) params.set('from_date', fromDate)
+    if (toDate) params.set('to_date', toDate)
+    return fetchWithAuthRetry(`/activity/log?${params.toString()}`)
+  },
+
+  recordBatch: async (logs) => {
+    return fetchWithAuthRetry('/activity/log', {
+      method: 'POST',
+      body: JSON.stringify({ logs })
+    })
+  },
+
+  getHeatmap: async (fromDate, toDate) => {
+    const params = new URLSearchParams()
+    if (fromDate) params.set('from_date', fromDate)
+    if (toDate) params.set('to_date', toDate)
+    return fetchWithAuthRetry(`/activity/heatmap?${params.toString()}`)
+  }
+}
+
 // ==================== Profile API (用户画像) ====================
 
 export const profileAPI = {
@@ -601,4 +626,5 @@ export default {
   tis: tisAPI,
   blackboard: blackboardAPI,
   email: emailAPI,
+  activity: activityAPI,
 }

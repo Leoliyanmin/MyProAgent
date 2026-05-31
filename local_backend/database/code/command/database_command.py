@@ -1467,3 +1467,69 @@ def delete_interaction_log(conversation_id: str, db_path: str | Path = DEFAULT_D
 def count_interaction_logs_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> int:
     row = _fetch_one("SELECT COUNT(*) as cnt FROM interaction_log WHERE user_id = ?", (user_id,), db_path)
     return row["cnt"] if row else 0
+
+
+# ==================== activity_log ====================
+
+def upsert_activity_log(
+    user_id: str,
+    log_date: str,
+    hour: int,
+    count: int = 1,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    _execute(
+        """
+        INSERT INTO activity_log (user_id, log_date, hour, count, updated_at)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(user_id, log_date, hour) DO UPDATE SET
+            count = count + excluded.count,
+            updated_at = excluded.updated_at
+        """,
+        (user_id, log_date, hour, count, now),
+        db_path,
+    )
+
+
+def upsert_activity_logs_batch(
+    logs: list[dict],
+    user_id: str,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> None:
+    import datetime
+    now = datetime.datetime.utcnow().isoformat()
+    for log in logs:
+        _execute(
+            """
+            INSERT INTO activity_log (user_id, log_date, hour, count, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id, log_date, hour) DO UPDATE SET
+                count = count + excluded.count,
+                updated_at = excluded.updated_at
+            """,
+            (user_id, log.get("log_date"), log.get("hour"), log.get("count", 1), now),
+            db_path,
+        )
+
+
+def list_activity_logs(
+    user_id: str,
+    from_date: str | None = None,
+    to_date: str | None = None,
+    db_path: str | Path = DEFAULT_DB_PATH,
+) -> list[dict]:
+    conditions = ["user_id = ?"]
+    params: list = [user_id]
+    if from_date:
+        conditions.append("log_date >= ?")
+        params.append(from_date)
+    if to_date:
+        conditions.append("log_date <= ?")
+        params.append(to_date)
+    where = " AND ".join(conditions)
+    return _fetch_all(
+        f"SELECT * FROM activity_log WHERE {where} ORDER BY log_date ASC, hour ASC",
+        tuple(params), db_path,
+    )

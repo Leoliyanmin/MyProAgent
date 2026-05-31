@@ -217,4 +217,16 @@ CREATE TABLE IF NOT EXISTS interaction_log (
 
 CREATE INDEX IF NOT EXISTS idx_interaction_log_user ON interaction_log(user_id, timestamp);
 
+CREATE TABLE IF NOT EXISTS activity_log (
+    user_id    TEXT    NOT NULL,
+    log_date   TEXT    NOT NULL,
+    hour       INTEGER NOT NULL CHECK (hour >= 0 AND hour <= 23),
+    count      INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT    NOT NULL,
+    PRIMARY KEY (user_id, log_date, hour),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_log_user_date ON activity_log(user_id, log_date);
+
 COMMIT;

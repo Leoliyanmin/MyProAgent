@@ -132,6 +132,22 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
     if email_account_uid_check[0] == 0:
         conn.execute("ALTER TABLE email_account ADD COLUMN last_sync_uid INTEGER DEFAULT 0")
 
+    # activity_log table migration
+    activity_log_exists = conn.execute(
+        "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='activity_log'"
+    ).fetchone()
+    if activity_log_exists[0] == 0:
+        conn.execute("""CREATE TABLE IF NOT EXISTS activity_log (
+            user_id    TEXT    NOT NULL,
+            log_date   TEXT    NOT NULL,
+            hour       INTEGER NOT NULL CHECK (hour >= 0 AND hour <= 23),
+            count      INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT    NOT NULL,
+            PRIMARY KEY (user_id, log_date, hour),
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )""")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_activity_log_user_date ON activity_log(user_id, log_date)")
+
 
 def init_database(db_path: str | Path = DEFAULT_DB_PATH, schema_path: str | Path = DEFAULT_SCHEMA_PATH) -> None:
     if not schema_path.exists():

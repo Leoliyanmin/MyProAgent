@@ -299,6 +299,8 @@ import VueGridLayout from 'vue3-grid-layout'
 
 const { GridLayout, GridItem } = VueGridLayout
 
+const EMAIL_SORT_KEY = 'proagent_email_inbox_sort'
+
 const store = useEmailStore()
 
 const bindStatus = computed(() => store.bindStatus)
@@ -310,7 +312,7 @@ const sending = computed(() => store.sending)
 const selectedIndex = ref(null)
 const syncResult = ref(null)
 const sendSuccess = ref(false)
-const sortBy = ref('time-desc')
+const sortBy = ref(localStorage.getItem(EMAIL_SORT_KEY) || 'time-desc')
 const showTrash = ref(false)
 
 // ===== Multi-mode Layout Manager =====
@@ -437,6 +439,7 @@ if (initMode) {
 }
 
 // ===== Existing logic =====
+watch(sortBy, (val) => { try { localStorage.setItem(EMAIL_SORT_KEY, val) } catch {} })
 watch(() => store.bindStatus.is_bound, (isBound, wasBound) => {
   if (wasBound && !isBound) {
     store.stopPolling()

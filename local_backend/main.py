@@ -13,6 +13,7 @@ from presentation.scheduler_routes import router as scheduler_router
 from presentation.email_routes import router as email_router
 from presentation.courses_routes import router as courses_router
 from presentation.event_routes import router as event_router
+from presentation.activity_routes import router as activity_router
 from utils.logging_config import setup_logging
 from service.scheduler_service import scheduler_service
 
@@ -75,6 +76,7 @@ app.include_router(scheduler_router)
 app.include_router(email_router)
 app.include_router(courses_router)
 app.include_router(event_router)
+app.include_router(activity_router)
 
 
 @app.get("/")

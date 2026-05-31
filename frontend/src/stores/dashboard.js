@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { eventsAPI } from '../services/api.js'
+import { useBehaviorProfileStore } from './behaviorProfile.js'
+import { eventsAPI, activityAPI } from '../services/api.js'
 import { useCalendarStore } from './calendar.js'
 import {
   DEFAULT_DASHBOARD_LAYOUT_PRESETS,
@@ -13,7 +14,49 @@ import {
 const LAYOUT_STORAGE_KEY = 'proagent_layout'
 const LAYOUT_PRESETS_STORAGE_KEY = 'proagent_layout_presets'
 
+const ACTIVITY_LOG_STORAGE_KEY = 'proagent_activity_log'
+const MINI_WIDGETS_STORAGE_KEY = 'proagent_mini_widgets'
 const TODOS_STORAGE_KEY = 'proagent_todos'
+
+// ── Activity Log (heatmap data) ──
+const saveActivityLog = (log) => {
+  try {
+    localStorage.setItem(ACTIVITY_LOG_STORAGE_KEY, JSON.stringify(log))
+  } catch (err) {
+    console.error('Failed to save activity log to localStorage:', err)
+  }
+}
+
+const loadActivityLog = () => {
+  try {
+    const stored = localStorage.getItem(ACTIVITY_LOG_STORAGE_KEY)
+    return stored ? JSON.parse(stored) : {}
+  } catch (err) {
+    return {}
+  }
+}
+
+// ── Mini Widgets active set ──
+const saveMiniWidgets = (widgets) => {
+  try {
+    localStorage.setItem(MINI_WIDGETS_STORAGE_KEY, JSON.stringify([...widgets]))
+  } catch (err) {
+    console.error('Failed to save mini widgets to localStorage:', err)
+  }
+}
+
+const loadMiniWidgets = () => {
+  try {
+    const stored = localStorage.getItem(MINI_WIDGETS_STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      return Array.isArray(parsed) ? new Set(parsed) : new Set()
+    }
+  } catch (err) {
+    // fall through
+  }
+  return new Set()
+}
 
 const saveTodosToStorage = (todos) => {
   try {
@@ -178,11 +221,12 @@ const mapRemoteTaskToTodo = (task) => {
 }
 
 export const useDashboardStore = defineStore('dashboard', () => {
+  const behaviorProfileStore = useBehaviorProfileStore()
   // ==============================
   // 1. 活动热力图状态 (Heatmap)
   // ==============================
   // 记录每天每小时的活跃度：{ '2026-05-29': { 9: 2, 14: 3 } }
-  const activityLog = ref({})
+  const activityLog = ref(loadActivityLog())
 
   const getTodayString = () => {
     const d = new Date()
@@ -195,6 +239,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!activityLog.value[today]) activityLog.value[today] = {}
     if (!activityLog.value[today][hour]) activityLog.value[today][hour] = 0
     activityLog.value[today][hour] += points
+    saveActivityLog(activityLog.value)
+    _dirtyActivityLog()
   }
 
   // 今日 24 小时分布 [count0, count1, ... count23]
@@ -234,6 +280,80 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
     return result
   })
+
+  let _activityFlushTimer = null
+  let _activityDirty = false
+
+  const _dirtyActivityLog = () => {
+    _activityDirty = true
+    if (_activityFlushTimer) clearTimeout(_activityFlushTimer)
+    _activityFlushTimer = setTimeout(flushActivityLog, 10000)
+  }
+
+  const _onVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      flushActivityLog()
+    }
+  }
+
+  const flushActivityLog = async () => {
+    if (!_activityDirty) return
+    const logs = Object.entries(activityLog.value).flatMap(([date, hours]) =>
+      Object.entries(hours).map(([hour, count]) => ({
+        log_date: date,
+        hour: parseInt(hour),
+        count
+      }))
+    )
+    if (logs.length === 0) return
+    try {
+      await activityAPI.recordBatch(logs)
+      _activityDirty = false
+    } catch (err) {
+      console.error('Failed to flush activity log:', err)
+    }
+    if (_activityFlushTimer) clearTimeout(_activityFlushTimer)
+    _activityFlushTimer = null
+  }
+
+  let _visibilityBound = false
+
+  const syncActivityLog = async () => {
+    if (!_visibilityBound) {
+      _visibilityBound = true
+      document.addEventListener('visibilitychange', _onVisibilityChange)
+    }
+    try {
+      const now = new Date()
+      const toDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+      const from = new Date(now)
+      from.setDate(from.getDate() - 30)
+      const fromDate = `${from.getFullYear()}-${String(from.getMonth() + 1).padStart(2, '0')}-${String(from.getDate()).padStart(2, '0')}`
+      const res = await activityAPI.getHeatmap(fromDate, toDate)
+      const serverData = res?.heatmap || {}
+      const local = { ...activityLog.value }
+      for (const [date, hours] of Object.entries(serverData)) {
+        if (!local[date]) {
+          local[date] = { ...hours }
+        } else {
+          for (const [hour, count] of Object.entries(hours)) {
+            local[date][hour] = Math.max(local[date][hour] || 0, count)
+          }
+        }
+      }
+      activityLog.value = local
+      saveActivityLog(activityLog.value)
+    } catch (err) {
+      console.error('Failed to sync activity log from server:', err)
+    }
+  }
+
+  const cleanupActivitySync = () => {
+    flushActivityLog()
+    document.removeEventListener('visibilitychange', _onVisibilityChange)
+    _visibilityBound = false
+    if (_activityFlushTimer) clearTimeout(_activityFlushTimer)
+  }
 
   // ==============================
   // 2. TODO 状态 (本地存储)
@@ -316,6 +436,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     task.completed = !task.completed
     if (task.completed) {
       recordActivity(1)
+      behaviorProfileStore.recordBehaviorEvent('todo_completed', {
+        module: 'todo',
+        priority: task.priority ?? 2,
+        source: task.source || 'local'
+      })
     }
     saveTodosToStorage(todos.value)
 
@@ -393,6 +518,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     const arranged = applyLayoutPreset(normalized, preset) || arrangeDashboardLayout(normalized)
     layoutConfig.value.splice(0, layoutConfig.value.length, ...arranged)
     saveLayoutToStorage(layoutConfig.value)
+    behaviorProfileStore.recordBehaviorEvent('dashboard_auto_arranged', {
+      module: 'dashboard',
+      layoutKey: key,
+      source: preset ? 'preset' : 'algorithm'
+    })
   }
 
   const saveCurrentLayoutAsPreset = () => {
@@ -403,6 +533,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
       [preset.key]: preset
     }
     saveLayoutPresetsToStorage(customLayoutPresets.value)
+    behaviorProfileStore.recordBehaviorEvent('dashboard_template_saved', {
+      module: 'dashboard',
+      layoutKey: preset.key,
+      widgetCount: normalized.length
+    })
     return preset
   }
 
@@ -412,7 +547,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   }
 
   // ── Mini widgets ──
-  const miniWidgets = ref(new Set())
+  const miniWidgets = ref(loadMiniWidgets())
 
   const MINI_LAYOUT_MAP = {
     'compose': { w: 4, h: 7, i: 'mini-compose', type: 'compose-mini', minW: 3, minH: 5 },
@@ -469,6 +604,12 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
     recordActivity(1)
     miniWidgets.value = next
+    saveMiniWidgets(miniWidgets.value)
+    behaviorProfileStore.recordBehaviorEvent('widget_toggled', {
+      module: 'dashboard',
+      widget: type,
+      visible: !isVisible
+    })
   }
 
   function _addMiniToLayout(type) {
@@ -561,6 +702,9 @@ export const useDashboardStore = defineStore('dashboard', () => {
     weeklyHeatmap,
     monthlyHeatmap,
     recordActivity,
+    flushActivityLog,
+    syncActivityLog,
+    cleanupActivitySync,
     
     todos,
     sortedTodos,

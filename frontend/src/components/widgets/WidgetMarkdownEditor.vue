@@ -164,11 +164,21 @@ import { marked } from 'marked'
 
 const fileManagerStore = useFileManagerStore()
 
-const sidebarCollapsed = ref(false)
+const SAVE_MODE_KEY = 'proagent_md_save_mode'
+const SIDEBAR_COLLAPSED_KEY = 'proagent_md_sidebar'
+
+const loadPref = (key, fallback) => {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback } catch { return fallback }
+}
+const savePref = (key, value) => {
+  try { localStorage.setItem(key, JSON.stringify(value)) } catch {}
+}
+
+const sidebarCollapsed = ref(loadPref(SIDEBAR_COLLAPSED_KEY, false))
 const currentFile = ref(null)
 const editContent = ref('')
 const editorMode = ref('edit')
-const saveMode = ref('auto')
+const saveMode = ref(loadPref(SAVE_MODE_KEY, 'auto'))
 const showSettings = ref(false)
 const settingsRef = ref(null)
 const editorTextarea = ref(null)
@@ -443,6 +453,9 @@ watch(() => fileManagerStore.previewContent, (newVal) => {
     editContent.value = newVal || ''
   }
 })
+
+watch(sidebarCollapsed, (val) => savePref(SIDEBAR_COLLAPSED_KEY, val))
+watch(saveMode, (val) => savePref(SAVE_MODE_KEY, val))
 
 watch(() => fileManagerStore.isDirectorySet, async (val) => {
   if (val) {

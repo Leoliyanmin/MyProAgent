@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import VueGridLayout from 'vue3-grid-layout'
 import { getHeatmapLayoutPreset, useDashboardStore } from '../stores/dashboard'
 
@@ -124,6 +124,11 @@ onMounted(() => {
     })
   }
   dashboardStore.saveLayout()
+  dashboardStore.syncActivityLog()
+})
+
+onUnmounted(() => {
+  dashboardStore.cleanupActivitySync()
 })
 </script>
 

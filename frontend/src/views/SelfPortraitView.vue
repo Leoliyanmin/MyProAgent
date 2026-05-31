@@ -177,10 +177,19 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive, onMounted, onActivated, onUnmounted } from 'vue'
+import { computed, ref, reactive, onMounted, onActivated, onUnmounted, watch } from 'vue'
 import { profileAPI } from '../services/api.js'
 import { useBehaviorProfileStore } from '../stores/behaviorProfile.js'
 import { useDashboardStore } from '../stores/dashboard.js'
+
+const HEATMAP_VIEW_KEY = 'proagent_portrait_heatmap_view'
+
+const loadHeatmapView = () => {
+  try { return localStorage.getItem(HEATMAP_VIEW_KEY) || 'today' } catch { return 'today' }
+}
+const saveHeatmapView = (view) => {
+  try { localStorage.setItem(HEATMAP_VIEW_KEY, view) } catch {}
+}
 
 // AI analysis state
 const loading = reactive({ ai: false })
@@ -199,7 +208,7 @@ const activeHours = ref([])
 const personalityIndicators = ref({})
 const dashboardStore = useDashboardStore()
 const behaviorProfileStore = useBehaviorProfileStore()
-const heatmapView = ref('today')
+const heatmapView = ref(loadHeatmapView())
 const heatmapTooltip = reactive({ visible: false, text: '', x: 0, y: 0 })
 
 const displayWorkPreference = computed(() => {
@@ -269,6 +278,8 @@ const weekCellClass = (total) => {
 }
 
 const maxMonthly = computed(() => Math.max(1, ...dashboardStore.monthlyHeatmap.map(d => d.total)))
+
+watch(heatmapView, saveHeatmapView)
 const monthCellClass = (total) => {
   if (total === 0) return 'l0'
   const pct = total / maxMonthly.value

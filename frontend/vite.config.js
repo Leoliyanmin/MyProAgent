@@ -55,6 +55,10 @@ export default defineConfig(({ mode }) => {
         '/api/v1/email': {
           target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true
+        },
+        '/activity': {
+          target: env.VITE_API_URL || 'http://localhost:8002',
+          changeOrigin: true
         }
       },
     },
