@@ -40,7 +40,7 @@
                 :title="dashboardStore.namedPresets.length <= 1 ? '至少保留一个模板' : '删除模板'"
               >×</button>
             </div>
-            <div class="preset-menu-add" @click="handleAddPreset">
+            <div v-if="isEditing" class="preset-menu-add" @click="handleAddPreset">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               <span>新建模板</span>
             </div>
