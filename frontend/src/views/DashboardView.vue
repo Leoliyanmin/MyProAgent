@@ -349,7 +349,7 @@ onUnmounted(() => {
   transition: background 0.1s;
 }
 .preset-menu-item:hover { background: rgba(0,0,0,0.03); }
-.preset-menu-item.active { background: rgba(0,122,255,0.06); font-weight: 600; color: #007aff; }
+.preset-menu-item.active { background: rgba(0,0,0,0.04); font-weight: 600; color: #374151; }
 .preset-menu-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .preset-rename-btn {
@@ -358,16 +358,16 @@ onUnmounted(() => {
   border-radius: 3px; transition: all 0.1s;
 }
 .preset-menu-item:hover .preset-rename-btn { color: rgba(0,0,0,0.35); }
-.preset-rename-btn:hover { color: #007aff !important; background: rgba(0,122,255,0.06); }
+.preset-rename-btn:hover { color: #374151 !important; background: rgba(0,0,0,0.06); }
 
 .preset-inline-input {
   flex: 1;
-  border: 1px solid #007aff;
+  border: 1px solid rgba(0,0,0,0.2);
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 13px;
   font-weight: 600;
-  color: #007aff;
+  color: #374151;
   outline: none;
   font-family: inherit;
   min-width: 0;
@@ -385,11 +385,11 @@ onUnmounted(() => {
 
 .preset-menu-add {
   display: flex; align-items: center; gap: 6px;
-  padding: 8px 12px; font-size: 12px; color: #007aff;
+  padding: 8px 12px; font-size: 12px; color: rgba(0,0,0,0.45);
   border-top: 1px solid rgba(0,0,0,0.05);
   cursor: pointer; transition: background 0.1s;
 }
-.preset-menu-add:hover { background: rgba(0,122,255,0.04); }
+.preset-menu-add:hover { background: rgba(0,0,0,0.04); }
 
 .preset-name-input {
   border: 1px solid rgba(0,0,0,0.15);
