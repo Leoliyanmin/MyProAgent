@@ -617,15 +617,20 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!preset) return
 
     const presetTypes = new Set(preset.items.map(item => item.type))
-    layoutConfig.value = layoutConfig.value.filter(item => {
+
+    // Remove widgets not in target preset
+    const toRemove = []
+    for (const item of layoutConfig.value) {
       if (!presetTypes.has(item.type)) {
         const miniType = TYPE_TO_QUICK_TOGGLE[item.type]
-        if (miniType) miniWidgets.value = new Set([...miniWidgets.value].filter(t => t !== miniType))
-        return false
+        if (miniType) toRemove.push(miniType)
       }
-      return true
-    })
+    }
+    if (toRemove.length) {
+      miniWidgets.value = new Set([...miniWidgets.value].filter(t => !toRemove.includes(t)))
+    }
 
+    // Add missing widgets from preset
     const presentTypes = new Set(layoutConfig.value.map(item => item.type))
     for (const presetItem of preset.items) {
       if (!presentTypes.has(presetItem.type)) {
@@ -636,6 +641,9 @@ export const useDashboardStore = defineStore('dashboard', () => {
         if (miniType) _addMiniToLayout(miniType)
       }
     }
+
+    // Now apply positions — remove extras after adding missing
+    layoutConfig.value = layoutConfig.value.filter(item => presetTypes.has(item.type))
 
     const normalized = layoutConfig.value.map(normalizeLayoutItem)
     const arranged = applyLayoutPreset(normalized, preset) || arrangeDashboardLayout(normalized)
