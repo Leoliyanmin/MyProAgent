@@ -2,6 +2,8 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi.testclient import TestClient
 
+from config import settings
+
 
 def _async_return(value):
     """Helper: returns a coroutine that resolves to `value`."""
@@ -116,6 +118,13 @@ class TestLogin:
 
 
 class TestGetCurrentUser:
+    @pytest.fixture(autouse=True)
+    def _enable_test_mode(self):
+        old = settings.TEST_MODE
+        settings.TEST_MODE = True
+        yield
+        settings.TEST_MODE = old
+
     def test_get_current_user_in_test_mode(self, client):
         from presentation.auth_routes import user_service
         user_service.get_user_by_id = MagicMock(return_value=None)

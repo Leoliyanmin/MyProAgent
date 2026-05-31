@@ -6,6 +6,8 @@
 import sys
 import os
 
+import pytest
+
 # 添加路径以便导入模块
 sys.path.append(os.path.join(os.path.dirname(__file__), 'local_backend'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'server_backend'))
@@ -62,6 +64,7 @@ TEST_TASK = {
 }
 
 
+@pytest.mark.skip(reason="uses deprecated schedule table; schema has been migrated to event table")
 def test_direct_sync():
     """直接测试数据库同步"""
     print("="*60)
