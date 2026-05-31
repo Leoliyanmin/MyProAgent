@@ -10,7 +10,6 @@ COPY server_backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY server_backend/ .
-COPY logging_config.py /app/
 
 RUN mkdir -p logs database/db
 

@@ -8,8 +8,8 @@ from local_backend.database.code.command.database_command import (
 
 
 def insert_quote_history(user_id: str, quote_text: str, source: str = "custom",
-                          quote_author: str = "", quote_from: str = "",
-                          db_path=DEFAULT_DB_PATH) -> None:
+                         quote_author: str = "", quote_from: str = "",
+                         db_path=DEFAULT_DB_PATH) -> None:
     import datetime
     now = datetime.datetime.utcnow().isoformat()
     _execute(
@@ -21,7 +21,7 @@ def insert_quote_history(user_id: str, quote_text: str, source: str = "custom",
 
 
 def get_history_by_date(user_id: str, date: str | None = None,
-                         db_path=DEFAULT_DB_PATH) -> List[dict]:
+                        db_path=DEFAULT_DB_PATH) -> List[dict]:
     import datetime
     if date:
         target_date = date

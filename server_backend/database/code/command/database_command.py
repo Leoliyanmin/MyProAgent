@@ -125,13 +125,6 @@ def delete_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM users WHERE user_id = ?", (user_id,), db_path)
 
 
-
-
-
-
-
-
-
 def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **kwargs) -> None:
     import datetime
     now = datetime.datetime.utcnow().isoformat()
@@ -154,15 +147,6 @@ def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **k
              kwargs.get("notification_enabled", 1), kwargs.get("privacy_share_data", 0), now),
             db_path,
         )
-
-
-
-
-
-
-
-
-
 
 # user_match_profile
 
@@ -455,11 +439,6 @@ def list_accounts(db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
 
 def list_accounts_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> list[dict]:
     return _fetch_all("SELECT * FROM account WHERE user_id = ? ORDER BY account_id DESC", (user_id,), db_path)
-
-
-
-
-
 def delete_account(account_id: int, db_path: str | Path = DEFAULT_DB_PATH) -> None:
     _execute("DELETE FROM account WHERE account_id = ?", (account_id,), db_path)
 

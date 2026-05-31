@@ -10,12 +10,12 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'local_backend'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'server_backend'))
 
-from local_backend.database.code.database_command import (
+from local_backend.database.code.command.database_command import (
     create_schedule, get_schedule, list_schedule_by_user, delete_schedule,
     create_data, get_data, list_data_by_user, delete_data, upsert_user, get_user,
     create_category, list_categories_by_user, delete_category
 )
-from server_backend.database.code.database_command import (
+from server_backend.database.code.command.database_command import (
     create_schedule as server_create_schedule,
     list_schedule_by_user as server_list_schedule_by_user,
     delete_schedule as server_delete_schedule,

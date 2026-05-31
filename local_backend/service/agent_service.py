@@ -1,7 +1,9 @@
+import asyncio
+import logging
+
 from business.agent_logic import AgentLogic
 from database.code.handle.database_chat_handle import ChatHandle
 from database.code.operations.api_key_storage import get_active_api_keys
-import asyncio
 import json
 import re
 import re
@@ -28,6 +30,7 @@ from personality import InteractionLogger, ProfileExtractor, MBTIInferencer, Use
 from database.code.operations.database_interaction_log_operations import InteractionLogOperations
 from database.code.operations.database_user_personality_operations import UserPersonalityOperations
 
+logger = logging.getLogger(__name__)
 
 # Track currently connected (WebSocket) users.
 # Only users in this set are considered "active" for scheduled tasks like email sync.

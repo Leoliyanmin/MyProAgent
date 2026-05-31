@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     )
 
     # ---- Application ----
-    APP_NAME: str
-    APP_VERSION: str
+    APP_NAME: str = "ProAgent-Server"
+    APP_VERSION: str = "0.0.0"
     DEBUG: bool = False
     TEST_MODE: bool = False
     SKIP_VERIFICATION: bool = False
@@ -27,10 +27,10 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     # ---- Database ----
-    DATABASE_URL: str
+    DATABASE_URL: str = "sqlite:///./server_app.db"
 
     # ---- JWT ----
-    SECRET_KEY: str
+    SECRET_KEY: str = "dev-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080
 

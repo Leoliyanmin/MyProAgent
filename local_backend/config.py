@@ -18,18 +18,18 @@ class Settings(BaseSettings):
     )
 
     # ---- Application ----
-    APP_NAME: str
-    APP_VERSION: str
+    APP_NAME: str = "ProAgent-Local"
+    APP_VERSION: str = "0.0.0"
     DEBUG: bool = False
     TEST_MODE: bool = False
     SKIP_VERIFICATION: bool = False
     LOG_LEVEL: str = "INFO"
 
     # ---- Database ----
-    DATABASE_URL: str
+    DATABASE_URL: str = "sqlite:///./local_app.db"
 
     # ---- JWT ----
-    SECRET_KEY: str
+    SECRET_KEY: str = "dev-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080
 
@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     EMAIL_SYNC_MAX_MESSAGES: int = 20
 
     # ---- Encryption ----
-    ENCRYPTION_KEY: str
+    ENCRYPTION_KEY: str = "dev-encryption-key-change-in-production"
 
 
 settings = Settings()

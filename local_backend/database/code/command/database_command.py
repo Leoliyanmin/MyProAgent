@@ -1463,8 +1463,6 @@ def delete_interaction_log(conversation_id: str, db_path: str | Path = DEFAULT_D
     _execute("DELETE FROM interaction_log WHERE conversation_id = ?", (conversation_id,), db_path)
 
 
-
-
 def count_interaction_logs_by_user(user_id: str, db_path: str | Path = DEFAULT_DB_PATH) -> int:
     row = _fetch_one("SELECT COUNT(*) as cnt FROM interaction_log WHERE user_id = ?", (user_id,), db_path)
     return row["cnt"] if row else 0
