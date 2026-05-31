@@ -241,12 +241,23 @@ class AgentService:
 
     @staticmethod
     def _build_file_manager_message(user_message: str, working_directory: Path) -> str:
+        # Don't wrap vague/greeting messages with the file-manager prefix
+        # to avoid forcing unnecessary directory exploration
+        vague_patterns = ["测试", "test", "hello", "你好", "看看", "有什么", "里面"]
+        user_lower = user_message.strip().lower()
+        if any(p in user_lower for p in vague_patterns):
+            return (
+                f"当前工作目录已设置为: {working_directory}\n"
+                "如果你需要操作文件，可以使用 list_dir/read_file/write_file/edit_file/"
+                "delete_file/move_file/copy_file/create_dir 等工具。\n\n"
+                f"用户请求:\n{user_message}"
+            )
         return (
             "你正在执行文件管理任务。\n"
             f"当前工作目录: {working_directory}\n"
             "规则:\n"
             "1) 除非用户明确指定其他绝对路径，否则所有相对路径都基于当前工作目录。\n"
-            "2) 处理文件时优先使用工具：list_dir/read_file/write_file/edit_file/delete_file/move_file/copy_file/create_dir。\n"
+            "2) 处理文件时使用工具：list_dir/read_file/write_file/edit_file/delete_file/move_file/copy_file/create_dir。\n"
             "3) 对于删除或覆盖操作，先说明将执行的目标路径，再执行。\n\n"
             f"用户请求:\n{user_message}"
         )

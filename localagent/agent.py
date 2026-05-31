@@ -443,6 +443,7 @@ class LocalAgent:
         iterations = 0
         final_content = ""
         hallucination_detected = False
+        _list_dir_call_count: dict[str, int] = {}
 
         use_streaming = on_stream is not None
 
@@ -524,6 +525,20 @@ class LocalAgent:
                     "tool_call_id": tc.id,
                     "content": result,
                 })
+                # Detect repeated list_dir on the same path to prevent infinite explore loops
+                if tc.name == "list_dir":
+                    dir_path = tc.arguments.get("path", "(workspace root)")
+                    _list_dir_call_count[dir_path] = _list_dir_call_count.get(dir_path, 0) + 1
+                    if _list_dir_call_count[dir_path] >= 3:
+                        logger.warning(f"list_dir called {_list_dir_call_count[dir_path]} times on '{dir_path}' — breaking loop")
+                        messages.append({
+                            "role": "system",
+                            "content": (
+                                "你已经多次列出了相同目录的内容。"
+                                "请根据已有的目录信息直接输出最终回复，不要再调用 list_dir 工具。"
+                                "直接给用户完整回答即可，不需要再列出相同的信息。"
+                            ),
+                        })
         else:
             final_content = "Max iterations reached. Task may not be complete."
 
