@@ -191,7 +191,6 @@ class GetDailyQuoteHistoryTool(BaseTool):
                 get_history_by_date,
             )
             rows = get_history_by_date(user_id, date if date else None)
-            rows = get_today_history(user_id)
             if not rows:
                 label = date if date else "今天"
                 return f"{label}还没有记录过每日一句。"
