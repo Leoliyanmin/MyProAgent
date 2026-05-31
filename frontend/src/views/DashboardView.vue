@@ -3,12 +3,24 @@
     <div class="dashboard-toolbar">
       <h2 class="view-title">工作台概览</h2>
       <div class="toolbar-actions">
+        <select
+          class="preset-select"
+          :value="activePresetKey"
+          @change="handlePresetChange"
+        >
+          <option value="">布局模板</option>
+          <option v-for="p in dashboardStore.namedPresets" :key="p.key" :value="p.key">{{ p.name }}</option>
+        </select>
         <button class="mac-btn-secondary" @click="autoArrangeDashboard">
           自动整理
         </button>
-        <button v-if="isEditing" class="mac-btn-secondary" @click="saveLayoutPreset">
-          保存为模板
-        </button>
+        <template v-if="isEditing">
+          <button v-if="!showPresetName" class="mac-btn-secondary" @click="startPresetSave">保存为模板</button>
+          <template v-else>
+            <input v-model="presetName" class="preset-name-input" placeholder="模板名称" @keydown.enter="commitPreset" @keydown.escape="cancelPreset" />
+            <button class="mac-btn-primary mac-btn-sm" @click="commitPreset">确认</button>
+          </template>
+        </template>
         <button class="mac-btn-primary" :class="{ 'is-active': isEditing }" @click="toggleEditMode">
           {{ isEditing ? '保存布局配置' : '自定义布局' }}
         </button>
@@ -70,6 +82,10 @@ const dashboardStore = useDashboardStore()
 const layoutConfig = dashboardStore.layoutConfig
 
 const isEditing = ref(false)
+const showPresetName = ref(false)
+const presetName = ref('')
+const activePresetKey = ref('')
+
 const toggleEditMode = () => {
   isEditing.value = !isEditing.value
   if (!isEditing.value) {
@@ -83,9 +99,30 @@ const autoArrangeDashboard = () => {
   dashboardStore.autoArrangeLayout()
 }
 
-const saveLayoutPreset = () => {
+const startPresetSave = () => {
+  presetName.value = ''
+  showPresetName.value = true
+}
+
+const commitPreset = () => {
+  const name = presetName.value.trim()
+  if (!name) { showPresetName.value = false; return }
   snapHeatmapLayouts()
-  dashboardStore.saveCurrentLayoutAsPreset()
+  dashboardStore.saveCurrentLayoutAsPreset(name)
+  activePresetKey.value = '' // reset dropdown
+  showPresetName.value = false
+}
+
+const cancelPreset = () => {
+  showPresetName.value = false
+  presetName.value = ''
+}
+
+const handlePresetChange = (e) => {
+  const key = e.target.value
+  if (!key) return
+  dashboardStore.applyPreset(key)
+  activePresetKey.value = '' // reset to placeholder after applying
 }
 
 const applyHeatmapPreset = (item, width = item.w, height = item.h) => {
@@ -198,6 +235,32 @@ onUnmounted(() => {
   color: #ffffff;
   border-color: #007aff;
 }
+
+.preset-select {
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  max-width: 130px;
+}
+.preset-select:focus { border-color: #007aff; }
+
+.preset-name-input {
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  outline: none;
+  width: 110px;
+  font-family: inherit;
+}
+.preset-name-input:focus { border-color: #007aff; }
+
+.mac-btn-sm { font-size: 12px; padding: 5px 10px; }
 
 /* 网格容器需自适应剩余高度并允许内部溢出计算 */
 .grid-wrapper {

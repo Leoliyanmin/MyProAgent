@@ -525,20 +525,38 @@ export const useDashboardStore = defineStore('dashboard', () => {
     })
   }
 
-  const saveCurrentLayoutAsPreset = () => {
+  const saveCurrentLayoutAsPreset = (name) => {
     const normalized = layoutConfig.value.map(normalizeLayoutItem)
     const preset = createLayoutPreset(normalized)
     customLayoutPresets.value = {
       ...customLayoutPresets.value,
-      [preset.key]: preset
+      [preset.key]: { ...preset, name: name || preset.key }
     }
     saveLayoutPresetsToStorage(customLayoutPresets.value)
     behaviorProfileStore.recordBehaviorEvent('dashboard_template_saved', {
       module: 'dashboard',
       layoutKey: preset.key,
+      name,
       widgetCount: normalized.length
     })
     return preset
+  }
+
+  const namedPresets = computed(() =>
+    Object.entries(customLayoutPresets.value)
+      .filter(([, p]) => p.name)
+      .map(([key, p]) => ({ key, name: p.name }))
+  )
+
+  const applyPreset = (key) => {
+    const preset = customLayoutPresets.value[key]
+    if (!preset) return
+    const normalized = layoutConfig.value.map(normalizeLayoutItem)
+    const arranged = applyLayoutPreset(normalized, preset) || arrangeDashboardLayout(normalized)
+    if (arranged) {
+      layoutConfig.value.splice(0, layoutConfig.value.length, ...arranged)
+      saveLayoutToStorage(layoutConfig.value)
+    }
   }
 
   const resetLayout = () => {
@@ -720,6 +738,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     saveLayout,
     autoArrangeLayout,
     saveCurrentLayoutAsPreset,
+    namedPresets,
+    applyPreset,
     resetLayout,
 
     miniWidgets,
