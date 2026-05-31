@@ -174,6 +174,9 @@ async function loadPresetsFromAPI() {
     }
     if (Object.keys(presets).length > 0) {
       customLayoutPresets.value = presets
+      if (!customLayoutPresets.value[activePresetKey.value]) {
+        activePresetKey.value = Object.keys(presets)[0]
+      }
       saveLayoutPresetsToStorage(presets)
     }
   } catch (err) {
