@@ -506,6 +506,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   // ==============================
   const layoutConfig = ref(loadLayoutFromStorage())
   const customLayoutPresets = ref(loadLayoutPresetsFromStorage())
+  const activePresetKey = ref('')
 
   const saveLayout = () => {
     saveLayoutToStorage(layoutConfig.value)
@@ -525,17 +526,41 @@ export const useDashboardStore = defineStore('dashboard', () => {
     })
   }
 
+  const ensureDefaultPreset = () => {
+    const keys = Object.keys(customLayoutPresets.value)
+    if (keys.length === 0) {
+      const preset = createLayoutPreset(layoutConfig.value.map(normalizeLayoutItem))
+      const key = preset.key
+      customLayoutPresets.value = { [key]: { ...preset, name: '默认布局' } }
+      saveLayoutPresetsToStorage(customLayoutPresets.value)
+      activePresetKey.value = key
+    } else if (!activePresetKey.value || !customLayoutPresets.value[activePresetKey.value]) {
+      activePresetKey.value = keys[0]
+    }
+  }
+
   const saveCurrentLayoutAsPreset = (name) => {
     const normalized = layoutConfig.value.map(normalizeLayoutItem)
     const preset = createLayoutPreset(normalized)
+    const key = preset.key
+
+    // If saving to current active preset, update its name + items
+    if (activePresetKey.value) {
+      customLayoutPresets.value[activePresetKey.value] = { ...preset, name: name || '默认布局' }
+      saveLayoutPresetsToStorage(customLayoutPresets.value)
+      return preset
+    }
+
+    // Otherwise create new
     customLayoutPresets.value = {
       ...customLayoutPresets.value,
-      [preset.key]: { ...preset, name: name || preset.key }
+      [key]: { ...preset, name: name || preset.key }
     }
+    activePresetKey.value = key
     saveLayoutPresetsToStorage(customLayoutPresets.value)
     behaviorProfileStore.recordBehaviorEvent('dashboard_template_saved', {
       module: 'dashboard',
-      layoutKey: preset.key,
+      layoutKey: key,
       name,
       widgetCount: normalized.length
     })
@@ -547,6 +572,38 @@ export const useDashboardStore = defineStore('dashboard', () => {
       .filter(([, p]) => p.name)
       .map(([key, p]) => ({ key, name: p.name }))
   )
+
+  const activePresetName = computed(() => {
+    const p = customLayoutPresets.value[activePresetKey.value]
+    return p?.name || '默认布局'
+  })
+
+  const createNewPreset = (name) => {
+    const normalized = layoutConfig.value.map(normalizeLayoutItem)
+    const preset = createLayoutPreset(normalized)
+    const key = preset.key
+    customLayoutPresets.value = {
+      ...customLayoutPresets.value,
+      [key]: { ...preset, name: name || '新模板' }
+    }
+    activePresetKey.value = key
+    saveLayoutPresetsToStorage(customLayoutPresets.value)
+    saveLayoutToStorage(layoutConfig.value)
+    return key
+  }
+
+  const deletePreset = (key) => {
+    const keys = Object.keys(customLayoutPresets.value)
+    if (keys.length <= 1) return false
+    const newPresets = { ...customLayoutPresets.value }
+    delete newPresets[key]
+    customLayoutPresets.value = newPresets
+    if (activePresetKey.value === key) {
+      activePresetKey.value = Object.keys(newPresets)[0]
+    }
+    saveLayoutPresetsToStorage(customLayoutPresets.value)
+    return true
+  }
 
   const applyPreset = (key) => {
     const preset = customLayoutPresets.value[key]
@@ -567,6 +624,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     const arranged = applyLayoutPreset(normalized, preset) || arrangeDashboardLayout(normalized)
     if (arranged) {
       layoutConfig.value.splice(0, layoutConfig.value.length, ...arranged)
+      activePresetKey.value = key
       saveLayoutToStorage(layoutConfig.value)
       saveMiniWidgets(miniWidgets.value)
     }
@@ -757,7 +815,12 @@ export const useDashboardStore = defineStore('dashboard', () => {
     autoArrangeLayout,
     saveCurrentLayoutAsPreset,
     namedPresets,
+    activePresetKey,
+    activePresetName,
+    createNewPreset,
+    deletePreset,
     applyPreset,
+    ensureDefaultPreset,
     resetLayout,
 
     miniWidgets,

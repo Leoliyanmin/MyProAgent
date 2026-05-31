@@ -3,24 +3,41 @@
     <div class="dashboard-toolbar">
       <h2 class="view-title">工作台概览</h2>
       <div class="toolbar-actions">
-        <select
-          class="preset-select"
-          :value="activePresetKey"
-          @change="handlePresetChange"
-        >
-          <option value="">布局模板</option>
-          <option v-for="p in dashboardStore.namedPresets" :key="p.key" :value="p.key">{{ p.name }}</option>
-        </select>
+        <!-- Custom preset dropdown -->
+        <div class="preset-dropdown" ref="presetDropdownRef">
+          <button class="preset-trigger" @click="showPresetMenu = !showPresetMenu">
+            <span class="preset-trigger-text">{{ dashboardStore.activePresetName }}</span>
+            <svg class="preset-trigger-arrow" :class="{ open: showPresetMenu }" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div v-if="showPresetMenu" class="preset-menu">
+            <div
+              v-for="p in dashboardStore.namedPresets"
+              :key="p.key"
+              class="preset-menu-item"
+              :class="{ active: p.key === dashboardStore.activePresetKey }"
+              @click="selectPreset(p.key)"
+            >
+              <span class="preset-menu-name">{{ p.name }}</span>
+              <button
+                class="preset-delete-btn"
+                :class="{ disabled: dashboardStore.namedPresets.length <= 1 }"
+                @click.stop="handleDeletePreset(p.key)"
+                :title="dashboardStore.namedPresets.length <= 1 ? '至少保留一个模板' : '删除模板'"
+              >×</button>
+            </div>
+            <div class="preset-menu-add" @click="handleAddPreset">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>新建模板</span>
+            </div>
+          </div>
+        </div>
+        <template v-if="showNewPresetInput">
+          <input v-model="newPresetName" class="preset-name-input" placeholder="模板名称" @keydown.enter="commitNewPreset" @keydown.escape="cancelNewPreset" ref="presetNameInputRef" />
+          <button class="mac-btn-primary mac-btn-sm" @click="commitNewPreset">确认</button>
+        </template>
         <button class="mac-btn-secondary" @click="autoArrangeDashboard">
           自动整理
         </button>
-        <template v-if="isEditing">
-          <button v-if="!showPresetName" class="mac-btn-secondary" @click="startPresetSave">保存为模板</button>
-          <template v-else>
-            <input v-model="presetName" class="preset-name-input" placeholder="模板名称" @keydown.enter="commitPreset" @keydown.escape="cancelPreset" />
-            <button class="mac-btn-primary mac-btn-sm" @click="commitPreset">确认</button>
-          </template>
-        </template>
         <button class="mac-btn-primary" :class="{ 'is-active': isEditing }" @click="toggleEditMode">
           {{ isEditing ? '保存布局配置' : '自定义布局' }}
         </button>
@@ -83,14 +100,18 @@ const dashboardStore = useDashboardStore()
 const layoutConfig = dashboardStore.layoutConfig
 
 const isEditing = ref(false)
-const showPresetName = ref(false)
-const presetName = ref('')
-const activePresetKey = ref('')
+const showPresetMenu = ref(false)
+const showNewPresetInput = ref(false)
+const newPresetName = ref('')
+const presetDropdownRef = ref(null)
 
 const toggleEditMode = () => {
   isEditing.value = !isEditing.value
-  if (!isEditing.value) {
+  if (isEditing.value) {
     snapHeatmapLayouts()
+  } else {
+    snapHeatmapLayouts()
+    dashboardStore.saveCurrentLayoutAsPreset(dashboardStore.activePresetName)
     dashboardStore.saveLayout()
   }
 }
@@ -100,30 +121,30 @@ const autoArrangeDashboard = () => {
   dashboardStore.autoArrangeLayout()
 }
 
-const startPresetSave = () => {
-  presetName.value = ''
-  showPresetName.value = true
-}
-
-const commitPreset = () => {
-  const name = presetName.value.trim()
-  if (!name) { showPresetName.value = false; return }
-  snapHeatmapLayouts()
-  dashboardStore.saveCurrentLayoutAsPreset(name)
-  activePresetKey.value = '' // reset dropdown
-  showPresetName.value = false
-}
-
-const cancelPreset = () => {
-  showPresetName.value = false
-  presetName.value = ''
-}
-
-const handlePresetChange = (e) => {
-  const key = e.target.value
-  if (!key) return
+const selectPreset = (key) => {
   dashboardStore.applyPreset(key)
-  activePresetKey.value = '' // reset to placeholder after applying
+  showPresetMenu.value = false
+}
+
+const handleDeletePreset = (key) => {
+  if (dashboardStore.namedPresets.length <= 1) return
+  dashboardStore.deletePreset(key)
+}
+
+const handleAddPreset = () => {
+  showNewPresetInput.value = true
+  newPresetName.value = ''
+}
+
+const commitNewPreset = () => {
+  const name = newPresetName.value.trim()
+  if (!name) { showNewPresetInput.value = false; return }
+  dashboardStore.createNewPreset(name)
+  showNewPresetInput.value = false
+}
+
+const cancelNewPreset = () => {
+  showNewPresetInput.value = false
 }
 
 const TYPE_TO_MINI = {
@@ -169,6 +190,7 @@ const onItemResized = (itemId, newHeight, newWidth) => {
 onMounted(() => {
   const cfg = dashboardStore.layoutConfig
   snapHeatmapLayouts()
+  dashboardStore.ensureDefaultPreset()
   const hasMarkdown = cfg.some(item => item.type === 'markdown')
   if (!hasMarkdown) {
     cfg.push({
@@ -263,6 +285,60 @@ onUnmounted(() => {
   max-width: 130px;
 }
 .preset-select:focus { border-color: #007aff; }
+
+.preset-dropdown { position: relative; }
+
+.preset-trigger {
+  display: flex; align-items: center; gap: 4px;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  font-weight: 500;
+  min-width: 90px;
+}
+.preset-trigger:hover { border-color: rgba(0,0,0,0.25); }
+.preset-trigger-text { white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+.preset-trigger-arrow { flex-shrink: 0; color: rgba(0,0,0,0.3); transition: transform 0.15s; }
+.preset-trigger-arrow.open { transform: rotate(180deg); }
+
+.preset-menu {
+  position: absolute; top: 100%; left: 0; margin-top: 4px;
+  background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  min-width: 150px; z-index: 100; overflow: hidden;
+}
+.preset-menu-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; font-size: 13px; cursor: pointer;
+  transition: background 0.1s;
+}
+.preset-menu-item:hover { background: rgba(0,0,0,0.03); }
+.preset-menu-item.active { background: rgba(0,122,255,0.06); font-weight: 600; color: #007aff; }
+.preset-menu-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.preset-delete-btn {
+  background: none; border: none; font-size: 16px; color: rgba(0,0,0,0.2);
+  cursor: pointer; padding: 0 4px; line-height: 1; flex-shrink: 0;
+  border-radius: 3px; transition: all 0.1s;
+}
+.preset-menu-item:hover .preset-delete-btn { color: rgba(0,0,0,0.4); }
+.preset-delete-btn:hover { color: #ff3b30 !important; background: rgba(255,59,48,0.06); }
+.preset-delete-btn.disabled { color: rgba(0,0,0,0.1); cursor: not-allowed; }
+.preset-delete-btn.disabled:hover { color: rgba(0,0,0,0.1) !important; background: none; }
+
+.preset-menu-add {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px; font-size: 12px; color: #007aff;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  cursor: pointer; transition: background 0.1s;
+}
+.preset-menu-add:hover { background: rgba(0,122,255,0.04); }
 
 .preset-name-input {
   border: 1px solid rgba(0,0,0,0.15);
