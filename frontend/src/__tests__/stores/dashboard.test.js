@@ -9,6 +9,11 @@ vi.mock('@/services/api.js', () => ({
     update: vi.fn(),
     delete: vi.fn(),
   },
+  dashboardPresetsAPI: {
+    list: vi.fn(() => Promise.resolve([])),
+    save: vi.fn(() => Promise.resolve({ preset_id: 1 })),
+    delete: vi.fn(() => Promise.resolve({ ok: true })),
+  },
 }))
 
 import { useDashboardStore } from '@/stores/dashboard'
@@ -188,6 +193,45 @@ describe('dashboard store', () => {
 
       dashboard.autoArrangeLayout()
 
+      expect(dashboard.layoutConfig.find(item => item.type === 'todo').x).toBe(8)
+      expect(dashboard.layoutConfig.find(item => item.type === 'messages').x).toBe(0)
+    })
+  })
+
+  describe('applyPreset', () => {
+    it('keeps the layout array reference while switching templates', () => {
+      const dashboard = useDashboardStore()
+      dashboard.layoutConfig.splice(0, dashboard.layoutConfig.length,
+        { x: 8, y: 0, w: 4, h: 6, i: 'todo', type: 'todo', minW: 3, minH: 4 },
+        { x: 0, y: 0, w: 5, h: 6, i: 'messages', type: 'messages', minW: 4, minH: 4 }
+      )
+      dashboard.customLayoutPresets = {
+        first: {
+          name: 'First template',
+          items: [
+            { x: 0, y: 0, w: 4, h: 6, type: 'todo' },
+            { x: 4, y: 0, w: 5, h: 6, type: 'messages' },
+          ],
+        },
+        second: {
+          name: 'Second template',
+          items: [
+            { x: 8, y: 0, w: 4, h: 6, type: 'todo' },
+            { x: 0, y: 0, w: 5, h: 6, type: 'messages' },
+          ],
+        },
+      }
+      const originalLayout = dashboard.layoutConfig
+
+      dashboard.applyPreset('first')
+
+      expect(dashboard.layoutConfig).toBe(originalLayout)
+      expect(dashboard.layoutConfig.find(item => item.type === 'todo').x).toBe(0)
+      expect(dashboard.layoutConfig.find(item => item.type === 'messages').x).toBe(4)
+
+      dashboard.applyPreset('second')
+
+      expect(dashboard.layoutConfig).toBe(originalLayout)
       expect(dashboard.layoutConfig.find(item => item.type === 'todo').x).toBe(8)
       expect(dashboard.layoutConfig.find(item => item.type === 'messages').x).toBe(0)
     })

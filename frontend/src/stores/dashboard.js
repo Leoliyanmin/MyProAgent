@@ -699,9 +699,9 @@ export const useDashboardStore = defineStore('dashboard', () => {
       }
     })
 
-    layoutConfig.value = newLayout
+    layoutConfig.value.splice(0, layoutConfig.value.length, ...newLayout)
     activePresetKey.value = key
-    saveLayoutToStorage(newLayout)
+    saveLayoutToStorage(layoutConfig.value)
     saveMiniWidgets(miniWidgets.value)
   }
 

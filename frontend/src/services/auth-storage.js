@@ -53,13 +53,12 @@ export async function saveAuth(session) {
     expires_at: Date.now() + sessionTTLMs(),
   }
   _cachedToken = session.token
+  localStorage.setItem(STORE_KEY, JSON.stringify(payload))
 
   if (isTauriEnv) {
     await ensureStore()
     await _store.set(STORE_KEY, payload)
     await _store.save()
-  } else {
-    localStorage.setItem(STORE_KEY, JSON.stringify(payload))
   }
 }
 
@@ -96,6 +95,7 @@ export async function loadAuth() {
   }
 
   _cachedToken = raw.token
+  localStorage.setItem(STORE_KEY, JSON.stringify(raw))
   return { token: raw.token, user_email: raw.user_email || '' }
 }
 

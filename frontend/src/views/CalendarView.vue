@@ -57,7 +57,15 @@
             @dragleave="onDragLeave"
             @drop="onDrop($event, day)"
           >
-            <span class="date-num" :class="{ 'is-today-text': day.isToday }" @click.stop="openEventModal(day.date)">{{ day.dayNum }}</span>
+            <button
+              type="button"
+              class="date-num"
+              :class="{ 'is-today-text': day.isToday }"
+              @click.stop="switchToDayView(day.date)"
+              :title="`查看 ${day.date} 的日视图`"
+            >
+              {{ day.dayNum }}
+            </button>
             <div class="events-container" @click.self="openEventModal(day.date)">
               <div
                 v-for="event in day.events.slice(0, 3)"
@@ -284,12 +292,14 @@
 
 <script setup>
 import { ref, reactive, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { useBehaviorProfileStore } from '../stores/behaviorProfile.js'
 import { useCalendarStore } from '../stores/calendar.js'
 import { useDashboardStore } from '../stores/dashboard.js'
 import { computeEventLayout } from '../utils/eventLayout.js'
 
 const calendarStore = useCalendarStore()
 const dashboardStore = useDashboardStore()
+const behaviorProfileStore = useBehaviorProfileStore()
 
 const isRefreshing = ref(false)
 const isImporting = ref(false)
@@ -645,6 +655,11 @@ const goToToday = () => { calendarStore.currentDate = new Date() }
 const switchToDayView = (dateStr) => {
   calendarStore.currentDate = new Date(dateStr)
   calendarStore.viewType = 'day'
+  behaviorProfileStore.recordBehaviorEvent('calendar_view_changed', {
+    module: 'calendar',
+    viewType: 'day',
+    source: 'month_date_number'
+  })
 }
 
 const prevPeriod = () => {
@@ -740,6 +755,11 @@ const saveEvent = async () => {
 
   if (isEditing.value) {
     calendarStore.updateEvent(draftEvent.value)
+    behaviorProfileStore.recordBehaviorEvent('calendar_event_updated', {
+      module: 'calendar',
+      hasTime: Boolean(draftEvent.value.startTime && draftEvent.value.endTime),
+      priority: draftEvent.value.priority
+    })
     const existingInBasic = calendarStore.basicEvents.find(e => e.id === draftEvent.value.id)
     if (existingInBasic) {
       try {
@@ -768,6 +788,12 @@ const saveEvent = async () => {
       // 后端失败时用本地 ID 兜底
       calendarStore.addEvent(draftEvent.value)
     }
+    behaviorProfileStore.recordBehaviorEvent('calendar_event_created', {
+      module: 'calendar',
+      hasTime: Boolean(draftEvent.value.startTime && draftEvent.value.endTime),
+      priority: draftEvent.value.priority,
+      showInTodo: draftEvent.value.showInTodo !== false
+    })
   }
   closeModal()
 
@@ -1305,7 +1331,9 @@ onBeforeUnmount(() => {
 .date-num {
   font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center;
   width: 20px; height: 20px; border-radius: 50%; margin-bottom: 2px; align-self: flex-end; color: #1d1d1f;
+  border: none; background: transparent; padding: 0; cursor: pointer;
 }
+.date-num:hover { background: rgba(0, 122, 255, 0.08); color: #007aff; }
 .date-num.is-today-text { background: #007aff; color: white; }
 
 .events-container { flex: 1; display: flex; flex-direction: column; gap: 2px; overflow: hidden; pointer-events: none;}
