@@ -25,7 +25,17 @@
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
         </button>
-        <div class="mini-bar-spacer"></div>
+        <div v-if="dailyQuoteStore.text" class="mini-bar-spacer mini-bar-quote">{{ dailyQuoteStore.text }}</div>
+        <div v-else class="mini-bar-spacer"></div>
+        <button
+          v-if="dailyQuoteStore.text"
+          class="mini-bar-agent-btn"
+          :disabled="dailyQuoteStore.loading"
+          @click="refreshQuote"
+          :title="dailyQuoteStore.loading ? '获取中…' : '换一句'"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
         <button
           class="mini-bar-agent-btn"
           :class="{ 'is-active': isAgentOpen }"
@@ -68,12 +78,14 @@ import AgentSidebar from './components/layout/AgentSidebar.vue'
 import ThemeOverlayEditor from './components/layout/ThemeOverlayEditor.vue'
 import { useThemeStore } from './stores/theme.js'
 import { useEmailStore } from './stores/email.js'
+import { useDailyQuoteStore } from './stores/dailyQuote.js'
 
 const themeStore = useThemeStore()
 const emailStore = useEmailStore()
 const authStore = useAuthStore()
 const calendarStore = useCalendarStore()
 const dashboardStore = useDashboardStore()
+const dailyQuoteStore = useDailyQuoteStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -127,6 +139,7 @@ onMounted(() => {
   syncAgentShellWithLayout()
   if (authStore.isAuthenticated) {
     loadInitialData()
+    dailyQuoteStore.load()
     emailStore.fetchStatus()
     startPolling()
   }
@@ -221,6 +234,14 @@ const toggleAgent = () => {
   if (isAgentOpen.value) removeAgentMini()
 }
 
+const refreshQuote = async () => {
+  try {
+    await dailyQuoteStore.refresh()
+  } catch {
+    // silent — refresh button is non-critical
+  }
+}
+
 const handleAuthRequired = () => {
   authStore.token = null
   router.push('/login')
@@ -299,6 +320,16 @@ html, body, #app {
 
 .mini-bar-spacer {
   flex: 1;
+}
+
+.mini-bar-quote {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  user-select: none;
 }
 
 .mini-bar-agent-btn {

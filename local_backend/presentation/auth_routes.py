@@ -4,11 +4,13 @@ from presentation.dependencies import get_current_user_id
 from service.user_service import UserService
 from business.auth_service import AuthService
 from database.code.handle.database_user_setting_handle import UserSettingHandle
+from database.code.handle.database_quote_history_handle import QuoteHistoryHandle
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 user_service = UserService()
 auth_service = AuthService()
 setting_handle = UserSettingHandle()
+quote_history_handle = QuoteHistoryHandle()
 
 
 @router.post("/verification/send", response_model=VerificationCodeResponse)
@@ -105,7 +107,21 @@ async def update_settings(fields: dict = Body(...), user_id: str = Depends(get_c
         result = setting_handle.update_settings(user_id, fields)
         if not result["ok"]:
             raise HTTPException(status_code=400, detail=result["message"])
+        daily_quote = fields.get("daily_quote")
+        if daily_quote:
+            source = fields.get("daily_quote_source", "custom")
+            quote_author = fields.get("daily_quote_author", "")
+            quote_from = fields.get("daily_quote_from", "")
+            quote_history_handle.add(user_id, daily_quote, source, quote_author, quote_from)
     return {"success": True, "message": "保存成功"}
+
+
+@router.get("/settings/daily-quote/history")
+async def get_daily_quote_history(user_id: str = Depends(get_current_user_id)):
+    result = quote_history_handle.get_today(user_id)
+    if not result["ok"]:
+        raise HTTPException(status_code=500, detail=result["message"])
+    return result["data"]
 
 
 # ==================== API Key Management ====================
@@ -179,15 +195,3 @@ async def toggle_api_key(
         raise HTTPException(status_code=404, detail="API key not found")
     return result
 
-
-@router.post("/settings/api-keys/{key_id}/toggle")
-async def toggle_api_key(
-    key_id: str,
-    user_id: str = Depends(get_current_user_id),
-):
-    """Toggle API key active state."""
-    from database.code.operations.api_key_storage import toggle_api_key
-    result = toggle_api_key(user_id, key_id)
-    if not result["success"]:
-        raise HTTPException(status_code=404, detail="API key not found")
-    return result

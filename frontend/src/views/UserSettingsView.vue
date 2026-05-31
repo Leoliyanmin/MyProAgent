@@ -212,7 +212,51 @@
           <p class="progress-step">{{ bindingProgress.step }}</p>
         </div>
       </article>
+
+      <article class="panel">
+        <h3 class="panel-title">每日一句</h3>
+        <div class="field-row">
+          <label class="field-label" for="dailyQuoteText">自定义内容</label>
+          <div class="field-inline">
+            <input
+              id="dailyQuoteText"
+              v-model="dailyQuoteText"
+              class="text-input"
+              type="text"
+              :disabled="loadingQuote"
+              placeholder="输入今日的一句话，留空则不显示..."
+            />
+            <button class="action-btn" type="button" @click="saveDailyQuote">保存</button>
+            <button class="action-btn ghost" type="button" :disabled="loadingQuote" @click="fetchHitokoto">{{ loadingQuote ? '获取中…' : '自动获取' }}</button>
+          </div>
+          <p v-if="dailyQuoteNotice" class="status-text" :class="{ 'status-success': dailyQuoteNoticeType === 'success', 'status-error': dailyQuoteNoticeType === 'error' }">{{ dailyQuoteNotice }}</p>
+        </div>
+        <button class="action-btn ghost" type="button" style="margin-top: 8px;" @click="showHistoryModal = true; dailyQuoteStore.loadHistory()">查看今日记录</button>
+      </article>
     </div>
+
+    <Teleport to="body">
+      <div v-if="showHistoryModal" class="password-modal-mask" @click.self="showHistoryModal = false">
+        <div class="password-modal" role="dialog" aria-modal="true" aria-label="今日名言记录" style="max-width: 480px;">
+          <h3 class="password-modal-title">今日名言记录</h3>
+          <ul v-if="dailyQuoteStore.history.length" class="quote-history-list">
+            <li v-for="(item, i) in dailyQuoteStore.history" :key="i" class="quote-history-item">
+              <div class="quote-history-main">
+                <span class="quote-history-text">{{ item.quote_text }}</span>
+                <span class="quote-history-attribution" v-if="item.quote_author || item.quote_from">
+                  —— {{ [item.quote_author, item.quote_from ? `《${item.quote_from}》` : ''].filter(Boolean).join(' ') }}
+                </span>
+              </div>
+              <span class="quote-history-source">{{ item.source === 'hitokoto' ? '一言' : '自定义' }}</span>
+            </li>
+          </ul>
+          <p v-else class="binding-meta" style="text-align: center; padding: 20px 0;">今天还没有记录</p>
+          <div class="no-key-modal-actions" style="margin-top: 16px;">
+            <button class="no-key-modal-btn" type="button" @click="showHistoryModal = false">关闭</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <div v-if="isPasswordModalOpen" class="password-modal-mask" @click.self="closePasswordModal">
       <div class="password-modal" role="dialog" aria-modal="true" aria-label="修改密码">
@@ -286,6 +330,7 @@ import { tisAPI, blackboardAPI, emailAPI, settingsAPI } from '../services/api.js
 import { useCalendarStore } from '../stores/calendar.js'
 import { useAuthStore } from '../stores/auth.js'
 import { useEmailStore } from '../stores/email.js'
+import { useDailyQuoteStore } from '../stores/dailyQuote.js'
 import { getTokenSync } from '../services/auth-storage.js'
 
 const isTauriApp = !!window.__TAURI_INTERNALS__
@@ -301,6 +346,7 @@ if (isTauriApp) {
 }
 
 const authStore = useAuthStore()
+const dailyQuoteStore = useDailyQuoteStore()
 
 const profile = reactive({
   name: authStore.user?.full_name || ''
@@ -309,6 +355,7 @@ const profile = reactive({
 const settingsData = ref({})
 
 const isPasswordModalOpen = ref(false)
+const showHistoryModal = ref(false)
 const passwordNotice = ref('')
 const passwordNoticeType = ref('info')
 const passwordForm = reactive({
@@ -322,6 +369,11 @@ const verifyTimerId = ref(null)
 
 const nameNotice = ref('')
 const nameNoticeType = ref('info')
+
+const dailyQuoteText = ref('')
+const dailyQuoteNotice = ref('')
+const dailyQuoteNoticeType = ref('info')
+const loadingQuote = ref(false)
 
 const mockPasswordBackend = reactive({
   currentPassword: 'OldPass#2026',
@@ -559,6 +611,35 @@ const saveName = async () => {
   } catch (e) {
     nameNotice.value = '保存失败: ' + e.message
     nameNoticeType.value = 'error'
+  }
+}
+
+const saveDailyQuote = async () => {
+  try {
+    await dailyQuoteStore.update(dailyQuoteText.value)
+    dailyQuoteNotice.value = '保存成功'
+    dailyQuoteNoticeType.value = 'success'
+    dailyQuoteStore.loadHistory()
+  } catch (e) {
+    dailyQuoteNotice.value = '保存失败: ' + e.message
+    dailyQuoteNoticeType.value = 'error'
+  }
+}
+
+const fetchHitokoto = async () => {
+  loadingQuote.value = true
+  dailyQuoteNotice.value = ''
+  try {
+    const res = await fetch('https://v1.hitokoto.cn/')
+    const data = await res.json()
+    dailyQuoteText.value = data.hitokoto
+    dailyQuoteNotice.value = `已获取：「${data.hitokoto}」`
+    dailyQuoteNoticeType.value = 'success'
+  } catch (e) {
+    dailyQuoteNotice.value = '获取失败，请检查网络'
+    dailyQuoteNoticeType.value = 'error'
+  } finally {
+    loadingQuote.value = false
   }
 }
 
@@ -968,6 +1049,8 @@ onMounted(() => {
   loadEmailStatus()
   loadSettings()
   loadApiKeys()
+  dailyQuoteStore.load().then(() => { dailyQuoteText.value = dailyQuoteStore.text })
+  dailyQuoteStore.loadHistory()
 })
 
 onBeforeUnmount(() => {
@@ -1337,5 +1420,54 @@ onBeforeUnmount(() => {
 
 .toggle-switch.active .toggle-knob {
   transform: translateX(16px);
+}
+
+.quote-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.quote-history-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 13px;
+}
+
+.quote-history-item:last-child {
+  border-bottom: none;
+}
+
+.quote-history-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.quote-history-text {
+  color: #1d1d1f;
+  line-height: 1.5;
+}
+
+.quote-history-attribution {
+  display: block;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.35);
+  margin-top: 2px;
+}
+
+.quote-history-source {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
 }
 </style>

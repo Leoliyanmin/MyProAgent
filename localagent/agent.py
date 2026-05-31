@@ -60,6 +60,12 @@ from .tools.tis_tools import (
 from .tools.course_tools import (
     ListCoursesTool,
 )
+from .tools.daily_quote_tools import (
+    GetDailyQuoteTool,
+    GetDailyQuoteHistoryTool,
+    SetDailyQuoteTool,
+    RefreshDailyQuoteTool,
+)
 from .tools.task_tools import (
     ListTasksTool,
     CreateTaskTool,
@@ -262,6 +268,13 @@ class LocalAgent:
         self.tools.register(ListCoursesTool(
             lambda: self._runtime_context.get("user_id"),
         ))
+        self.tools.register(GetDailyQuoteTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(GetDailyQuoteHistoryTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(SetDailyQuoteTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(RefreshDailyQuoteTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(ListTasksTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(CreateTaskTool(lambda: self._runtime_context.get("user_id")))
+        self.tools.register(UpdateTaskTool(lambda: self._runtime_context.get("user_id")))
         self.tools.register(ListTasksTool(lambda: self._runtime_context.get("user_id")))
         self.tools.register(CreateTaskTool(lambda: self._runtime_context.get("user_id")))
         self.tools.register(UpdateTaskTool(lambda: self._runtime_context.get("user_id")))

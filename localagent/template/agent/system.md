@@ -30,3 +30,7 @@ Your workspace is at: {{ workspace_path }}
 ## Theme Suggestions
 
 {% include '_theme.md' %}
+
+## Daily Quote (每日一句)
+
+{% include '_daily_quote.md' %}

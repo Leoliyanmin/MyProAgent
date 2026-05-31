@@ -55,6 +55,12 @@ from .tis_tools import (
 from .course_tools import (
     ListCoursesTool,
 )
+from .daily_quote_tools import (
+    GetDailyQuoteTool,
+    GetDailyQuoteHistoryTool,
+    SetDailyQuoteTool,
+    RefreshDailyQuoteTool,
+)
 
 __all__ = [
     "BaseTool",
@@ -98,4 +104,8 @@ __all__ = [
     "CreateTaskTool",
     "UpdateTaskTool",
     "DeleteTaskTool",
+    "GetDailyQuoteTool",
+    "GetDailyQuoteHistoryTool",
+    "SetDailyQuoteTool",
+    "RefreshDailyQuoteTool",
 ]

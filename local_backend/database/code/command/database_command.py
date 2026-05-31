@@ -177,7 +177,7 @@ def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **k
     if existing:
         allowed = {"avatar_url", "bio", "current_focus", "work_preference",
                    "skills", "theme_config", "notification_enabled", "privacy_share_data",
-                   "full_name"}
+                   "full_name", "daily_quote"}
         fields = {k: v for k, v in kwargs.items() if k in allowed and v is not None}
         if not fields:
             return
@@ -188,12 +188,13 @@ def upsert_user_setting(user_id: str, db_path: str | Path = DEFAULT_DB_PATH, **k
     else:
         _execute(
             """INSERT INTO user_setting (user_id, avatar_url, bio, current_focus,
-               work_preference, skills, theme_config, notification_enabled,
+               work_preference, skills, theme_config, daily_quote, notification_enabled,
                privacy_share_data, full_name, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (user_id, kwargs.get("avatar_url"), kwargs.get("bio"),
              kwargs.get("current_focus"), kwargs.get("work_preference"),
              kwargs.get("skills"), kwargs.get("theme_config"),
+             kwargs.get("daily_quote"),
              kwargs.get("notification_enabled", 1), kwargs.get("privacy_share_data", 0),
              kwargs.get("full_name"), now),
             db_path,

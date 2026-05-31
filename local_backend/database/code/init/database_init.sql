@@ -109,11 +109,24 @@ CREATE TABLE IF NOT EXISTS user_setting (
     work_preference      TEXT,
     skills               TEXT,
     theme_config         TEXT,
+    daily_quote          TEXT,
     notification_enabled INTEGER NOT NULL DEFAULT 1,
     privacy_share_data   INTEGER NOT NULL DEFAULT 0,
     updated_at           TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+CREATE TABLE IF NOT EXISTS daily_quote_history (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      TEXT NOT NULL,
+    quote_text   TEXT NOT NULL,
+    quote_author TEXT DEFAULT '',
+    quote_from   TEXT DEFAULT '',
+    source       TEXT NOT NULL DEFAULT 'custom',
+    created_at   TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_daily_quote_history_user_date ON daily_quote_history(user_id, created_at);
 
 CREATE TABLE IF NOT EXISTS email_account (
     account_id          INTEGER PRIMARY KEY AUTOINCREMENT,

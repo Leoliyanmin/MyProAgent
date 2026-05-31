@@ -529,6 +529,10 @@ export const settingsAPI = {
     })
   },
 
+  getQuoteHistory: async () => {
+    return fetchWithAuth('/auth/settings/daily-quote/history')
+  },
+
   // API Key management
   getApiKeys: async () => {
     return fetchWithAuth('/auth/settings/api-keys')

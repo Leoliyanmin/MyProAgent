@@ -84,7 +84,11 @@ const TOOL_LABELS = {
   list_courses: '正在加载课程...',
   get_starred_emails: '正在获取星标邮件...',
   star_email: '正在标记星标...',
-  unstar_email: '正在取消星标...'
+  unstar_email: '正在取消星标...',
+  get_daily_quote: '正在读取每日一句...',
+  set_daily_quote: '正在更新每日一句...',
+  refresh_daily_quote: '正在刷新每日一句...',
+  get_daily_quote_history: '正在查看历史记录...'
 }
 
 const TOOL_CHAT_LABELS = {
