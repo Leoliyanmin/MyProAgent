@@ -618,41 +618,39 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
     const presetTypes = new Set(preset.items.map(item => item.type))
 
-    // Remove widgets not in target preset
-    const toRemove = []
-    for (const item of layoutConfig.value) {
-      if (!presetTypes.has(item.type)) {
-        const miniType = TYPE_TO_QUICK_TOGGLE[item.type]
-        if (miniType) toRemove.push(miniType)
+    // Sync miniWidgets to match preset types
+    const newWidgets = new Set()
+    for (const widgetType of miniWidgets.value) {
+      const mapped = MINI_LAYOUT_MAP[widgetType]?.type
+      if (mapped && presetTypes.has(mapped)) newWidgets.add(widgetType)
+    }
+    for (const item of preset.items) {
+      const miniType = TYPE_TO_QUICK_TOGGLE[item.type]
+      if (miniType) newWidgets.add(miniType)
+    }
+    miniWidgets.value = newWidgets
+
+    // Directly rebuild layout from preset items
+    const newLayout = preset.items.map(pItem => {
+      const miniType = TYPE_TO_QUICK_TOGGLE[pItem.type]
+      const defaults = miniType ? MINI_LAYOUT_MAP[miniType] : null
+      return {
+        x: pItem.x,
+        y: pItem.y,
+        w: pItem.w,
+        h: pItem.h,
+        i: defaults?.i || pItem.type,
+        type: pItem.type,
+        minW: defaults?.minW || 2,
+        minH: defaults?.minH || 1,
+        heatmapVariant: pItem.heatmapVariant,
       }
-    }
-    if (toRemove.length) {
-      miniWidgets.value = new Set([...miniWidgets.value].filter(t => !toRemove.includes(t)))
-    }
+    })
 
-    // Add missing widgets from preset
-    const presentTypes = new Set(layoutConfig.value.map(item => item.type))
-    for (const presetItem of preset.items) {
-      if (!presentTypes.has(presetItem.type)) {
-        const miniType = TYPE_TO_QUICK_TOGGLE[presetItem.type]
-        if (miniType && !miniWidgets.value.has(miniType)) {
-          miniWidgets.value = new Set([...miniWidgets.value, miniType])
-        }
-        if (miniType) _addMiniToLayout(miniType)
-      }
-    }
-
-    // Now apply positions — remove extras after adding missing
-    layoutConfig.value = layoutConfig.value.filter(item => presetTypes.has(item.type))
-
-    const normalized = layoutConfig.value.map(normalizeLayoutItem)
-    const arranged = applyLayoutPreset(normalized, preset) || arrangeDashboardLayout(normalized)
-    if (arranged) {
-      layoutConfig.value.splice(0, layoutConfig.value.length, ...arranged)
-      activePresetKey.value = key
-      saveLayoutToStorage(layoutConfig.value)
-      saveMiniWidgets(miniWidgets.value)
-    }
+    layoutConfig.value = newLayout
+    activePresetKey.value = key
+    saveLayoutToStorage(newLayout)
+    saveMiniWidgets(miniWidgets.value)
   }
 
   const resetLayout = () => {
