@@ -221,6 +221,7 @@ onMounted(() => {
   const cfg = dashboardStore.layoutConfig
   snapHeatmapLayouts()
   dashboardStore.ensureDefaultPreset()
+  dashboardStore.loadPresetsFromAPI()
   const hasMarkdown = cfg.some(item => item.type === 'markdown')
   if (!hasMarkdown) {
     cfg.push({

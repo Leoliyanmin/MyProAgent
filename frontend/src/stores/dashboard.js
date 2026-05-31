@@ -893,6 +893,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     renamePreset,
     applyPreset,
     ensureDefaultPreset,
+    loadPresetsFromAPI,
     resetLayout,
 
     miniWidgets,
