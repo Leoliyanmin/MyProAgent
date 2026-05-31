@@ -551,11 +551,24 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const applyPreset = (key) => {
     const preset = customLayoutPresets.value[key]
     if (!preset) return
+
+    const presentTypes = new Set(layoutConfig.value.map(item => item.type))
+    for (const presetItem of preset.items) {
+      if (!presentTypes.has(presetItem.type)) {
+        const miniType = TYPE_TO_QUICK_TOGGLE[presetItem.type]
+        if (miniType && !miniWidgets.value.has(miniType)) {
+          miniWidgets.value = new Set([...miniWidgets.value, miniType])
+        }
+        if (miniType) _addMiniToLayout(miniType)
+      }
+    }
+
     const normalized = layoutConfig.value.map(normalizeLayoutItem)
     const arranged = applyLayoutPreset(normalized, preset) || arrangeDashboardLayout(normalized)
     if (arranged) {
       layoutConfig.value.splice(0, layoutConfig.value.length, ...arranged)
       saveLayoutToStorage(layoutConfig.value)
+      saveMiniWidgets(miniWidgets.value)
     }
   }
 
@@ -574,6 +587,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     'todo':    { w: 4, h: 6, i: 'mini-todo',    type: 'todo',        minW: 3, minH: 4 },
     'heatmap': { w: 4, h: 1, i: 'mini-heatmap', type: 'heatmap',     minW: 2, minH: 1, maxW: 12, maxH: 2, heatmapVariant: 'wide' },
     'agent':   { w: 5, h: 6, i: 'mini-agent',   type: 'agent-mini',  minW: 4, minH: 4 },
+  }
+
+  const TYPE_TO_QUICK_TOGGLE = {
+    'todo': 'todo', 'messages': 'inbox', 'markdown': 'note',
+    'heatmap': 'heatmap', 'compose-mini': 'compose', 'agent-mini': 'agent',
   }
 
   const _removedCache = new Map()
