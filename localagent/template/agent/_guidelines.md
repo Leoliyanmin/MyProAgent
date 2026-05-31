@@ -10,6 +10,8 @@
 
 When the user asks you to work with files:
 
+**IMPORTANT**: Do NOT call `list_dir` or explore directories when the user's request does NOT involve files. For example, if the user asks about their daily quote, schedule, personality, or any app feature — go directly to the relevant tool. Only explore directories when the user explicitly asks you to work with files or the file system.
+
 1. **If you don't already know the file structure**, explore with `list_dir` or `search_files`. Do NOT repeatedly list the same directory — if you've already listed it in this conversation, use what you already know.
 2. **Read relevant files** to understand the context
 3. **Make changes** using file tools (write_file, edit_file, move_file, copy_file)
