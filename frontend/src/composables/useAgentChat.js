@@ -10,6 +10,7 @@ import { useDashboardStore } from '../stores/dashboard.js'
 import { useEmailStore } from '../stores/email.js'
 import { useFileManagerStore } from '../stores/fileManager.js'
 import { useThemeStore } from '../stores/theme.js'
+import { useDailyQuoteStore } from '../stores/dailyQuote.js'
 import { useMessageParser } from './useMessageParser.js'
 
 const CALENDAR_TOOL_NAMES = new Set([
@@ -32,6 +33,13 @@ const FILE_TOOL_NAMES = new Set([
   'copy_file',
   'delete_file',
   'create_dir'
+])
+
+const DAILY_QUOTE_TOOL_NAMES = new Set([
+  'get_daily_quote',
+  'set_daily_quote',
+  'refresh_daily_quote',
+  'get_daily_quote_history',
 ])
 
 const EMAIL_TOOL_NAMES = new Set([
@@ -126,6 +134,7 @@ export function useAgentChat(sessionId = 'default', { isTemporary = false } = {}
   const dashboardStore = useDashboardStore()
   const fmStore = useFileManagerStore()
   const emailStore = useEmailStore()
+  const dailyQuoteStore = useDailyQuoteStore()
   const chatStore = useAgentChatStore()
   const router = useRouter()
   const { parse: parseMessage } = useMessageParser()
@@ -268,6 +277,7 @@ export function useAgentChat(sessionId = 'default', { isTemporary = false } = {}
     const hasCalendarMutation = names.some(name => CALENDAR_TOOL_NAMES.has(name))
     const hasTaskMutation = names.some(name => TASK_TOOL_NAMES.has(name))
     const hasFileMutation = names.some(name => FILE_TOOL_NAMES.has(name))
+    const hasDailyQuoteMutation = names.some(name => DAILY_QUOTE_TOOL_NAMES.has(name))
     const hasEmailMutation = names.some(name => EMAIL_TOOL_NAMES.has(name))
     const promises = []
 
@@ -280,6 +290,9 @@ export function useAgentChat(sessionId = 'default', { isTemporary = false } = {}
     }
     if (!hasCalendarMutation && !hasTaskMutation && names.length > 0) {
       promises.push(dashboardStore.loadTodosFromBackend())
+    }
+    if (hasDailyQuoteMutation) {
+      promises.push(dailyQuoteStore.load())
     }
 
     try { await Promise.all(promises) } catch (err) {
