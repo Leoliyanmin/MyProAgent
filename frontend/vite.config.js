@@ -59,6 +59,14 @@ export default defineConfig(({ mode }) => {
         '/activity': {
           target: env.VITE_API_URL || 'http://localhost:8002',
           changeOrigin: true
+        },
+        '/dashboard-presets': {
+          target: env.VITE_API_URL || 'http://localhost:8002',
+          changeOrigin: true
+        },
+        '/dashboard-presets': {
+          target: env.VITE_API_URL || 'http://localhost:8002',
+          changeOrigin: true
         }
       },
     },

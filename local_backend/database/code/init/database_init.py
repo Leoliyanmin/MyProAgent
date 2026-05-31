@@ -148,6 +148,38 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
         )""")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_activity_log_user_date ON activity_log(user_id, log_date)")
 
+    # dashboard_preset table migration
+    preset_exists = conn.execute(
+        "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='dashboard_preset'"
+    ).fetchone()
+    if preset_exists[0] == 0:
+        conn.execute("""CREATE TABLE IF NOT EXISTS dashboard_preset (
+            preset_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id      TEXT NOT NULL,
+            preset_name  TEXT NOT NULL,
+            preset_data  TEXT NOT NULL,
+            created_at   TEXT NOT NULL,
+            updated_at   TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(user_id),
+            UNIQUE (user_id, preset_name)
+        )""")
+
+    # dashboard_preset table migration
+    dashboard_preset_exists = conn.execute(
+        "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='dashboard_preset'"
+    ).fetchone()
+    if dashboard_preset_exists[0] == 0:
+        conn.execute("""CREATE TABLE IF NOT EXISTS dashboard_preset (
+            preset_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id      TEXT    NOT NULL,
+            preset_name  TEXT    NOT NULL,
+            preset_data  TEXT    NOT NULL,
+            created_at   TEXT    NOT NULL,
+            updated_at   TEXT    NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )""")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_dashboard_preset_user ON dashboard_preset(user_id)")
+
 
 def init_database(db_path: str | Path = DEFAULT_DB_PATH, schema_path: str | Path = DEFAULT_SCHEMA_PATH) -> None:
     if not schema_path.exists():

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useBehaviorProfileStore } from './behaviorProfile.js'
-import { eventsAPI, activityAPI } from '../services/api.js'
+import { eventsAPI, activityAPI, dashboardPresetsAPI } from '../services/api.js'
 import { useCalendarStore } from './calendar.js'
 import {
   DEFAULT_DASHBOARD_LAYOUT_PRESETS,
@@ -151,17 +151,56 @@ const loadLayoutPresetsFromStorage = () => {
   try {
     const stored = localStorage.getItem(LAYOUT_PRESETS_STORAGE_KEY)
     return stored ? JSON.parse(stored) : {}
-  } catch (err) {
-    console.error('Failed to load layout presets from localStorage:', err)
-    return {}
-  }
+  } catch { return {} }
 }
 
 const saveLayoutPresetsToStorage = (presets) => {
+  try { localStorage.setItem(LAYOUT_PRESETS_STORAGE_KEY, JSON.stringify(presets)) } catch {}
+}
+
+async function loadPresetsFromAPI() {
   try {
-    localStorage.setItem(LAYOUT_PRESETS_STORAGE_KEY, JSON.stringify(presets))
+    const list = await dashboardPresetsAPI.list()
+    const presets = {}
+    for (const p of list) {
+      let items
+      try { items = JSON.parse(p.preset_data) } catch { items = [] }
+      presets[String(p.preset_id)] = {
+        name: p.preset_name,
+        items,
+        createdAt: p.created_at,
+        _apiId: p.preset_id
+      }
+    }
+    if (Object.keys(presets).length > 0) {
+      customLayoutPresets.value = presets
+      saveLayoutPresetsToStorage(presets)
+    }
   } catch (err) {
-    console.error('Failed to save layout presets to localStorage:', err)
+    console.warn('Failed to load presets from API, using localStorage:', err)
+  }
+}
+
+async function savePresetToAPI(key, preset) {
+  try {
+    const data = JSON.stringify(preset.items)
+    const body = { preset_name: preset.name, preset_data: data }
+    if (preset._apiId) body.preset_id = preset._apiId
+    const result = await dashboardPresetsAPI.save(body.preset_name, body.preset_data, body.preset_id)
+    return result.preset_id
+  } catch (err) {
+    console.warn('Failed to save preset to API:', err)
+    return null
+  }
+}
+
+async function deletePresetFromAPI(apiId) {
+  try {
+    await dashboardPresetsAPI.delete(apiId)
+    return true
+  } catch (err) {
+    console.warn('Failed to delete preset from API:', err)
+    return false
   }
 }
 
@@ -534,6 +573,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
       customLayoutPresets.value = { [key]: { ...preset, name: '默认布局' } }
       saveLayoutPresetsToStorage(customLayoutPresets.value)
       activePresetKey.value = key
+      savePresetToAPI(key, { ...preset, name: '默认布局' }).then(id => {
+        if (id && customLayoutPresets.value[key]) customLayoutPresets.value[key]._apiId = id
+      }).then(id => {
+        if (id && customLayoutPresets.value[key]) customLayoutPresets.value[key]._apiId = id
+      })
     } else if (!activePresetKey.value || !customLayoutPresets.value[activePresetKey.value]) {
       activePresetKey.value = keys[0]
     }
@@ -544,20 +588,20 @@ export const useDashboardStore = defineStore('dashboard', () => {
     const preset = createLayoutPreset(normalized)
     const key = preset.key
 
-    // If saving to current active preset, update its name + items
     if (activePresetKey.value) {
       customLayoutPresets.value[activePresetKey.value] = { ...preset, name: name || '默认布局' }
       saveLayoutPresetsToStorage(customLayoutPresets.value)
+      savePresetToAPI(activePresetKey.value, { ...preset, name: name || '默认布局' })
       return preset
     }
 
-    // Otherwise create new
     customLayoutPresets.value = {
       ...customLayoutPresets.value,
       [key]: { ...preset, name: name || preset.key }
     }
     activePresetKey.value = key
     saveLayoutPresetsToStorage(customLayoutPresets.value)
+    savePresetToAPI(key, { ...preset, name: name || preset.key })
     behaviorProfileStore.recordBehaviorEvent('dashboard_template_saved', {
       module: 'dashboard',
       layoutKey: key,
@@ -589,12 +633,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
     activePresetKey.value = key
     saveLayoutPresetsToStorage(customLayoutPresets.value)
     saveLayoutToStorage(layoutConfig.value)
+    savePresetToAPI(key, { ...preset, name: name || '新模板' })
     return key
   }
 
   const deletePreset = (key) => {
     const keys = Object.keys(customLayoutPresets.value)
     if (keys.length <= 1) return false
+    const deleted = customLayoutPresets.value[key]
     const newPresets = { ...customLayoutPresets.value }
     delete newPresets[key]
     customLayoutPresets.value = newPresets
@@ -602,6 +648,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       activePresetKey.value = Object.keys(newPresets)[0]
     }
     saveLayoutPresetsToStorage(customLayoutPresets.value)
+    if (deleted?._apiId) deletePresetFromAPI(deleted._apiId)
     return true
   }
 
@@ -610,6 +657,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!p) return
     customLayoutPresets.value[key] = { ...p, name: newName }
     saveLayoutPresetsToStorage(customLayoutPresets.value)
+    savePresetToAPI(key, { ...p, name: newName })
   }
 
   const applyPreset = (key) => {

@@ -622,6 +622,15 @@ export const profileAPI = {
   }
 }
 
+export const dashboardPresetsAPI = {
+  list: () => fetchWithAuth('/dashboard-presets/'),
+  save: (presetName, presetData, presetId) => fetchWithAuth('/dashboard-presets/', {
+    method: 'POST',
+    body: JSON.stringify({ preset_name: presetName, preset_data: presetData, preset_id: presetId || undefined })
+  }),
+  delete: (presetId) => fetchWithAuth(`/dashboard-presets/${presetId}`, { method: 'DELETE' }),
+}
+
 export default {
   auth: authAPI,
   agent: agentAPI,
@@ -631,4 +640,5 @@ export default {
   blackboard: blackboardAPI,
   email: emailAPI,
   activity: activityAPI,
+  dashboardPresets: dashboardPresetsAPI,
 }
