@@ -48,18 +48,12 @@
           :value="currentModeKey"
           @change="switchMode($event.target.value)"
         >
-          <option v-for="m in modeList" :key="m.key" :value="m.key">{{ m.name }}</option>
+          <option value="immersive">{{ MODE_NAMES.immersive }}</option>
+          <option value="preview">{{ MODE_NAMES.preview }}</option>
         </select>
         <button class="mac-btn-primary" :class="{ 'is-active': isEditing }" @click="toggleEditMode">
           {{ isEditing ? '保存布局配置' : '自定义布局' }}
         </button>
-        <template v-if="isEditing">
-          <button v-if="!showNewModeInput" class="mac-btn-secondary new-mode-btn" @click="startNewMode">+ 保存为新模式</button>
-          <template v-if="showNewModeInput">
-            <input v-model="newModeName" class="mode-name-input" placeholder="新模式名称" @keydown.enter="commitNewMode" @keydown.escape="cancelNewMode" />
-            <button class="mac-btn-primary mac-btn-sm" @click="commitNewMode">确认</button>
-          </template>
-        </template>
       </div>
     </div>
 
@@ -146,7 +140,7 @@
                 class="view-mode-toggle"
                 :class="{ 'is-preview': previewLayout }"
                 @click.stop="switchMode(previewLayout ? 'immersive' : 'preview')"
-                :title="previewLayout ? '切换到' + (modeList.find(m => m.key === 'immersive')?.name || '沉浸模式') : '切换到' + (modeList.find(m => m.key === 'preview')?.name || '小窗模式')"
+                :title="previewLayout ? '切换到' + MODE_NAMES.immersive : '切换到' + MODE_NAMES.preview"
               >{{ previewLayout ? '⊞' : '⊟' }}</button>
               <select v-model="sortBy" class="sort-select" @mousedown.stop @click.stop>
                 <option value="time-desc">时间 ↓</option>
@@ -315,8 +309,11 @@ const sendSuccess = ref(false)
 const sortBy = ref(localStorage.getItem(EMAIL_SORT_KEY) || 'time-desc')
 const showTrash = ref(false)
 
-// ===== Multi-mode Layout Manager =====
-const MODES_STORAGE_KEY = 'email_modes'
+// ===== Two-Mode Layout Manager =====
+const LAYOUT_KEY_IMM = 'email_layout_immersive'
+const LAYOUT_KEY_PREV = 'email_layout_preview'
+
+const MODE_NAMES = { immersive: '沉浸模式', preview: '小窗模式' }
 
 const PRESET_IMMERSIVE = [
   { x: 0, y: 0, w: 5, h: 8, i: 'compose', minW: 4, minH: 6 },
@@ -328,115 +325,60 @@ const PRESET_PREVIEW = [
   { x: 6, y: 8, w: 6, h: 8, i: 'inbox', minW: 4, minH: 5 },
 ]
 
-const BUILTIN_MODES = [
-  { key: 'immersive', name: '沉浸模式', preset: PRESET_IMMERSIVE },
-  { key: 'preview', name: '小窗模式', preset: PRESET_PREVIEW },
-]
-
-function loadModes() {
+function loadLayout(key, preset) {
   try {
-    const saved = localStorage.getItem(MODES_STORAGE_KEY)
+    const saved = localStorage.getItem(key)
     if (saved) {
       const parsed = JSON.parse(saved)
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map(m => ({
-          key: m.key,
-          name: m.name || m.key,
-          layout: Array.isArray(m.layout) ? m.layout : BUILTIN_MODES.find(b => b.key === m.key)?.preset || PRESET_IMMERSIVE,
+      if (Array.isArray(parsed) && parsed.length === preset.length) {
+        return parsed.map((item, i) => ({
+          ...preset[i],
+          ...item,
+          minW: preset[i].minW,
+          minH: preset[i].minH,
         }))
       }
     }
   } catch { /* ignore */ }
-  return BUILTIN_MODES.map(b => ({ key: b.key, name: b.name, layout: structuredClone(b.preset) }))
+  return structuredClone(preset)
 }
 
-function saveModes(key) {
-  // Save current layout to the given mode
-  const idx = modeList.value.findIndex(m => m.key === key)
-  if (idx !== -1) {
-    const toSave = layoutConfig.value.map(({ x, y, w, h, i, minW, minH }) => ({ x, y, w, h, i, minW, minH }))
-    modeList.value[idx].layout = toSave
-  }
+function saveLayout(key) {
   try {
-    localStorage.setItem(MODES_STORAGE_KEY, JSON.stringify(modeList.value.map(m => ({
-      key: m.key, name: m.name, layout: m.layout,
-    }))))
+    const toSave = layoutConfig.value.map(({ x, y, w, h, i }) => ({ x, y, w, h, i }))
+    localStorage.setItem(key, JSON.stringify(toSave))
   } catch { /* ignore */ }
 }
 
-const modeList = ref([])
 const currentModeKey = ref('immersive')
 const layoutConfig = ref([])
 const isEditing = ref(false)
 
-const currentMode = computed(() => modeList.value.find(m => m.key === currentModeKey.value))
-
-// Layout item lookups
 const composeLayout = computed(() => layoutConfig.value.find(item => item.i === 'compose'))
 const inboxLayout = computed(() => layoutConfig.value.find(item => item.i === 'inbox'))
 const previewLayout = computed(() => layoutConfig.value.find(item => item.i === 'preview'))
 
 function switchMode(key) {
   if (key === currentModeKey.value) return
-  // Save current layout to current mode
-  const cur = modeList.value.find(m => m.key === currentModeKey.value)
-  if (cur) {
-    cur.layout = layoutConfig.value.map(({ x, y, w, h, i, minW, minH }) => ({ x, y, w, h, i, minW, minH }))
-  }
-  // Load target mode layout
-  const target = modeList.value.find(m => m.key === key)
-  if (target) {
-    currentModeKey.value = key
-    layoutConfig.value = target.layout.map(item => {
-      const builtin = BUILTIN_MODES.find(b => b.key === key)
-      const presetItem = builtin?.preset?.find(p => p.i === item.i)
-      return { ...item, minW: presetItem?.minW || item.minW || 3, minH: presetItem?.minH || item.minH || 4 }
-    })
-    // Save to storage
-    saveModes(key)
-  }
+  // Save current layout
+  saveLayout(currentModeKey.value === 'immersive' ? LAYOUT_KEY_IMM : LAYOUT_KEY_PREV)
+  // Load target
+  currentModeKey.value = key
+  const targetKey = key === 'immersive' ? LAYOUT_KEY_IMM : LAYOUT_KEY_PREV
+  const targetPreset = key === 'immersive' ? PRESET_IMMERSIVE : PRESET_PREVIEW
+  layoutConfig.value = loadLayout(targetKey, targetPreset)
   selectedIndex.value = null
 }
 
 function toggleEditMode() {
   isEditing.value = !isEditing.value
   if (!isEditing.value) {
-    saveModes(currentModeKey.value)
+    saveLayout(currentModeKey.value === 'immersive' ? LAYOUT_KEY_IMM : LAYOUT_KEY_PREV)
   }
 }
 
-// ── Save As New Mode ──
-const showNewModeInput = ref(false)
-const newModeName = ref('')
-
-function startNewMode() {
-  newModeName.value = ''
-  showNewModeInput.value = true
-}
-
-function commitNewMode() {
-  const name = newModeName.value.trim()
-  if (!name) { showNewModeInput.value = false; return }
-  const key = 'custom_' + Date.now()
-  const layout = layoutConfig.value.map(({ x, y, w, h, i, minW, minH }) => ({ x, y, w, h, i, minW, minH }))
-  modeList.value.push({ key, name, layout })
-  currentModeKey.value = key
-  saveModes(key)
-  showNewModeInput.value = false
-  newModeName.value = ''
-}
-
-function cancelNewMode() {
-  showNewModeInput.value = false
-  newModeName.value = ''
-}
-
 // Init
-modeList.value = loadModes()
-const initMode = modeList.value.find(m => m.key === currentModeKey.value)
-if (initMode) {
-  layoutConfig.value = initMode.layout
-}
+layoutConfig.value = loadLayout(LAYOUT_KEY_IMM, PRESET_IMMERSIVE)
 
 // ===== Existing logic =====
 watch(sortBy, (val) => { try { localStorage.setItem(EMAIL_SORT_KEY, val) } catch {} })
@@ -643,14 +585,6 @@ onMounted(async () => {
   border-color: #007aff;
 }
 
-.mode-name-area {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: #6b7280;
-}
-.mode-name-text { font-weight: 600; color: #007aff; }
 .prioritize-btn {
   background: linear-gradient(135deg, #f59e0b, #d97706) !important;
   border-color: #d97706 !important;
@@ -777,26 +711,6 @@ onMounted(async () => {
 }
 .view-mode-toggle:hover { background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.6); }
 .view-mode-toggle.is-preview { color: #007aff; border-color: rgba(0,122,255,0.3); background: rgba(0,122,255,0.04); }
-
-.mode-name-area {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 13px; color: #6b7280;
-}
-.mode-name-text { font-weight: 600; color: #007aff; }
-
-.new-mode-btn { font-size: 12px; padding: 4px 10px; }
-
-.mac-btn-sm { font-size: 12px; padding: 4px 10px; }
-.mode-name-input {
-  border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 12px;
-  outline: none;
-  width: 120px;
-  font-family: inherit;
-}
-.mode-name-input:focus { border-color: #007aff; }
 
 /* Compose form */
 .compose-content { padding: 0; }
