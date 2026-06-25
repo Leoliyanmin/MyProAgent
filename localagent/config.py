@@ -1,12 +1,15 @@
 """Configuration management for local agent."""
 
 import json
+import logging
 import os
 import re
 from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+logger = logging.getLogger(__name__)
 
 # Config file is in project root, not in localagent package
 # 查找 config.json（从当前目录向上查找）
@@ -24,9 +27,6 @@ def find_config_file():
     return Path(__file__).parent.parent.parent / "config.json"
 
 CONFIG_FILE = find_config_file()
-
-print(f"[DEBUG] Config file path: {CONFIG_FILE}")
-print(f"[DEBUG] Config file exists: {CONFIG_FILE.exists()}")
 
 def _to_camel(s: str) -> str:
     """Convert snake_case to camelCase."""
@@ -106,7 +106,7 @@ class LocalAgentConfig(BaseModel):
             p = getattr(self.providers, forced, None)
             if p:
                 return p, forced
-            print(f"[DEBUG] Forced provider '{forced}' not found in providers")
+            logger.warning("Forced provider '%s' not found in providers", forced)
             return None, None
 
         model_lower = (model or self.agent.model).lower()
@@ -200,13 +200,13 @@ def load_config() -> LocalAgentConfig:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
             config = LocalAgentConfig.parse_obj(data)
-            print(f"[DEBUG] Config loaded from {CONFIG_FILE}")
+            logger.debug("Config loaded from %s", CONFIG_FILE)
         except (json.JSONDecodeError, Exception) as e:
-            print(f"Warning: Failed to load config: {e}")
-            print("Using default configuration.")
+            logger.warning("Failed to load config: %s", e)
+            logger.warning("Using default configuration.")
     else:
-        print(f"[DEBUG] Config file not found at {CONFIG_FILE}")
-        print("Using default configuration.")
+        logger.debug("Config file not found at %s", CONFIG_FILE)
+        logger.debug("Using default configuration.")
 
     return config
 
@@ -222,4 +222,4 @@ def save_config(config: LocalAgentConfig) -> None:
                 ensure_ascii=False,
             )
     except Exception as e:
-        print(f"Warning: Failed to save config: {e}")
+        logger.warning("Failed to save config: %s", e)
