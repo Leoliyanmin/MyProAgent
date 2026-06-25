@@ -9,29 +9,23 @@ from pathlib import Path
 
 
 def get_target_triple():
-    """获取当前平台的 target triple"""
+    """获取当前平台的 target triple。"""
     system = platform.system()
     machine = platform.machine()
-    
-    if system == "Windows":
-        if machine == "AMD64":
-            return "x86_64-pc-windows-msvc"
-        elif machine == "ARM64":
-            return "aarch64-pc-windows-msvc"
-        else:
-            return "i686-pc-windows-msvc"
-    elif system == "Darwin":  # macOS
+
+    if system == "Darwin":
         if machine == "arm64":
             return "aarch64-apple-darwin"
-        else:
-            return "x86_64-apple-darwin"
-    else:  # Linux
+        return "x86_64-apple-darwin"
+
+    if system == "Linux":
         if machine == "x86_64":
             return "x86_64-unknown-linux-gnu"
-        elif machine == "aarch64":
+        if machine == "aarch64":
             return "aarch64-unknown-linux-gnu"
-        else:
-            return "x86_64-unknown-linux-gnu"
+        return "x86_64-unknown-linux-gnu"
+
+    raise RuntimeError(f"Unsupported build platform: {system}")
 
 
 BACKENDS = [
@@ -50,11 +44,9 @@ BACKENDS = [
 
 def build_one(name: str, script: Path, binaries_dir: Path, target_triple: str, script_dir: Path, data_dirs: list):
     output_name = f"{name}-{target_triple}"
-    if sys.platform == "win32":
-        output_name += ".exe"
 
     project_root = script_dir.parent
-    sep = ";" if sys.platform == "win32" else ":"
+    sep = ":"
 
     print(f"\nBuilding {name} for {target_triple}...")
     print(f"Script: {script}")
@@ -130,7 +122,11 @@ def build_sidecar():
     binaries_dir = project_root / "frontend" / "src-tauri" / "binaries"
     binaries_dir.mkdir(parents=True, exist_ok=True)
 
-    target_triple = get_target_triple()
+    try:
+        target_triple = get_target_triple()
+    except RuntimeError as exc:
+        print(f"Error: {exc}")
+        sys.exit(1)
 
     for backend in BACKENDS:
         script = script_dir / backend["script"]

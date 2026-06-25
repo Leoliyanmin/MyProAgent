@@ -10,33 +10,26 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = resolve(__dirname, '..')
 
-const isWindows = process.platform === 'win32'
-const venvPython = resolve(rootDir, '..', '.venv', 'Scripts', 'python.exe')
-
 const services = [
   {
     name: 'VITE',
     color: '\x1b[34m',
-    command: isWindows ? 'cmd' : 'npm',
-    args: isWindows ? ['/c', 'npm', 'run', 'dev:frontend'] : ['run', 'dev:frontend'],
+    command: 'npm',
+    args: ['run', 'dev:frontend'],
     cwd: resolve(rootDir, 'frontend')
   },
   {
     name: 'LOCAL',
     color: '\x1b[32m',
-    command: isWindows ? venvPython : 'uvicorn',
-    args: isWindows
-      ? ['-m', 'uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8002']
-      : ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8002'],
+    command: 'uvicorn',
+    args: ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8002'],
     cwd: resolve(rootDir, 'local_backend')
   },
   {
     name: 'SERVER',
     color: '\x1b[33m',
-    command: isWindows ? venvPython : 'uvicorn',
-    args: isWindows
-      ? ['-m', 'uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8001']
-      : ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8001'],
+    command: 'uvicorn',
+    args: ['main:app', '--reload', '--host', '0.0.0.0', '--port', '8001'],
     cwd: resolve(rootDir, 'server_backend')
   }
 ]
@@ -73,13 +66,10 @@ function killProcessTree(proc, signal) {
 
 function startService(service) {
   return new Promise((resolve, reject) => {
-    // detached: true on Unix creates a new process group via setsid(),
-    // so killProcessTree(-pid) can clean up the entire subtree.
-    // On Windows we fall back to shell: true for cmd.exe.
     const spawnOpts = {
       cwd: service.cwd,
       stdio: ['pipe', 'pipe', 'pipe'],
-      ...(isWindows ? { shell: true } : { detached: true })
+      detached: true
     }
 
     const proc = spawn(service.command, service.args, spawnOpts)

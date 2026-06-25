@@ -2,7 +2,6 @@
 
 import asyncio
 import os
-import sys
 from pathlib import Path
 
 from .base import BaseTool
@@ -48,15 +47,12 @@ class ExecTool(BaseTool):
         self.default_timeout = 60
         self.max_timeout = 300
         self.max_output = 10_000
-        self._is_windows = sys.platform == "win32"
 
         # Safety: deny dangerous commands by default
         self.deny_patterns = [
             r"\brm\s+-[rf]{1,2}\b",          # rm -r, rm -rf
-            r"\bdel\s+/[fq]\b",              # del /f, del /q
-            r"\brmdir\s+/s\b",               # rmdir /s
             r"(?:^|[;&|]\s*)format\b",       # format
-            r"\b(mkfs|diskpart)\b",          # disk operations
+            r"\bmkfs\b",                     # disk operations
             r"\bdd\s+if=",                   # dd
             r">\s*/dev/sd",                  # write to disk
             r"\b(shutdown|reboot|poweroff)\b",  # system power
@@ -84,29 +80,17 @@ class ExecTool(BaseTool):
         effective_timeout = min(timeout or self.default_timeout, self.max_timeout)
 
         try:
-            # Execute command
-            if self._is_windows:
-                comspec = os.environ.get("COMSPEC", "cmd.exe")
-                process = await asyncio.create_subprocess_exec(
-                    comspec,
-                    "/c",
-                    command,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                    cwd=cwd,
-                )
-            else:
-                bash = os.path.join("/bin", "bash")
-                if not os.path.exists(bash):
-                    bash = "/bin/bash"
-                process = await asyncio.create_subprocess_exec(
-                    bash,
-                    "-c",
-                    command,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                    cwd=cwd,
-                )
+            bash = os.path.join("/bin", "bash")
+            if not os.path.exists(bash):
+                bash = "/bin/bash"
+            process = await asyncio.create_subprocess_exec(
+                bash,
+                "-c",
+                command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=cwd,
+            )
 
             try:
                 stdout, stderr = await asyncio.wait_for(

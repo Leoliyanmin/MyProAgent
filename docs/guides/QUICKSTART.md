@@ -4,12 +4,12 @@
 >
 > 虚拟环境在项目根目录的上层：
 > ```
-> 路径: D:\collections2026\phd_application\project_productivity\.venv\Scripts\python.exe
+> 路径: ../.venv/bin/python
 > ```
 >
-> ```powershell
-> cd D:\collections2026\phd_application\project_productivity\team-project-26spring-26s-27
-> ..\.venv\Scripts\Activate.ps1
+> ```bash
+> cd /path/to/MyProAgent
+> source ../.venv/bin/activate
 > ```
 
 ## 已完成配置
@@ -84,7 +84,6 @@ npm run tauri:build
 
 输出文件：
 - macOS: `src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
-- Windows: `src-tauri/target/release/bundle/nsis/ProAgent_*.exe`
 - Linux: `src-tauri/target/release/bundle/appimage/ProAgent_*.AppImage`
 
 ## 常见问题

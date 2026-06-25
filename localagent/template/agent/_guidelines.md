@@ -38,12 +38,7 @@ For file organization tasks (like "整理桌面上的PDF文件"):
 4. Use `move_file` to organize files into target directories
 5. **Avoid using `exec`** unless file tools are not sufficient
 
-### Platform-Specific Notes
-
-**Windows:**
-- Use backslashes `\\` for paths in `exec` commands
-- Use `move` command instead of `mv`
-- Use `copy` command instead of `cp`
+### Platform Notes
 
 **Linux/macOS:**
 - Use forward slashes `/` for paths

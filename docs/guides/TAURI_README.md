@@ -119,7 +119,6 @@ npm run tauri:build
 
 构建输出：
 - **macOS**: `frontend/src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
-- **Windows**: `frontend/src-tauri/target/release/bundle/nsis/ProAgent_*.exe`
 - **Linux**: `frontend/src-tauri/target/release/bundle/appimage/ProAgent_*.AppImage`
 
 ## 关键配置说明

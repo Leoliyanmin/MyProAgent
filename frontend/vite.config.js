@@ -73,7 +73,7 @@ export default defineConfig(({ mode }) => {
       setupFiles: ['src/__tests__/setup.js'],
     },
     build: {
-      target: process.env.TAURI_ENV_PLATFORM === 'windows' ? 'chrome105' : 'safari13',
+      target: 'safari13',
       outDir: 'dist',
       sourcemap: !!process.env.TAURI_ENV_DEBUG,
     }

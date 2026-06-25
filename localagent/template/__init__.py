@@ -108,12 +108,7 @@ For file organization tasks (like PDF整理):
 - When using `exec`, prefer safe commands with proper flags
 - Always explain your actions before executing
 
-## Platform-Specific Notes
-
-**Windows:**
-- Use backslashes `\\` for paths in `exec` commands
-- Use `move` command instead of `mv`
-- Use `copy` command instead of `cp`
+## Platform Notes
 
 **Linux/macOS:**
 - Use forward slashes `/` for paths

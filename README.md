@@ -179,13 +179,13 @@ python build_sidecar.py
 cd ../frontend
 npm run tauri:dev
 
-# 4. 生产构建（生成 .app / .exe）
+# 4. 生产构建（生成桌面安装包）
 npm run tauri:build
 ```
 
 输出文件：
 - macOS: `src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
-- Windows: `src-tauri/target/release/bundle/nsis/ProAgent_*.exe`
+- Linux: `src-tauri/target/release/bundle/appimage/ProAgent_*.AppImage`
 
 ### 方式三：手动启动各服务
 
@@ -197,7 +197,6 @@ cd local_backend
 # 创建虚拟环境
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# 或: venv\Scripts\activate  # Windows
 
 # 安装依赖
 pip install -r requirements.txt

@@ -33,7 +33,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["app", "dmg", "appimage", "nsis"],
+    "targets": ["app", "dmg", "appimage"],
     "category": "Productivity",
     "copyright": "© 2026 Team 26S-27",
     "shortDescription": "智能协作工作台",
@@ -41,15 +41,6 @@
     "icon": ["icons/icon.png"],
     "externalBin": ["binaries/python-backend", "binaries/server-backend"],
     "resources": [],
-    "windows": {
-      "wix": {
-        "language": "zh-CN"
-      },
-      "nsis": {
-        "languages": ["SimpChinese"],
-        "displayLanguageSelector": false
-      }
-    },
     "macOS": {
       "frameworks": [],
       "minimumSystemVersion": "10.13",
