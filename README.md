@@ -140,6 +140,12 @@
 
 ## 🚀 快速开始
 
+### 前置要求
+
+- **Python 3.10+**（推荐 Python 3.11，仓库 `.python-version` 已固定为 3.11）
+- Node.js 18+
+- Rust（仅桌面应用打包需要）
+
 ### 方式一：Web 开发模式（推荐日常开发）
 
 一键启动前端 + Local Backend + Server Backend：
