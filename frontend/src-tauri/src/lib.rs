@@ -168,9 +168,7 @@ async fn extract_cookies(app: tauri::AppHandle, platform: Option<String>) -> Res
     let mut seen = std::collections::HashSet::new();
     let mut all_cookies = Vec::new();
 
-    // Navigate to each domain so cookies_for_url can read them on all platforms.
-    // macOS WKWebView allows cross-domain cookie reads, but Windows WebView2
-    // and Linux WebKitGTK may restrict reads to the current page's origin.
+    // Navigate to each domain so cookies_for_url can read them reliably on macOS.
     for url_str in &[cas_url_str, target_url_str] {
         let nav_url = Url::parse(url_str).map_err(|e| format!("Invalid URL: {}", e))?;
         // Navigate to the target domain first

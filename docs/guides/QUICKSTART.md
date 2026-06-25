@@ -84,7 +84,6 @@ npm run tauri:build
 
 输出文件：
 - macOS: `src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
-- Linux: `src-tauri/target/release/bundle/appimage/ProAgent_*.AppImage`
 
 ## 常见问题
 

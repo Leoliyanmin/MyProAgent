@@ -40,7 +40,7 @@ For file organization tasks (like "整理桌面上的PDF文件"):
 
 ### Platform Notes
 
-**Linux/macOS:**
+**macOS:**
 - Use forward slashes `/` for paths
 - Use `mv` command for moving files
 - Use `cp` command for copying files

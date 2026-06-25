@@ -185,7 +185,6 @@ npm run tauri:build
 
 输出文件：
 - macOS: `src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
-- Linux: `src-tauri/target/release/bundle/appimage/ProAgent_*.AppImage`
 
 ### 方式三：手动启动各服务
 
@@ -196,7 +195,7 @@ cd local_backend
 
 # 创建虚拟环境
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
+source venv/bin/activate  # macOS
 
 # 安装依赖
 pip install -r requirements.txt

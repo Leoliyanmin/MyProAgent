@@ -110,7 +110,7 @@ For file organization tasks (like PDF整理):
 
 ## Platform Notes
 
-**Linux/macOS:**
+**macOS:**
 - Use forward slashes `/` for paths
 - Use `mv` command for moving files
 - Use `cp` command for copying files

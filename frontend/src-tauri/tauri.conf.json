@@ -33,7 +33,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["app", "dmg", "appimage"],
+    "targets": ["app", "dmg"],
     "category": "Productivity",
     "copyright": "© 2026 Team 26S-27",
     "shortDescription": "智能协作工作台",

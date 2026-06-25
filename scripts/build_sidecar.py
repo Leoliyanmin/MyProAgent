@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def get_target_triple():
-    """获取当前平台的 target triple。"""
+    """获取当前 macOS 平台的 target triple。"""
     system = platform.system()
     machine = platform.machine()
 
@@ -18,14 +18,7 @@ def get_target_triple():
             return "aarch64-apple-darwin"
         return "x86_64-apple-darwin"
 
-    if system == "Linux":
-        if machine == "x86_64":
-            return "x86_64-unknown-linux-gnu"
-        if machine == "aarch64":
-            return "aarch64-unknown-linux-gnu"
-        return "x86_64-unknown-linux-gnu"
-
-    raise RuntimeError(f"Unsupported build platform: {system}")
+    raise RuntimeError(f"Unsupported build platform: {system}. This script only supports macOS.")
 
 
 BACKENDS = [
