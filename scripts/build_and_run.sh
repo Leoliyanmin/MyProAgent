@@ -5,19 +5,27 @@ cd "$(dirname "$0")/.."
 echo "=== 1. 编译 sidecar ==="
 python3 scripts/build_sidecar.py
 
-echo "=== 2. 生成图标 ==="
+echo "=== 2. 重命名 sidecar（与 CI 保持一致）==="
+(
+  cd frontend/src-tauri/binaries
+  for f in python-backend-*; do
+    [ -f "$f" ] && ln -sf "$f" python-backend
+  done
+  for f in server-backend-*; do
+    [ -f "$f" ] && ln -sf "$f" server-backend
+  done
+  [ -f python-backend ] || { echo "ERROR: python-backend sidecar not found"; exit 1; }
+  [ -f server-backend ] || { echo "ERROR: server-backend sidecar not found"; exit 1; }
+)
+
+echo "=== 3. 生成图标 ==="
 python3 scripts/gen_icon.py
 
-echo "=== 3. 构建 Tauri 应用 ==="
+echo "=== 4. 构建 Tauri 应用 ==="
 cd frontend && npm run tauri:build && cd ..
 
-echo "=== 4. 修复 bundle 路径 ==="
-APP_DIR="frontend/src-tauri/target/release/bundle/macos/ProAgent.app"
-mkdir -p "$APP_DIR/Contents/MacOS/binaries"
-ln -sf ../python-backend "$APP_DIR/Contents/MacOS/binaries/python-backend"
-ln -sf ../server-backend "$APP_DIR/Contents/MacOS/binaries/server-backend"
-
 echo "=== 5. 去隔离 + 打开 ==="
+APP_DIR="frontend/src-tauri/target/release/bundle/macos/ProAgent.app"
 sudo xattr -cr "$APP_DIR"
 open "$APP_DIR"
 
