@@ -99,11 +99,20 @@ npm run tauri:dev
 在生产环境中，Python 后端需要打包为可执行文件：
 
 ```bash
-cd scripts
-python build_sidecar.py
+python scripts/build_sidecar.py
 ```
 
 打包后的文件将位于 `frontend/src-tauri/binaries/`。
+
+打包完成后，需要为 Tauri 创建不带平台 triple 的软链接：
+
+```bash
+cd frontend/src-tauri/binaries
+for f in python-backend-*; do [ -f "$f" ] && ln -sf "$f" python-backend; done
+for f in server-backend-*; do [ -f "$f" ] && ln -sf "$f" server-backend; done
+```
+
+> 也可以直接运行 `bash scripts/build_and_run.sh`，该脚本包含以上全部步骤。
 
 ### 4. 构建桌面应用
 

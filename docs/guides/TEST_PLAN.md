@@ -10,13 +10,13 @@
 ### 1. 启动后端服务
 ```bash
 # 终端 1: 启动 Local Backend
-cd backend/local_backend
+cd local_backend
 python main.py
-# 确认: 服务运行在 http://localhost:8000
+# 确认: 服务运行在 http://localhost:8002
 
 # 终端 2: 启动 Server Backend (可选，用于同步测试)
-cd backend/server_backend
-修复配置，保留自动切换但正常工作？python main.py
+cd server_backend
+python main.py
 # 确认: 服务运行在 http://localhost:8001
 ```
 
@@ -29,7 +29,7 @@ npm run dev
 ```
 
 ### 3. 检查服务状态
-- Local Backend: http://localhost:8000/health
+- Local Backend: http://localhost:8002/health
 - Server Backend: http://localhost:8001/health (如启动)
 - Frontend: http://localhost:5173
 
@@ -41,10 +41,10 @@ npm run dev
 **目的**: 确认后端服务运行正常
 
 **步骤**:
-1. 打开浏览器访问 http://localhost:8000/health
+1. 打开浏览器访问 http://localhost:8002/health
 2. 或者使用 curl:
    ```bash
-   curl http://localhost:8000/health
+   curl http://localhost:8002/health
    ```
 
 **预期结果**:
@@ -64,8 +64,8 @@ npm run dev
 **目的**: 确认 API 文档可访问
 
 **步骤**:
-1. 访问 http://localhost:8000/docs (Swagger UI)
-2. 访问 http://localhost:8000/redoc (ReDoc)
+1. 访问 http://localhost:8002/docs (Swagger UI)
+2. 访问 http://localhost:8002/redoc (ReDoc)
 
 **预期结果**: 页面正常加载，显示所有 API 端点
 
@@ -81,7 +81,7 @@ npm run dev
 2. 切换到 Console 标签
 3. 输入以下代码:
    ```javascript
-   fetch('http://localhost:8000/health')
+   fetch('http://localhost:8002/health')
      .then(r => r.json())
      .then(data => console.log('✅ CORS 正常:', data))
      .catch(err => console.error('❌ CORS 错误:', err))
@@ -102,7 +102,7 @@ npm run dev
 1. 在浏览器控制台测试:
    ```javascript
    // 步骤 1: 发送验证码
-   fetch('http://localhost:8000/auth/verification/send', {
+   fetch('http://localhost:8002/auth/verification/send', {
      method: 'POST',
      headers: { 'Content-Type': 'application/json' },
      body: JSON.stringify({
@@ -122,7 +122,7 @@ npm run dev
 
 3. 使用验证码注册:
    ```javascript
-   fetch('http://localhost:8000/auth/register', {
+   fetch('http://localhost:8002/auth/register', {
      method: 'POST',
      headers: { 'Content-Type': 'application/json' },
      body: JSON.stringify({
@@ -151,7 +151,7 @@ npm run dev
 
 **步骤**:
 ```javascript
-fetch('http://localhost:8000/auth/login', {
+fetch('http://localhost:8002/auth/login', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -196,7 +196,7 @@ fetch('http://localhost:8000/auth/login', {
 ```javascript
 const token = localStorage.getItem('token')
 
-fetch('http://localhost:8000/auth/me', {
+fetch('http://localhost:8002/auth/me', {
   headers: {
     'Authorization': `Bearer ${token}`
   }
@@ -237,7 +237,7 @@ fetch('http://localhost:8000/auth/me', {
 ```javascript
 const token = localStorage.getItem('token')
 
-fetch('http://localhost:8000/tasks/', {
+fetch('http://localhost:8002/tasks/', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -288,7 +288,7 @@ fetch('http://localhost:8000/tasks/', {
 ```javascript
 const token = localStorage.getItem('token')
 
-fetch('http://localhost:8000/tasks/', {
+fetch('http://localhost:8002/tasks/', {
   headers: {
     'Authorization': `Bearer ${token}`
   }
@@ -315,7 +315,7 @@ fetch('http://localhost:8000/tasks/', {
 const token = localStorage.getItem('token')
 const taskId = 1  // 替换为实际任务 ID
 
-fetch(`http://localhost:8000/tasks/${taskId}`, {
+fetch(`http://localhost:8002/tasks/${taskId}`, {
   method: 'PUT',
   headers: {
     'Content-Type': 'application/json',
@@ -341,7 +341,7 @@ fetch(`http://localhost:8000/tasks/${taskId}`, {
 ```javascript
 const token = localStorage.getItem('token')
 
-fetch('http://localhost:8000/tasks/study-plan', {
+fetch('http://localhost:8002/tasks/study-plan', {
   headers: {
     'Authorization': `Bearer ${token}`
   }
@@ -366,7 +366,7 @@ fetch('http://localhost:8000/tasks/study-plan', {
 ```javascript
 const token = localStorage.getItem('token')
 
-fetch('http://localhost:8000/schedules/', {
+fetch('http://localhost:8002/schedules/', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -400,7 +400,7 @@ fetch('http://localhost:8000/schedules/', {
 ```javascript
 const token = localStorage.getItem('token')
 
-fetch('http://localhost:8000/schedules/', {
+fetch('http://localhost:8002/schedules/', {
   headers: {
     'Authorization': `Bearer ${token}`
   }
@@ -502,7 +502,7 @@ console.log('合并后事件:', calendar.allEvents)
 const token = localStorage.getItem('token')
 
 // 推送本地数据到服务器
-fetch('http://localhost:8000/sync/push', {
+fetch('http://localhost:8002/sync/push', {
   method: 'POST',
   headers: {
     'Authorization': `Bearer ${token}`
@@ -512,7 +512,7 @@ fetch('http://localhost:8000/sync/push', {
 .then(data => console.log('推送结果:', data))
 
 // 从服务器拉取数据
-fetch('http://localhost:8000/sync/pull', {
+fetch('http://localhost:8002/sync/pull', {
   method: 'POST',
   headers: {
     'Authorization': `Bearer ${token}`
@@ -581,7 +581,7 @@ fetch('http://localhost:8000/sync/pull', {
 **解决**:
 ```bash
 # 重新初始化数据库
-cd backend/local_backend
+cd local_backend
 python database/code/database_init.py
 ```
 

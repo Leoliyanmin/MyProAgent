@@ -1,43 +1,5 @@
 # ProAgent Desktop - 快速启动指南
 
-> **重要：先激活 Python 虚拟环境**
->
-> 虚拟环境在项目根目录的上层：
-> ```
-> 路径: ../.venv/bin/python
-> ```
->
-> ```bash
-> cd /path/to/MyProAgent
-> source ../.venv/bin/activate
-> ```
-
-## 已完成配置
-
-Tauri 桌面端项目已成功配置。项目结构：
-
-```
-frontend/
-├── src-tauri/              # Tauri 配置和 Rust 代码 ✅
-│   ├── src/
-│   │   ├── main.rs         # Rust 入口，自动启动 Python sidecar
-│   │   └── lib.rs
-│   ├── capabilities/
-│   │   └── default.json    # 权限配置（包含 sidecar 启动权限）
-│   ├── binaries/           # Python sidecar 二进制文件位置
-│   ├── Cargo.toml          # Rust 依赖配置
-│   ├── tauri.conf.json     # Tauri 主配置
-│   └── build.rs            # Rust 构建脚本
-├── src/services/
-│   └── tauri-api.js        # 桌面端 API 封装
-├── package.json            # 添加 tauri 脚本
-└── vite.config.js          # 更新为 Tauri 模式
-
-scripts/
-├── python_backend.py       # Python sidecar 入口
-└── build_sidecar.py        # PyInstaller 构建脚本
-```
-
 ## 立即开始
 
 ### 1. 安装依赖
@@ -50,7 +12,7 @@ npm install
 ### 2. 开发模式（测试桌面版）
 
 ```bash
-# 终端 1: 启动 Python 后端（保持现有开发流程）
+# 终端 1: 启动 Python 后端
 cd local_backend
 uvicorn main:app --reload --host 0.0.0.0 --port 8002
 
@@ -64,18 +26,32 @@ npm run tauri:dev
 ### 3. 构建 Sidecar（生产环境）
 
 ```bash
-# 安装 PyInstaller
-cd local_backend
+# 安装 PyInstaller（首次需要）
 pip install pyinstaller
 
 # 构建 Python 可执行文件
-cd ../scripts
-python build_sidecar.py
+python scripts/build_sidecar.py
 ```
 
 生成的文件位于 `frontend/src-tauri/binaries/`。
 
+构建完成后，为 Tauri 创建软链接：
+
+```bash
+cd frontend/src-tauri/binaries
+for f in python-backend-*; do [ -f "$f" ] && ln -sf "$f" python-backend; done
+for f in server-backend-*; do [ -f "$f" ] && ln -sf "$f" server-backend; done
+```
+
 ### 4. 构建桌面应用（生产版）
+
+推荐使用一键脚本（含 sidecar 构建、软链接、图标生成）：
+
+```bash
+bash scripts/build_and_run.sh
+```
+
+或手动：
 
 ```bash
 cd frontend
@@ -85,30 +61,45 @@ npm run tauri:build
 输出文件：
 - macOS: `src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
 
+## 项目结构（Tauri 相关）
+
+```
+frontend/
+├── src-tauri/
+│   ├── src/main.rs         # Rust 入口，自动启动 Python sidecar
+│   ├── capabilities/
+│   │   └── default.json    # 权限配置（sidecar 启动权限）
+│   ├── binaries/           # Python sidecar 二进制文件（构建后）
+│   ├── Cargo.toml
+│   └── tauri.conf.json
+├── src/services/
+│   └── tauri-api.js        # 桌面端 API 封装
+└── vite.config.js
+
+scripts/
+├── python_backend.py       # Python sidecar 入口
+├── server_backend.py       # Server sidecar 入口
+└── build_sidecar.py        # PyInstaller 构建脚本
+```
+
 ## 常见问题
 
 ### Rust 编译失败？
-确保 Rust 版本 >= 1.77.2:
+确保 Rust 版本 >= 1.77.2：
 ```bash
 rustc --version
 ```
 
-### Python 后端未启动？
-1. 检查 `src-tauri/binaries/python-backend-*` 是否存在
-2. 检查是否有执行权限: `chmod +x python-backend-*`
+### Sidecar 找不到？
+检查 `frontend/src-tauri/binaries/` 下是否有 `python-backend-*` 文件，以及是否创建了不带 triple 的软链接：
+```bash
+ls -la frontend/src-tauri/binaries/
+```
 
 ### 端口冲突？
 修改 `local_backend/main.py` 或 `scripts/python_backend.py` 中的端口配置。
 
-## 后续可以添加的功能
-
-- [ ] 系统通知（`@tauri-apps/plugin-notification`）
-- [ ] 系统托盘图标
-- [ ] 全局快捷键
-- [ ] 自动更新
-- [ ] 原生文件选择对话框
-
 ## 详细文档
 
-- `TAURI_README.md` - 完整开发指南
-- `TAURI_MIGRATION_SUMMARY.md` - 迁移总结
+- [TAURI_README.md](TAURI_README.md) - 完整开发指南
+- [TAURI_CROSS_PLATFORM.md](TAURI_CROSS_PLATFORM.md) - macOS 构建和 sidecar 命名说明

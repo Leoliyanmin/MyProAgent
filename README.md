@@ -69,9 +69,11 @@
 │   ├── requirements.txt      # 依赖
 │   └── README.md             # 服务器后端文档
 │
-├── DATABASE_TESTING.md       # 数据库测试指南
-├── database_invoke_rules.md  # 数据库调用规范
-├── database_synchronize_rules.md  # 数据同步规范
+├── docs/
+│   ├── architecture/         # 架构规范（数据库调用规范、同步规范、DB 设计）
+│   ├── guides/               # 开发指南（Tauri、测试、LocalAgent 集成等）
+│   ├── planning/             # 功能规划文档
+│   └── specs/                # 功能规格说明
 └── README.md                 # 本文档
 ```
 
@@ -172,25 +174,28 @@ npm run dev
 构建独立桌面应用（包含所有后端）：
 
 ```bash
-# 1. 安装依赖
-cd frontend
-npm install
+# 1. 安装前端依赖
+cd frontend && npm install && cd ..
 
-# 2. 构建 Python sidecar（打包后端为可执行文件）
-cd ../scripts
+# 2. 安装 PyInstaller（首次需要）
 pip install pyinstaller
-python build_sidecar.py
 
-# 3. 开发模式（带桌面窗口）
-cd ../frontend
-npm run tauri:dev
+# 3. 一键构建并运行（含 sidecar 打包、软链接、图标生成、Tauri 打包）
+bash scripts/build_and_run.sh
+```
 
-# 4. 生产构建（生成桌面安装包）
-npm run tauri:build
+或手动分步：
+
+```bash
+# 开发模式（后端与 Tauri 分开启动）
+cd local_backend && uvicorn main:app --reload --port 8002 &
+cd frontend && npm run tauri:dev
 ```
 
 输出文件：
-- macOS: `src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
+- macOS: `frontend/src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
+
+详细说明见 [docs/guides/TAURI_README.md](docs/guides/TAURI_README.md)。
 
 ### 方式三：手动启动各服务
 

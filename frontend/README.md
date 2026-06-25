@@ -136,16 +136,16 @@ npm run dev
 ```javascript
 server: {
   proxy: {
-    '/auth': { target: 'http://localhost:8000' },  // Local Backend
-    '/tasks': { target: 'http://localhost:8000' },
-    '/schedules': { target: 'http://localhost:8000' },
-    '/agent': { target: 'http://localhost:8000' },
-    '/sync': { target: 'http://localhost:8000' }
+    '/auth': { target: 'http://localhost:8002' },  // Local Backend
+    '/tasks': { target: 'http://localhost:8002' },
+    '/schedules': { target: 'http://localhost:8002' },
+    '/agent': { target: 'http://localhost:8002' },
+    '/sync': { target: 'http://localhost:8002' }
   }
 }
 ```
 
-确保 Local Backend 在 http://localhost:8000 运行
+确保 Local Backend 在 http://localhost:8002 运行
 
 ### 生产构建
 

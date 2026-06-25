@@ -19,9 +19,9 @@
 │                          ▼                                   │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │  Vite Proxy (Development)                            │  │
-│  │  - /auth/*  → http://localhost:8000/auth/*           │  │
-│  │  - /tasks/* → http://localhost:8000/tasks/*          │  │
-│  │  - /schedules/* → http://localhost:8000/schedules/*  │  │
+│  │  - /auth/*  → http://localhost:8002/auth/*           │  │
+│  │  - /tasks/* → http://localhost:8002/tasks/*          │  │
+│  │  - /schedules/* → http://localhost:8002/schedules/*  │  │
 │  └──────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
                               │
@@ -30,7 +30,7 @@
 ┌─────────────────────────────────────────────────────────────┐
 │                 Backend (FastAPI + SQLite)                  │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │  Local Backend: http://localhost:8000               │  │
+│  │  Local Backend: http://localhost:8002               │  │
 │  │  - 用户认证 (JWT Token)                              │  │
 │  │  - 任务管理 (CRUD)                                  │  │
 │  │  - 日程管理 (CRUD)                                  │  │
@@ -176,11 +176,11 @@ await calendar.updateScheduleOnBackend(scheduleId, eventData)
 ```javascript
 server: {
   proxy: {
-    '/auth': { target: 'http://localhost:8000' },
-    '/tasks': { target: 'http://localhost:8000' },
-    '/schedules': { target: 'http://localhost:8000' },
-    '/agent': { target: 'http://localhost:8000' },
-    '/sync': { target: 'http://localhost:8000' }
+    '/auth': { target: 'http://localhost:8002' },
+    '/tasks': { target: 'http://localhost:8002' },
+    '/schedules': { target: 'http://localhost:8002' },
+    '/agent': { target: 'http://localhost:8002' },
+    '/sync': { target: 'http://localhost:8002' }
   }
 }
 ```
@@ -190,7 +190,7 @@ server: {
 ### 1. 启动后端
 
 ```bash
-cd backend/local_backend
+cd local_backend
 
 # 创建虚拟环境（首次）
 python -m venv venv
@@ -214,8 +214,8 @@ python main.py
 # 或: uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-后端将在 http://localhost:8000 运行
-API 文档：http://localhost:8000/docs
+后端将在 http://localhost:8002 运行
+API 文档：http://localhost:8002/docs
 
 ### 2. 启动前端
 
@@ -355,7 +355,7 @@ if (dashboard.error) {
 
 ```javascript
 // api.js
-const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8002'
 ```
 
 - 开发：使用 Vite 代理（无前缀）
@@ -371,6 +371,6 @@ const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:8000'
 
 ## 📖 API 文档
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger UI: http://localhost:8002/docs
+- ReDoc: http://localhost:8002/redoc
 - 后端 README: `backend/README.md`
