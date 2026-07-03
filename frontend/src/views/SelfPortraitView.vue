@@ -498,6 +498,10 @@ onActivated(() => {
   color: #ffffff;
 }
 
+.editor-panel {
+  overflow-y: auto;
+}
+
 .preview-panel {
   overflow: auto;
 }

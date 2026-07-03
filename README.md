@@ -1,324 +1,148 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/py413vYq)
+# ProAgent — 智能协作工作台
 
-飞书文档：https://kcnshyb9xgl3.feishu.cn/wiki/VOTmwDTd1ipr9JkpZ27cW0BCnrb
+个人全栈项目，将日程、任务、邮件、文件、AI 对话和个人画像整合进一个桌面级 Web 应用。前端 Vue3，后端双服务架构（本地 FastAPI + 远程同步服务），支持 Tauri 打包为桌面应用。
 
-# ProAgent - 智能协作工作台 (Full Stack)
-
-这是一个完整的全栈应用，整合了前端 Vue3 界面和后端 FastAPI 服务。
-
-![Version](https://img.shields.io/badge/version-0.0.0-blue)
-![Vue](https://img.shields.io/badge/Vue-3.5.29-green)
+![Vue](https://img.shields.io/badge/Vue-3.5.29-42b883)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688)
+![Python](https://img.shields.io/badge/Python-3.10+-3776ab)
 
-## 📁 项目结构
 
-```
-.
-├── frontend/                   # Vue3 前端应用
-│   ├── src/
-│   │   ├── components/         # Vue 组件
-│   │   │   ├── layout/       # 布局组件 (Sidebar, TopBar)
-│   │   │   ├── widgets/      # 仪表板小部件
-│   │   │   └── icons/        # 图标组件
-│   │   ├── views/            # 页面视图
-│   │   │   ├── DashboardView.vue      # 工作台概览
-│   │   │   ├── CalendarView.vue       # 日历管理
-│   │   │   ├── SelfPortraitView.vue   # 自我画像
-│   │   │   ├── ThemeSettingsView.vue  # 主题设置
-│   │   │   ├── FileManagerView.vue    # 文件管理
-│   │   │   └── UserSettingsView.vue   # 用户设置
-│   │   ├── stores/           # Pinia 状态管理
-│   │   ├── App.vue
-│   │   └── main.js
-│   ├── package.json
-│   ├── vite.config.js
-│   └── README.md             # 前端详细文档
-│
-├── local_backend/            # 本地后端 (FastAPI + SQLite)
-│   ├── business/             # 业务逻辑
-│   │   ├── agent_logic.py         # AI 助手逻辑
-│   │   ├── auth_service.py        # 认证服务
-│   │   ├── schedule_logic.py      # 日程逻辑
-│   │   └── task_logic.py          # 任务逻辑
-│   ├── database/             # 数据库层
-│   │   └── code/
-│   │       ├── database_init.sql       # 数据库初始化
-│   │       ├── database_schedule_*.py   # 日程数据库操作
-│   │       ├── database_task_*.py       # 任务数据库操作
-│   │       ├── database_user_*.py       # 用户数据库操作
-│   │       └── database_synchronize_*.py  # 数据同步操作
-│   ├── presentation/         # API 路由
-│   │   ├── agent_routes.py        # AI 助手接口
-│   │   ├── auth_routes.py         # 认证接口
-│   │   ├── schedule_routes.py     # 日程接口
-│   │   ├── task_routes.py         # 任务接口
-│   │   └── sync_routes.py         # 同步接口
-│   ├── service/              # 服务层
-│   ├── main.py               # 本地后端入口
-│   ├── requirements.txt      # 依赖
-│   └── README.md             # 本地后端文档
-│
-├── server_backend/           # 服务器后端 (远程同步)
-│   ├── business/             # 业务逻辑
-│   │   ├── auth_service.py        # 认证服务
-│   │   └── email_service.py       # 邮件服务
-│   ├── database/             # 数据库层
-│   ├── presentation/         # API 路由
-│   ├── service/              # 服务层
-│   ├── main.py               # 服务器后端入口
-│   ├── requirements.txt      # 依赖
-│   └── README.md             # 服务器后端文档
-│
-├── docs/
-│   ├── architecture/         # 架构规范（数据库调用规范、同步规范、DB 设计）
-│   ├── guides/               # 开发指南（Tauri、测试、LocalAgent 集成等）
-│   ├── planning/             # 功能规划文档
-│   └── specs/                # 功能规格说明
-└── README.md                 # 本文档
-```
+## 截图
 
-## 项目进度
+| 登录 | 工作台 |
+|------|--------|
+| ![](docs/screenshots/login.png) | ![](docs/screenshots/dashboard.png) |
 
-已完成以下功能：
-- ✅ Local Backend 和 Server Backend 基本框架
-- ✅ 用户认证系统（注册/登录）
-- ✅ 日程管理（完整CRUD）
-- ✅ 任务管理（完整CRUD）
-- ✅ 数据库集成（SQLite）
-- ✅ 数据同步机制（Local ↔ Server）
-- ✅ AI助手功能
-- ✅ 验证码服务（基于数据库实现）
-- ✅ 前端认证集成（登录/注册页面）
-- ✅ 退出登录功能
+| 日程 · 月视图 | 日程 · 周视图 |
+|--------------|--------------|
+| ![](docs/screenshots/calendar_month.png) | ![](docs/screenshots/calendar_week.png) |
 
-正在开发中：
-- 🔄 寻友匹配功能
-- 🔄 文件管理功能
+| 日程 · 日视图（同时段事件并排） | Agent 助手 |
+|-------------------------------|-----------|
+| ![](docs/screenshots/calendar_day.png) | ![](docs/screenshots/agent.png) |
 
-## 系统架构
+| 邮件管理 | 文件管理 |
+|---------|---------|
+| ![](docs/screenshots/email_manager.png) | ![](docs/screenshots/file_manager.png) |
 
-### 整体架构
+| 自我画像 · MBTI 分析 | 用户设置 |
+|--------------------|---------|
+| ![](docs/screenshots/self_portrait.png) | ![](docs/screenshots/settings.png) |
+
+| 主题设置 | |
+|---------|--|
+| ![](docs/screenshots/theme_settings.png) | |
+
+## 功能
+
+**工作台**：可拖拽卡片布局，包含待办清单、星标邮件、Markdown 笔记本、每日一句。
+
+**日程规划**：月/周/日三视图，支持同时段事件自动并排（Apple Calendar 风格布局算法），可拖拽调整时间，全天事件独立行，待办事项联动。
+
+**邮件管理**：绑定 IMAP 邮箱（支持腾讯企业邮），本地同步收件箱，AI 智能置顶，内置发件界面。
+
+**文件管理**：指定本地目录作为工作区，支持 Markdown 文件在线预览/编辑、新建/重命名/删除、文件夹导航。
+
+**Agent 助手**：侧边浮层对话，多会话历史，接入 DeepSeek / 其他 OpenAI 兼容模型，支持流式回复。
+
+**自我画像**：基于对话历史自动推断 MBTI 类型（LLM 分析），展示兴趣领域、技能标签、行为模式、使用热力图。
+
+**主题设置**：实时预览自定义配色方案，应用到全局布局。
+
+**用户设置**：邮箱绑定、AI 服务 API Key 管理（支持多 provider）、每日一句自定义、教务平台绑定入口。
+
+## 架构
 
 ```
-┌─────────────────────────┐       ┌─────────────────────────┐
-│                         │       │                         │
-│  Local Backend          │◄──────►  Server Backend         │
-│  (用户设备本地)         │       │  (服务器端)             │
-│                         │       │                         │
-├─────────────────────────┤       ├─────────────────────────┤
-│  - 本地数据存储         │       │  - 用户认证             │
-│  - 核心业务逻辑         │       │  - 数据同步             │
-│  - 离线功能             │       │  - 远程备份             │
-│  - 实时同步             │       │  - 安全管理             │
-│                         │       │  - 邮件服务             │
-└─────────────────────────┘       └─────────────────────────┘
+前端 (Vue3 · :5173)
+        │
+        ├──► Local Backend (FastAPI · :8002)
+        │       ├─ 日程 / 任务 / 文件 / AI 对话 / 自我画像
+        │       └─ SQLite 本地库
+        │
+        └──► Server Backend (FastAPI · :8001)
+                ├─ 用户认证 / 邮件同步
+                └─ SQLite 服务端库
 ```
 
-### 架构分工
+Local Backend 处理所有核心功能，离线可用；Server Backend 负责账户注册登录与邮件 IMAP 代理。AI 能力通过 `config.json` 配置 provider，默认支持 DeepSeek。
 
-| 组件 | 职责 | 部署位置 | 技术栈 |
-|------|------|----------|--------|
-| **Local Backend** | 本地数据存储、核心业务逻辑、离线功能 | 用户设备本地 | FastAPI + SQLite |
-| **Server Backend** | 用户认证、数据同步、远程备份、邮件服务 | 服务器端 | FastAPI + SQLite |
+## 快速开始
 
-## 核心功能
-
-### 前端 (Vue3 + Vite)
-- 📊 **工作台概览** - 可拖拽布局，热力图、便签、待办、消息组件
-- 📅 **日历管理** - 日/周/月视图，事件管理，多日事件，待办同步
-- 🎨 **自我画像** - 个人资料、技能标签、背景图片、360°评价
-- 🎭 **主题设置** - 动态主题编辑、色彩管理
-- 📁 **文件管理** - 文件浏览、上传、下载
-- ⚙️ **用户设置** - 账户、通知、隐私、系统信息
-
-### 后端 (FastAPI + SQLite)
-- 🔐 **用户认证** - 注册/登录、JWT Token
-- 📅 **日程管理** - 完整 CRUD、提醒通知
-- ✅ **任务管理** - 完整 CRUD、优先级、时间
-- 🤖 **AI 助手** - 智能对话、任务建议
-- 🔄 **数据同步** - Local ↔ Server 双向同步
-- 📧 **邮件服务** - 验证码、通知邮件
-- 💾 **数据库** - SQLite 本地存储
-
-## 🚀 快速开始
-
-### 前置要求
-
-- **Python 3.10+**（推荐 Python 3.11，仓库 `.python-version` 已固定为 3.11）
-- Node.js 18+
-- Rust（仅桌面应用打包需要）
-
-### 方式一：Web 开发模式（推荐日常开发）
-
-一键启动前端 + Local Backend + Server Backend：
-
-初始化数据库
-```bash
-cd local_backend
-python database/code/database_init.py
-cd ..
-cd server_backend
-python database/code/database_init.py
-```
+**环境要求**：Python 3.10+、Node.js 18+
 
 ```bash
-cd frontend
-npm install
-npm run dev
+# 1. 初始化数据库
+cd local_backend && python database/code/database_init.py && cd ..
+cd server_backend && python database/code/database_init.py && cd ..
+
+# 2. 配置 AI provider（可选，不配则 Agent 功能不可用）
+# 在项目根目录创建 config.json：
+# {
+#   "providers": { "deepseek": { "apiKey": "sk-xxx", "apiBase": "https://api.deepseek.com/v1" } },
+#   "agent": { "model": "deepseek-chat", "provider": "deepseek" }
+# }
+
+# 3. 启动后端
+cd local_backend && pip install -r requirements.txt
+uvicorn main:app --port 8002 &
+cd ../server_backend && pip install -r requirements.txt
+uvicorn main:app --port 8001 &
+
+# 4. 启动前端
+cd frontend && npm install && npm run dev
 ```
 
 访问 http://localhost:5173
 
-### 方式二：Tauri 桌面应用
-
-构建独立桌面应用（包含所有后端）：
+### Tauri 桌面版
 
 ```bash
-# 1. 安装前端依赖
 cd frontend && npm install && cd ..
-
-# 2. 安装 PyInstaller（首次需要）
 pip install pyinstaller
-
-# 3. 一键构建并运行（含 sidecar 打包、软链接、图标生成、Tauri 打包）
 bash scripts/build_and_run.sh
+# 输出：frontend/src-tauri/target/release/bundle/dmg/ProAgent_*.dmg
 ```
 
-或手动分步：
-
-```bash
-# 开发模式（后端与 Tauri 分开启动）
-cd local_backend && uvicorn main:app --reload --port 8002 &
-cd frontend && npm run tauri:dev
-```
-
-输出文件：
-- macOS: `frontend/src-tauri/target/release/bundle/dmg/ProAgent_*.dmg`
-
-详细说明见 [docs/guides/TAURI_README.md](docs/guides/TAURI_README.md)。
-
-### 方式三：手动启动各服务
-
-#### 1. 启动后端 (Local)
-
-```bash
-cd local_backend
-
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # macOS
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 配置环境变量
-cp .env.example .env
-# 编辑 .env 文件配置
-
-# 初始化数据库
-python database/code/database_init.py
-
-# 启动服务
-uvicorn main:app --reload --host 0.0.0.0 --port 8002
-```
-
-后端服务将在 http://localhost:8002 运行
-
-### 2. 启动前端
-
-```bash
-cd frontend
-
-# 安装依赖
-npm install
-
-# 启动开发服务器
-npm run dev
-```
-
-前端将在 http://localhost:5173 运行
-
-### 3. 启动服务器后端 (可选，用于远程同步)
-
-```bash
-cd server_backend
-
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 配置环境变量
-cp .env.example .env
-
-# 初始化数据库
-python database/code/database_init.py
-
-# 启动服务
-uvicorn main:app --reload --host 0.0.0.0 --port 8001
-```
-
-## API文档
-
-- **Local Backend**：http://localhost:8002/docs
-- **Server Backend**：http://localhost:8001/docs
-
-## 🛠️ 技术栈
-
-| 层级 | 技术 | 版本 |
-|------|------|------|
-| 前端框架 | Vue | 3.5.29 |
-| 构建工具 | Vite | 7.3.1 |
-| 状态管理 | Pinia | 3.0.4 |
-| UI 布局 | vue3-grid-layout | 1.0.0 |
-| 图表 | ECharts | ^6.0.0 |
-| 后端框架 | FastAPI | 0.100+ |
-| 数据库 | SQLite | 3 |
-| ORM | SQLAlchemy | 2.0+ |
-| 认证 | JWT | - |
-
-## CI/CD
-
-[![CI/CD Pipeline](https://github.com/lsz-asd/team-project-26spring-26s-27/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/lsz-asd/team-project-26spring-26s-27/actions/workflows/ci-cd.yml)
-
-流水线在 push 到 `main` 或 `integration` 分支时自动触发，包含五个阶段：
-
-| 阶段 | 说明 | 工具 |
-|------|------|------|
-| **Compile** | Python 语法检查 + 前端 Vite 构建 | compileall, Vite |
-| **Test** | 后端 pytest (含覆盖率) + 前端 vitest + flake8 代码检查 | pytest-cov, vitest, flake8 |
-| **Package** | 分别打包 Local 制品和 Server 制品 | GitHub Actions Artifacts |
-| **Docs** | 从源码生成 API HTML 文档 | pdoc3 |
-| **Docker** | 构建镜像、docker-compose 运行测试、推送到 GHCR | Docker Buildx, GHCR |
-| **Kubernetes** | 清单验证 (kubeconform) + kind 集群部署测试 | kubectl, kind |
-
-制品下载：在 [Actions](https://github.com/lsz-asd/team-project-26spring-26s-27/actions) 页面选择最新一次运行：
-- `proagent-local-*` — 本地桌面版（含前端 + local_backend）
-- `proagent-server-*` — 服务器部署版（server_backend）
-- `api-docs` — API HTML 文档
-
-### Docker 快速启动
+### Docker
 
 ```bash
 docker compose up -d
+# 前端: http://localhost
+# Local API: http://localhost:8002/docs
+# Server API: http://localhost:8001/docs
 ```
 
-- 前端: http://localhost
-- Local API 文档: http://localhost:8002/docs
-- Server API 文档: http://localhost:8001/docs
+## API 文档
 
-### Kubernetes 部署
+启动后访问：
+- Local Backend：http://localhost:8002/docs
+- Server Backend：http://localhost:8001/docs
 
-```bash
-kubectl apply -k k8s/
-kubectl get all -n proagent
-```
+## 技术栈
 
-- 前端通过 LoadBalancer 对外暴露
-- Local/Server 后端通过 ClusterIP 内部通信
+| | 技术 | 版本 |
+|-|------|------|
+| 前端框架 | Vue | 3.5.29 |
+| 构建工具 | Vite | 7.3.1 |
+| 状态管理 | Pinia | 3.0.4 |
+| 布局 | vue3-grid-layout | 1.0.0 |
+| 图表 | ECharts | 6.x |
+| 桌面壳 | Tauri | 2.x |
+| 后端框架 | FastAPI | 0.100+ |
+| 数据库 | SQLite | 3 |
+| ORM | SQLAlchemy | 2.0+ |
+| 认证 | JWT | — |
 
-## 开发团队
+## CI/CD
 
-Made with ❤️ by Team 26S-27
+Push 到 `main` / `integration` 分支自动触发：
+
+| 阶段 | 内容 |
+|------|------|
+| Compile | Python 语法检查 + Vite 构建 |
+| Test | pytest（含覆盖率）+ vitest + flake8 |
+| Package | 打包 Local / Server 制品上传 Artifacts |
+| Docs | pdoc3 生成 API HTML 文档 |
+| Docker | 构建镜像 + docker-compose 测试 + 推送 GHCR |
+| Kubernetes | kubeconform 清单验证 + kind 集群部署测试 |

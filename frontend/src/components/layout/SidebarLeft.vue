@@ -343,10 +343,7 @@ const openAgent = () => {
 
 .user-profile-btn {
   flex: 1;
-}
-
-.user-profile-btn {
-  width: 100%;
+  min-width: 0;
   border: 1px solid #000000;
   border-radius: 10px;
   background: #ffffff;
@@ -393,6 +390,9 @@ const openAgent = () => {
   font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-role {
